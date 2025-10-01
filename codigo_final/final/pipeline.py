@@ -5,6 +5,69 @@ from scipy.stats import t
 from typing import List, Dict, Union, Tuple
 import os
 
+
+
+# ============================================================================
+# 1. LIMPIEZA AGRESIVA DE TENSORFLOW
+# ============================================================================
+import tensorflow as tf
+import torch
+import gc
+import os
+from typing import Dict, Tuple
+import pandas as pd
+
+# Configuración inicial más restrictiva
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1'  # Forzar CPU
+
+# Limitar threads
+tf.config.threading.set_inter_op_parallelism_threads(1)
+tf.config.threading.set_intra_op_parallelism_threads(1)
+
+def clear_all_sessions():
+    """Limpieza completa de todas las sesiones."""
+    tf.keras.backend.clear_session()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+    gc.collect()
+
+# ============================================================================
+# 2. WORKER CON LIMPIEZA FORZADA
+# ============================================================================
+def run_single_scenario_robust(scenario_with_seed: Dict) -> Tuple[Dict, pd.DataFrame]:
+    """Worker con limpieza estricta."""
+    scenario_config = scenario_with_seed['config']
+    seed = scenario_with_seed['seed']
+    
+    # Limpieza ANTES de empezar
+    clear_all_sessions()
+    
+    try:
+        pipeline = PipelineOptimizado(
+            **{k: v for k, v in scenario_config.items() if k != 'scenario_id'},
+            seed=seed,
+            verbose=False
+        )
+        
+        results_df = pipeline.execute(show_intermediate_plots=False)
+        
+        return (scenario_config, results_df)
+    
+    except Exception as e:
+        print(f"ERROR escenario {scenario_config.get('scenario_id', 'N/A')}: {e}")
+        return (scenario_config, None)
+    
+    finally:
+        # Limpieza DESPUÉS de terminar
+        clear_all_sessions()
+        # Forzar recolección de basura
+        import sys
+        sys.stdout.flush()
+        sys.stderr.flush()
+
+
 class ARMASimulation:
     """
     Genera series temporales ARMA con diferentes tipos de ruido y puede proporcionar
@@ -292,16 +355,27 @@ class EnhancedBootstrappingModel:
         self.mean_val, self.std_val = np.mean(self.train), np.std(self.train)
         return (self.train - self.mean_val) / (self.std_val + 1e-8)
 
-    def denormalize(self, values): return (values * self.std_val) + self.mean_val
+    def denormalize(self, values): 
+        # Esta función ahora es segura porque self.std_val y self.mean_val estarán definidos
+        return (values * self.std_val) + self.mean_val
 
     def _block_bootstrap_predict(self, fitted_model, n_boot):
         residuals, n_resid = fitted_model.resid, len(fitted_model.resid)
-        if n_resid < 2: return fitted_model.forecast(steps=1) + self.rng.choice(residuals, size=n_boot, replace=True)
+        if n_resid < 2: 
+            # Fallback si no hay suficientes residuos
+            if n_resid == 1:
+                return fitted_model.forecast(steps=1) + self.rng.choice(residuals, size=n_boot, replace=True)
+            else: # n_resid == 0
+                return fitted_model.forecast(steps=1)
+
         block_length = max(1, int(n_resid**(1/3)))
         blocks = [residuals[i:i+block_length] for i in range(n_resid - block_length + 1)]
-        if not blocks: return fitted_model.forecast(steps=1)
-        resampled_indices = self.rng.choice(len(blocks), size=(n_boot // block_length) + 1, replace=True)
+        if not blocks: 
+            return fitted_model.forecast(steps=1)
+        
+        resampled_indices = self.rng.choice(len(blocks), size=(n_boot // block_length) + 2, replace=True)
         bootstrap_error_pool = np.concatenate([blocks[i] for i in resampled_indices])
+        
         return fitted_model.forecast(steps=1) + self.rng.choice(bootstrap_error_pool, size=n_boot, replace=True)
 
     def fit_predict(self, data, n_boot=1000):
@@ -313,27 +387,35 @@ class EnhancedBootstrappingModel:
                 test_predictions.append(np.full(n_boot, pred))
                 current_data = np.append(current_data, np.mean(current_data))
                 continue
-            try: fitted_model = AutoReg(current_data, lags=self.n_lags, old_names=False).fit()
+            try: 
+                fitted_model = AutoReg(current_data, lags=self.n_lags, old_names=False).fit()
             except (np.linalg.LinAlgError, ValueError):
                 pred = self.denormalize(np.mean(current_data))
                 test_predictions.append(np.full(n_boot, pred))
                 current_data = np.append(current_data, np.mean(current_data))
                 continue
+            
             boot_preds = self._block_bootstrap_predict(fitted_model, n_boot)
             current_data = np.append(current_data, np.mean(boot_preds))
             test_predictions.append(self.denormalize(boot_preds))
         return test_predictions
 
-    # --- MÉTODO MODIFICADO ---
-    # Se reemplaza grid_search por optimize_hyperparameters para usar ECRPS
-    def optimize_hyperparameters(self, df, reference_noise):
+    # --- MÉTODO MODIFICADO Y CORREGIDO ---
+    def optimize_hyperparameters(self, df: Union[pd.DataFrame, np.ndarray], reference_noise: np.ndarray):
         """
         Encuentra el número óptimo de retardos (n_lags) minimizando el ECRPS.
         Este método reemplaza al grid_search anterior basado en CRPS.
         """
         series = df['valor'].values if isinstance(df, pd.DataFrame) else df
-        # Usamos la serie completa para la optimización, como los otros modelos
-        normalized_data = (series - np.mean(series)) / (np.std(series) + 1e-8)
+        
+        # --- INICIO DE LA CORRECCIÓN ---
+        # Se calculan y asignan la media y la desviación estándar ANTES de usarlas.
+        # Esto evita que self.mean_val y self.std_val sean 'None' al llamar a denormalize().
+        self.mean_val = np.mean(series)
+        self.std_val = np.std(series)
+        # --- FIN DE LA CORRECCIÓN ---
+
+        normalized_data = (series - self.mean_val) / (self.std_val + 1e-8)
         
         best_ecrps, best_lag = float('inf'), 1
         lags_range = range(1, 13) # Rango de búsqueda para n_lags
@@ -351,9 +433,10 @@ class EnhancedBootstrappingModel:
                 boot_preds_normalized = self._block_bootstrap_predict(fitted_model, n_boot=2000)
                 
                 # Desnormalizar las predicciones para que tengan la misma escala que reference_noise
+                # Esta llamada ahora es segura gracias a la corrección anterior.
                 boot_preds = self.denormalize(boot_preds_normalized)
                 
-                # *** CAMBIO CLAVE: Calcular ECRPS en lugar de CRPS ***
+                # Calcular ECRPS
                 current_ecrps = ecrps(boot_preds, reference_noise)
 
                 if current_ecrps < best_ecrps:
@@ -501,63 +584,166 @@ class LSPMW(LSPM):
         else: self.rho, best_ecrps = 0.95, -1
         if self.verbose: print(f"✅ Opt. LSPMW: Rho={self.rho:.3f}, ECRPS={best_ecrps:.4f}")
         return self.rho, best_ecrps
-    
+ 
+ 
 class DeepARModel:
-    def __init__(self, hidden_size=20, n_lags=5, num_layers=1, dropout=0.1, lr=0.01, batch_size=32, epochs=50, num_samples=1000, random_state=42, verbose=False):
-        self.hidden_size, self.n_lags, self.num_layers, self.dropout, self.lr, self.batch_size, self.epochs, self.num_samples = hidden_size, n_lags, num_layers, dropout, lr, batch_size, epochs, num_samples
+    def __init__(self, hidden_size=20, n_lags=5, num_layers=1, dropout=0.1, lr=0.01, 
+                 batch_size=32, epochs=50, num_samples=1000, random_state=42, verbose=False):
+        self.hidden_size, self.n_lags, self.num_layers, self.dropout, self.lr = hidden_size, n_lags, num_layers, dropout, lr
+        self.batch_size, self.epochs, self.num_samples = batch_size, epochs, num_samples
         self.model, self.scaler_mean, self.scaler_std, self.random_state, self.verbose, self.best_params = None, None, None, random_state, verbose, {}
-        np.random.seed(random_state), torch.manual_seed(random_state)
+        np.random.seed(random_state)
+        torch.manual_seed(random_state)
+    
     class _DeepARNN(nn.Module):
         def __init__(self, input_size, hidden_size, num_layers, dropout):
-            super().__init__(); dropout_to_apply = dropout if num_layers > 1 else 0; self.lstm = nn.LSTM(input_size, hidden_size, num_layers, batch_first=True, dropout=dropout_to_apply); self.fc_mu, self.fc_sigma = nn.Linear(hidden_size, 1), nn.Linear(hidden_size, 1)
-        def forward(self, x): lstm_out, _ = self.lstm(x); mu, sigma = self.fc_mu(lstm_out[:, -1, :]), torch.exp(self.fc_sigma(lstm_out[:, -1, :])) + 1e-6; return mu, sigma
+            super().__init__()
+            dropout_to_apply = dropout if num_layers > 1 else 0
+            self.lstm = nn.LSTM(input_size, hidden_size, num_layers, batch_first=True, dropout=dropout_to_apply)
+            self.fc_mu, self.fc_sigma = nn.Linear(hidden_size, 1), nn.Linear(hidden_size, 1)
+        
+        def forward(self, x):
+            lstm_out, _ = self.lstm(x)
+            mu = self.fc_mu(lstm_out[:, -1, :])
+            sigma = torch.exp(self.fc_sigma(lstm_out[:, -1, :])) + 1e-6
+            return mu, sigma
+    
     def _create_sequences(self, series):
-        X, y = [], []; [X.append(series[i:i + self.n_lags]) for i in range(len(series) - self.n_lags)]; [y.append(series[i + self.n_lags]) for i in range(len(series) - self.n_lags)]; return np.array(X), np.array(y)
+        X, y = [], []
+        for i in range(len(series) - self.n_lags):
+            X.append(series[i:i + self.n_lags])
+            y.append(series[i + self.n_lags])
+        return np.array(X), np.array(y)
+    
     def optimize_hyperparameters(self, df, reference_noise):
         def objective(n_lags, hidden_size, num_layers, dropout, lr):
             try:
-                self.n_lags, self.hidden_size, self.num_layers, self.dropout, self.lr = max(1, int(n_lags)), max(5, int(hidden_size)), max(1, int(num_layers)), min(0.5, max(0.0, dropout)), max(0.0001, lr)
+                self.n_lags = max(1, int(n_lags))
+                self.hidden_size = max(5, int(hidden_size))
+                self.num_layers = max(1, int(num_layers))
+                self.dropout = min(0.5, max(0.0, dropout))
+                self.lr = max(0.0001, lr)
+                
                 series = df['valor'].values if isinstance(df, pd.DataFrame) else df
-                self.scaler_mean, self.scaler_std = np.nanmean(series), np.nanstd(series) + 1e-8
+                self.scaler_mean = np.nanmean(series)
+                self.scaler_std = np.nanstd(series) + 1e-8
                 normalized_series = (series - self.scaler_mean) / self.scaler_std
-                if len(normalized_series) <= self.n_lags: return -float('inf')
+                
+                if len(normalized_series) <= self.n_lags:
+                    return -float('inf')
+                
                 X_train, y_train = self._create_sequences(normalized_series)
-                if len(X_train) == 0: return -float('inf')
-                mu, sigma = np.nanmean(y_train), np.nanstd(y_train) if np.nanstd(y_train) > 1e-6 else 1e-6
+                if len(X_train) == 0:
+                    return -float('inf')
+                
+                mu = np.nanmean(y_train)
+                sigma = np.nanstd(y_train) if np.nanstd(y_train) > 1e-6 else 1e-6
                 predictions = (np.random.normal(mu, sigma, self.num_samples) * self.scaler_std + self.scaler_mean)
+                
                 return -ecrps(predictions, reference_noise)
-            except Exception: return -float('inf')
-        optimizer = BayesianOptimization(f=objective, pbounds={'n_lags': (1, 10), 'hidden_size': (5, 30), 'num_layers': (1, 3), 'dropout': (0.0, 0.5), 'lr': (0.001, 0.1)}, random_state=self.random_state, verbose=0)
-        try: optimizer.maximize(init_points=3, n_iter=7)
-        except Exception: pass
+            except Exception:
+                return -float('inf')
+            finally:
+                # Limpieza de PyTorch
+                if hasattr(self, 'model') and self.model is not None:
+                    del self.model
+                    self.model = None
+                torch.cuda.empty_cache() if torch.cuda.is_available() else None
+                gc.collect()
+        
+        optimizer = BayesianOptimization(
+            f=objective, 
+            pbounds={'n_lags': (1, 10), 'hidden_size': (5, 30), 'num_layers': (1, 3), 
+                     'dropout': (0.0, 0.5), 'lr': (0.001, 0.1)}, 
+            random_state=self.random_state, 
+            verbose=0
+        )
+        
+        try:
+            optimizer.maximize(init_points=3, n_iter=7)
+        except Exception:
+            pass
+        
         best_ecrps = -1
         if optimizer.max and optimizer.max['target'] > -float('inf'):
-            best_ecrps, self.best_params = -optimizer.max['target'], {k: v for k, v in optimizer.max['params'].items()}
-            self.best_params.update({'n_lags': int(self.best_params['n_lags']), 'hidden_size': int(self.best_params['hidden_size']), 'num_layers': int(self.best_params['num_layers'])})
-        else: self.best_params = {'n_lags': 5, 'hidden_size': 20, 'num_layers': 1, 'dropout': 0.1, 'lr': 0.01}
-        if self.verbose: print(f"✅ Opt. DeepAR (ECRPS: {best_ecrps:.4f}): {self.best_params}")
+            best_ecrps = -optimizer.max['target']
+            self.best_params = {k: v for k, v in optimizer.max['params'].items()}
+            self.best_params.update({
+                'n_lags': int(self.best_params['n_lags']),
+                'hidden_size': int(self.best_params['hidden_size']),
+                'num_layers': int(self.best_params['num_layers'])
+            })
+        else:
+            self.best_params = {'n_lags': 5, 'hidden_size': 20, 'num_layers': 1, 'dropout': 0.1, 'lr': 0.01}
+        
+        if self.verbose:
+            print(f"✅ Opt. DeepAR (ECRPS: {best_ecrps:.4f}): {self.best_params}")
+        
         return self.best_params, best_ecrps
+    
     def fit_predict(self, df):
         try:
             series = df['valor'].values if isinstance(df, pd.DataFrame) else df
-            self.scaler_mean, self.scaler_std = np.nanmean(series), np.nanstd(series) + 1e-8
+            self.scaler_mean = np.nanmean(series)
+            self.scaler_std = np.nanstd(series) + 1e-8
             normalized_series = (series - self.scaler_mean) / self.scaler_std
-            if self.best_params: self.__dict__.update(self.best_params)
-            if len(normalized_series) <= self.n_lags: return np.full(self.num_samples, self.scaler_mean)
+            
+            if self.best_params:
+                self.__dict__.update(self.best_params)
+            
+            if len(normalized_series) <= self.n_lags:
+                return np.full(self.num_samples, self.scaler_mean)
+            
             X_train, y_train = self._create_sequences(normalized_series)
-            if X_train.shape[0] < self.batch_size: return np.full(self.num_samples, self.scaler_mean)
-            X_tensor, y_tensor = torch.FloatTensor(X_train.reshape(-1, self.n_lags, 1)), torch.FloatTensor(y_train.reshape(-1, 1))
+            if X_train.shape[0] < self.batch_size:
+                return np.full(self.num_samples, self.scaler_mean)
+            
+            X_tensor = torch.FloatTensor(X_train.reshape(-1, self.n_lags, 1))
+            y_tensor = torch.FloatTensor(y_train.reshape(-1, 1))
+            
             self.model = self._DeepARNN(1, self.hidden_size, self.num_layers, self.dropout)
-            criterion, optimizer = nn.GaussianNLLLoss(), optim.Adam(self.model.parameters(), lr=self.lr)
+            criterion = nn.GaussianNLLLoss()
+            optimizer = optim.Adam(self.model.parameters(), lr=self.lr)
+            
             self.model.train()
             for _ in range(self.epochs):
                 perm = torch.randperm(X_tensor.size(0))
                 for i in range(0, X_tensor.size(0), self.batch_size):
-                    idx = perm[i:i + self.batch_size]; mu, sigma = self.model(X_tensor[idx]); loss = criterion(mu, y_tensor[idx], sigma); optimizer.zero_grad(), loss.backward(), optimizer.step()
+                    idx = perm[i:i + self.batch_size]
+                    mu, sigma = self.model(X_tensor[idx])
+                    loss = criterion(mu, y_tensor[idx], sigma)
+                    optimizer.zero_grad()
+                    loss.backward()
+                    optimizer.step()
+            
             self.model.eval()
-            with torch.no_grad(): mu, sigma = self.model(torch.FloatTensor(normalized_series[-self.n_lags:].reshape(1, self.n_lags, 1)))
-            return np.nan_to_num((np.random.normal(mu.item(), sigma.item(), self.num_samples) * self.scaler_std + self.scaler_mean))
-        except Exception: return np.full(self.num_samples, np.nanmean(df))
+            with torch.no_grad():
+                last_sequence = torch.FloatTensor(normalized_series[-self.n_lags:].reshape(1, self.n_lags, 1))
+                mu, sigma = self.model(last_sequence)
+            
+            result = np.nan_to_num(
+                (np.random.normal(mu.item(), sigma.item(), self.num_samples) * self.scaler_std + self.scaler_mean)
+            )
+            
+            return result
+        
+        except Exception:
+            return np.full(self.num_samples, np.nanmean(df))
+        
+        finally:
+            # LIMPIEZA CRÍTICA
+            if hasattr(self, 'model') and self.model is not None:
+                del self.model
+                self.model = None
+            torch.cuda.empty_cache() if torch.cuda.is_available() else None
+            gc.collect()
+
+    def __del__(self):
+        """Destructor con limpieza explícita."""
+        if hasattr(self, 'model') and self.model is not None:
+            del self.model
+        clear_all_sessions()
+
 
 class SieveBootstrap:
     """
@@ -703,7 +889,7 @@ from bayes_opt import BayesianOptimization
 
 class MondrianCPSModel:
     """
-    Implementación corregida del Mondrian Conformal Predictive System (MCPS)
+    Implementación corregida y DETERMINISTA del Mondrian Conformal Predictive System (MCPS)
     siguiendo la teoría del paper original.
     """
     
@@ -715,7 +901,8 @@ class MondrianCPSModel:
         self.test_size = test_size
         self.random_state = random_state
         self.verbose = verbose
-        self.rng = np.random.default_rng(random_state)
+        # El rng ahora solo se usaría en la optimización, pero la mantenemos por consistencia
+        self.rng = np.random.default_rng(random_state) 
         
         self.base_model = xgb.XGBRegressor(
             objective='reg:squarederror', 
@@ -737,24 +924,20 @@ class MondrianCPSModel:
     
     def _compute_cdf(self, scores: np.ndarray, y_value: float) -> float:
         """
-        Computa la CDF según la fórmula teórica del MCPS.
+        Computa la CDF según la fórmula teórica del MCPS de forma DETERMINISTA.
         
         F̂(y|x) = (n + τ)/(N_c + 1) si y ∈ (C_(n), C_(n+1))
-        donde τ ~ Uniform(0,1) para suavizado
+        donde τ se fija en 0.5 para garantizar la replicabilidad.
         """
         if len(scores) == 0:
             return 0.5
             
-        # Ordenar scores y encontrar posición de y_value
         sorted_scores = np.sort(scores)
-        
-        # Encontrar el índice donde y_value estaría en la secuencia ordenada
         n = np.searchsorted(sorted_scores, y_value, side='right')
         
-        # Suavizado con variable aleatoria uniforme
-        tau = self.rng.uniform(0, 1)
+        # Suavizado DETERMINISTA usando el valor esperado de la variable uniforme
+        tau = 0.5 # CORRECCIÓN CLAVE
         
-        # CDF según fórmula teórica
         cdf_value = (n + tau) / (len(scores) + 1)
         
         return np.clip(cdf_value, 0, 1)
@@ -766,31 +949,26 @@ class MondrianCPSModel:
         if len(scores) == 0:
             return [{'value': 0.0, 'probability': 1.0}]
         
-        # Usar scores únicos como valores posibles
         unique_scores = np.unique(scores)
         
         if len(unique_scores) == 1:
             return [{'value': float(unique_scores[0]), 'probability': 1.0}]
         
-        # Crear distribución empírica basada en CDF
         distribution = []
         
         for i, score in enumerate(unique_scores):
             if i == 0:
-                # Primera probabilidad
                 prob = self._compute_cdf(scores, score)
             else:
-                # Probabilidad como diferencia de CDFs
                 prob = (self._compute_cdf(scores, score) - 
                        self._compute_cdf(scores, unique_scores[i-1]))
             
-            if prob > 1e-10:  # Evitar probabilidades muy pequeñas
+            if prob > 1e-10:
                 distribution.append({
                     'value': float(score),
                     'probability': float(prob)
                 })
         
-        # Normalizar probabilidades
         total_prob = sum(d['probability'] for d in distribution)
         if total_prob > 0:
             for d in distribution:
@@ -800,14 +978,10 @@ class MondrianCPSModel:
 
     def optimize_hyperparameters(self, df: Union[pd.DataFrame, np.ndarray], 
                                 reference_noise: np.ndarray) -> Tuple[Dict, float]:
-        """
-        Optimiza hiperparámetros usando optimización bayesiana.
-        """
         series = df['valor'].values if isinstance(df, pd.DataFrame) else np.asarray(df).flatten()
 
         def objective(n_lags, n_bins):
             try:
-                # Actualizar parámetros temporalmente
                 old_lags, old_bins = self.n_lags, self.n_bins
                 self.n_lags = max(5, int(n_lags))
                 self.n_bins = max(3, int(n_bins))
@@ -816,23 +990,20 @@ class MondrianCPSModel:
                     self.n_lags, self.n_bins = old_lags, old_bins
                     return -1e10
                 
-                # Evaluar con nuevos parámetros
                 dist = self.fit_predict(series)
                 if not dist:
                     self.n_lags, self.n_bins = old_lags, old_bins
                     return -1e10
                 
-                # Calcular ECRPS
                 values = [d['value'] for d in dist]
                 probs = [d['probability'] for d in dist]
                 samples = self.rng.choice(values, size=2000, p=probs, replace=True)
                 
                 ecrps_score = ecrps(samples, reference_noise)
                 
-                # Restaurar parámetros originales
                 self.n_lags, self.n_bins = old_lags, old_bins
                 
-                return -ecrps_score  # Minimizar ECRPS
+                return -ecrps_score
                 
             except Exception:
                 return -1e10
@@ -863,12 +1034,8 @@ class MondrianCPSModel:
         return self.best_params, best_ecrps
 
     def fit_predict(self, df: Union[pd.DataFrame, np.ndarray]) -> List[Dict[str, float]]:
-        """
-        Implementación principal del MCPS siguiendo la teoría del paper.
-        """
         series = df['valor'].values if isinstance(df, pd.DataFrame) else np.asarray(df).flatten()
         
-        # Aplicar mejores parámetros si fueron optimizados
         if self.best_params:
             self.n_lags = self.best_params.get('n_lags', self.n_lags)
             self.n_bins = self.best_params.get('n_bins', self.n_bins)
@@ -877,11 +1044,9 @@ class MondrianCPSModel:
             mean_val = np.mean(series) if series.size > 0 else 0
             return [{'value': mean_val, 'probability': 1.0}]
         
-        # 1. Crear matriz de lags
         X, y = self._create_lag_matrix(series)
         x_test = series[-self.n_lags:].reshape(1, -1)
         
-        # 2. División entrenamiento/calibración
         n_calib = max(10, int(len(X) * self.test_size))
         if n_calib >= len(X):
             return [{'value': np.mean(series), 'probability': 1.0}]
@@ -889,46 +1054,36 @@ class MondrianCPSModel:
         X_train, X_calib = X[:-n_calib], X[-n_calib:]
         y_train, y_calib = y[:-n_calib], y[-n_calib:]
         
-        # 3. Entrenar modelo base
         self.base_model.fit(X_train, y_train)
         
-        # 4. Predicciones para calibración y test
         point_prediction = self.base_model.predict(x_test)[0]
         calib_preds = self.base_model.predict(X_calib)
         
-        # 5. BINNING POR PREDICCIONES (Mondrian partitioning)
         try:
-            # Crear bins basados en predicciones de calibración
             _, bin_edges = pd.qcut(calib_preds, self.n_bins, retbins=True, duplicates='drop')
             bin_indices = np.digitize(calib_preds, bins=bin_edges) - 1
             bin_indices = np.clip(bin_indices, 0, len(bin_edges) - 2)
         except (ValueError, IndexError):
-            # Fallback: usar todos los datos si binning falla
             bin_indices = np.zeros(len(calib_preds), dtype=int)
             bin_edges = [-np.inf, np.inf]
         
-        # 6. Determinar bin para predicción test
         test_bin = np.digitize(point_prediction, bins=bin_edges) - 1
         test_bin = np.clip(test_bin, 0, len(bin_edges) - 2)
         
-        # 7. SCORES DE CALIBRACIÓN LOCALES (fórmula teórica)
-        # C^κ_j = h(x) + (y^κ_j - h(x^κ_j)) para datos en el mismo bin
         local_mask = (bin_indices == test_bin)
         
         if not np.any(local_mask) or np.sum(local_mask) < 5:
-            # Fallback: usar todos los datos si bin muy pequeño
             local_y = y_calib
             local_preds = calib_preds
         else:
             local_y = y_calib[local_mask]
             local_preds = calib_preds[local_mask]
         
-        # Calcular scores de calibración según teoría MCPS
         calibration_scores = point_prediction + (local_y - local_preds)
         
-        # 8. Crear distribución a partir de scores
         return self._create_distribution_from_scores(calibration_scores)
     
+
 import tensorflow as tf
 import warnings
 # --- Configuración para un entorno limpio ---
@@ -942,12 +1097,35 @@ from typing import Union
 from tensorflow.keras import layers, optimizers, Model
 from sklearn.preprocessing import MinMaxScaler
 from bayes_opt import BayesianOptimization
-import gc # --- MEJORA: Importar el recolector de basura ---
+import gc
+import tensorflow as tf
+import warnings
+import os
+
+# Configuración global
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
+tf.get_logger().setLevel('ERROR')
+warnings.filterwarnings("ignore", category=UserWarning, module='tensorflow')
+
+# Limitar threads de TensorFlow
+tf.config.threading.set_inter_op_parallelism_threads(1)
+tf.config.threading.set_intra_op_parallelism_threads(1)
+
+# Deshabilitar GPU si causa problemas
+try:
+    tf.config.set_visible_devices([], 'GPU')
+except:
+    pass
+
+from tensorflow.keras import layers, optimizers, Model
+from sklearn.preprocessing import MinMaxScaler
+from bayes_opt import BayesianOptimization
+import gc
 
 class EnCQR_LSTM_Model:
     """
-    Implementa el método Ensemble Conformalized Quantile Regression (EnCQR)
-    utilizando un predictor LSTM interno, con gestión de memoria mejorada.
+    EnCQR-LSTM con limpieza completa de memoria de TensorFlow.
     """
     def __init__(self, n_lags: int = 24, B: int = 3, units: int = 50, n_layers: int = 2,
                  lr: float = 0.005, batch_size: int = 16, epochs: int = 25, 
@@ -959,6 +1137,8 @@ class EnCQR_LSTM_Model:
         self.rng = np.random.default_rng(random_state)
         self.quantiles = np.round(np.arange(0.1, 1.0, 0.1), 2)
         self.median_idx = np.where(self.quantiles == 0.5)[0][0]
+        
+        # Configurar semillas
         tf.random.set_seed(random_state)
         np.random.seed(random_state)
 
@@ -967,9 +1147,11 @@ class EnCQR_LSTM_Model:
         return tf.reduce_mean(tf.maximum(self.quantiles * error, (self.quantiles - 1) * error), axis=-1)
 
     def _build_lstm(self):
+        """Construye el modelo LSTM."""
         x_in = layers.Input(shape=(self.n_lags, 1))
         x = x_in
-        for _ in range(self.n_layers - 1): x = layers.LSTM(self.units, return_sequences=True)(x)
+        for _ in range(self.n_layers - 1):
+            x = layers.LSTM(self.units, return_sequences=True)(x)
         x = layers.LSTM(self.units, return_sequences=False)(x)
         x = layers.Dense(len(self.quantiles))(x)
         model = Model(inputs=x_in, outputs=x)
@@ -979,68 +1161,117 @@ class EnCQR_LSTM_Model:
     def _create_sequences(self, data: np.ndarray):
         X, y = [], []
         for i in range(len(data) - self.n_lags):
-            X.append(data[i:(i + self.n_lags)]); y.append(data[i + self.n_lags])
+            X.append(data[i:(i + self.n_lags)])
+            y.append(data[i + self.n_lags])
         return np.array(X), np.array(y)
 
     def _prepare_data(self, series: np.ndarray):
         series_scaled = self.scaler.fit_transform(series.reshape(-1, 1))
         X, y = self._create_sequences(series_scaled)
         n_samples = X.shape[0]
-        if n_samples < self.B: raise ValueError(f"No hay suficientes muestras ({n_samples}) para crear {self.B} lotes.")
+        
+        if n_samples < self.B:
+            raise ValueError(f"No hay suficientes muestras ({n_samples}) para crear {self.B} lotes.")
+        
         batch_size = n_samples // self.B
         train_data_batches = []
+        
         for b in range(self.B):
-            start, end = b * batch_size, (b + 1) * batch_size
-            if b == self.B - 1: end = n_samples
+            start = b * batch_size
+            end = (b + 1) * batch_size if b < self.B - 1 else n_samples
             train_data_batches.append({'X': X[start:end], 'y': y[start:end]})
+        
         return train_data_batches
     
-    # ... (El método optimize_hyperparameters no cambia y puede ir aquí) ...
     def optimize_hyperparameters(self, df: pd.DataFrame, reference_noise: np.ndarray):
-        """Optimiza hiperparámetros clave usando optimización bayesiana."""
         series = df['valor'].values
+        
         def objective(n_lags, units, B):
+            # Limpiar sesión ANTES de cada evaluación
+            tf.keras.backend.clear_session()
+            gc.collect()
+            
             try:
-                self.n_lags, self.units, self.B = max(10, int(n_lags)), max(16, int(units)), max(2, int(B))
-                if len(series) <= self.n_lags * self.B: return -1e10
+                self.n_lags = max(10, int(n_lags))
+                self.units = max(16, int(units))
+                self.B = max(2, int(B))
+                
+                if len(series) <= self.n_lags * self.B:
+                    return -1e10
+                
                 predictions = self.fit_predict(series)
-                return -ecrps(predictions, reference_noise) if predictions is not None and len(predictions) > 0 else -1e10
+                
+                if predictions is not None and len(predictions) > 0:
+                    return -ecrps(predictions, reference_noise)
+                else:
+                    return -1e10
+            
             except Exception:
                 return -1e10
+            
+            finally:
+                # Limpieza DESPUÉS de cada evaluación
+                tf.keras.backend.clear_session()
+                gc.collect()
 
-        optimizer = BayesianOptimization(f=objective, pbounds={'n_lags': (10, 50), 'units': (20, 80), 'B': (2, 5.99)}, random_state=self.random_state, verbose=0)
+        optimizer = BayesianOptimization(
+            f=objective, 
+            pbounds={'n_lags': (10, 50), 'units': (20, 80), 'B': (2, 5.99)}, 
+            random_state=self.random_state, 
+            verbose=0
+        )
+        
         try:
             optimizer.maximize(init_points=4, n_iter=8)
             best_ecrps = -optimizer.max['target'] if optimizer.max else -1
             if optimizer.max:
                 self.best_params = {k: int(v) for k, v in optimizer.max['params'].items()}
-        except Exception: best_ecrps = -1
-        if self.verbose: print(f"✅ Opt. EnCQR-LSTM (ECRPS: {best_ecrps:.4f}): {self.best_params}")
+        except Exception:
+            best_ecrps = -1
+            
+        if self.verbose:
+            print(f"✅ Opt. EnCQR-LSTM (ECRPS: {best_ecrps:.4f}): {self.best_params}")
+            
         return self.best_params, best_ecrps
 
     def fit_predict(self, df: Union[pd.DataFrame, np.ndarray]) -> np.ndarray:
-        # --- MEJORA: Envolver toda la lógica en un bloque try...finally ---
-        # para garantizar que la limpieza de memoria se ejecute siempre.
-        final_samples = np.array([])
+        # Limpiar sesión ANTES de empezar
+        tf.keras.backend.clear_session()
+        gc.collect()
+        
+        ensemble_models = []
+        
         try:
             series = df['valor'].values if isinstance(df, pd.DataFrame) else np.asarray(df)
-            if self.best_params: self.__dict__.update(self.best_params)
+            if self.best_params:
+                self.__dict__.update(self.best_params)
 
             if len(series) <= self.n_lags + self.B:
-                if self.verbose: print("⚠️ EnCQR-LSTM: No hay suficientes datos para el proceso.")
+                if self.verbose:
+                    print("⚠️ EnCQR-LSTM: No hay suficientes datos.")
                 return np.full(self.num_samples, np.mean(series))
 
-            try: train_batches = self._prepare_data(series)
+            try:
+                train_batches = self._prepare_data(series)
             except ValueError as e:
-                if self.verbose: print(f"⚠️ EnCQR-LSTM: Error en preparación de datos - {e}")
+                if self.verbose:
+                    print(f"⚠️ EnCQR-LSTM: Error en preparación - {e}")
                 return np.full(self.num_samples, np.mean(series))
 
-            ensemble_models, loo_preds_median = [], [[] for _ in range(self.B)]
+            loo_preds_median = [[] for _ in range(self.B)]
+            
             for b in range(self.B):
                 model = self._build_lstm()
-                model.fit(train_batches[b]['X'], train_batches[b]['y'], 
-                          epochs=self.epochs, batch_size=self.batch_size, verbose=0)
+                model.fit(
+                    train_batches[b]['X'], 
+                    train_batches[b]['y'], 
+                    epochs=self.epochs, 
+                    batch_size=self.batch_size, 
+                    verbose=0, 
+                    shuffle=False
+                )
                 ensemble_models.append(model)
+                
                 for i in range(self.B):
                     if i != b:
                         preds = model.predict(train_batches[i]['X'], verbose=0)
@@ -1053,85 +1284,120 @@ class EnCQR_LSTM_Model:
                 conformity_scores.extend(scores.flatten())
             conformity_scores = np.array(conformity_scores)
 
-            last_window_scaled = self.scaler.transform(series[-self.n_lags:].reshape(-1, 1)).reshape(1, self.n_lags, 1)
+            last_window_scaled = self.scaler.transform(
+                series[-self.n_lags:].reshape(-1, 1)
+            ).reshape(1, self.n_lags, 1)
 
-            final_preds_median = [model.predict(last_window_scaled, verbose=0)[0, self.median_idx] for model in ensemble_models]
+            final_preds_median = [
+                model.predict(last_window_scaled, verbose=0)[0, self.median_idx] 
+                for model in ensemble_models
+            ]
             point_prediction_scaled = np.mean(final_preds_median)
             
             predictive_dist_scaled = point_prediction_scaled + self.rng.choice(
                 conformity_scores, size=self.num_samples, replace=True
             )
             
-            final_samples = self.scaler.inverse_transform(predictive_dist_scaled.reshape(-1, 1)).flatten()
+            final_samples = self.scaler.inverse_transform(
+                predictive_dist_scaled.reshape(-1, 1)
+            ).flatten()
+            
+            return final_samples
+            
+        except Exception as e:
+            if self.verbose:
+                print(f"Error en EnCQR-LSTM: {e}")
+            return np.full(self.num_samples, np.nanmean(df))
             
         finally:
-            # --- MEJORA CLAVE: Limpieza de memoria de TensorFlow/Keras ---
+            # LIMPIEZA CRÍTICA
+            for model in ensemble_models:
+                del model
+            ensemble_models.clear()
+            
             tf.keras.backend.clear_session()
             gc.collect()
-        
-        return final_samples
     
+    def __del__(self):
+        """Destructor con limpieza explícita."""
+        clear_all_sessions()
+                
 ## Pipeline
 # pipeline.py
-
+import os
+import gc
 import numpy as np
 import pandas as pd
-from IPython.display import display
-from typing import Dict, List, Any
+from tqdm import tqdm
 import concurrent.futures
-import os # Asegúrate de que os está importado
+from typing import Dict, Any, List, Tuple
+import tensorflow as tf
 
-# ==============================================================================
-# FUNCIÓN AUXILIAR PARA PARALELIZACIÓN (SOLO PREDICCIÓN)
-# (Esta función no necesita cambios)
-# ==============================================================================
-def _predict_with_model(model_name: str, model_instance: Any, 
-                        history_df: pd.DataFrame, history_series: np.ndarray,
-                        sim_config: Dict, seed: int) -> Dict:
+# ============================================================================
+# CONFIGURACIÓN GLOBAL PARA LIMITAR RECURSOS Y EVITAR MEMORY LEAKS
+# ============================================================================
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
+# Limitar threads de TensorFlow para evitar sobrecarga
+tf.config.threading.set_inter_op_parallelism_threads(1)
+tf.config.threading.set_intra_op_parallelism_threads(1)
+
+# ============================================================================
+# FUNCIÓN AUXILIAR MEJORADA PARA PREDICCIÓN (SIN PARALELIZACIÓN INTERNA)
+# ============================================================================
+def _predict_with_model_safe(model_name: str, model_instance: Any, 
+                             history_df: pd.DataFrame, history_series: np.ndarray,
+                             sim_config: Dict, seed: int) -> Dict:
     """
-    Encapsula la lógica para predecir con un modelo ya optimizado.
+    Versión segura que maneja memoria explícitamente.
     """
-    np.random.seed(seed) # Asegurar consistencia en operaciones aleatorias internas
-    local_rng = np.random.default_rng(seed)
+    try:
+        np.random.seed(seed)
+        local_rng = np.random.default_rng(seed)
+        
+        # Predicción según tipo de modelo
+        if model_name == 'Block Bootstrapping':
+            local_simulator = ARMASimulation(**sim_config)
+            bb_model_step = EnhancedBootstrappingModel(local_simulator, random_state=seed)
+            bb_model_step.n_lags = model_instance.n_lags
+            bb_model_step.arma_simulator.series = history_series
+            prediction_output = bb_model_step.fit_predict(history_series)[0]
+        else:
+            prediction_output = model_instance.fit_predict(history_df)
+        
+        # Procesar salida
+        if isinstance(prediction_output, list) and prediction_output and isinstance(prediction_output[0], dict):
+            values = [d['value'] for d in prediction_output]
+            probs = np.array([d['probability'] for d in prediction_output])
+            if np.sum(probs) > 1e-9:
+                probs /= np.sum(probs)
+            else:
+                probs = np.ones(len(values)) / len(values) if values else []
+            samples = local_rng.choice(values, size=5000, p=probs, replace=True) if values else np.array([])
+        else:
+            samples = np.array(prediction_output).flatten()
+        
+        return {'name': model_name, 'samples': samples, 'error': None}
     
-    # La predicción es directa, sin optimización
-    if hasattr(model_instance, 'fit_predict') and not isinstance(model_instance, EnhancedBootstrappingModel):
-        prediction_output = model_instance.fit_predict(history_df)
-    else: # Caso especial para EnhancedBootstrappingModel que usa la serie directamente
-        local_simulator = ARMASimulation(**sim_config)
-        bb_model_step = EnhancedBootstrappingModel(local_simulator, random_state=seed)
-        bb_model_step.n_lags = model_instance.n_lags
-        bb_model_step.arma_simulator.series = history_series
-        # fit_predict devuelve una lista de arrays, tomamos el primero para el paso actual
-        prediction_output = bb_model_step.fit_predict(history_series)[0]
-
-    # Procesar la salida para obtener siempre un array de muestras
-    if isinstance(prediction_output, list) and prediction_output and isinstance(prediction_output[0], dict):
-        values = [d['value'] for d in prediction_output]
-        probs = np.array([d['probability'] for d in prediction_output])
-        # Normalizar probabilidades por si no suman 1
-        if np.sum(probs) > 1e-9:
-            probs /= np.sum(probs)
-        else: # Si las probabilidades son cero, usar distribución uniforme
-            probs = np.ones(len(values)) / len(values) if values else []
-        samples = local_rng.choice(values, size=5000, p=probs, replace=True) if values else np.array([])
-    else:
-        samples = np.array(prediction_output).flatten()
-
-    return {'name': model_name, 'samples': samples}
+    except Exception as e:
+        return {'name': model_name, 'samples': np.array([]), 'error': str(e)}
+    
+    finally:
+        # Limpieza agresiva
+        if model_name in ['DeepAR', 'EnCQR-LSTM']:
+            tf.keras.backend.clear_session()
+        gc.collect()
 
 
-# ===================================================================
-# CLASE Pipeline (Modificada y Simplificada)
-# ===================================================================
-class Pipeline:
-    """
-    Orquesta un backtesting con ventana rodante. Los modelos se optimizan
-    UNA SOLA VEZ al inicio del escenario y luego se usan para predecir.
-    """
+# ============================================================================
+# PIPELINE OPTIMIZADO (SIN PARALELIZACIÓN INTERNA)
+# ============================================================================
+class PipelineOptimizado:
+    """Pipeline con optimización UNA SOLA VEZ al inicio."""
     N_TEST_STEPS = 5
 
-    def __init__(self, model_type='ARMA(1,1)', phi=[0.7], theta=[0.3], sigma=1.2, noise_dist='t-student', n_samples=250, seed=42, verbose=False):
+    def __init__(self, model_type='ARMA(1,1)', phi=[0.7], theta=[0.3], 
+                 sigma=1.2, noise_dist='t-student', n_samples=250, seed=42, verbose=False):
         self.config = {
             'model_type': model_type, 'phi': phi, 'theta': theta, 'sigma': sigma,
             'noise_dist': noise_dist, 'n_samples': n_samples, 'seed': seed,
@@ -1143,101 +1409,94 @@ class Pipeline:
         self.rolling_ecrps: List[Dict] = []
 
     def _setup_models(self) -> Dict:
-        """Inicializa todos los modelos a ser evaluados."""
+        """Inicializa modelos."""
         seed = self.config['seed']
         p_order = len(self.config['phi']) if self.config['phi'] else 2
         
         return {
-            'LSPM': LSPM(random_state=seed, verbose=self.verbose),
-            'LSPMW': LSPMW(random_state=seed, verbose=self.verbose),
-            'AREPD': AREPD(random_state=seed, verbose=self.verbose),
-            'DeepAR': DeepARModel(random_state=seed, verbose=self.verbose, epochs=20),
-            'Block Bootstrapping': EnhancedBootstrappingModel(self.simulator, random_state=seed, verbose=self.verbose),
-            'Sieve Bootstrap': SieveBootstrap(p_order=p_order, random_state=seed, verbose=self.verbose),
-            'MCPS': MondrianCPSModel(random_state=seed, verbose=self.verbose),
-            'EnCQR-LSTM': EnCQR_LSTM_Model(random_state=seed, verbose=self.verbose, epochs=8, B=2, units=32, n_layers=1)
+            'LSPM': LSPM(random_state=seed, verbose=False),
+            'LSPMW': LSPMW(random_state=seed, verbose=False),
+            'AREPD': AREPD(random_state=seed, verbose=False),
+            'DeepAR': DeepARModel(random_state=seed, verbose=False, epochs=15),
+            'Block Bootstrapping': EnhancedBootstrappingModel(self.simulator, random_state=seed, verbose=False),
+            'Sieve Bootstrap': SieveBootstrap(p_order=p_order, random_state=seed, verbose=False),
+            'MCPS': MondrianCPSModel(random_state=seed, verbose=False),
+            'EnCQR-LSTM': EnCQR_LSTM_Model(random_state=seed, verbose=False, epochs=6, B=2, units=24, n_layers=1)
         }
     
     def execute(self, show_intermediate_plots=False):
-        """Ejecuta el pipeline y devuelve un DataFrame con los resultados."""
-        sim_config = {k: v for k, v in self.config.items() if k not in ['n_samples', 'verbose']}
+        """Ejecuta pipeline con optimización única."""
+        sim_config = {k: v for k, v in self.config.items() 
+                     if k not in ['n_samples', 'verbose']}
         self.simulator = ARMASimulation(**sim_config)
-        self.full_series, self.full_errors = self.simulator.simulate(n=self.config['n_samples'], burn_in=50)
+        self.full_series, self.full_errors = self.simulator.simulate(
+            n=self.config['n_samples'], burn_in=50
+        )
         
         initial_train_len = len(self.full_series) - self.N_TEST_STEPS
         initial_train_series = self.full_series[:initial_train_len]
         df_initial_train = pd.DataFrame({'valor': initial_train_series})
         
         all_models = self._setup_models()
-        colors = {name: PlotManager._STYLE['default_colors'][i % len(PlotManager._STYLE['default_colors'])] for i, name in enumerate(all_models.keys())}
-        colors['Teórica'] = '#000000'
-
-        # --- CAMBIO CLAVE: BUCLE DE OPTIMIZACIÓN SIMPLIFICADO ---
-        if self.verbose: print(f"\n--- Optimizando hiperparámetros para el escenario ---")
         
-        # Generar ruido de referencia para optimización una sola vez
+        # ====================================================================
+        # OPTIMIZACIÓN UNA SOLA VEZ (NO EN CADA PASO)
+        # ====================================================================
         initial_errors = self.full_errors[:initial_train_len]
-        reference_noise_for_opt = self.simulator.get_true_next_step_samples(initial_train_series, initial_errors, 5000)
+        reference_noise_for_opt = self.simulator.get_true_next_step_samples(
+            initial_train_series, initial_errors, 5000
+        )
 
         for name, model in all_models.items():
-            if self.verbose: print(f"Optimizando {name}...")
-            # Este bloque genérico ahora funciona para TODOS los modelos,
-            # incluido el 'Block Bootstrapping' modificado.
             if hasattr(model, 'optimize_hyperparameters'):
-                model.optimize_hyperparameters(df_initial_train, reference_noise_for_opt)
+                try:
+                    model.optimize_hyperparameters(df_initial_train, reference_noise_for_opt)
+                except Exception as e:
+                    if self.verbose:
+                        print(f"Error optimizando {name}: {e}")
         
-        if self.verbose: print(f"--- Fin de la optimización ---")
-
-        # --- BUCLE DE VENTANA RODANTE (PARA PREDICCIÓN) ---
+        # ====================================================================
+        # VENTANA RODANTE SIN RE-OPTIMIZACIÓN
+        # ====================================================================
         for t in range(self.N_TEST_STEPS):
             step_t = initial_train_len + t
-            if self.verbose: print(f"\n >> Paso {t+1}/{self.N_TEST_STEPS} (Prediciendo para t={step_t})")
             
             history_series = self.full_series[:step_t]
             history_errors = self.full_errors[:step_t]
             df_history = pd.DataFrame({'valor': history_series})
             
-            theoretical_samples = self.simulator.get_true_next_step_samples(history_series, history_errors, 20000)
+            theoretical_samples = self.simulator.get_true_next_step_samples(
+                history_series, history_errors, 20000
+            )
 
             step_ecrps = {'Paso': t + 1}
             step_distributions = {'Teórica': theoretical_samples}
             
-            # Usar un número razonable de procesos
-            max_p_workers = max(1, os.cpu_count() - 2) if os.cpu_count() and os.cpu_count() > 2 else 2
-            with concurrent.futures.ProcessPoolExecutor(max_workers=max_p_workers) as executor:
-                futures = {
-                    executor.submit(
-                        _predict_with_model,
-                        name, model, df_history, history_series,
-                        sim_config,
-                        self.config['seed'] + t
-                    ): name for name, model in all_models.items()
-                }
-                for future in concurrent.futures.as_completed(futures):
-                    try:
-                        result = future.result()
-                        model_name, samples = result['name'], result['samples']
-                        if samples.size > 0:
-                            step_distributions[model_name] = samples
-                            step_ecrps[model_name] = ecrps(samples, theoretical_samples)
-                        else:
-                            step_ecrps[model_name] = np.nan
-                    except Exception as exc:
-                        model_name_failed = futures[future]
-                        print(f"ERROR prediciendo con {model_name_failed} en el paso {t+1}: {exc}")
-                        step_ecrps[model_name_failed] = np.nan
+            # Predicción SECUENCIAL con modelos YA optimizados
+            for name, model in all_models.items():
+                result = _predict_with_model_safe(
+                    name, model, df_history, history_series,
+                    sim_config, self.config['seed'] + t
+                )
+                
+                if result['samples'].size > 0 and result['error'] is None:
+                    step_distributions[name] = result['samples']
+                    step_ecrps[name] = ecrps(result['samples'], theoretical_samples)
+                else:
+                    step_ecrps[name] = np.nan
             
             self.rolling_ecrps.append(step_ecrps)
             
-            if show_intermediate_plots:
-                metrics_for_plot = {name: val for name, val in step_ecrps.items() if name != 'Paso'}
-                plot_title = f"Comparación de Densidades Predictivas en el Paso t={step_t}"
-                PlotManager.plot_density_comparison(step_distributions, metrics_for_plot, plot_title, colors)
-
+            # Limpieza después de cada paso
+            clear_all_sessions()
+        
+        # Limpieza final
+        del all_models
+        clear_all_sessions()
+        
         return self._prepare_results_df()
         
     def _prepare_results_df(self):
-        # Esta función no necesita cambios
         if not self.rolling_ecrps:
             return pd.DataFrame()
         ecrps_df = pd.DataFrame(self.rolling_ecrps).set_index('Paso')
@@ -1249,44 +1508,45 @@ class Pipeline:
         ecrps_df.loc['Promedio', 'Mejor Modelo'] = best_overall_model
         return ecrps_df
 
-from tqdm import tqdm
-from tqdm import tqdm
-import pandas as pd
-import numpy as np
-
-class ScenarioRunnerAdaptado:
-    """
-    Ejecuta múltiples escenarios, genera un Excel acumulativo para evitar
-    problemas de memoria y crea los análisis gráficos al final.
-    """
+class ScenarioRunnerMejorado:
+    """Runner con reinicio periódico del pool de procesos."""
     def __init__(self, seed=420):
         self.seed = seed
-        self.model_names = [] # Se llenará dinámicamente
-        # Definición de los escenarios a ejecutar
+        self.model_names = []
         self.models_config = [
-            {'model_type': 'AR(1)', 'phi': [0.9], 'theta': []}, {'model_type': 'AR(2)', 'phi': [0.5, -0.3], 'theta': []},
-            {'model_type': 'MA(1)', 'phi': [], 'theta': [0.7]}, {'model_type': 'MA(2)', 'phi': [], 'theta': [0.4, 0.2]},
-            {'model_type': 'ARMA(1,1)', 'phi': [0.6], 'theta': [0.3]}, {'model_type': 'ARMA(2,2)', 'phi': [0.4, -0.2], 'theta': [0.5, 0.1]}
+            {'model_type': 'AR(1)', 'phi': [0.9], 'theta': []},
+            {'model_type': 'AR(2)', 'phi': [0.5, -0.3], 'theta': []},
+            {'model_type': 'MA(1)', 'phi': [], 'theta': [0.7]},
+            {'model_type': 'MA(2)', 'phi': [], 'theta': [0.4, 0.2]},
+            {'model_type': 'ARMA(1,1)', 'phi': [0.6], 'theta': [0.3]},
+            {'model_type': 'ARMA(2,2)', 'phi': [0.4, -0.2], 'theta': [0.5, 0.1]}
         ]
         self.distributions = ['normal', 'uniform', 'exponential', 't-student', 'mixture']
         self.variances = [0.2, 0.5, 1.0, 3.0]
 
     def _generate_scenarios(self, n_scenarios):
-        """Crea la lista de diccionarios de configuración para cada escenario."""
         scenarios, count = [], 0
         for model in self.models_config:
             for dist in self.distributions:
                 for var in self.variances:
                     if count < n_scenarios:
-                        scenarios.append({**model, 'noise_dist': dist, 'sigma': np.sqrt(var), 'scenario_id': count + 1})
+                        scenarios.append({
+                            **model, 
+                            'noise_dist': dist, 
+                            'sigma': np.sqrt(var), 
+                            'scenario_id': count + 1
+                        })
                         count += 1
-        return scenarios
+        return [{'config': sc, 'seed': self.seed + i} for i, sc in enumerate(scenarios)]
 
     def _prepare_rows_from_result(self, scenario_config, results_df):
-        """Convierte el DataFrame de resultados de un escenario en una lista de diccionarios (filas)."""
         rows = []
-        if self.model_names is None or not self.model_names:
-             self.model_names = [col for col in results_df.columns if col not in ['Paso', 'Mejor Modelo']]
+        if results_df is None or results_df.empty:
+            return rows
+            
+        if not self.model_names:
+            self.model_names = [col for col in results_df.columns 
+                               if col not in ['Paso', 'Mejor Modelo']]
              
         for step, data_row in results_df.iterrows():
             row = {
@@ -1295,67 +1555,125 @@ class ScenarioRunnerAdaptado:
                 'Valores MA': str(scenario_config['theta']),
                 'Distribución': scenario_config['noise_dist'],
                 'Varianza error': np.round(scenario_config['sigma'] ** 2, 2),
-                'Mejor Modelo': data_row['Mejor Modelo']
+                'Mejor Modelo': data_row.get('Mejor Modelo', 'Error')
             }
             for model_name in self.model_names:
                 row[model_name] = data_row.get(model_name, np.nan)
             rows.append(row)
         return rows
 
-    def run(self, n_scenarios=120, excel_filename="resultados_acumulativos.xlsx"):
-        """
-        Ejecuta los escenarios y guarda los resultados en un Excel acumulativo
-        después de cada uno para ahorrar memoria.
-        """
-        all_scenarios = self._generate_scenarios(n_scenarios)
-        all_excel_rows = [] # Acumulador de bajo consumo de memoria
-
-        for scenario in tqdm(all_scenarios, desc="Ejecutando escenarios"):
-            print(f"\n--- Ejecutando Escenario {scenario['scenario_id']}: {scenario['model_type']} con ruido {scenario['noise_dist']} y σ={scenario['sigma']:.2f} ---")
-            try:
-                pipeline = Pipeline(**{k: v for k, v in scenario.items() if k != 'scenario_id'}, seed=self.seed, verbose=False)
-                results_df = pipeline.execute(show_intermediate_plots=False)
+    def _run_batch(self, batch_scenarios, restart_every=10):
+        """Ejecuta lote con reinicio periódico del executor."""
+        batch_results = []
+        max_workers = 1
+        
+        # Dividir el lote en sublotes más pequeños
+        sublotes = [batch_scenarios[i:i+restart_every] 
+                   for i in range(0, len(batch_scenarios), restart_every)]
+        
+        for sublote_idx, sublote in enumerate(sublotes):
+            print(f"    Sublote {sublote_idx + 1}/{len(sublotes)}")
+            
+            # CREAR NUEVO EXECUTOR PARA CADA SUBLOTE
+            with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
+                futures = {
+                    executor.submit(run_single_scenario_robust, sc): sc 
+                    for sc in sublote
+                }
                 
-                # --- MEJORA: Procesar y agregar filas en lugar de DataFrames completos ---
-                new_rows = self._prepare_rows_from_result(scenario, results_df)
+                for future in tqdm(concurrent.futures.as_completed(futures), 
+                                  total=len(futures), desc="      Escenarios"):
+                    try:
+                        scenario_config, results_df = future.result(timeout=600)
+                        if results_df is not None:
+                            batch_results.append((scenario_config, results_df))
+                    except concurrent.futures.TimeoutError:
+                        sc_id = futures[future]['config'].get('scenario_id', 'N/A')
+                        print(f"      Timeout en escenario {sc_id}")
+                    except Exception as e:
+                        print(f"      Error: {e}")
+            
+            # Limpieza entre sublotes
+            clear_all_sessions()
+            import time
+            time.sleep(2)  # Pausa para asegurar limpieza
+        
+        return batch_results
+
+    def run(self, n_scenarios=120, excel_filename="resultados_finales.xlsx", 
+            batch_size=20, restart_every=5):  # Reducir batch_size
+        """Ejecuta escenarios en lotes pequeños con reinicio frecuente."""
+        all_scenarios_configs = self._generate_scenarios(n_scenarios)
+        all_excel_rows = []
+        
+        n_batches = (len(all_scenarios_configs) + batch_size - 1) // batch_size
+        
+        print(f"Ejecutando {len(all_scenarios_configs)} escenarios en {n_batches} lotes")
+        
+        for batch_num in range(n_batches):
+            start_idx = batch_num * batch_size
+            end_idx = min((batch_num + 1) * batch_size, len(all_scenarios_configs))
+            batch = all_scenarios_configs[start_idx:end_idx]
+            
+            print(f"\n{'='*60}")
+            print(f"LOTE {batch_num + 1}/{n_batches} (Escenarios {start_idx + 1}-{end_idx})")
+            print(f"{'='*60}")
+            
+            batch_results = self._run_batch(batch, restart_every=restart_every)
+            
+            for scenario_config, results_df in batch_results:
+                new_rows = self._prepare_rows_from_result(scenario_config, results_df)
                 all_excel_rows.extend(new_rows)
-                
-                # --- MEJORA: Guardado acumulativo en Excel ---
-                if all_excel_rows:
-                    df_acumulado = pd.DataFrame(all_excel_rows)
-                    # Reordenar columnas para una mejor visualización
-                    first_cols = ['Paso', 'Valores de AR', 'Valores MA', 'Distribución', 'Varianza error']
-                    last_col = ['Mejor Modelo']
-                    model_cols = sorted([m for m in self.model_names])
-                    ordered_columns = first_cols + model_cols + last_col
-                    df_acumulado = df_acumulado[ordered_columns]
-                    
-                    df_acumulado.to_excel(excel_filename, index=False)
-                    print(f"✅ Resultados de {len(all_excel_rows)//6} escenarios guardados en '{excel_filename}'")
+            
+            # Limpieza agresiva entre lotes
+            print(f"  Limpiando memoria del lote...")
+            clear_all_sessions()
+            import time
+            time.sleep(3)  # Pausa más larga entre lotes
+            
+            # Checkpoint intermedio
+            if all_excel_rows and (batch_num + 1) % 3 == 0:
+                temp_filename = f"checkpoint_lote_{batch_num + 1}.xlsx"
+                pd.DataFrame(all_excel_rows).to_excel(temp_filename, index=False)
+                print(f"  ✅ Checkpoint guardado: {temp_filename}")
+        
+        # Guardar resultados finales
+        if all_excel_rows:
+            df_final = pd.DataFrame(all_excel_rows)
+            first_cols = ['Paso', 'Valores de AR', 'Valores MA', 'Distribución', 'Varianza error']
+            last_col = ['Mejor Modelo']
+            
+            if not self.model_names and not df_final.empty:
+                self.model_names = [col for col in df_final.columns 
+                                   if col not in first_cols + last_col]
 
-            except Exception as e:
-                print(f"ERROR en escenario {scenario['scenario_id']} ({scenario['model_type']}, {scenario['noise_dist']}): {e}")
-                # Forzar recolección de basura en caso de error para liberar recursos
-                gc.collect()
-
-        print("\n--- Ejecución de todos los escenarios completada. ---")
-        # Generar gráficos al final usando el archivo Excel guardado
-        self.plot_results_from_excel(excel_filename)
+            model_cols = sorted([m for m in self.model_names if m in df_final.columns])
+            ordered_columns = first_cols + model_cols + last_col
+            df_final = df_final[ordered_columns]
+            
+            df_final.to_excel(excel_filename, index=False)
+            print(f"✅ {len(all_excel_rows)} resultados guardados en '{excel_filename}'")
+            
+            self.plot_results_from_excel(excel_filename)
+        else:
+            print("❌ No se generaron resultados.")
 
     def plot_results_from_excel(self, filename):
-        """Genera los 6 boxplots y 6 diagramas de torta leyendo el archivo Excel final."""
+        """Genera boxplots y gráficos de torta."""
         try:
             df_total = pd.read_excel(filename)
         except FileNotFoundError:
-            print(f"No se encontró el archivo '{filename}'. No se pueden generar los gráficos.")
+            print(f"No se encontró '{filename}'.")
             return
 
         if df_total.empty:
-            print("El archivo de resultados está vacío. No hay nada que graficar.")
+            print("Archivo vacío.")
             return
 
         if not self.model_names:
-            self.model_names = [col for col in df_total.columns if col not in ['Paso', 'Valores de AR', 'Valores MA', 'Distribución', 'Varianza error', 'Mejor Modelo']]
+            self.model_names = [col for col in df_total.columns 
+                               if col not in ['Paso', 'Valores de AR', 'Valores MA', 
+                                             'Distribución', 'Varianza error', 'Mejor Modelo']]
 
         pasos_disponibles = df_total['Paso'].unique()
 
@@ -1365,7 +1683,8 @@ class ScenarioRunnerAdaptado:
             df_melted = df_step.melt(value_vars=self.model_names, var_name='Modelo', value_name='ECRPS')
             wins = df_step['Mejor Modelo'].value_counts()
             
-            title_prefix = f"Resultados para el Paso {step_name}" if step_name != "Promedio" else "Resultados Generales (Promedio de Pasos)"
+            title_prefix = (f"Resultados para el Paso {step_name}" if step_name != "Promedio" 
+                          else "Resultados Generales (Promedio de Pasos)")
             
             fig, axes = plt.subplots(1, 2, figsize=(20, 8))
             fig.suptitle(title_prefix, fontsize=18)
@@ -1377,9 +1696,14 @@ class ScenarioRunnerAdaptado:
             axes[0].tick_params(axis='x', rotation=45)
             
             if not wins.empty:
-                pie_colors = [PlotManager._STYLE['default_colors'][i % len(PlotManager._STYLE['default_colors'])] for i, _ in enumerate(wins.index)]
-                axes[1].pie(wins, labels=wins.index, autopct='%1.1f%%', startangle=140, colors=pie_colors,
-                            wedgeprops={"edgecolor":"k",'linewidth': 0.5, 'antialiased': True})
+                pie_colors_map = {
+                    name: PlotManager._STYLE['default_colors'][i % len(PlotManager._STYLE['default_colors'])] 
+                    for i, name in enumerate(self.model_names)
+                }
+                pie_colors = [pie_colors_map.get(label, '#CCCCCC') for label in wins.index]
+
+                axes[1].pie(wins, labels=wins.index, autopct='%1.1f%%', startangle=140, 
+                           colors=pie_colors, wedgeprops={"edgecolor":"k",'linewidth': 0.5, 'antialiased': True})
                 axes[1].set_title('Distribución de Victorias por Modelo', fontsize=14)
             else:
                 axes[1].text(0.5, 0.5, 'No hay datos de victorias', ha='center', va='center')
@@ -1387,5 +1711,4 @@ class ScenarioRunnerAdaptado:
             
             plt.tight_layout(rect=[0, 0.03, 1, 0.95])
             plt.show()
-            # La limpieza de la figura ya se hace al mostrarla
             plt.close(fig)
