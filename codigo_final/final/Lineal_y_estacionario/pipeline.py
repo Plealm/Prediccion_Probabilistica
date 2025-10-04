@@ -341,117 +341,128 @@ from sklearn.utils import check_random_state
 from sklearn.linear_model import Ridge
 
 
+import numpy as np
+import pandas as pd
+from typing import Union
+from statsmodels.tsa.ar_model import AutoReg
+
 class EnhancedBootstrappingModel:
-    """Modelo con Block Bootstrap y evaluación ECRPS para optimización."""
+    """Modelo con Block Bootstrap corregido y evaluación ECRPS para optimización."""
+    
     def __init__(self, arma_simulator, random_state=42, verbose=False):
-        self.n_lags, self.random_state, self.verbose = None, random_state, verbose
+        self.n_lags = None
+        self.random_state = random_state
+        self.verbose = verbose
         self.rng = np.random.default_rng(self.random_state)
         self.arma_simulator = arma_simulator
-        self.train, self.test, self.mean_val, self.std_val = None, None, None, None
+        self.train = None
+        self.test = None
+        self.mean_val = None
+        self.std_val = None
 
     def prepare_data(self, series):
-        split_idx = int(len(series)*0.9)
-        self.train, self.test = series[:split_idx], series[split_idx:]
-        self.mean_val, self.std_val = np.mean(self.train), np.std(self.train)
-        return (self.train - self.mean_val) / (self.std_val + 1e-8)
+        """Prepara y normaliza los datos."""
+        self.mean_val = np.mean(series)
+        self.std_val = np.std(series)
+        return (series - self.mean_val) / (self.std_val + 1e-8)
 
     def denormalize(self, values): 
-        # Esta función ahora es segura porque self.std_val y self.mean_val estarán definidos
+        """Desnormaliza valores usando media y desviación estándar del entrenamiento."""
         return (values * self.std_val) + self.mean_val
 
     def _block_bootstrap_predict(self, fitted_model, n_boot):
-        residuals, n_resid = fitted_model.resid, len(fitted_model.resid)
+        """
+        Implementación de Block Bootstrap para pronóstico.
+        
+        Preserva la estructura de dependencia temporal remuestreando bloques
+        completos de residuos.
+        """
+        residuals = fitted_model.resid
+        n_resid = len(residuals)
+        
         if n_resid < 2: 
-            # Fallback si no hay suficientes residuos
+            forecast = fitted_model.forecast(steps=1)
             if n_resid == 1:
-                return fitted_model.forecast(steps=1) + self.rng.choice(residuals, size=n_boot, replace=True)
-            else: # n_resid == 0
-                return fitted_model.forecast(steps=1)
+                return forecast + self.rng.choice(residuals, size=n_boot, replace=True)
+            else:
+                return np.full(n_boot, forecast)
 
-        block_length = max(1, int(n_resid**(1/3)))
-        blocks = [residuals[i:i+block_length] for i in range(n_resid - block_length + 1)]
-        if not blocks: 
-            return fitted_model.forecast(steps=1)
+        block_length = max(1, int(n_resid ** (1/3)))
+        forecast = fitted_model.forecast(steps=1)
+        bootstrap_forecasts = []
         
-        resampled_indices = self.rng.choice(len(blocks), size=(n_boot // block_length) + 2, replace=True)
-        bootstrap_error_pool = np.concatenate([blocks[i] for i in resampled_indices])
+        for _ in range(n_boot):
+            resampled_residuals = []
+            while len(resampled_residuals) < n_resid:
+                start_idx = self.rng.integers(0, n_resid - block_length + 1)
+                block = residuals[start_idx:start_idx + block_length]
+                resampled_residuals.extend(block)
+            
+            resampled_residuals = np.array(resampled_residuals[:n_resid])
+            bootstrap_forecasts.append(forecast + resampled_residuals[-1])
         
-        return fitted_model.forecast(steps=1) + self.rng.choice(bootstrap_error_pool, size=n_boot, replace=True)
+        return np.array(bootstrap_forecasts)
 
     def fit_predict(self, data, n_boot=1000):
-        normalized_train = self.prepare_data(data)
-        test_predictions, current_data = [], normalized_train.copy()
-        for _ in range(len(self.test)):
-            if len(current_data) <= self.n_lags * 2 + 1:
-                pred = self.denormalize(np.mean(current_data))
-                test_predictions.append(np.full(n_boot, pred))
-                current_data = np.append(current_data, np.mean(current_data))
-                continue
-            try: 
-                fitted_model = AutoReg(current_data, lags=self.n_lags, old_names=False).fit()
-            except (np.linalg.LinAlgError, ValueError):
-                pred = self.denormalize(np.mean(current_data))
-                test_predictions.append(np.full(n_boot, pred))
-                current_data = np.append(current_data, np.mean(current_data))
-                continue
-            
-            boot_preds = self._block_bootstrap_predict(fitted_model, n_boot)
-            current_data = np.append(current_data, np.mean(boot_preds))
-            test_predictions.append(self.denormalize(boot_preds))
-        return test_predictions
+        """
+        Ajusta el modelo y genera una predicción bootstrap para el siguiente paso.
+        """
+        normalized_data = self.prepare_data(data)
+        
+        if len(normalized_data) <= self.n_lags * 2 + 1:
+            pred = np.mean(data)
+            return np.full(n_boot, pred)
+        
+        try: 
+            fitted_model = AutoReg(normalized_data, lags=self.n_lags, old_names=False).fit()
+        except (np.linalg.LinAlgError, ValueError):
+            pred = np.mean(data)
+            return np.full(n_boot, pred)
 
-    # --- MÉTODO MODIFICADO Y CORREGIDO ---
+        boot_preds_normalized = self._block_bootstrap_predict(fitted_model, n_boot)
+        
+        return self.denormalize(boot_preds_normalized)
+
     def optimize_hyperparameters(self, df: Union[pd.DataFrame, np.ndarray], reference_noise: np.ndarray):
         """
         Encuentra el número óptimo de retardos (n_lags) minimizando el ECRPS.
-        Este método reemplaza al grid_search anterior basado en CRPS.
         """
         series = df['valor'].values if isinstance(df, pd.DataFrame) else df
         
-        # --- INICIO DE LA CORRECCIÓN ---
-        # Se calculan y asignan la media y la desviación estándar ANTES de usarlas.
-        # Esto evita que self.mean_val y self.std_val sean 'None' al llamar a denormalize().
         self.mean_val = np.mean(series)
         self.std_val = np.std(series)
-        # --- FIN DE LA CORRECCIÓN ---
-
         normalized_data = (series - self.mean_val) / (self.std_val + 1e-8)
         
-        best_ecrps, best_lag = float('inf'), 1
-        lags_range = range(1, 13) # Rango de búsqueda para n_lags
+        best_ecrps = float('inf')
+        best_lag = 1
+        lags_range = range(1, 13)
 
         for n_lags in lags_range:
-            # Asegurarse de que hay suficientes datos para ajustar el modelo
             if len(normalized_data) <= 2 * n_lags + 1:
                 continue
             
             try:
-                # Ajustar el modelo AR una vez con todos los datos de entrenamiento disponibles
                 fitted_model = AutoReg(normalized_data, lags=n_lags, old_names=False).fit()
-                
-                # Generar una distribución de pronóstico
                 boot_preds_normalized = self._block_bootstrap_predict(fitted_model, n_boot=2000)
-                
-                # Desnormalizar las predicciones para que tengan la misma escala que reference_noise
-                # Esta llamada ahora es segura gracias a la corrección anterior.
                 boot_preds = self.denormalize(boot_preds_normalized)
                 
-                # Calcular ECRPS
+                # Aquí se asume que la función ecrps está definida globalmente
                 current_ecrps = ecrps(boot_preds, reference_noise)
 
                 if current_ecrps < best_ecrps:
-                    best_ecrps, best_lag = current_ecrps, n_lags
+                    best_ecrps = current_ecrps
+                    best_lag = n_lags
+                    
             except (np.linalg.LinAlgError, ValueError):
-                # Si el modelo no se puede ajustar para un n_lags, se continúa al siguiente
                 continue
         
-        # Guardar el mejor hiperparámetro encontrado
         self.n_lags = best_lag
+        
         if self.verbose:
             print(f"✅ Opt. Block Bootstrap: Mejor n_lags={best_lag} (ECRPS: {best_ecrps:.4f})")
             
         return best_lag, best_ecrps
-
+    
 class LSPM:
     """Least Squares Prediction Machine (LSPM) - Versión Studentized."""
     def __init__(self, random_state=42, verbose=False):
