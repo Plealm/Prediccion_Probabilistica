@@ -40,18 +40,23 @@ def run_single_scenario_robust(scenario_with_seed: Dict) -> Tuple[Dict, pd.DataF
     """Worker con limpieza estricta."""
     scenario_config = scenario_with_seed['config']
     seed = scenario_with_seed['seed']
+    # MODIFICACIÓN: Extraer el flag 'plot' del diccionario del escenario
+    plot_flag = scenario_with_seed.get('plot', False)
     
     # Limpieza ANTES de empezar
     clear_all_sessions()
     
     try:
+        # MODIFICACIÓN: Pasar el scenario_id al pipeline para usarlo en los títulos de los gráficos
         pipeline = PipelineOptimizado(
             **{k: v for k, v in scenario_config.items() if k != 'scenario_id'},
+            scenario_id=scenario_config.get('scenario_id', 'N/A'),
             seed=seed,
             verbose=False
         )
         
-        results_df = pipeline.execute(show_intermediate_plots=False)
+        # MODIFICACIÓN: Usar el flag para decidir si se muestran los gráficos
+        results_df = pipeline.execute(show_intermediate_plots=plot_flag)
         
         return (scenario_config, results_df)
     
@@ -229,9 +234,10 @@ class PlotManager:
         plt.close(fig)
 
     @classmethod
-    def plot_density_comparison(cls, distributions: Dict[str, np.ndarray], metric_values: Dict[str, float], title: str, colors: Dict[str, str] = None):
+    def plot_density_comparison(cls, distributions: Dict[str, np.ndarray], metric_values: Dict[str, float], title: str, colors: Dict[str, str] = None, save_path: str = None):
         """
         Compara las densidades de las distribuciones predictivas para un único paso de tiempo.
+        Si se proporciona save_path, guarda el gráfico en lugar de mostrarlo.
         """
         fig = cls._base_plot(title, "Valor", "Densidad")
         
@@ -257,8 +263,19 @@ class PlotManager:
         
         plt.legend(loc='upper left', frameon=True)
         plt.tight_layout()
-        plt.show()
-        # --- MEJORA: Cerrar la figura explícitamente para liberar memoria ---
+
+        # --- MODIFICACIÓN CLAVE: Guardar si se proporciona una ruta, si no, mostrar ---
+        if save_path:
+            # os.makedirs se encarga de no fallar si el directorio ya existe.
+            # No es estrictamente necesario aquí porque ya lo creamos en el runner,
+            # pero es una buena práctica hacerlo a prueba de fallos.
+            os.makedirs(os.path.dirname(save_path), exist_ok=True)
+            plt.savefig(save_path, dpi=100) # dpi=100 para un buen balance calidad/tamaño.
+        else:
+            plt.show()
+        # -----------------------------------------------------------------------------
+        
+        # Cerrar la figura explícitamente para liberar memoria es crucial
         plt.close(fig)
 
 ## Metricas
@@ -1093,7 +1110,235 @@ class MondrianCPSModel:
         calibration_scores = point_prediction + (local_y - local_preds)
         
         return self._create_distribution_from_scores(calibration_scores)
+
+
+
+
+import xgboost as xgb
+import numpy as np
+import pandas as pd
+from typing import Union, List, Dict, Tuple
+from bayes_opt import BayesianOptimization
+
+class AdaptiveVolatilityMondrianCPS:
+    """
+    Adaptive Volatility Mondrian Conformal Predictive System (AV-MCPS).
+
+    Este modelo extiende el MCPS estándar creando categorías Mondrian bidimensionales.
+    En lugar de agrupar los datos solo por el nivel de la predicción puntual,
+    los agrupa simultáneamente por:
+    1. El nivel de la predicción (cuantil de la predicción).
+    2. La volatilidad local de la serie (cuantil de la desviación estándar reciente).
+
+    Esto permite que el modelo genere distribuciones predictivas mucho más adaptativas,
+    produciendo intervalos más amplios en períodos de alta inestabilidad y más estrechos
+    en períodos de calma, incluso para el mismo valor de predicción.
+    """
+
+    def __init__(self,
+                 n_lags: int = 15,
+                 n_pred_bins: int = 10,
+                 n_vol_bins: int = 5,
+                 volatility_window: int = 20,
+                 test_size: float = 0.25,
+                 random_state: int = 42,
+                 verbose: bool = False):
+        """
+        Inicializa el modelo AV-MCPS.
+
+        Args:
+            n_lags (int): Número de observaciones pasadas a usar como características.
+            n_pred_bins (int): Número de cuantiles para categorizar las predicciones.
+            n_vol_bins (int): Número de cuantiles para categorizar la volatilidad.
+            volatility_window (int): Ventana temporal para calcular la volatilidad local.
+            test_size (float): Proporción del dataset a usar para calibración.
+            random_state (int): Semilla para reproducibilidad.
+            verbose (bool): Si es True, imprime información durante la optimización.
+        """
+        self.n_lags = n_lags
+        self.n_pred_bins = n_pred_bins
+        self.n_vol_bins = n_vol_bins
+        self.volatility_window = volatility_window
+        self.test_size = test_size
+        self.random_state = random_state
+        self.verbose = verbose
+        self.rng = np.random.default_rng(random_state)
+        
+        # Modelo base robusto y rápido
+        self.base_model = xgb.XGBRegressor(
+            objective='reg:squarederror',
+            n_estimators=150,
+            learning_rate=0.05,
+            max_depth=4,
+            subsample=0.8,
+            colsample_bytree=0.8,
+            random_state=self.random_state,
+            n_jobs=-1
+        )
+        self.best_params = {}
+
+    def _create_lag_matrix(self, series: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        """Crea la matriz de características (lags) y el vector objetivo."""
+        X, y = [], []
+        for i in range(len(series) - self.n_lags):
+            X.append(series[i:(i + self.n_lags)])
+            y.append(series[i + self.n_lags])
+        return np.array(X), np.array(y)
     
+    def _calculate_volatility(self, series: np.ndarray) -> np.ndarray:
+        """Calcula la volatilidad local para cada punto que puede ser predicho."""
+        # Usamos pandas rolling para un cálculo eficiente y limpio
+        volatility = pd.Series(series).rolling(
+            window=self.volatility_window
+        ).std().bfill().values
+        
+        # Devolvemos la volatilidad correspondiente a cada muestra en X
+        return volatility[self.n_lags - 1 : -1]
+
+    def _create_distribution_from_scores(self, scores: np.ndarray) -> List[Dict[str, float]]:
+        """Crea una distribución de probabilidad discreta a partir de los scores de conformidad."""
+        if len(scores) == 0:
+            return [{'value': 0.0, 'probability': 1.0}]
+        
+        counts = pd.Series(scores).value_counts(normalize=True)
+        return [{'value': val, 'probability': prob} for val, prob in counts.items()]
+
+    def optimize_hyperparameters(self, df: Union[pd.DataFrame, np.ndarray],
+                                 reference_noise: np.ndarray) -> Tuple[Dict, float]:
+        """
+        Optimiza los hiperparámetros clave del modelo usando optimización Bayesiana.
+        """
+        series = df['valor'].values if isinstance(df, pd.DataFrame) else np.asarray(df).flatten()
+
+        def objective(n_lags, n_pred_bins, n_vol_bins, volatility_window):
+            try:
+                # Guardar estado anterior para restaurarlo después
+                old_params = (self.n_lags, self.n_pred_bins, self.n_vol_bins, self.volatility_window)
+                
+                # Asignar nuevos hiperparámetros (asegurando que sean enteros)
+                self.n_lags = int(n_lags)
+                self.n_pred_bins = int(n_pred_bins)
+                self.n_vol_bins = int(n_vol_bins)
+                self.volatility_window = int(volatility_window)
+                
+                # Validar que los parámetros son factibles
+                if len(series) <= self.n_lags * 2 or self.volatility_window < 2:
+                    self.n_lags, self.n_pred_bins, self.n_vol_bins, self.volatility_window = old_params
+                    return -1e10
+
+                dist = self.fit_predict(series)
+                if not dist:
+                    self.n_lags, self.n_pred_bins, self.n_vol_bins, self.volatility_window = old_params
+                    return -1e10
+                
+                values = [d['value'] for d in dist]
+                probs = [d['probability'] for d in dist]
+                samples = self.rng.choice(values, size=2000, p=probs, replace=True)
+                
+                # Asumiendo que ecrps está definida globalmente
+                ecrps_score = ecrps(samples, reference_noise)
+                
+                # Restaurar estado
+                self.n_lags, self.n_pred_bins, self.n_vol_bins, self.volatility_window = old_params
+                
+                return -ecrps_score
+            except Exception:
+                return -1e10
+
+        # Rangos de búsqueda para los hiperparámetros
+        pbounds = {
+            'n_lags': (5, 30.99),
+            'n_pred_bins': (3, 15.99),
+            'n_vol_bins': (2, 10.99),
+            'volatility_window': (5, 40.99)
+        }
+        
+        optimizer = BayesianOptimization(f=objective, pbounds=pbounds, random_state=self.random_state, verbose=0)
+        
+        try:
+            optimizer.maximize(init_points=5, n_iter=15)
+            if optimizer.max:
+                self.best_params = {k: int(v) for k, v in optimizer.max['params'].items()}
+                best_ecrps = -optimizer.max['target']
+            else:
+                best_ecrps = float('inf')
+        except Exception:
+            best_ecrps = float('inf')
+        
+        if self.verbose:
+            print(f"✅ Opt. AV-MCPS (ECRPS: {best_ecrps:.4f}): {self.best_params}")
+            
+        return self.best_params, best_ecrps
+
+    def fit_predict(self, df: Union[pd.DataFrame, np.ndarray]) -> List[Dict[str, float]]:
+        """
+        Ajusta el modelo y genera la distribución predictiva para el siguiente paso.
+        """
+        series = df['valor'].values if isinstance(df, pd.DataFrame) else np.asarray(df).flatten()
+        
+        # Usar hiperparámetros optimizados si están disponibles
+        if self.best_params:
+            self.__dict__.update(self.best_params)
+
+        if len(series) < self.n_lags * 2 or len(series) < self.volatility_window:
+            mean_val = np.mean(series) if series.size > 0 else 0
+            return [{'value': mean_val, 'probability': 1.0}]
+        
+        # 1. Crear lags y calcular volatilidad
+        X, y = self._create_lag_matrix(series)
+        volatility_features = self._calculate_volatility(series)
+        
+        # 2. Preparar datos de prueba y dividir en entrenamiento/calibración
+        x_test = series[-self.n_lags:].reshape(1, -1)
+        test_volatility = np.std(series[-self.volatility_window:])
+        
+        n_calib = max(10, int(len(X) * self.test_size))
+        if n_calib >= len(X):
+            return [{'value': np.mean(series), 'probability': 1.0}]
+
+        X_train, X_calib = X[:-n_calib], X[-n_calib:]
+        y_train, y_calib = y[:-n_calib], y[-n_calib:]
+        vol_calib = volatility_features[-n_calib:]
+        
+        # 3. Entrenar modelo base y hacer predicciones
+        self.base_model.fit(X_train, y_train)
+        point_prediction = self.base_model.predict(x_test)[0]
+        calib_preds = self.base_model.predict(X_calib)
+        
+        # 4. Categorización Mondrian 2D
+        try:
+            # Bins para las predicciones
+            _, pred_bin_edges = pd.qcut(calib_preds, self.n_pred_bins, retbins=True, duplicates='drop')
+            # Bins para la volatilidad
+            _, vol_bin_edges = pd.qcut(vol_calib, self.n_vol_bins, retbins=True, duplicates='drop')
+        except ValueError: # No hay suficientes puntos únicos para crear bins
+            return [{'value': float(point_prediction), 'probability': 1.0}]
+
+        # Asignar cada punto de calibración a su bin 2D
+        calib_pred_indices = np.digitize(calib_preds, bins=pred_bin_edges[:-1]) -1
+        calib_vol_indices = np.digitize(vol_calib, bins=vol_bin_edges[:-1]) -1
+        
+        # Encontrar el bin 2D para el punto de prueba
+        test_pred_bin = np.digitize(point_prediction, bins=pred_bin_edges[:-1]) -1
+        test_vol_bin = np.digitize(test_volatility, bins=vol_bin_edges[:-1]) -1
+
+        # 5. Seleccionar scores de conformidad del bin correspondiente
+        local_mask = (calib_pred_indices == test_pred_bin) & (calib_vol_indices == test_vol_bin)
+        
+        # Lógica de fallback robusta
+        if np.sum(local_mask) < 5: # Si el bin 2D está casi vacío...
+            local_mask = (calib_pred_indices == test_pred_bin) # ...usar solo el bin de predicción (1D)
+            if np.sum(local_mask) < 5: # Si incluso ese está vacío...
+                local_mask = np.ones_like(calib_preds, dtype=bool) # ...usar todos los datos (conformal estándar)
+
+        local_y = y_calib[local_mask]
+        local_preds = calib_preds[local_mask]
+        
+        # 6. Calcular scores y construir la distribución final
+        calibration_scores = point_prediction + (local_y - local_preds)
+        
+        return self._create_distribution_from_scores(calibration_scores)
+
 
 import tensorflow as tf
 import warnings
@@ -1356,6 +1601,9 @@ tf.config.threading.set_intra_op_parallelism_threads(1)
 # ============================================================================
 # FUNCIÓN AUXILIAR MEJORADA PARA PREDICCIÓN (SIN PARALELIZACIÓN INTERNA)
 # ============================================================================
+# ============================================================================
+# FUNCIÓN AUXILIAR MEJORADA PARA PREDICCIÓN (SIN PARALELIZACIÓN INTERNA)
+# ============================================================================
 def _predict_with_model_safe(model_name: str, model_instance: Any, 
                              history_df: pd.DataFrame, history_series: np.ndarray,
                              sim_config: Dict, seed: int) -> Dict:
@@ -1372,7 +1620,10 @@ def _predict_with_model_safe(model_name: str, model_instance: Any,
             bb_model_step = EnhancedBootstrappingModel(local_simulator, random_state=seed)
             bb_model_step.n_lags = model_instance.n_lags
             bb_model_step.arma_simulator.series = history_series
-            prediction_output = bb_model_step.fit_predict(history_series)[0]
+            
+            # --- CORRECCIÓN: Eliminar el [0] para obtener el array completo ---
+            prediction_output = bb_model_step.fit_predict(history_series)
+            # -----------------------------------------------------------------
         else:
             prediction_output = model_instance.fit_predict(history_df)
         
@@ -1386,6 +1637,7 @@ def _predict_with_model_safe(model_name: str, model_instance: Any,
                 probs = np.ones(len(values)) / len(values) if values else []
             samples = local_rng.choice(values, size=5000, p=probs, replace=True) if values else np.array([])
         else:
+            # Ahora Block Bootstrap pasará por aquí correctamente
             samples = np.array(prediction_output).flatten()
         
         return {'name': model_name, 'samples': samples, 'error': None}
@@ -1407,13 +1659,16 @@ class PipelineOptimizado:
     """Pipeline con optimización UNA SOLA VEZ al inicio."""
     N_TEST_STEPS = 5
 
+    # MODIFICACIÓN: Añadir 'scenario_id' al constructor
     def __init__(self, model_type='ARMA(1,1)', phi=[0.7], theta=[0.3], 
-                 sigma=1.2, noise_dist='t-student', n_samples=250, seed=42, verbose=False):
+                 sigma=1.2, noise_dist='t-student', n_samples=250, scenario_id=None,
+                 seed=42, verbose=False):
         self.config = {
             'model_type': model_type, 'phi': phi, 'theta': theta, 'sigma': sigma,
             'noise_dist': noise_dist, 'n_samples': n_samples, 'seed': seed,
             'verbose': verbose
         }
+        self.scenario_id = scenario_id # Guardar el ID del escenario
         self.verbose = verbose
         self.rng = np.random.default_rng(seed)
         self.simulator, self.full_series, self.full_errors = None, None, None
@@ -1432,6 +1687,7 @@ class PipelineOptimizado:
             'Block Bootstrapping': EnhancedBootstrappingModel(self.simulator, random_state=seed, verbose=False),
             'Sieve Bootstrap': SieveBootstrap(p_order=p_order, random_state=seed, verbose=False),
             'MCPS': MondrianCPSModel(random_state=seed, verbose=False),
+            'AV-MCPS': AdaptiveVolatilityMondrianCPS(random_state=seed, verbose=False),
             'EnCQR-LSTM': EnCQR_LSTM_Model(random_state=seed, verbose=False, epochs=6, B=2, units=24, n_layers=1)
         }
     
@@ -1497,6 +1753,33 @@ class PipelineOptimizado:
                     step_ecrps[name] = np.nan
             
             self.rolling_ecrps.append(step_ecrps)
+            
+            # MODIFICACIÓN: Graficar si el flag está activado
+            if show_intermediate_plots:
+                # 1. Definir la carpeta de salida (debe ser la misma que en el runner)
+                plots_directory = "plots_densidades_por_escenario"
+                
+                # 2. Construir un nombre de archivo único y descriptivo
+                plot_filename = os.path.join(
+                    plots_directory, 
+                    f"escenario_{self.scenario_id}_paso_{t + 1}.png"
+                )
+                
+                # 3. Preparar el título y las métricas para el gráfico
+                title = f"Densidades Predictivas - Escenario {self.scenario_id} - Paso {t + 1}"
+                metrics_for_plot = {k: v for k, v in step_ecrps.items() if k != 'Paso'}
+                
+                # 4. Llamar al PlotManager con la ruta para guardar el archivo
+                PlotManager.plot_density_comparison(
+                    step_distributions, 
+                    metrics_for_plot, 
+                    title, 
+                    save_path=plot_filename  # Pasamos la ruta aquí
+                )
+            # -------------------------------------------------------------------
+            
+            self.rolling_ecrps.append(step_ecrps)
+            clear_all_sessions()
             
             # Limpieza después de cada paso
             clear_all_sessions()
@@ -1573,7 +1856,8 @@ class ScenarioRunnerMejorado:
             rows.append(row)
         return rows
 
-    def _run_batch(self, batch_scenarios, restart_every=10):
+    # MODIFICACIÓN: Añadir 'plot' como parámetro
+    def _run_batch(self, batch_scenarios, restart_every=10, plot=False):
         """Ejecuta lote con reinicio periódico del executor."""
         batch_results = []
         max_workers = 1
@@ -1585,6 +1869,10 @@ class ScenarioRunnerMejorado:
         for sublote_idx, sublote in enumerate(sublotes):
             print(f"    Sublote {sublote_idx + 1}/{len(sublotes)}")
             
+            # MODIFICACIÓN: Añadir el flag 'plot' a cada escenario antes de enviarlo
+            for sc in sublote:
+                sc['plot'] = plot
+
             # CREAR NUEVO EXECUTOR PARA CADA SUBLOTE
             with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
                 futures = {
@@ -1611,15 +1899,27 @@ class ScenarioRunnerMejorado:
         
         return batch_results
 
+    # MODIFICACIÓN: Añadir el argumento 'plot' al método principal
     def run(self, n_scenarios=120, excel_filename="resultados_finales.xlsx", 
-            batch_size=20, restart_every=5):  # Reducir batch_size
-        """Ejecuta escenarios en lotes pequeños con reinicio frecuente."""
+            batch_size=20, restart_every=5, plot: bool = False):
+        """
+        Ejecuta escenarios en lotes pequeños con reinicio frecuente.
+        """
+        # --- MODIFICACIÓN: Crear el directorio para los plots si plot=True ---
+        if plot:
+            # Usamos un nombre descriptivo para la carpeta.
+            self.plots_directory = "plots_densidades_por_escenario"
+            os.makedirs(self.plots_directory, exist_ok=True)
+            print(f"✅ Gráficos de densidad activados. Se guardarán en la carpeta: '{self.plots_directory}'")
+        # ----------------------------------------------------------------------
+        
         all_scenarios_configs = self._generate_scenarios(n_scenarios)
         all_excel_rows = []
         
+        # El resto del método run continúa igual...
         n_batches = (len(all_scenarios_configs) + batch_size - 1) // batch_size
         
-        print(f"Ejecutando {len(all_scenarios_configs)} escenarios en {n_batches} lotes")
+        print(f"Ejecuting {len(all_scenarios_configs)} scenarios in {n_batches} batches")
         
         for batch_num in range(n_batches):
             start_idx = batch_num * batch_size
@@ -1627,28 +1927,25 @@ class ScenarioRunnerMejorado:
             batch = all_scenarios_configs[start_idx:end_idx]
             
             print(f"\n{'='*60}")
-            print(f"LOTE {batch_num + 1}/{n_batches} (Escenarios {start_idx + 1}-{end_idx})")
+            print(f"BATCH {batch_num + 1}/{n_batches} (Scenarios {start_idx + 1}-{end_idx})")
             print(f"{'='*60}")
             
-            batch_results = self._run_batch(batch, restart_every=restart_every)
+            batch_results = self._run_batch(batch, restart_every=restart_every, plot=plot)
             
             for scenario_config, results_df in batch_results:
                 new_rows = self._prepare_rows_from_result(scenario_config, results_df)
                 all_excel_rows.extend(new_rows)
             
-            # Limpieza agresiva entre lotes
-            print(f"  Limpiando memoria del lote...")
+            print(f"  Cleaning up batch memory...")
             clear_all_sessions()
             import time
-            time.sleep(3)  # Pausa más larga entre lotes
+            time.sleep(3)
             
-            # Checkpoint intermedio
             if all_excel_rows and (batch_num + 1) % 3 == 0:
-                temp_filename = f"checkpoint_lote_{batch_num + 1}.xlsx"
+                temp_filename = f"checkpoint_batch_{batch_num + 1}.xlsx"
                 pd.DataFrame(all_excel_rows).to_excel(temp_filename, index=False)
-                print(f"  ✅ Checkpoint guardado: {temp_filename}")
-        
-        # Guardar resultados finales
+                print(f"  ✅ Checkpoint saved: {temp_filename}")
+
         if all_excel_rows:
             df_final = pd.DataFrame(all_excel_rows)
             first_cols = ['Paso', 'Valores de AR', 'Valores MA', 'Distribución', 'Varianza error']
@@ -1663,11 +1960,12 @@ class ScenarioRunnerMejorado:
             df_final = df_final[ordered_columns]
             
             df_final.to_excel(excel_filename, index=False)
-            print(f"✅ {len(all_excel_rows)} resultados guardados en '{excel_filename}'")
+            print(f"✅ {len(all_excel_rows)} results saved to '{excel_filename}'")
             
+            # Los plots de resumen SIEMPRE se ejecutan al final
             self.plot_results_from_excel(excel_filename)
         else:
-            print("❌ No se generaron resultados.")
+            print("❌ No results were generated.")
 
     def plot_results_from_excel(self, filename):
         """Genera boxplots y gráficos de torta."""
