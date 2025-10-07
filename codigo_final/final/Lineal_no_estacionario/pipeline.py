@@ -40,18 +40,23 @@ def run_single_scenario_robust(scenario_with_seed: Dict) -> Tuple[Dict, pd.DataF
     """Worker con limpieza estricta."""
     scenario_config = scenario_with_seed['config']
     seed = scenario_with_seed['seed']
+    # MODIFICACIÓN: Extraer el flag 'plot' del diccionario del escenario
+    plot_flag = scenario_with_seed.get('plot', False)
     
     # Limpieza ANTES de empezar
     clear_all_sessions()
     
     try:
+        # MODIFICACIÓN: Pasar el scenario_id al pipeline para usarlo en los títulos de los gráficos
         pipeline = PipelineOptimizado(
             **{k: v for k, v in scenario_config.items() if k != 'scenario_id'},
+            scenario_id=scenario_config.get('scenario_id', 'N/A'),
             seed=seed,
             verbose=False
         )
         
-        results_df = pipeline.execute(show_intermediate_plots=False)
+        # MODIFICACIÓN: Usar el flag para decidir si se muestran los gráficos
+        results_df = pipeline.execute(show_intermediate_plots=plot_flag)
         
         return (scenario_config, results_df)
     
@@ -68,36 +73,20 @@ def run_single_scenario_robust(scenario_with_seed: Dict) -> Tuple[Dict, pd.DataF
         sys.stderr.flush()
 
 
-import numpy as np
-from scipy.stats import t
-from typing import List, Dict, Tuple
-
 class ARIMASimulation:
     """
-    Genera series temporales ARIMA con diferentes tipos de ruido y puede proporcionar
-    la distribución teórica del siguiente paso, dado el historial completo.
+    Genera series temporales ARIMA(p,1,q) con diferentes tipos de ruido y puede
+    proporcionar la distribución teórica del siguiente paso, dado el historial completo.
+    El componente de integración (d=1) se maneja explícitamente.
     """
-    def __init__(self, model_type: str = 'ARIMA(1,1,1)', phi: List[float] = [], d: int = 1, theta: List[float] = [],
+    def __init__(self, model_type: str = 'ARIMA(1,1,0)', phi: List[float] = [], theta: List[float] = [],
                  noise_dist: str = 'normal', sigma: float = 1.0, seed: int = None, verbose: bool = False):
         """
         Inicializa el simulador ARIMA.
-
-        Args:
-            model_type (str): Identificador del modelo, ej: 'ARIMA(1,1,1)'.
-            phi (List[float]): Coeficientes de la parte autorregresiva (AR).
-            d (int): Orden de diferenciación (I).
-            theta (List[float]): Coeficientes de la parte de medias móviles (MA).
-            noise_dist (str): Distribución del término de error.
-            sigma (float): Desviación estándar del error.
-            seed (int): Semilla para la reproducibilidad.
-            verbose (bool): Si es True, imprime información adicional.
+        Los parámetros phi y theta corresponden al proceso ARMA subyacente de la serie diferenciada.
         """
-        if d != 1:
-            raise NotImplementedError("Esta implementación solo soporta d=1 por ahora.")
-
         self.model_type = model_type
         self.phi = np.array(phi)
-        self.d = d
         self.theta = np.array(theta)
         self.noise_dist = noise_dist
         self.sigma = sigma
@@ -112,24 +101,23 @@ class ARIMASimulation:
         return {
             'model_type': self.model_type,
             'phi': self.phi.tolist(),
-            'd': self.d,
             'theta': self.theta.tolist(),
             'sigma': self.sigma
         }
 
-    def simulate(self, n: int = 250, burn_in: int = 50) -> Tuple[np.ndarray, np.ndarray]:
+    def simulate(self, n: int = 250, burn_in: int = 50, return_just_series: bool = False) -> Tuple[np.ndarray, np.ndarray]:
         """
-        Simula una serie temporal ARIMA(p, 1, q).
-
-        El proceso consiste en simular primero un ARMA(p, q) para la serie
-        diferenciada y luego integrar (suma acumulada) para obtener la serie final.
+        Simula una serie temporal ARIMA(p,1,q).
+        1. Simula un proceso ARMA(p,q) para la serie diferenciada.
+        2. Integra (suma acumulada) la serie ARMA para obtener la serie ARIMA final.
         """
         total_length = n + burn_in
         p, q = len(self.phi), len(self.theta)
-
-        # 1. Simular el proceso ARMA(p, q) subyacente para la serie diferenciada
+        
+        # 1. Simular el proceso ARMA(p,q) para la serie diferenciada
         errors = self._generate_errors(total_length + q)
         diff_series = np.zeros(total_length)
+        
         initial_values = self.rng.normal(0, self.sigma, max(p, q))
         if len(initial_values) > 0:
             diff_series[:len(initial_values)] = initial_values
@@ -139,89 +127,86 @@ class ARIMASimulation:
             ma_part = np.dot(self.theta, errors[t-q:t][::-1]) if q > 0 else 0
             diff_series[t] = ar_part + ma_part + errors[t]
 
-        # 2. Integrar la serie diferenciada (usando suma acumulada) para obtener la serie ARIMA
-        # Se asume que la serie comienza en 0 antes del período de burn-in.
-        integrated_series = np.cumsum(diff_series)
-        
-        # 3. Eliminar el período de burn-in
-        self.series = integrated_series[burn_in:]
-        # Los errores corresponden a la serie ARMA subyacente
-        self.errors = errors[burn_in:burn_in + n]
+        # 2. Integrar la serie diferenciada para obtener la serie ARIMA
+        # Se inicia desde 0 para la serie integrada
+        integrated_series = np.cumsum(np.insert(diff_series, 0, 0))
 
+        if return_just_series:
+            return integrated_series, None
+
+        # Descartar el período de burn-in
+        self.series = integrated_series[burn_in+1:] # +1 por el 0 insertado
+        self.errors = errors[burn_in:burn_in + n]
         return self.series, self.errors
 
     def get_true_next_step_samples(self, series_history: np.ndarray, errors_history: np.ndarray,
-                                   n_samples: int = 10000) -> np.ndarray:
+                                         n_samples: int = 10000) -> np.ndarray:
         """
-        Calcula una muestra grande de la distribución real para el siguiente paso (X_{n+1}).
-        Para un modelo ARIMA(p,1,q), la relación es: X_{n+1} = X_n + Y_{n+1},
-        donde Y es el proceso ARMA(p,q) subyacente.
-
-        Args:
-            series_history (np.ndarray): El historial de valores de la serie (X_1, ..., X_n).
-            errors_history (np.ndarray): El historial de errores que generaron la serie (e_1, ..., e_n).
-            n_samples (int): El número de muestras a generar para estimar la densidad.
-
-        Returns:
-            Un array de numpy con las muestras de la distribución del siguiente paso.
+        Calcula una muestra grande de la distribución real para el siguiente paso (Y_{n+1}).
+        Para un ARIMA(p,1,q), Y_{n+1} = Y_n + X_{n+1}, donde X es el proceso ARMA(p,q) subyacente.
+        La distribución de Y_{n+1} es la distribución de X_{n+1} desplazada por el último valor Y_n.
         """
         p, q = len(self.phi), len(self.theta)
 
-        if len(series_history) < p + self.d:
-            raise ValueError(f"El historial de la serie es insuficiente. Se necesitan al menos {p + self.d} puntos.")
+        if len(series_history) < p + 1:
+            raise ValueError(f"El historial de la serie es insuficiente para el orden AR(p={p}) en la serie diferenciada.")
         if len(errors_history) < q:
             raise ValueError(f"El historial de errores es insuficiente para el orden MA(q={q}).")
-
-        # 1. Obtener el último valor observado de la serie original. Es un valor conocido.
+            
+        # El último valor observado de la serie original es el componente de "localización"
         last_observed_value = series_history[-1]
-
-        # 2. Calcular la distribución del siguiente paso para la serie diferenciada Y_{n+1}
-        # La serie diferenciada Y_t = X_t - X_{t-1}
-        diff_history = np.diff(series_history)
         
-        # El término determinista de Y_{n+1} depende del historial de Y y de los errores pasados
-        ar_part = np.dot(self.phi, diff_history[-p:][::-1]) if p > 0 else 0
-        ma_part = np.dot(self.theta, errors_history[-q:][::-1]) if q > 0 else 0
-        conditional_mean_of_diff = ar_part + ma_part
+        # Necesitamos el historial de la serie diferenciada para predecir el siguiente incremento
+        diff_history = np.diff(series_history)
 
-        # La parte aleatoria de Y_{n+1} es el nuevo término de error e_{n+1}
+        # Predecir el siguiente valor del proceso ARMA subyacente (X_{n+1})
+        deterministic_part = np.dot(self.phi, diff_history[-p:][::-1]) if p > 0 else 0
+        ma_part = np.dot(self.theta, errors_history[-q:][::-1]) if q > 0 else 0
+        conditional_mean_of_diff = deterministic_part + ma_part
+
+        # Generar los futuros errores para el componente estocástico
         future_errors = self._generate_errors(n_samples)
         
-        # Muestras para el siguiente paso de la serie diferenciada (Y_{n+1})
-        future_diff_samples = conditional_mean_of_diff + future_errors
-
-        # 3. Combinar para obtener la distribución de X_{n+1}
-        # X_{n+1} = X_n + Y_{n+1}
-        return last_observed_value + future_diff_samples
+        # Muestras del siguiente incremento (X_{n+1})
+        next_step_diff_samples = conditional_mean_of_diff + future_errors
+        
+        # Muestras del siguiente valor de la serie ARIMA (Y_{n+1} = Y_n + X_{n+1})
+        return last_observed_value + next_step_diff_samples
 
     def _generate_errors(self, n: int) -> np.ndarray:
-        """Genera el término de error según la distribución especificada. (Sin cambios)"""
+        """Genera el término de error según la distribución especificada."""
         if self.noise_dist == 'normal':
             return self.rng.normal(0, self.sigma, n)
         if self.noise_dist == 'uniform':
             limit = np.sqrt(3) * self.sigma
             return self.rng.uniform(-limit, limit, size=n)
         if self.noise_dist == 'exponential':
+            # Centrado en cero
             return self.rng.exponential(scale=self.sigma, size=n) - self.sigma
         if self.noise_dist == 't-student':
-            df = 5
+            df = 5 # Grados de libertad fijos
+            # Escalar para que la varianza sea sigma^2
             scale_factor = self.sigma * np.sqrt((df - 2) / df)
             return t.rvs(df, scale=scale_factor, size=n, random_state=self.rng)
         elif self.noise_dist == 'mixture':
+            # Mezcla de dos normales, centrada en cero
             n1 = int(n * 0.75)
             n2 = n - n1
+            # Asegurar que la varianza total de la mezcla sea sigma^2
             variance_of_means = 0.75 * (-0.25 * self.sigma * 2)**2 + 0.25 * (0.75 * self.sigma * 2)**2
             if self.sigma**2 < variance_of_means:
                 raise ValueError("La varianza de la mezcla no puede ser la sigma deseada.")
             component_std = np.sqrt(self.sigma**2 - variance_of_means)
+            
             comp1 = self.rng.normal(-0.25 * self.sigma * 2, component_std, n1)
             comp2 = self.rng.normal(0.75 * self.sigma * 2, component_std, n2)
             mixture = np.concatenate([comp1, comp2])
             self.rng.shuffle(mixture)
-            return mixture - np.mean(mixture)
+            return mixture - np.mean(mixture) # Forzar media cero
         else:
             raise ValueError(f"Distribución de ruido no soportada: {self.noise_dist}")
-        
+
+
 ## Plot
 # plot.py
 import matplotlib.pyplot as plt
@@ -229,11 +214,11 @@ import seaborn as sns
 import numpy as np
 import pandas as pd
 from typing import List, Dict
+import os
 
 
 class PlotManager:
     """Clase de utilidad para generar los gráficos del análisis."""
-    # Estilos actualizados según lo solicitado
     _STYLE = {'figsize': (14, 6), 'grid_style': {'alpha': 0.3, 'linestyle': ':'},
               'default_colors': ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#000000']}
 
@@ -241,39 +226,52 @@ class PlotManager:
     def _base_plot(cls, title, xlabel, ylabel, figsize=None):
         """Crea la base para un gráfico estándar y devuelve el objeto figura."""
         fig_size = figsize if figsize else cls._STYLE['figsize']
-        # --- MEJORA: Capturar el objeto 'fig' para poder cerrarlo después ---
         fig = plt.figure(figsize=fig_size)
         plt.title(title, fontsize=14, pad=15)
         plt.xlabel(xlabel, fontsize=12)
         plt.ylabel(ylabel, fontsize=12)
         plt.grid(**cls._STYLE['grid_style'])
         plt.gca().spines[['top', 'right']].set_visible(False)
-        # --- MEJORA: Devolver la figura para su posterior gestión ---
         return fig
 
     @classmethod
-    def plot_series_split(cls, series: np.ndarray, burn_in_len: int, test_len: int):
-        """Grafica la serie temporal mostrando las divisiones de burn-in, train y test."""
-        fig = cls._base_plot("Serie Temporal Simulada con Divisiones", "Tiempo", "Valor")
+    def plot_series_split(cls, series: np.ndarray, burn_in_len: int, test_len: int, title: str = "Serie Temporal Simulada", save_path: str = None):
+        """
+        Grafica la serie temporal mostrando las divisiones de burn-in, train y test.
+        Si se proporciona save_path, guarda el gráfico en lugar de mostrarlo.
+        """
+        # CORRECCIÓN: Se añade el argumento 'save_path' y se usa un título dinámico
+        fig = cls._base_plot(title, "Tiempo", "Valor")
         
-        train_len = len(series) - burn_in_len - test_len
+        # La serie que se pasa aquí ya no tiene el burn-in, por lo que el eje x debe ajustarse
+        total_visible_len = len(series)
+        train_len = total_visible_len - test_len
         
-        plt.plot(series, label='Serie Completa', color=cls._STYLE['default_colors'][0])
+        # Ajustar los índices para reflejar el tiempo original, incluyendo burn-in
+        time_axis = np.arange(burn_in_len, burn_in_len + total_visible_len)
         
-        plt.axvspan(0, burn_in_len, color='gray', alpha=0.3, label=f'Burn-in ({burn_in_len} puntos)')
+        plt.plot(time_axis, series, label='Serie de Entrenamiento y Test', color=cls._STYLE['default_colors'][0])
+        
+        # Las regiones coloreadas deben corresponder al eje de tiempo ajustado
         plt.axvspan(burn_in_len, burn_in_len + train_len, color='green', alpha=0.2, label=f'Entrenamiento Inicial ({train_len} puntos)')
-        plt.axvspan(burn_in_len + train_len, len(series), color='red', alpha=0.2, label=f'Test (Ventana Rodante) ({test_len} puntos)')
+        plt.axvspan(burn_in_len + train_len, burn_in_len + total_visible_len, color='red', alpha=0.2, label=f'Test (Ventana Rodante) ({test_len} puntos)')
         
         plt.legend(loc='upper left')
         plt.tight_layout()
-        plt.show()
-        # --- MEJORA: Cerrar la figura explícitamente para liberar memoria ---
+
+        if save_path:
+            os.makedirs(os.path.dirname(save_path), exist_ok=True)
+            plt.savefig(save_path, dpi=100)
+        else:
+            plt.show()
+            
         plt.close(fig)
 
     @classmethod
-    def plot_density_comparison(cls, distributions: Dict[str, np.ndarray], metric_values: Dict[str, float], title: str, colors: Dict[str, str] = None):
+    def plot_density_comparison(cls, distributions: Dict[str, np.ndarray], metric_values: Dict[str, float], title: str, colors: Dict[str, str] = None, save_path: str = None):
         """
         Compara las densidades de las distribuciones predictivas para un único paso de tiempo.
+        Si se proporciona save_path, guarda el gráfico en lugar de mostrarlo.
         """
         fig = cls._base_plot(title, "Valor", "Densidad")
         
@@ -299,9 +297,15 @@ class PlotManager:
         
         plt.legend(loc='upper left', frameon=True)
         plt.tight_layout()
-        plt.show()
-        # --- MEJORA: Cerrar la figura explícitamente para liberar memoria ---
+
+        if save_path:
+            os.makedirs(os.path.dirname(save_path), exist_ok=True)
+            plt.savefig(save_path, dpi=100)
+        else:
+            plt.show()
+        
         plt.close(fig)
+
 
 ## Metricas
 
@@ -1135,7 +1139,235 @@ class MondrianCPSModel:
         calibration_scores = point_prediction + (local_y - local_preds)
         
         return self._create_distribution_from_scores(calibration_scores)
+
+
+
+
+import xgboost as xgb
+import numpy as np
+import pandas as pd
+from typing import Union, List, Dict, Tuple
+from bayes_opt import BayesianOptimization
+
+class AdaptiveVolatilityMondrianCPS:
+    """
+    Adaptive Volatility Mondrian Conformal Predictive System (AV-MCPS).
+
+    Este modelo extiende el MCPS estándar creando categorías Mondrian bidimensionales.
+    En lugar de agrupar los datos solo por el nivel de la predicción puntual,
+    los agrupa simultáneamente por:
+    1. El nivel de la predicción (cuantil de la predicción).
+    2. La volatilidad local de la serie (cuantil de la desviación estándar reciente).
+
+    Esto permite que el modelo genere distribuciones predictivas mucho más adaptativas,
+    produciendo intervalos más amplios en períodos de alta inestabilidad y más estrechos
+    en períodos de calma, incluso para el mismo valor de predicción.
+    """
+
+    def __init__(self,
+                 n_lags: int = 15,
+                 n_pred_bins: int = 10,
+                 n_vol_bins: int = 5,
+                 volatility_window: int = 20,
+                 test_size: float = 0.25,
+                 random_state: int = 42,
+                 verbose: bool = False):
+        """
+        Inicializa el modelo AV-MCPS.
+
+        Args:
+            n_lags (int): Número de observaciones pasadas a usar como características.
+            n_pred_bins (int): Número de cuantiles para categorizar las predicciones.
+            n_vol_bins (int): Número de cuantiles para categorizar la volatilidad.
+            volatility_window (int): Ventana temporal para calcular la volatilidad local.
+            test_size (float): Proporción del dataset a usar para calibración.
+            random_state (int): Semilla para reproducibilidad.
+            verbose (bool): Si es True, imprime información durante la optimización.
+        """
+        self.n_lags = n_lags
+        self.n_pred_bins = n_pred_bins
+        self.n_vol_bins = n_vol_bins
+        self.volatility_window = volatility_window
+        self.test_size = test_size
+        self.random_state = random_state
+        self.verbose = verbose
+        self.rng = np.random.default_rng(random_state)
+        
+        # Modelo base robusto y rápido
+        self.base_model = xgb.XGBRegressor(
+            objective='reg:squarederror',
+            n_estimators=150,
+            learning_rate=0.05,
+            max_depth=4,
+            subsample=0.8,
+            colsample_bytree=0.8,
+            random_state=self.random_state,
+            n_jobs=-1
+        )
+        self.best_params = {}
+
+    def _create_lag_matrix(self, series: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        """Crea la matriz de características (lags) y el vector objetivo."""
+        X, y = [], []
+        for i in range(len(series) - self.n_lags):
+            X.append(series[i:(i + self.n_lags)])
+            y.append(series[i + self.n_lags])
+        return np.array(X), np.array(y)
     
+    def _calculate_volatility(self, series: np.ndarray) -> np.ndarray:
+        """Calcula la volatilidad local para cada punto que puede ser predicho."""
+        # Usamos pandas rolling para un cálculo eficiente y limpio
+        volatility = pd.Series(series).rolling(
+            window=self.volatility_window
+        ).std().bfill().values
+        
+        # Devolvemos la volatilidad correspondiente a cada muestra en X
+        return volatility[self.n_lags - 1 : -1]
+
+    def _create_distribution_from_scores(self, scores: np.ndarray) -> List[Dict[str, float]]:
+        """Crea una distribución de probabilidad discreta a partir de los scores de conformidad."""
+        if len(scores) == 0:
+            return [{'value': 0.0, 'probability': 1.0}]
+        
+        counts = pd.Series(scores).value_counts(normalize=True)
+        return [{'value': val, 'probability': prob} for val, prob in counts.items()]
+
+    def optimize_hyperparameters(self, df: Union[pd.DataFrame, np.ndarray],
+                                 reference_noise: np.ndarray) -> Tuple[Dict, float]:
+        """
+        Optimiza los hiperparámetros clave del modelo usando optimización Bayesiana.
+        """
+        series = df['valor'].values if isinstance(df, pd.DataFrame) else np.asarray(df).flatten()
+
+        def objective(n_lags, n_pred_bins, n_vol_bins, volatility_window):
+            try:
+                # Guardar estado anterior para restaurarlo después
+                old_params = (self.n_lags, self.n_pred_bins, self.n_vol_bins, self.volatility_window)
+                
+                # Asignar nuevos hiperparámetros (asegurando que sean enteros)
+                self.n_lags = int(n_lags)
+                self.n_pred_bins = int(n_pred_bins)
+                self.n_vol_bins = int(n_vol_bins)
+                self.volatility_window = int(volatility_window)
+                
+                # Validar que los parámetros son factibles
+                if len(series) <= self.n_lags * 2 or self.volatility_window < 2:
+                    self.n_lags, self.n_pred_bins, self.n_vol_bins, self.volatility_window = old_params
+                    return -1e10
+
+                dist = self.fit_predict(series)
+                if not dist:
+                    self.n_lags, self.n_pred_bins, self.n_vol_bins, self.volatility_window = old_params
+                    return -1e10
+                
+                values = [d['value'] for d in dist]
+                probs = [d['probability'] for d in dist]
+                samples = self.rng.choice(values, size=2000, p=probs, replace=True)
+                
+                # Asumiendo que ecrps está definida globalmente
+                ecrps_score = ecrps(samples, reference_noise)
+                
+                # Restaurar estado
+                self.n_lags, self.n_pred_bins, self.n_vol_bins, self.volatility_window = old_params
+                
+                return -ecrps_score
+            except Exception:
+                return -1e10
+
+        # Rangos de búsqueda para los hiperparámetros
+        pbounds = {
+            'n_lags': (5, 30.99),
+            'n_pred_bins': (3, 15.99),
+            'n_vol_bins': (2, 10.99),
+            'volatility_window': (5, 40.99)
+        }
+        
+        optimizer = BayesianOptimization(f=objective, pbounds=pbounds, random_state=self.random_state, verbose=0)
+        
+        try:
+            optimizer.maximize(init_points=5, n_iter=15)
+            if optimizer.max:
+                self.best_params = {k: int(v) for k, v in optimizer.max['params'].items()}
+                best_ecrps = -optimizer.max['target']
+            else:
+                best_ecrps = float('inf')
+        except Exception:
+            best_ecrps = float('inf')
+        
+        if self.verbose:
+            print(f"✅ Opt. AV-MCPS (ECRPS: {best_ecrps:.4f}): {self.best_params}")
+            
+        return self.best_params, best_ecrps
+
+    def fit_predict(self, df: Union[pd.DataFrame, np.ndarray]) -> List[Dict[str, float]]:
+        """
+        Ajusta el modelo y genera la distribución predictiva para el siguiente paso.
+        """
+        series = df['valor'].values if isinstance(df, pd.DataFrame) else np.asarray(df).flatten()
+        
+        # Usar hiperparámetros optimizados si están disponibles
+        if self.best_params:
+            self.__dict__.update(self.best_params)
+
+        if len(series) < self.n_lags * 2 or len(series) < self.volatility_window:
+            mean_val = np.mean(series) if series.size > 0 else 0
+            return [{'value': mean_val, 'probability': 1.0}]
+        
+        # 1. Crear lags y calcular volatilidad
+        X, y = self._create_lag_matrix(series)
+        volatility_features = self._calculate_volatility(series)
+        
+        # 2. Preparar datos de prueba y dividir en entrenamiento/calibración
+        x_test = series[-self.n_lags:].reshape(1, -1)
+        test_volatility = np.std(series[-self.volatility_window:])
+        
+        n_calib = max(10, int(len(X) * self.test_size))
+        if n_calib >= len(X):
+            return [{'value': np.mean(series), 'probability': 1.0}]
+
+        X_train, X_calib = X[:-n_calib], X[-n_calib:]
+        y_train, y_calib = y[:-n_calib], y[-n_calib:]
+        vol_calib = volatility_features[-n_calib:]
+        
+        # 3. Entrenar modelo base y hacer predicciones
+        self.base_model.fit(X_train, y_train)
+        point_prediction = self.base_model.predict(x_test)[0]
+        calib_preds = self.base_model.predict(X_calib)
+        
+        # 4. Categorización Mondrian 2D
+        try:
+            # Bins para las predicciones
+            _, pred_bin_edges = pd.qcut(calib_preds, self.n_pred_bins, retbins=True, duplicates='drop')
+            # Bins para la volatilidad
+            _, vol_bin_edges = pd.qcut(vol_calib, self.n_vol_bins, retbins=True, duplicates='drop')
+        except ValueError: # No hay suficientes puntos únicos para crear bins
+            return [{'value': float(point_prediction), 'probability': 1.0}]
+
+        # Asignar cada punto de calibración a su bin 2D
+        calib_pred_indices = np.digitize(calib_preds, bins=pred_bin_edges[:-1]) -1
+        calib_vol_indices = np.digitize(vol_calib, bins=vol_bin_edges[:-1]) -1
+        
+        # Encontrar el bin 2D para el punto de prueba
+        test_pred_bin = np.digitize(point_prediction, bins=pred_bin_edges[:-1]) -1
+        test_vol_bin = np.digitize(test_volatility, bins=vol_bin_edges[:-1]) -1
+
+        # 5. Seleccionar scores de conformidad del bin correspondiente
+        local_mask = (calib_pred_indices == test_pred_bin) & (calib_vol_indices == test_vol_bin)
+        
+        # Lógica de fallback robusta
+        if np.sum(local_mask) < 5: # Si el bin 2D está casi vacío...
+            local_mask = (calib_pred_indices == test_pred_bin) # ...usar solo el bin de predicción (1D)
+            if np.sum(local_mask) < 5: # Si incluso ese está vacío...
+                local_mask = np.ones_like(calib_preds, dtype=bool) # ...usar todos los datos (conformal estándar)
+
+        local_y = y_calib[local_mask]
+        local_preds = calib_preds[local_mask]
+        
+        # 6. Calcular scores y construir la distribución final
+        calibration_scores = point_prediction + (local_y - local_preds)
+        
+        return self._create_distribution_from_scores(calibration_scores)
+
 
 import tensorflow as tf
 import warnings
@@ -1374,237 +1606,8 @@ class EnCQR_LSTM_Model:
     def __del__(self):
         """Destructor con limpieza explícita."""
         clear_all_sessions()
-
-
-
-import xgboost as xgb
-import numpy as np
-import pandas as pd
-from typing import Union, List, Dict, Tuple
-from bayes_opt import BayesianOptimization
-
-class AdaptiveVolatilityMondrianCPS:
-    """
-    Adaptive Volatility Mondrian Conformal Predictive System (AV-MCPS).
-
-    Este modelo extiende el MCPS estándar creando categorías Mondrian bidimensionales.
-    En lugar de agrupar los datos solo por el nivel de la predicción puntual,
-    los agrupa simultáneamente por:
-    1. El nivel de la predicción (cuantil de la predicción).
-    2. La volatilidad local de la serie (cuantil de la desviación estándar reciente).
-
-    Esto permite que el modelo genere distribuciones predictivas mucho más adaptativas,
-    produciendo intervalos más amplios en períodos de alta inestabilidad y más estrechos
-    en períodos de calma, incluso para el mismo valor de predicción.
-    """
-
-    def __init__(self,
-                 n_lags: int = 15,
-                 n_pred_bins: int = 10,
-                 n_vol_bins: int = 5,
-                 volatility_window: int = 20,
-                 test_size: float = 0.25,
-                 random_state: int = 42,
-                 verbose: bool = False):
-        """
-        Inicializa el modelo AV-MCPS.
-
-        Args:
-            n_lags (int): Número de observaciones pasadas a usar como características.
-            n_pred_bins (int): Número de cuantiles para categorizar las predicciones.
-            n_vol_bins (int): Número de cuantiles para categorizar la volatilidad.
-            volatility_window (int): Ventana temporal para calcular la volatilidad local.
-            test_size (float): Proporción del dataset a usar para calibración.
-            random_state (int): Semilla para reproducibilidad.
-            verbose (bool): Si es True, imprime información durante la optimización.
-        """
-        self.n_lags = n_lags
-        self.n_pred_bins = n_pred_bins
-        self.n_vol_bins = n_vol_bins
-        self.volatility_window = volatility_window
-        self.test_size = test_size
-        self.random_state = random_state
-        self.verbose = verbose
-        self.rng = np.random.default_rng(random_state)
-        
-        # Modelo base robusto y rápido
-        self.base_model = xgb.XGBRegressor(
-            objective='reg:squarederror',
-            n_estimators=150,
-            learning_rate=0.05,
-            max_depth=4,
-            subsample=0.8,
-            colsample_bytree=0.8,
-            random_state=self.random_state,
-            n_jobs=-1
-        )
-        self.best_params = {}
-
-    def _create_lag_matrix(self, series: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-        """Crea la matriz de características (lags) y el vector objetivo."""
-        X, y = [], []
-        for i in range(len(series) - self.n_lags):
-            X.append(series[i:(i + self.n_lags)])
-            y.append(series[i + self.n_lags])
-        return np.array(X), np.array(y)
-    
-    def _calculate_volatility(self, series: np.ndarray) -> np.ndarray:
-        """Calcula la volatilidad local para cada punto que puede ser predicho."""
-        # Usamos pandas rolling para un cálculo eficiente y limpio
-        volatility = pd.Series(series).rolling(
-            window=self.volatility_window
-        ).std().bfill().values
-        
-        # Devolvemos la volatilidad correspondiente a cada muestra en X
-        return volatility[self.n_lags - 1 : -1]
-
-    def _create_distribution_from_scores(self, scores: np.ndarray) -> List[Dict[str, float]]:
-        """Crea una distribución de probabilidad discreta a partir de los scores de conformidad."""
-        if len(scores) == 0:
-            return [{'value': 0.0, 'probability': 1.0}]
-        
-        counts = pd.Series(scores).value_counts(normalize=True)
-        return [{'value': val, 'probability': prob} for val, prob in counts.items()]
-
-    def optimize_hyperparameters(self, df: Union[pd.DataFrame, np.ndarray],
-                                 reference_noise: np.ndarray) -> Tuple[Dict, float]:
-        """
-        Optimiza los hiperparámetros clave del modelo usando optimización Bayesiana.
-        """
-        series = df['valor'].values if isinstance(df, pd.DataFrame) else np.asarray(df).flatten()
-
-        def objective(n_lags, n_pred_bins, n_vol_bins, volatility_window):
-            try:
-                # Guardar estado anterior para restaurarlo después
-                old_params = (self.n_lags, self.n_pred_bins, self.n_vol_bins, self.volatility_window)
                 
-                # Asignar nuevos hiperparámetros (asegurando que sean enteros)
-                self.n_lags = int(n_lags)
-                self.n_pred_bins = int(n_pred_bins)
-                self.n_vol_bins = int(n_vol_bins)
-                self.volatility_window = int(volatility_window)
-                
-                # Validar que los parámetros son factibles
-                if len(series) <= self.n_lags * 2 or self.volatility_window < 2:
-                    self.n_lags, self.n_pred_bins, self.n_vol_bins, self.volatility_window = old_params
-                    return -1e10
-
-                dist = self.fit_predict(series)
-                if not dist:
-                    self.n_lags, self.n_pred_bins, self.n_vol_bins, self.volatility_window = old_params
-                    return -1e10
-                
-                values = [d['value'] for d in dist]
-                probs = [d['probability'] for d in dist]
-                samples = self.rng.choice(values, size=2000, p=probs, replace=True)
-                
-                # Asumiendo que ecrps está definida globalmente
-                ecrps_score = ecrps(samples, reference_noise)
-                
-                # Restaurar estado
-                self.n_lags, self.n_pred_bins, self.n_vol_bins, self.volatility_window = old_params
-                
-                return -ecrps_score
-            except Exception:
-                return -1e10
-
-        # Rangos de búsqueda para los hiperparámetros
-        pbounds = {
-            'n_lags': (5, 30.99),
-            'n_pred_bins': (3, 15.99),
-            'n_vol_bins': (2, 10.99),
-            'volatility_window': (5, 40.99)
-        }
-        
-        optimizer = BayesianOptimization(f=objective, pbounds=pbounds, random_state=self.random_state, verbose=0)
-        
-        try:
-            optimizer.maximize(init_points=5, n_iter=15)
-            if optimizer.max:
-                self.best_params = {k: int(v) for k, v in optimizer.max['params'].items()}
-                best_ecrps = -optimizer.max['target']
-            else:
-                best_ecrps = float('inf')
-        except Exception:
-            best_ecrps = float('inf')
-        
-        if self.verbose:
-            print(f"✅ Opt. AV-MCPS (ECRPS: {best_ecrps:.4f}): {self.best_params}")
-            
-        return self.best_params, best_ecrps
-
-    def fit_predict(self, df: Union[pd.DataFrame, np.ndarray]) -> List[Dict[str, float]]:
-        """
-        Ajusta el modelo y genera la distribución predictiva para el siguiente paso.
-        """
-        series = df['valor'].values if isinstance(df, pd.DataFrame) else np.asarray(df).flatten()
-        
-        # Usar hiperparámetros optimizados si están disponibles
-        if self.best_params:
-            self.__dict__.update(self.best_params)
-
-        if len(series) < self.n_lags * 2 or len(series) < self.volatility_window:
-            mean_val = np.mean(series) if series.size > 0 else 0
-            return [{'value': mean_val, 'probability': 1.0}]
-        
-        # 1. Crear lags y calcular volatilidad
-        X, y = self._create_lag_matrix(series)
-        volatility_features = self._calculate_volatility(series)
-        
-        # 2. Preparar datos de prueba y dividir en entrenamiento/calibración
-        x_test = series[-self.n_lags:].reshape(1, -1)
-        test_volatility = np.std(series[-self.volatility_window:])
-        
-        n_calib = max(10, int(len(X) * self.test_size))
-        if n_calib >= len(X):
-            return [{'value': np.mean(series), 'probability': 1.0}]
-
-        X_train, X_calib = X[:-n_calib], X[-n_calib:]
-        y_train, y_calib = y[:-n_calib], y[-n_calib:]
-        vol_calib = volatility_features[-n_calib:]
-        
-        # 3. Entrenar modelo base y hacer predicciones
-        self.base_model.fit(X_train, y_train)
-        point_prediction = self.base_model.predict(x_test)[0]
-        calib_preds = self.base_model.predict(X_calib)
-        
-        # 4. Categorización Mondrian 2D
-        try:
-            # Bins para las predicciones
-            _, pred_bin_edges = pd.qcut(calib_preds, self.n_pred_bins, retbins=True, duplicates='drop')
-            # Bins para la volatilidad
-            _, vol_bin_edges = pd.qcut(vol_calib, self.n_vol_bins, retbins=True, duplicates='drop')
-        except ValueError: # No hay suficientes puntos únicos para crear bins
-            return [{'value': float(point_prediction), 'probability': 1.0}]
-
-        # Asignar cada punto de calibración a su bin 2D
-        calib_pred_indices = np.digitize(calib_preds, bins=pred_bin_edges[:-1]) -1
-        calib_vol_indices = np.digitize(vol_calib, bins=vol_bin_edges[:-1]) -1
-        
-        # Encontrar el bin 2D para el punto de prueba
-        test_pred_bin = np.digitize(point_prediction, bins=pred_bin_edges[:-1]) -1
-        test_vol_bin = np.digitize(test_volatility, bins=vol_bin_edges[:-1]) -1
-
-        # 5. Seleccionar scores de conformidad del bin correspondiente
-        local_mask = (calib_pred_indices == test_pred_bin) & (calib_vol_indices == test_vol_bin)
-        
-        # Lógica de fallback robusta
-        if np.sum(local_mask) < 5: # Si el bin 2D está casi vacío...
-            local_mask = (calib_pred_indices == test_pred_bin) # ...usar solo el bin de predicción (1D)
-            if np.sum(local_mask) < 5: # Si incluso ese está vacío...
-                local_mask = np.ones_like(calib_preds, dtype=bool) # ...usar todos los datos (conformal estándar)
-
-        local_y = y_calib[local_mask]
-        local_preds = calib_preds[local_mask]
-        
-        # 6. Calcular scores y construir la distribución final
-        calibration_scores = point_prediction + (local_y - local_preds)
-        
-        return self._create_distribution_from_scores(calibration_scores)
-
-
 ## Pipeline
-# pipeline.py
 # pipeline.py
 import os
 import gc
@@ -1627,6 +1630,9 @@ tf.config.threading.set_intra_op_parallelism_threads(1)
 # ============================================================================
 # FUNCIÓN AUXILIAR MEJORADA PARA PREDICCIÓN (SIN PARALELIZACIÓN INTERNA)
 # ============================================================================
+# ============================================================================
+# FUNCIÓN AUXILIAR MEJORADA PARA PREDICCIÓN (SIN PARALELIZACIÓN INTERNA)
+# ============================================================================
 def _predict_with_model_safe(model_name: str, model_instance: Any, 
                              history_df: pd.DataFrame, history_series: np.ndarray,
                              sim_config: Dict, seed: int) -> Dict:
@@ -1643,7 +1649,10 @@ def _predict_with_model_safe(model_name: str, model_instance: Any,
             bb_model_step = EnhancedBootstrappingModel(local_simulator, random_state=seed)
             bb_model_step.n_lags = model_instance.n_lags
             bb_model_step.arma_simulator.series = history_series
-            prediction_output = bb_model_step.fit_predict(history_series)[0]
+            
+            # --- CORRECCIÓN: Eliminar el [0] para obtener el array completo ---
+            prediction_output = bb_model_step.fit_predict(history_series)
+            # -----------------------------------------------------------------
         else:
             prediction_output = model_instance.fit_predict(history_df)
         
@@ -1657,6 +1666,7 @@ def _predict_with_model_safe(model_name: str, model_instance: Any,
                 probs = np.ones(len(values)) / len(values) if values else []
             samples = local_rng.choice(values, size=5000, p=probs, replace=True) if values else np.array([])
         else:
+            # Ahora Block Bootstrap pasará por aquí correctamente
             samples = np.array(prediction_output).flatten()
         
         return {'name': model_name, 'samples': samples, 'error': None}
@@ -1677,14 +1687,17 @@ def _predict_with_model_safe(model_name: str, model_instance: Any,
 class PipelineOptimizado:
     """Pipeline con optimización UNA SOLA VEZ al inicio."""
     N_TEST_STEPS = 5
+    BURN_IN_PERIOD = 50 # Definir como constante para consistencia
 
-    def __init__(self, model_type='ARIMA(1,1,1)', phi=[0.6], d=1, theta=[0.3], 
-                 sigma=1.2, noise_dist='t-student', n_samples=250, seed=42, verbose=False):
+    def __init__(self, model_type='ARIMA(1,1,1)', phi=[0.7], theta=[0.3],
+                 sigma=1.2, noise_dist='t-student', n_samples=250, scenario_id=None,
+                 seed=42, verbose=False):
         self.config = {
-            'model_type': model_type, 'phi': phi, 'd': d, 'theta': theta, 'sigma': sigma,
+            'model_type': model_type, 'phi': phi, 'theta': theta, 'sigma': sigma,
             'noise_dist': noise_dist, 'n_samples': n_samples, 'seed': seed,
             'verbose': verbose
         }
+        self.scenario_id = scenario_id
         self.verbose = verbose
         self.rng = np.random.default_rng(seed)
         self.simulator, self.full_series, self.full_errors = None, None, None
@@ -1703,10 +1716,7 @@ class PipelineOptimizado:
             'Block Bootstrapping': EnhancedBootstrappingModel(self.simulator, random_state=seed, verbose=False),
             'Sieve Bootstrap': SieveBootstrap(p_order=p_order, random_state=seed, verbose=False),
             'MCPS': MondrianCPSModel(random_state=seed, verbose=False),
-            
-            # --- MODELO AÑADIDO ---
             'AV-MCPS': AdaptiveVolatilityMondrianCPS(random_state=seed, verbose=False),
-            
             'EnCQR-LSTM': EnCQR_LSTM_Model(random_state=seed, verbose=False, epochs=6, B=2, units=24, n_layers=1)
         }
     
@@ -1716,18 +1726,33 @@ class PipelineOptimizado:
                      if k not in ['n_samples', 'verbose']}
         self.simulator = ARIMASimulation(**sim_config)
         self.full_series, self.full_errors = self.simulator.simulate(
-            n=self.config['n_samples'], burn_in=50
+            n=self.config['n_samples'], burn_in=self.BURN_IN_PERIOD
         )
         
+        # --- NUEVA ADICIÓN: Graficar la serie temporal si plot=True ---
+        if show_intermediate_plots:
+            plots_directory = "plots_densidades_por_escenario"
+            series_plot_filename = os.path.join(
+                plots_directory,
+                f"escenario_{self.scenario_id}_series_completa.png"
+            )
+            plot_title = f"Serie Temporal - Escenario {self.scenario_id} ({self.config['model_type']})"
+            
+            PlotManager.plot_series_split(
+                series=self.full_series,
+                burn_in_len=self.BURN_IN_PERIOD,
+                test_len=self.N_TEST_STEPS,
+                title=plot_title,
+                save_path=series_plot_filename
+            )
+        # --------------------------------------------------------------------
+
         initial_train_len = len(self.full_series) - self.N_TEST_STEPS
         initial_train_series = self.full_series[:initial_train_len]
         df_initial_train = pd.DataFrame({'valor': initial_train_series})
         
         all_models = self._setup_models()
         
-        # ====================================================================
-        # OPTIMIZACIÓN UNA SOLA VEZ (NO EN CADA PASO)
-        # ====================================================================
         initial_errors = self.full_errors[:initial_train_len]
         reference_noise_for_opt = self.simulator.get_true_next_step_samples(
             initial_train_series, initial_errors, 5000
@@ -1736,16 +1761,11 @@ class PipelineOptimizado:
         for name, model in all_models.items():
             if hasattr(model, 'optimize_hyperparameters'):
                 try:
-                    if self.verbose:
-                        print(f"Optimizando {name}...")
                     model.optimize_hyperparameters(df_initial_train, reference_noise_for_opt)
                 except Exception as e:
                     if self.verbose:
                         print(f"Error optimizando {name}: {e}")
         
-        # ====================================================================
-        # VENTANA RODANTE SIN RE-OPTIMIZACIÓN
-        # ====================================================================
         for t in range(self.N_TEST_STEPS):
             step_t = initial_train_len + t
             
@@ -1760,7 +1780,6 @@ class PipelineOptimizado:
             step_ecrps = {'Paso': t + 1}
             step_distributions = {'Teórica': theoretical_samples}
             
-            # Predicción SECUENCIAL con modelos YA optimizados
             for name, model in all_models.items():
                 result = _predict_with_model_safe(
                     name, model, df_history, history_series,
@@ -1773,12 +1792,31 @@ class PipelineOptimizado:
                 else:
                     step_ecrps[name] = np.nan
             
+            # --- CORRECCIÓN: Se elimina la llamada duplicada a 'append' ---
+            # La primera llamada es la única necesaria.
             self.rolling_ecrps.append(step_ecrps)
             
-            # Limpieza después de cada paso
+            if show_intermediate_plots:
+                plots_directory = "plots_densidades_por_escenario"
+                plot_filename = os.path.join(
+                    plots_directory, 
+                    f"escenario_{self.scenario_id}_paso_{t + 1}.png"
+                )
+                title = f"Densidades Predictivas - Escenario {self.scenario_id} - Paso {t + 1}"
+                metrics_for_plot = {k: v for k, v in step_ecrps.items() if k != 'Paso'}
+                
+                PlotManager.plot_density_comparison(
+                    step_distributions, 
+                    metrics_for_plot, 
+                    title, 
+                    save_path=plot_filename
+                )
+            
+            # Esta era la línea duplicada que causaba el error en el Excel. Ha sido eliminada.
+            # self.rolling_ecrps.append(step_ecrps) 
+            
             clear_all_sessions()
-        
-        # Limpieza final
+
         del all_models
         clear_all_sessions()
         
@@ -1795,63 +1833,66 @@ class PipelineOptimizado:
         ecrps_df.loc['Promedio'] = averages
         ecrps_df.loc['Promedio', 'Mejor Modelo'] = best_overall_model
         return ecrps_df
-    
 
-    
 class ScenarioRunnerMejorado:
-    """Runner con reinicio periódico del pool de procesos."""
+    """
+    Runner que genera y ejecuta escenarios ARIMA, gestionando la ejecución en paralelo
+    con reinicio periódico del pool de procesos para garantizar la estabilidad y
+    evitar fugas de memoria.
+    """
     def __init__(self, seed=420):
         self.seed = seed
         self.model_names = []
-        
-        # --- CAMBIO AQUÍ: Se actualizó la lista completa de modelos a ARIMA(p,1,q) ---
-        # Se usan los mismos coeficientes phi y theta de la configuración original,
-        # pero ahora aplicados a un modelo con d=1.
+        # CAMBIO CLAVE: Nueva configuración de modelos ARIMA(p,1,q)
+        # Los parámetros phi y theta corresponden al proceso ARMA(p,q) de la serie diferenciada.
         self.models_config = [
-            # ARIMA(0,1,0) - Camino Aleatorio
-            {'model_type': 'ARIMA(0,1,0)', 'phi': [], 'd': 1, 'theta': []},
-            # ARIMA(1,1,0) - Usando phi del AR(1) original
-            {'model_type': 'ARIMA(1,1,0)', 'phi': [0.9], 'd': 1, 'theta': []},
-            # ARIMA(2,1,0) - Usando phi del AR(2) original
-            {'model_type': 'ARIMA(2,1,0)', 'phi': [0.5, -0.3], 'd': 1, 'theta': []},
-            # ARIMA(0,1,1) - Usando theta del MA(1) original
-            {'model_type': 'ARIMA(0,1,1)', 'phi': [], 'd': 1, 'theta': [0.7]},
-            # ARIMA(0,1,2) - Usando theta del MA(2) original
-            {'model_type': 'ARIMA(0,1,2)', 'phi': [], 'd': 1, 'theta': [0.4, 0.2]},
-            # ARIMA(1,1,1) - Usando params del ARMA(1,1) original
-            {'model_type': 'ARIMA(1,1,1)', 'phi': [0.6], 'd': 1, 'theta': [0.3]},
-            # ARIMA(2,1,2) - Usando params del ARMA(2,2) original
-            {'model_type': 'ARIMA(2,1,2)', 'phi': [0.4, -0.2], 'd': 1, 'theta': [0.5, 0.1]}
+            {'model_type': 'ARIMA(0,1,0)', 'phi': [], 'theta': []}, # Camino Aleatorio
+            {'model_type': 'ARIMA(1,1,0)', 'phi': [0.6], 'theta': []},
+            {'model_type': 'ARIMA(2,1,0)', 'phi': [0.5, -0.2], 'theta': []},
+            {'model_type': 'ARIMA(0,1,1)', 'phi': [], 'theta': [0.5]},
+            {'model_type': 'ARIMA(0,1,2)', 'phi': [], 'theta': [0.4, 0.25]},
+            {'model_type': 'ARIMA(1,1,1)', 'phi': [0.7], 'theta': [-0.3]},
+            {'model_type': 'ARIMA(2,1,2)', 'phi': [0.6, 0.2], 'theta': [0.4, -0.1]}
         ]
-        # --------------------------------------------------------------------------
-
         self.distributions = ['normal', 'uniform', 'exponential', 't-student', 'mixture']
         self.variances = [0.2, 0.5, 1.0, 3.0]
+        self.plots_directory = "plots_densidades_por_escenario"
 
-    def _generate_scenarios(self, n_scenarios):
-        scenarios, count = [], 0
+    def _generate_scenarios(self, n_scenarios: int) -> List[Dict]:
+        """
+        Genera los escenarios de simulación basados en la nueva configuración ARIMA.
+        """
+        scenarios = []
+        
+        # Crear todas las combinaciones posibles
+        all_possible_scenarios = []
         for model in self.models_config:
             for dist in self.distributions:
                 for var in self.variances:
-                    # --- CAMBIO AQUÍ: Asegurarse de que 'd' esté en la configuración ---
-                    if count < n_scenarios:
-                        config = {
-                            **model,
-                            'noise_dist': dist,
-                            'sigma': np.sqrt(var),
-                            'scenario_id': count + 1
-                        }
-                        # Asegurarse de que 'd' está presente, por si acaso
-                        config.setdefault('d', 1) 
-                        scenarios.append(config)
-                        count += 1
-        return [{'config': sc, 'seed': self.seed + i} for i, sc in enumerate(scenarios)]
+                    all_possible_scenarios.append({
+                        **model, 
+                        'noise_dist': dist, 
+                        'sigma': np.sqrt(var)
+                    })
 
-    def _prepare_rows_from_result(self, scenario_config, results_df):
+        # Seleccionar el número de escenarios solicitado, asegurando que no exceda el máximo posible
+        num_to_generate = min(n_scenarios, len(all_possible_scenarios))
+        final_scenarios = all_possible_scenarios[:num_to_generate]
+        
+        # Añadir ID y semilla a cada escenario para la ejecución
+        return [{'config': {**sc, 'scenario_id': i + 1}, 'seed': self.seed + i} 
+                for i, sc in enumerate(final_scenarios)]
+
+    def _prepare_rows_from_result(self, scenario_config: Dict, results_df: pd.DataFrame) -> List[Dict]:
+        """
+        Convierte el DataFrame de resultados de un escenario en un formato de fila
+        para el archivo Excel final.
+        """
         rows = []
         if results_df is None or results_df.empty:
             return rows
             
+        # Inicializa la lista de nombres de modelos si está vacía
         if not self.model_names:
             self.model_names = [col for col in results_df.columns 
                                if col not in ['Paso', 'Mejor Modelo']]
@@ -1859,39 +1900,51 @@ class ScenarioRunnerMejorado:
         for step, data_row in results_df.iterrows():
             row = {
                 'Paso': step,
+                # CAMBIO: Incluir el tipo de modelo ARIMA en la salida
+                'Tipo de Modelo': scenario_config['model_type'],
                 'Valores de AR': str(scenario_config['phi']),
                 'Valores MA': str(scenario_config['theta']),
                 'Distribución': scenario_config['noise_dist'],
                 'Varianza error': np.round(scenario_config['sigma'] ** 2, 2),
                 'Mejor Modelo': data_row.get('Mejor Modelo', 'Error')
             }
+            # Añadir las puntuaciones ECRPS de cada modelo
             for model_name in self.model_names:
                 row[model_name] = data_row.get(model_name, np.nan)
             rows.append(row)
         return rows
 
-    def _run_batch(self, batch_scenarios, restart_every=10):
-        """Ejecuta lote con reinicio periódico del executor."""
+    def _run_batch(self, batch_scenarios: List[Dict], restart_every: int, plot: bool) -> List[Tuple]:
+        """
+        Ejecuta un lote de escenarios, reiniciando el pool de procesos periódicamente
+        para mantener la estabilidad del sistema.
+        """
         batch_results = []
-        max_workers = 1
+        max_workers = 1 # Se ejecuta secuencialmente dentro del lote, pero los lotes son paralelos
         
-        # Dividir el lote en sublotes más pequeños
+        # Dividir el lote en sublotes más pequeños para el reinicio
         sublotes = [batch_scenarios[i:i+restart_every] 
                    for i in range(0, len(batch_scenarios), restart_every)]
         
         for sublote_idx, sublote in enumerate(sublotes):
             print(f"    Sublote {sublote_idx + 1}/{len(sublotes)}")
             
-            # CREAR NUEVO EXECUTOR PARA CADA SUBLOTE
+            # Añadir el flag 'plot' a cada escenario antes de enviarlo al worker
+            for sc in sublote:
+                sc['plot'] = plot
+
+            # Crear un nuevo executor para cada sublote garantiza un entorno limpio
             with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
                 futures = {
                     executor.submit(run_single_scenario_robust, sc): sc 
                     for sc in sublote
                 }
                 
+                # Procesar resultados a medida que se completan
                 for future in tqdm(concurrent.futures.as_completed(futures), 
                                   total=len(futures), desc="      Escenarios"):
                     try:
+                        # Obtener resultado con un timeout para evitar bloqueos indefinidos
                         scenario_config, results_df = future.result(timeout=600)
                         if results_df is not None:
                             batch_results.append((scenario_config, results_df))
@@ -1899,24 +1952,38 @@ class ScenarioRunnerMejorado:
                         sc_id = futures[future]['config'].get('scenario_id', 'N/A')
                         print(f"      Timeout en escenario {sc_id}")
                     except Exception as e:
-                        print(f"      Error: {e}")
+                        sc_id = futures[future]['config'].get('scenario_id', 'N/A')
+                        print(f"      Error en escenario {sc_id}: {e}")
             
-            # Limpieza entre sublotes
+            # Limpieza forzada entre sublotes
             clear_all_sessions()
             import time
-            time.sleep(2)  # Pausa para asegurar limpieza
+            time.sleep(2)
         
         return batch_results
 
-    def run(self, n_scenarios=120, excel_filename="resultados_finales.xlsx", 
-            batch_size=20, restart_every=5):  # Reducir batch_size
-        """Ejecuta escenarios en lotes pequeños con reinicio frecuente."""
+    def run(self, n_scenarios: int = 140, excel_filename: str = "resultados_arima_finales.xlsx", 
+            batch_size: int = 20, restart_every: int = 5, plot: bool = False):
+        """
+        Método principal para ejecutar la simulación completa.
+        
+        Args:
+            n_scenarios (int): Número total de escenarios a ejecutar.
+            excel_filename (str): Nombre del archivo para guardar los resultados.
+            batch_size (int): Número de escenarios a procesar antes de una limpieza mayor.
+            restart_every (int): Frecuencia de reinicio del pool de procesos dentro de un lote.
+            plot (bool): Si es True, guarda los gráficos de densidad para cada paso de cada escenario.
+        """
+        if plot:
+            os.makedirs(self.plots_directory, exist_ok=True)
+            print(f"✅ Gráficos de densidad activados. Se guardarán en la carpeta: '{self.plots_directory}'")
+        
         all_scenarios_configs = self._generate_scenarios(n_scenarios)
         all_excel_rows = []
         
         n_batches = (len(all_scenarios_configs) + batch_size - 1) // batch_size
         
-        print(f"Ejecutando {len(all_scenarios_configs)} escenarios en {n_batches} lotes")
+        print(f"Ejecutando {len(all_scenarios_configs)} escenarios en {n_batches} lotes.")
         
         for batch_num in range(n_batches):
             start_idx = batch_num * batch_size
@@ -1927,28 +1994,27 @@ class ScenarioRunnerMejorado:
             print(f"LOTE {batch_num + 1}/{n_batches} (Escenarios {start_idx + 1}-{end_idx})")
             print(f"{'='*60}")
             
-            batch_results = self._run_batch(batch, restart_every=restart_every)
+            batch_results = self._run_batch(batch, restart_every=restart_every, plot=plot)
             
             for scenario_config, results_df in batch_results:
                 new_rows = self._prepare_rows_from_result(scenario_config, results_df)
                 all_excel_rows.extend(new_rows)
             
-            # Limpieza agresiva entre lotes
             print(f"  Limpiando memoria del lote...")
             clear_all_sessions()
             import time
-            time.sleep(3)  # Pausa más larga entre lotes
+            time.sleep(3)
             
-            # Checkpoint intermedio
+            # Guardar un checkpoint periódico para no perder el progreso
             if all_excel_rows and (batch_num + 1) % 3 == 0:
                 temp_filename = f"checkpoint_lote_{batch_num + 1}.xlsx"
                 pd.DataFrame(all_excel_rows).to_excel(temp_filename, index=False)
                 print(f"  ✅ Checkpoint guardado: {temp_filename}")
-        
-        # Guardar resultados finales
+
         if all_excel_rows:
             df_final = pd.DataFrame(all_excel_rows)
-            first_cols = ['Paso', 'Valores de AR', 'Valores MA', 'Distribución', 'Varianza error']
+            # Definir el orden de las columnas para una mejor legibilidad
+            first_cols = ['Paso', 'Tipo de Modelo', 'Valores de AR', 'Valores MA', 'Distribución', 'Varianza error']
             last_col = ['Mejor Modelo']
             
             if not self.model_names and not df_final.empty:
@@ -1957,38 +2023,46 @@ class ScenarioRunnerMejorado:
 
             model_cols = sorted([m for m in self.model_names if m in df_final.columns])
             ordered_columns = first_cols + model_cols + last_col
-            df_final = df_final[ordered_columns]
+            df_final = df_final[[col for col in ordered_columns if col in df_final.columns]]
             
             df_final.to_excel(excel_filename, index=False)
-            print(f"✅ {len(all_excel_rows)} resultados guardados en '{excel_filename}'")
+            print(f"✅ {len(all_excel_rows)} filas de resultados guardadas en '{excel_filename}'")
             
+            # Generar los gráficos resumen al final de toda la ejecución
             self.plot_results_from_excel(excel_filename)
         else:
-            print("❌ No se generaron resultados.")
+            print("❌ No se generaron resultados. Revise la configuración o posibles errores.")
 
-    def plot_results_from_excel(self, filename):
-        """Genera boxplots y gráficos de torta."""
+    def plot_results_from_excel(self, filename: str):
+        """
+        Genera y muestra gráficos resumen (boxplots y diagramas de tarta) a partir
+        del archivo de resultados final.
+        """
         try:
             df_total = pd.read_excel(filename)
         except FileNotFoundError:
-            print(f"No se encontró '{filename}'.")
+            print(f"Error: No se encontró el archivo de resultados '{filename}'. No se pueden generar los gráficos.")
             return
 
         if df_total.empty:
-            print("Archivo vacío.")
+            print("El archivo de resultados está vacío. No se pueden generar gráficos.")
             return
 
+        # Identificar dinámicamente las columnas de los modelos
         if not self.model_names:
-            self.model_names = [col for col in df_total.columns 
-                               if col not in ['Paso', 'Valores de AR', 'Valores MA', 
-                                             'Distribución', 'Varianza error', 'Mejor Modelo']]
+            non_model_cols = ['Paso', 'Tipo de Modelo', 'Valores de AR', 'Valores MA', 'Distribución', 'Varianza error', 'Mejor Modelo']
+            self.model_names = [col for col in df_total.columns if col not in non_model_cols]
 
         pasos_disponibles = df_total['Paso'].unique()
 
         for step_name in pasos_disponibles:
-            df_step = df_total[df_total['Paso'] == step_name]
+            df_step = df_total[df_total['Paso'] == step_name].copy()
 
-            df_melted = df_step.melt(value_vars=self.model_names, var_name='Modelo', value_name='ECRPS')
+            # Asegurarse de que las columnas de los modelos sean numéricas
+            for col in self.model_names:
+                df_step[col] = pd.to_numeric(df_step[col], errors='coerce')
+            
+            df_melted = df_step.melt(value_vars=self.model_names, var_name='Modelo', value_name='ECRPS').dropna()
             wins = df_step['Mejor Modelo'].value_counts()
             
             title_prefix = (f"Resultados para el Paso {step_name}" if step_name != "Promedio" 
@@ -1997,25 +2071,23 @@ class ScenarioRunnerMejorado:
             fig, axes = plt.subplots(1, 2, figsize=(20, 8))
             fig.suptitle(title_prefix, fontsize=18)
 
+            # Boxplot de distribución de ECRPS
             sns.boxplot(ax=axes[0], data=df_melted, x='Modelo', y='ECRPS', palette='viridis')
             axes[0].set_title('Distribución de ECRPS por Modelo', fontsize=14)
             axes[0].set_xlabel('')
-            axes[0].set_ylabel('ECRPS')
-            axes[0].tick_params(axis='x', rotation=45)
+            axes[0].set_ylabel('ECRPS (menor es mejor)')
+            axes[0].tick_params(axis='x', rotation=45, labelsize=11)
+            axes[0].grid(axis='y', linestyle='--', alpha=0.7)
             
+            # Gráfico de tarta de victorias
             if not wins.empty:
-                pie_colors_map = {
-                    name: PlotManager._STYLE['default_colors'][i % len(PlotManager._STYLE['default_colors'])] 
-                    for i, name in enumerate(self.model_names)
-                }
+                pie_colors_map = {name: PlotManager._STYLE['default_colors'][i % len(PlotManager._STYLE['default_colors'])] for i, name in enumerate(self.model_names)}
                 pie_colors = [pie_colors_map.get(label, '#CCCCCC') for label in wins.index]
-
-                axes[1].pie(wins, labels=wins.index, autopct='%1.1f%%', startangle=140, 
-                           colors=pie_colors, wedgeprops={"edgecolor":"k",'linewidth': 0.5, 'antialiased': True})
-                axes[1].set_title('Distribución de Victorias por Modelo', fontsize=14)
+                axes[1].pie(wins, labels=wins.index, autopct='%1.1f%%', startangle=140, colors=pie_colors, wedgeprops={"edgecolor":"k",'linewidth': 0.5, 'antialiased': True})
+                axes[1].set_title('Porcentaje de Victorias por Modelo', fontsize=14)
             else:
                 axes[1].text(0.5, 0.5, 'No hay datos de victorias', ha='center', va='center')
-                axes[1].set_title('Distribución de Victorias por Modelo', fontsize=14)
+                axes[1].set_title('Porcentaje de Victorias por Modelo', fontsize=14)
             
             plt.tight_layout(rect=[0, 0.03, 1, 0.95])
             plt.show()
