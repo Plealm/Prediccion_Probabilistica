@@ -1,0 +1,57 @@
+================================================================================
+PERFIL DETALLADO: Sieve Bootstrap
+================================================================================
+
+1. ESTADÍSTICAS GENERALES
+----------------------------------------
+ECRPS Promedio Global: 0.614997
+Desviación Estándar: 0.769016
+Coeficiente de Variación: 1.2504
+Mínimo: 0.220954
+Mediana: 0.510747
+Máximo: 34.341079
+
+Ranking General: 2° de 9
+
+2. MEJORES ESCENARIOS
+----------------------------------------
+Mejor ECRPS: 0.220954
+  - Escenario: Estacionario_Lineal
+  - Tipo Modelo: AR(2)
+  - Distribución: exponential
+  - Varianza: 0.2
+  - Paso: 1.0
+
+3. PEORES ESCENARIOS
+----------------------------------------
+Peor ECRPS: 34.341079
+  - Escenario: No_Estacionario_Lineal
+  - Tipo Modelo: ARIMA(2,1,0)
+  - Distribución: t-student
+  - Varianza: 3.0
+  - Paso: 4.0
+
+4. RENDIMIENTO POR ESCENARIO
+----------------------------------------
+Estacionario_Lineal:
+  ECRPS: 0.541897 (Ranking: 2°)
+No_Estacionario_Lineal:
+  ECRPS: 0.748928 (Ranking: 2°)
+No_Lineal:
+  ECRPS: 0.606378 (Ranking: 3°)
+
+5. FORTALEZAS Y DEBILIDADES
+----------------------------------------
+Por Distribución:
+  Mejor: normal (Ranking 2°)
+  Peor: mixture (Ranking 2°)
+
+Por Varianza:
+  Mejor: Varianza 0.2 (Ranking 2°)
+  Peor: Varianza 3.0 (Ranking 2°)
+
+6. COMPARACIONES ESTADÍSTICAS (DIEBOLD-MARIANO)
+----------------------------------------
+Victorias significativas: 5
+Derrotas significativas: 0
+Score neto: 5

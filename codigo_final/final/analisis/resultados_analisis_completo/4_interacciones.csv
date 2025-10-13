@@ -1,0 +1,136 @@
+Modelo,Escenario,Distribución,ECRPS_Mean
+AREPD,Estacionario_Lineal,normal,0.692259552875175
+AREPD,Estacionario_Lineal,uniform,0.7491000784979541
+AREPD,Estacionario_Lineal,exponential,0.6367920214075072
+AREPD,Estacionario_Lineal,t-student,0.6869219658339925
+AREPD,Estacionario_Lineal,mixture,0.7732631721220878
+AREPD,No_Estacionario_Lineal,normal,12.794716507097457
+AREPD,No_Estacionario_Lineal,uniform,9.798266527589153
+AREPD,No_Estacionario_Lineal,exponential,8.857144594694471
+AREPD,No_Estacionario_Lineal,t-student,8.455309374207125
+AREPD,No_Estacionario_Lineal,mixture,7.929387205661942
+AREPD,No_Lineal,normal,0.650875295354304
+AREPD,No_Lineal,uniform,0.7041796952309026
+AREPD,No_Lineal,exponential,0.6356434289338101
+AREPD,No_Lineal,t-student,0.6577590864868004
+AREPD,No_Lineal,mixture,0.7068962550889235
+AV-MCPS,Estacionario_Lineal,normal,0.633574274517274
+AV-MCPS,Estacionario_Lineal,uniform,0.6352756875478538
+AV-MCPS,Estacionario_Lineal,exponential,0.5649554800140605
+AV-MCPS,Estacionario_Lineal,t-student,0.6073863996716914
+AV-MCPS,Estacionario_Lineal,mixture,0.6661403113787604
+AV-MCPS,No_Estacionario_Lineal,normal,3.674304911046021
+AV-MCPS,No_Estacionario_Lineal,uniform,1.892911664764399
+AV-MCPS,No_Estacionario_Lineal,exponential,2.0303246815596743
+AV-MCPS,No_Estacionario_Lineal,t-student,1.5400367816808227
+AV-MCPS,No_Estacionario_Lineal,mixture,1.658467862551032
+AV-MCPS,No_Lineal,normal,0.6291957791550745
+AV-MCPS,No_Lineal,uniform,0.6525644906696121
+AV-MCPS,No_Lineal,exponential,0.5963941562408672
+AV-MCPS,No_Lineal,t-student,0.6056153605810906
+AV-MCPS,No_Lineal,mixture,0.6654445935545257
+Block Bootstrapping,Estacionario_Lineal,normal,0.5584881323599807
+Block Bootstrapping,Estacionario_Lineal,uniform,0.5708319876235871
+Block Bootstrapping,Estacionario_Lineal,exponential,0.4970696739363677
+Block Bootstrapping,Estacionario_Lineal,t-student,0.5290192944264608
+Block Bootstrapping,Estacionario_Lineal,mixture,0.5426528787270374
+Block Bootstrapping,No_Estacionario_Lineal,normal,0.5584878611698787
+Block Bootstrapping,No_Estacionario_Lineal,uniform,0.572000321331203
+Block Bootstrapping,No_Estacionario_Lineal,exponential,0.5039788982239378
+Block Bootstrapping,No_Estacionario_Lineal,t-student,0.5304933221610074
+Block Bootstrapping,No_Estacionario_Lineal,mixture,0.5475323750964801
+Block Bootstrapping,No_Lineal,normal,0.5932022235755946
+Block Bootstrapping,No_Lineal,uniform,0.6247147216183279
+Block Bootstrapping,No_Lineal,exponential,0.5564606500678663
+Block Bootstrapping,No_Lineal,t-student,0.5953074039073467
+Block Bootstrapping,No_Lineal,mixture,0.647022103253446
+DeepAR,Estacionario_Lineal,normal,0.597121814319711
+DeepAR,Estacionario_Lineal,uniform,0.6265553109094305
+DeepAR,Estacionario_Lineal,exponential,0.5638577182659067
+DeepAR,Estacionario_Lineal,t-student,0.5802678234622763
+DeepAR,Estacionario_Lineal,mixture,0.5999281863986202
+DeepAR,No_Estacionario_Lineal,normal,2.0195413396147583
+DeepAR,No_Estacionario_Lineal,uniform,2.3334535539534946
+DeepAR,No_Estacionario_Lineal,exponential,1.9172683307475957
+DeepAR,No_Estacionario_Lineal,t-student,1.4897166821140189
+DeepAR,No_Estacionario_Lineal,mixture,2.015988666624542
+DeepAR,No_Lineal,normal,0.6175318924666187
+DeepAR,No_Lineal,uniform,0.6367080186530706
+DeepAR,No_Lineal,exponential,0.5601139277607875
+DeepAR,No_Lineal,t-student,0.5792482355610413
+DeepAR,No_Lineal,mixture,0.6310494501768549
+EnCQR-LSTM,Estacionario_Lineal,normal,0.7041147366271207
+EnCQR-LSTM,Estacionario_Lineal,uniform,0.6986654162257928
+EnCQR-LSTM,Estacionario_Lineal,exponential,0.5997396523264115
+EnCQR-LSTM,Estacionario_Lineal,t-student,0.6705359269337433
+EnCQR-LSTM,Estacionario_Lineal,mixture,0.6963992876180028
+EnCQR-LSTM,No_Estacionario_Lineal,normal,4.435482570735827
+EnCQR-LSTM,No_Estacionario_Lineal,uniform,3.9177598601449226
+EnCQR-LSTM,No_Estacionario_Lineal,exponential,3.848693895400536
+EnCQR-LSTM,No_Estacionario_Lineal,t-student,3.3012084549627434
+EnCQR-LSTM,No_Estacionario_Lineal,mixture,2.8077586781732435
+EnCQR-LSTM,No_Lineal,normal,0.6420321546274325
+EnCQR-LSTM,No_Lineal,uniform,0.6683988189709963
+EnCQR-LSTM,No_Lineal,exponential,0.5783031848848528
+EnCQR-LSTM,No_Lineal,t-student,0.6335873005175117
+EnCQR-LSTM,No_Lineal,mixture,0.6665898241487008
+LSPM,Estacionario_Lineal,normal,0.7353643979059974
+LSPM,Estacionario_Lineal,uniform,0.7917052181653506
+LSPM,Estacionario_Lineal,exponential,0.6815884841061195
+LSPM,Estacionario_Lineal,t-student,0.7303692007019055
+LSPM,Estacionario_Lineal,mixture,0.714416948260712
+LSPM,No_Estacionario_Lineal,normal,1.0542555928207653
+LSPM,No_Estacionario_Lineal,uniform,1.1512622004668605
+LSPM,No_Estacionario_Lineal,exponential,1.0636720343134873
+LSPM,No_Estacionario_Lineal,t-student,1.0139133815347456
+LSPM,No_Estacionario_Lineal,mixture,1.1728321031965465
+LSPM,No_Lineal,normal,0.6763448784420967
+LSPM,No_Lineal,uniform,0.7000295787241337
+LSPM,No_Lineal,exponential,0.5928111194964133
+LSPM,No_Lineal,t-student,0.6802338243913839
+LSPM,No_Lineal,mixture,0.6951426805614541
+LSPMW,Estacionario_Lineal,normal,0.7752138847721767
+LSPMW,Estacionario_Lineal,uniform,0.8240944754245815
+LSPMW,Estacionario_Lineal,exponential,0.7130555245379047
+LSPMW,Estacionario_Lineal,t-student,0.7570810539483243
+LSPMW,Estacionario_Lineal,mixture,0.7483821932216514
+LSPMW,No_Estacionario_Lineal,normal,1.0490161509785216
+LSPMW,No_Estacionario_Lineal,uniform,1.1587444160156415
+LSPMW,No_Estacionario_Lineal,exponential,1.0766225252077464
+LSPMW,No_Estacionario_Lineal,t-student,1.0053387992685212
+LSPMW,No_Estacionario_Lineal,mixture,1.1603655112374534
+LSPMW,No_Lineal,normal,0.7042745404997032
+LSPMW,No_Lineal,uniform,0.72253052596871
+LSPMW,No_Lineal,exponential,0.6228818889565425
+LSPMW,No_Lineal,t-student,0.7290312924510015
+LSPMW,No_Lineal,mixture,0.7228960709057154
+MCPS,Estacionario_Lineal,normal,0.6585369808194452
+MCPS,Estacionario_Lineal,uniform,0.6513965808527193
+MCPS,Estacionario_Lineal,exponential,0.570320933545463
+MCPS,Estacionario_Lineal,t-student,0.6127337035506997
+MCPS,Estacionario_Lineal,mixture,0.6397410339028831
+MCPS,No_Estacionario_Lineal,normal,4.0286089577751865
+MCPS,No_Estacionario_Lineal,uniform,2.464186319395024
+MCPS,No_Estacionario_Lineal,exponential,2.417435335734541
+MCPS,No_Estacionario_Lineal,t-student,1.6502718785949766
+MCPS,No_Estacionario_Lineal,mixture,2.1799919116458546
+MCPS,No_Lineal,normal,0.6300560657756622
+MCPS,No_Lineal,uniform,0.6371222539237753
+MCPS,No_Lineal,exponential,0.5975017530337062
+MCPS,No_Lineal,t-student,0.6191026915223846
+MCPS,No_Lineal,mixture,0.6688773534826822
+Sieve Bootstrap,Estacionario_Lineal,normal,0.5640944168307909
+Sieve Bootstrap,Estacionario_Lineal,uniform,0.5704689332894921
+Sieve Bootstrap,Estacionario_Lineal,exponential,0.4967504138165642
+Sieve Bootstrap,Estacionario_Lineal,t-student,0.5328845811895643
+Sieve Bootstrap,Estacionario_Lineal,mixture,0.545288943960395
+Sieve Bootstrap,No_Estacionario_Lineal,normal,0.7255968417809208
+Sieve Bootstrap,No_Estacionario_Lineal,uniform,0.7187820922638947
+Sieve Bootstrap,No_Estacionario_Lineal,exponential,0.7116925406136912
+Sieve Bootstrap,No_Estacionario_Lineal,t-student,0.8476102726564645
+Sieve Bootstrap,No_Estacionario_Lineal,mixture,0.7409579755770157
+Sieve Bootstrap,No_Lineal,normal,0.5921110742499633
+Sieve Bootstrap,No_Lineal,uniform,0.6269917270290138
+Sieve Bootstrap,No_Lineal,exponential,0.5594802336332917
+Sieve Bootstrap,No_Lineal,t-student,0.6029974010336584
+Sieve Bootstrap,No_Lineal,mixture,0.650311926657417

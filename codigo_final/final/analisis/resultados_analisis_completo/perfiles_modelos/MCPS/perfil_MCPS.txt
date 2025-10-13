@@ -1,0 +1,57 @@
+================================================================================
+PERFIL DETALLADO: MCPS
+================================================================================
+
+1. ESTADÍSTICAS GENERALES
+----------------------------------------
+ECRPS Promedio Global: 1.144960
+Desviación Estándar: 2.822433
+Coeficiente de Variación: 2.4651
+Mínimo: 0.229263
+Mediana: 0.588410
+Máximo: 49.652705
+
+Ranking General: 7° de 9
+
+2. MEJORES ESCENARIOS
+----------------------------------------
+Mejor ECRPS: 0.229263
+  - Escenario: Estacionario_Lineal
+  - Tipo Modelo: ARMA(2,2)
+  - Distribución: exponential
+  - Varianza: 0.2
+  - Paso: 5.0
+
+3. PEORES ESCENARIOS
+----------------------------------------
+Peor ECRPS: 49.652705
+  - Escenario: No_Estacionario_Lineal
+  - Tipo Modelo: ARIMA(2,1,2)
+  - Distribución: normal
+  - Varianza: 3.0
+  - Paso: 3.0
+
+4. RENDIMIENTO POR ESCENARIO
+----------------------------------------
+Estacionario_Lineal:
+  ECRPS: 0.626546 (Ranking: 5°)
+No_Estacionario_Lineal:
+  ECRPS: 2.548099 (Ranking: 7°)
+No_Lineal:
+  ECRPS: 0.630532 (Ranking: 5°)
+
+5. FORTALEZAS Y DEBILIDADES
+----------------------------------------
+Por Distribución:
+  Mejor: normal (Ranking 7°)
+  Peor: mixture (Ranking 7°)
+
+Por Varianza:
+  Mejor: Varianza 0.2 (Ranking 7°)
+  Peor: Varianza 3.0 (Ranking 7°)
+
+6. COMPARACIONES ESTADÍSTICAS (DIEBOLD-MARIANO)
+----------------------------------------
+Victorias significativas: 1
+Derrotas significativas: 5
+Score neto: -4

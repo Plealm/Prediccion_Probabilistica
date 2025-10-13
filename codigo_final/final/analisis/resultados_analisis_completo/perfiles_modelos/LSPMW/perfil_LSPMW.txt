@@ -1,0 +1,57 @@
+================================================================================
+PERFIL DETALLADO: LSPMW
+================================================================================
+
+1. ESTADÍSTICAS GENERALES
+----------------------------------------
+ECRPS Promedio Global: 0.834430
+Desviación Estándar: 0.641513
+Coeficiente de Variación: 0.7688
+Mínimo: 0.223452
+Mediana: 0.635328
+Máximo: 9.814071
+
+Ranking General: 4° de 9
+
+2. MEJORES ESCENARIOS
+----------------------------------------
+Mejor ECRPS: 0.223452
+  - Escenario: Estacionario_Lineal
+  - Tipo Modelo: ARMA(2,2)
+  - Distribución: exponential
+  - Varianza: 0.2
+  - Paso: 4.0
+
+3. PEORES ESCENARIOS
+----------------------------------------
+Peor ECRPS: 9.814071
+  - Escenario: No_Estacionario_Lineal
+  - Tipo Modelo: ARIMA(2,1,2)
+  - Distribución: exponential
+  - Varianza: 3.0
+  - Paso: 5.0
+
+4. RENDIMIENTO POR ESCENARIO
+----------------------------------------
+Estacionario_Lineal:
+  ECRPS: 0.763565 (Ranking: 9°)
+No_Estacionario_Lineal:
+  ECRPS: 1.090017 (Ranking: 3°)
+No_Lineal:
+  ECRPS: 0.700323 (Ranking: 9°)
+
+5. FORTALEZAS Y DEBILIDADES
+----------------------------------------
+Por Distribución:
+  Mejor: normal (Ranking 4°)
+  Peor: mixture (Ranking 4°)
+
+Por Varianza:
+  Mejor: Varianza 0.2 (Ranking 4°)
+  Peor: Varianza 3.0 (Ranking 4°)
+
+6. COMPARACIONES ESTADÍSTICAS (DIEBOLD-MARIANO)
+----------------------------------------
+Victorias significativas: 5
+Derrotas significativas: 2
+Score neto: 3

@@ -1,0 +1,57 @@
+================================================================================
+PERFIL DETALLADO: DeepAR
+================================================================================
+
+1. ESTADÍSTICAS GENERALES
+----------------------------------------
+ECRPS Promedio Global: 0.963209
+Desviación Estándar: 2.007269
+Coeficiente de Variación: 2.0839
+Mínimo: 0.229294
+Mediana: 0.578955
+Máximo: 39.471709
+
+Ranking General: 5° de 9
+
+2. MEJORES ESCENARIOS
+----------------------------------------
+Mejor ECRPS: 0.229294
+  - Escenario: Estacionario_Lineal
+  - Tipo Modelo: ARMA(2,2)
+  - Distribución: exponential
+  - Varianza: 0.2
+  - Paso: 5.0
+
+3. PEORES ESCENARIOS
+----------------------------------------
+Peor ECRPS: 39.471709
+  - Escenario: No_Estacionario_Lineal
+  - Tipo Modelo: ARIMA(2,1,2)
+  - Distribución: uniform
+  - Varianza: 1.0
+  - Paso: 3.0
+
+4. RENDIMIENTO POR ESCENARIO
+----------------------------------------
+Estacionario_Lineal:
+  ECRPS: 0.593546 (Ranking: 3°)
+No_Estacionario_Lineal:
+  ECRPS: 1.955194 (Ranking: 5°)
+No_Lineal:
+  ECRPS: 0.604930 (Ranking: 2°)
+
+5. FORTALEZAS Y DEBILIDADES
+----------------------------------------
+Por Distribución:
+  Mejor: normal (Ranking 5°)
+  Peor: mixture (Ranking 6°)
+
+Por Varianza:
+  Mejor: Varianza 0.2 (Ranking 5°)
+  Peor: Varianza 1.0 (Ranking 6°)
+
+6. COMPARACIONES ESTADÍSTICAS (DIEBOLD-MARIANO)
+----------------------------------------
+Victorias significativas: 3
+Derrotas significativas: 4
+Score neto: -1

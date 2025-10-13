@@ -1,0 +1,148 @@
+================================================================================
+RECOMENDACIONES Y CONCLUSIONES
+================================================================================
+
+1. MODELO CAMPEÓN GENERAL
+----------------------------------------
+Mejor rendimiento promedio: Block Bootstrapping
+ECRPS: 0.557547
+Desviación Estándar: 0.293355
+
+Peor rendimiento promedio: AREPD
+ECRPS: 3.083010
+
+2. RECOMENDACIONES POR ESCENARIO
+----------------------------------------
+
+Estacionario_Lineal:
+  Modelo Recomendado: Block Bootstrapping
+  ECRPS Promedio: 0.539612
+
+No_Estacionario_Lineal:
+  Modelo Recomendado: Block Bootstrapping
+  ECRPS Promedio: 0.542499
+
+No_Lineal:
+  Modelo Recomendado: Block Bootstrapping
+  ECRPS Promedio: 0.603341
+
+3. RECOMENDACIONES POR DISTRIBUCIÓN DE ERRORES
+----------------------------------------
+
+Distribución normal:
+  Modelo Recomendado: Block Bootstrapping
+  ECRPS Promedio: 0.567834
+
+Distribución uniform:
+  Modelo Recomendado: Block Bootstrapping
+  ECRPS Promedio: 0.585653
+
+Distribución exponential:
+  Modelo Recomendado: Block Bootstrapping
+  ECRPS Promedio: 0.514920
+
+Distribución t-student:
+  Modelo Recomendado: Block Bootstrapping
+  ECRPS Promedio: 0.547263
+
+Distribución mixture:
+  Modelo Recomendado: Block Bootstrapping
+  ECRPS Promedio: 0.572066
+
+4. MODELOS MÁS ROBUSTOS (MENOR VARIABILIDAD)
+----------------------------------------
+1. Block Bootstrapping: CV = 0.5262
+2. LSPMW: CV = 0.7688
+3. LSPM: CV = 0.7896
+
+5. RECOMENDACIONES POR HORIZONTE DE PREDICCIÓN
+----------------------------------------
+
+Paso 1.0:
+  Modelo Recomendado: Block Bootstrapping
+  ECRPS Promedio: 0.548020
+
+Paso 3.0:
+  Modelo Recomendado: Block Bootstrapping
+  ECRPS Promedio: 0.560285
+
+Paso 5.0:
+  Modelo Recomendado: Block Bootstrapping
+  ECRPS Promedio: 0.554843
+
+6. ESTRATEGIA DE ENSAMBLE SUGERIDA
+----------------------------------------
+Combinar los siguientes modelos:
+1. Block Bootstrapping (ECRPS: 0.557547)
+2. Sieve Bootstrap (ECRPS: 0.614997)
+3. LSPM (ECRPS: 0.811114)
+
+Justificación:
+  - Estos modelos muestran el mejor rendimiento promedio
+  - Un ensamble puede capturar fortalezas complementarias
+  - Reduce el riesgo de seleccionar un modelo subóptimo
+
+7. MODELOS CON DOMINANCIA ESTADÍSTICA
+----------------------------------------
+Modelos estadísticamente superiores (test Diebold-Mariano):
+1. Block Bootstrapping: 7 victorias significativas
+2. LSPM: 6 victorias significativas
+3. LSPMW: 5 victorias significativas
+4. Sieve Bootstrap: 5 victorias significativas
+5. DeepAR: 3 victorias significativas
+
+8. REGLAS DE DECISIÓN SUGERIDAS
+----------------------------------------
+
+SI el proceso es ESTACIONARIO y LINEAL:
+  → Primera opción: Block Bootstrapping
+  → Segunda opción: Sieve Bootstrap
+
+SI el proceso es NO ESTACIONARIO y LINEAL:
+  → Primera opción: Block Bootstrapping
+  → Segunda opción: Sieve Bootstrap
+
+SI el proceso es NO LINEAL:
+  → Primera opción: Block Bootstrapping
+  → Segunda opción: DeepAR
+
+SI la distribución de errores:
+  • Es normal → Usar Block Bootstrapping
+  • Es uniform → Usar Block Bootstrapping
+  • Es exponential → Usar Block Bootstrapping
+  • Es t-student → Usar Block Bootstrapping
+  • Es mixture → Usar Block Bootstrapping
+
+SI el nivel de varianza:
+  • Es bajo (0.2) → Usar Block Bootstrapping
+  • Es alto (3.0) → Usar Block Bootstrapping
+
+9. CONCLUSIONES PRINCIPALES
+----------------------------------------
+
+• El modelo Block Bootstrapping muestra el mejor rendimiento general
+  con ECRPS promedio de 0.557547
+
+• El modelo más robusto (menor CV) es Block Bootstrapping
+
+• Block Bootstrapping es consistentemente superior en procesos
+  estacionarios y no estacionarios
+
+• Para procesos no lineales: Block Bootstrapping es la mejor opción
+
+• Se recomienda implementar un ENSAMBLE de los top 3 modelos
+  para maximizar robustez y rendimiento
+
+10. CONSIDERACIONES PRÁCTICAS
+----------------------------------------
+
+Factores a considerar en la selección:
+  1. Costo computacional vs ganancia en precisión
+  2. Robustez ante cambios en la distribución de errores
+  3. Consistencia a través de horizontes de predicción
+  4. Facilidad de interpretación y explicabilidad
+  5. Disponibilidad de recursos para implementación
+
+Trade-offs identificados:
+  • Algunos modelos son especialistas en escenarios específicos
+  • Otros modelos son generalistas con buen rendimiento global

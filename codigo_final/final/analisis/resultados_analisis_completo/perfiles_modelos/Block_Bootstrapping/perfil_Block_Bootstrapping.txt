@@ -1,0 +1,57 @@
+================================================================================
+PERFIL DETALLADO: Block Bootstrapping
+================================================================================
+
+1. ESTADÍSTICAS GENERALES
+----------------------------------------
+ECRPS Promedio Global: 0.557547
+Desviación Estándar: 0.293355
+Coeficiente de Variación: 0.5262
+Mínimo: 0.221126
+Mediana: 0.501359
+Máximo: 3.172213
+
+Ranking General: 1° de 9
+
+2. MEJORES ESCENARIOS
+----------------------------------------
+Mejor ECRPS: 0.221126
+  - Escenario: No_Estacionario_Lineal
+  - Tipo Modelo: ARIMA(1,1,0)
+  - Distribución: exponential
+  - Varianza: 0.2
+  - Paso: 1.0
+
+3. PEORES ESCENARIOS
+----------------------------------------
+Peor ECRPS: 3.172213
+  - Escenario: No_Lineal
+  - Tipo Modelo: TAR(2,1)
+  - Distribución: mixture
+  - Varianza: 3.0
+  - Paso: 2.0
+
+4. RENDIMIENTO POR ESCENARIO
+----------------------------------------
+Estacionario_Lineal:
+  ECRPS: 0.539612 (Ranking: 1°)
+No_Estacionario_Lineal:
+  ECRPS: 0.542499 (Ranking: 1°)
+No_Lineal:
+  ECRPS: 0.603341 (Ranking: 1°)
+
+5. FORTALEZAS Y DEBILIDADES
+----------------------------------------
+Por Distribución:
+  Mejor: normal (Ranking 1°)
+  Peor: mixture (Ranking 1°)
+
+Por Varianza:
+  Mejor: Varianza 0.2 (Ranking 1°)
+  Peor: Varianza 3.0 (Ranking 1°)
+
+6. COMPARACIONES ESTADÍSTICAS (DIEBOLD-MARIANO)
+----------------------------------------
+Victorias significativas: 7
+Derrotas significativas: 0
+Score neto: 7
