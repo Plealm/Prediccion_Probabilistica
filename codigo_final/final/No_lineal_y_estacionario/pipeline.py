@@ -1875,28 +1875,23 @@ class ScenarioRunnerMejorado:
     def __init__(self, seed=420):
         self.seed = seed
         self.model_names = []
-        # Configuración de modelos no lineales
+        # Configuración de modelos no lineales ESTACIONARIOS
         self.models_config = [
-            # SETAR básicos (2 regímenes)
+            # Modelos ya estacionarios
             {'model_type': 'SETAR(2,1)', 'phi_low': [0.6], 'phi_high': [-0.5], 'threshold': 0.0, 'delay': 1},
-            {'model_type': 'SETAR(2,2)', 'phi_low': [0.8, -0.3], 'phi_high': [-0.6, 0.2], 'threshold': 0.5, 'delay': 1},
-            
-            # TAR (Threshold AR)
             {'model_type': 'TAR(2,1)', 'phi_low': [0.7], 'phi_high': [-0.7], 'threshold': 0.0, 'delay': 2},
-            {'model_type': 'TAR(2,2)', 'phi_low': [0.5, 0.3], 'phi_high': [-0.5, -0.3], 'threshold': 1.0, 'delay': 1},
-            
-            # EXPAR (Exponential AR - transición suave)
             {'model_type': 'EXPAR(2,1)', 'phi_low': [0.6], 'phi_high': [-0.4], 'threshold': 0.0, 'delay': 1},
-            
-            # Bilinear
             {'model_type': 'BILINEAR(1)', 'phi_low': [0.5], 'phi_high': [0.5], 'threshold': 0.0, 'delay': 1},
             
-            # Casos extremos
-            {'model_type': 'SETAR(2,3)', 'phi_low': [0.7, -0.2, 0.1], 'phi_high': [-0.6, 0.3, -0.1], 'threshold': 0.0, 'delay': 1},
+            # Modelos modificados (ahora estacionarios)
+            {'model_type': 'SETAR(2,2)', 'phi_low': [0.5, -0.2], 'phi_high': [-0.3, 0.1], 'threshold': 0.5, 'delay': 1},
+            {'model_type': 'TAR(2,2)', 'phi_low': [0.3, 0.1], 'phi_high': [-0.2, -0.1], 'threshold': 1.0, 'delay': 1},
+            {'model_type': 'SETAR(2,3)', 'phi_low': [0.4, -0.1, 0.05], 'phi_high': [-0.3, 0.1, -0.05], 'threshold': 0.0, 'delay': 1},
         ]
         self.distributions = ['normal', 'uniform', 'exponential', 't-student', 'mixture']
         self.variances = [0.2, 0.5, 1.0, 3.0]
         self.plots_directory = "plots_densidades_por_escenario"
+
 
     def _generate_scenarios(self, n_scenarios: int) -> List[Dict]:
         """Genera escenarios no lineales."""
