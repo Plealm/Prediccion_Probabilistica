@@ -1,0 +1,21 @@
+Modelo,Estacionario,Escenario,Status,Min_Modulo,Est_Bajo,Est_Alto
+AR(1),No,Lineal Estacionario,NO ESTACIONARIO,0.900,,
+AR(2),No,Lineal Estacionario,NO ESTACIONARIO,0.548,,
+MA(1),Sí,Lineal Estacionario,ESTACIONARIO,,,
+MA(2),Sí,Lineal Estacionario,ESTACIONARIO,,,
+"ARMA(1,1)",No,Lineal Estacionario,NO ESTACIONARIO,0.600,,
+"ARMA(2,2)",No,Lineal Estacionario,NO ESTACIONARIO,0.447,,
+"ARIMA(0,1,0)",No,Lineal No Estacionario,NO ESTACIONARIO (ARIMA con d>=1),,,
+"ARIMA(1,1,0)",No,Lineal No Estacionario,NO ESTACIONARIO (ARIMA con d>=1),0.600,,
+"ARIMA(2,1,0)",No,Lineal No Estacionario,NO ESTACIONARIO (ARIMA con d>=1),0.447,,
+"ARIMA(0,1,1)",No,Lineal No Estacionario,NO ESTACIONARIO (ARIMA con d>=1),,,
+"ARIMA(0,1,2)",No,Lineal No Estacionario,NO ESTACIONARIO (ARIMA con d>=1),,,
+"ARIMA(1,1,1)",No,Lineal No Estacionario,NO ESTACIONARIO (ARIMA con d>=1),0.700,,
+"ARIMA(2,1,2)",No,Lineal No Estacionario,NO ESTACIONARIO (ARIMA con d>=1),0.239,,
+"SETAR(2,1)",No,No Lineal,NO ESTACIONARIO,,No,No
+"SETAR(2,2)",No,No Lineal,NO ESTACIONARIO,,No,No
+"TAR(2,1)",No,No Lineal,NO ESTACIONARIO,,No,No
+"TAR(2,2)",No,No Lineal,NO ESTACIONARIO,,No,No
+"EXPAR(2,1)",No,No Lineal,NO ESTACIONARIO,,No,No
+BILINEAR(1),No,No Lineal,NO ESTACIONARIO,,No,No
+"SETAR(2,3)",No,No Lineal,NO ESTACIONARIO,,No,No

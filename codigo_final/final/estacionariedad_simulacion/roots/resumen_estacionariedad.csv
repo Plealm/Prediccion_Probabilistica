@@ -1,0 +1,21 @@
+Modelo,Estacionario,Escenario
+AR(1),Sí,Lineal Estacionario
+AR(2),Sí,Lineal Estacionario
+MA(1),Sí,Lineal Estacionario
+MA(2),Sí,Lineal Estacionario
+"ARMA(1,1)",Sí,Lineal Estacionario
+"ARMA(2,2)",Sí,Lineal Estacionario
+"ARIMA(0,1,0)",No,Lineal No Estacionario
+"ARIMA(1,1,0)",No,Lineal No Estacionario
+"ARIMA(2,1,0)",No,Lineal No Estacionario
+"ARIMA(0,1,1)",No,Lineal No Estacionario
+"ARIMA(0,1,2)",No,Lineal No Estacionario
+"ARIMA(1,1,1)",No,Lineal No Estacionario
+"ARIMA(2,1,2)",No,Lineal No Estacionario
+"SETAR(2,1)",Sí,No Lineal
+"SETAR(2,2)",Sí,No Lineal
+"TAR(2,1)",Sí,No Lineal
+"TAR(2,2)",Sí,No Lineal
+"EXPAR(2,1)",Sí,No Lineal
+BILINEAR(1),Sí,No Lineal
+"SETAR(2,3)",Sí,No Lineal
