@@ -1,0 +1,18 @@
+================================================================================
+RESUMEN DE ANÁLISIS
+Modelo: AV-MCPS
+Escenario: No_Estacionario_Lineal
+Observaciones: 700
+================================================================================
+
+RECOMENDACIONES:
+✓ Mejor paso: 1
+✓ Mejor tipo de modelo: ARIMA(0,1,1)
+✓ Mejor distribución: t-student
+✓ Mejor varianza: 0.2
+
+EVITAR:
+⚠ Peor paso: 4
+⚠ Peor tipo de modelo: ARIMA(2,1,2)
+⚠ Peor distribución: normal
+⚠ Peor varianza: 3.0

@@ -1,0 +1,18 @@
+================================================================================
+RESUMEN DE ANÁLISIS
+Modelo: LSPM
+Escenario: Estacionario_Lineal
+Observaciones: 600
+================================================================================
+
+RECOMENDACIONES:
+✓ Mejor paso: 5
+✓ Mejor tipo de modelo: MA(2)
+✓ Mejor distribución: exponential
+✓ Mejor varianza: 0.2
+
+EVITAR:
+⚠ Peor paso: 1
+⚠ Peor tipo de modelo: MA(1)
+⚠ Peor distribución: uniform
+⚠ Peor varianza: 3.0

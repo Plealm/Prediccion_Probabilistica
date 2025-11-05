@@ -1,0 +1,18 @@
+================================================================================
+RESUMEN DE ANÁLISIS
+Modelo: AREPD
+Escenario: No_Lineal_Estacionario
+Observaciones: 700
+================================================================================
+
+RECOMENDACIONES:
+✓ Mejor paso: 1
+✓ Mejor tipo de modelo: TAR(2,2)
+✓ Mejor distribución: t-student
+✓ Mejor varianza: 0.2
+
+EVITAR:
+⚠ Peor paso: 4
+⚠ Peor tipo de modelo: TAR(2,1)
+⚠ Peor distribución: uniform
+⚠ Peor varianza: 3.0

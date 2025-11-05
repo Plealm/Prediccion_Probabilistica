@@ -1,0 +1,18 @@
+================================================================================
+RESUMEN DE ANÁLISIS
+Modelo: MCPS
+Escenario: No_Lineal_Estacionario
+Observaciones: 700
+================================================================================
+
+RECOMENDACIONES:
+✓ Mejor paso: 5
+✓ Mejor tipo de modelo: TAR(2,2)
+✓ Mejor distribución: exponential
+✓ Mejor varianza: 0.2
+
+EVITAR:
+⚠ Peor paso: 3
+⚠ Peor tipo de modelo: TAR(2,1)
+⚠ Peor distribución: uniform
+⚠ Peor varianza: 3.0
