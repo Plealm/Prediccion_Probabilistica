@@ -1,7 +1,7 @@
 Condicion,Completo,Mejor_Modelo,ECRPS,Frecuencia
-Est+Var_Alta,Estacionario + Varianza Alta,Block Bootstrapping,1.0351402351515762,30.76923076923077
-Est+Var_Media,Estacionario + Varianza Media,Block Bootstrapping,0.4886102623620015,33.23076923076923
-Est+Var_Baja,Estacionario + Varianza Baja,Block Bootstrapping,0.2574886854480998,33.84615384615385
-No +Var_Alta,No Estacionario + Varianza Alta,Block Bootstrapping,0.967225363330384,73.71428571428571
-No +Var_Media,No Estacionario + Varianza Media,Block Bootstrapping,0.47710002767401777,74.0
-No +Var_Baja,No Estacionario + Varianza Baja,Block Bootstrapping,0.2485688037075859,80.57142857142857
+Est+Var_Alta,Estacionario + Varianza Alta,AV-MCPS,0.9246961575993187,21.975308641975307
+Est+Var_Media,Estacionario + Varianza Media,Block Bootstrapping,0.4866783169492922,29.397293972939732
+Est+Var_Baja,Estacionario + Varianza Baja,Block Bootstrapping,0.25586802830890243,37.31707317073171
+No +Var_Alta,No Estacionario + Varianza Alta,Block Bootstrapping,0.967225363330384,74.28571428571429
+No +Var_Media,No Estacionario + Varianza Media,Block Bootstrapping,0.47710002767401777,74.85714285714286
+No +Var_Baja,No Estacionario + Varianza Baja,Block Bootstrapping,0.2485688037075859,80.0

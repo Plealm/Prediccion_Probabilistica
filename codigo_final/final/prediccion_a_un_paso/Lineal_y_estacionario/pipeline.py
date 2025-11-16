@@ -908,29 +908,37 @@ class AREPD:
             model = Ridge(alpha=self.alpha, fit_intercept=False).fit(X, y, sample_weight=weights / (weights.sum() + 1e-8))
             return self._Qn_distribution(model.predict(X))
         except Exception: return []
-
 import xgboost as xgb
 import numpy as np
 import pandas as pd
-from typing import Union
+from typing import Union, List, Dict, Tuple
 from bayes_opt import BayesianOptimization
+
 
 class MondrianCPSModel:
     """
-    Implementación corregida y DETERMINISTA del Mondrian Conformal Predictive System (MCPS)
-    siguiendo la teoría del paper original.
+    Mondrian Conformal Predictive System (MCPS) con τ ~ Uniform(0, 1).
+    
+    Implementación siguiendo la teoría del paper original donde τ es aleatorio
+    para garantizar las propiedades teóricas de cobertura.
     """
     
     def __init__(self, n_lags: int = 10, n_bins: int = 10, test_size: float = 0.25,
                  random_state: int = 42, verbose: bool = False):
-        
+        """
+        Args:
+            n_lags: Número de lags para features temporales
+            n_bins: Número de bins para estratificación Mondrian
+            test_size: Proporción de datos para calibración
+            random_state: Semilla para reproducibilidad
+            verbose: Si True, imprime información de optimización
+        """
         self.n_lags = n_lags
         self.n_bins = n_bins
         self.test_size = test_size
         self.random_state = random_state
         self.verbose = verbose
-        # El rng ahora solo se usaría en la optimización, pero la mantenemos por consistencia
-        self.rng = np.random.default_rng(random_state) 
+        self.rng = np.random.default_rng(random_state)
         
         self.base_model = xgb.XGBRegressor(
             objective='reg:squarederror', 
@@ -952,27 +960,23 @@ class MondrianCPSModel:
     
     def _compute_cdf(self, scores: np.ndarray, y_value: float) -> float:
         """
-        Computa la CDF según la fórmula teórica del MCPS de forma DETERMINISTA.
+        Computa la CDF según la fórmula teórica del MCPS con τ aleatorio.
         
-        F̂(y|x) = (n + τ)/(N_c + 1) si y ∈ (C_(n), C_(n+1))
-        donde τ se fija en 0.5 para garantizar la replicabilidad.
+        F̂(y|x) = (n + τ)/(N_c + 1) donde τ ~ Uniform(0, 1)
         """
         if len(scores) == 0:
             return 0.5
             
         sorted_scores = np.sort(scores)
         n = np.searchsorted(sorted_scores, y_value, side='right')
-        
-        # Suavizado DETERMINISTA usando el valor esperado de la variable uniforme
-        tau = 0.5 # CORRECCIÓN CLAVE
-        
+        tau = self.rng.uniform(0, 1)
         cdf_value = (n + tau) / (len(scores) + 1)
         
         return np.clip(cdf_value, 0, 1)
     
     def _create_distribution_from_scores(self, scores: np.ndarray) -> List[Dict[str, float]]:
         """
-        Crea distribución discreta a partir de scores de calibración.
+        Crea distribución discreta a partir de scores con τ ~ U(0,1).
         """
         if len(scores) == 0:
             return [{'value': 0.0, 'probability': 1.0}]
@@ -1006,6 +1010,7 @@ class MondrianCPSModel:
 
     def optimize_hyperparameters(self, df: Union[pd.DataFrame, np.ndarray], 
                                 reference_noise: np.ndarray) -> Tuple[Dict, float]:
+        """Optimiza hiperparámetros usando ECRPS."""
         series = df['valor'].values if isinstance(df, pd.DataFrame) else np.asarray(df).flatten()
 
         def objective(n_lags, n_bins):
@@ -1057,11 +1062,12 @@ class MondrianCPSModel:
             best_ecrps = float('inf')
         
         if self.verbose:
-            print(f"Optimización MCPS (ECRPS: {best_ecrps:.4f}): {self.best_params}")
+            print(f"Optimización MCPS [τ~U(0,1)] (ECRPS: {best_ecrps:.4f}): {self.best_params}")
             
         return self.best_params, best_ecrps
 
     def fit_predict(self, df: Union[pd.DataFrame, np.ndarray]) -> List[Dict[str, float]]:
+        """Ajusta el modelo y genera distribución predictiva."""
         series = df['valor'].values if isinstance(df, pd.DataFrame) else np.asarray(df).flatten()
         
         if self.best_params:
@@ -1112,27 +1118,13 @@ class MondrianCPSModel:
         return self._create_distribution_from_scores(calibration_scores)
 
 
-
-
-import xgboost as xgb
-import numpy as np
-import pandas as pd
-from typing import Union, List, Dict, Tuple
-from bayes_opt import BayesianOptimization
-
 class AdaptiveVolatilityMondrianCPS:
     """
-    Adaptive Volatility Mondrian Conformal Predictive System (AV-MCPS).
-
-    Este modelo extiende el MCPS estándar creando categorías Mondrian bidimensionales.
-    En lugar de agrupar los datos solo por el nivel de la predicción puntual,
-    los agrupa simultáneamente por:
-    1. El nivel de la predicción (cuantil de la predicción).
-    2. La volatilidad local de la serie (cuantil de la desviación estándar reciente).
-
-    Esto permite que el modelo genere distribuciones predictivas mucho más adaptativas,
-    produciendo intervalos más amplios en períodos de alta inestabilidad y más estrechos
-    en períodos de calma, incluso para el mismo valor de predicción.
+    Adaptive Volatility Mondrian CPS (AV-MCPS) con τ ~ Uniform(0, 1).
+    
+    Extiende MCPS con estratificación bidimensional:
+    1. Nivel de predicción (cuantil de la predicción)
+    2. Volatilidad local (cuantil de la desviación estándar)
     """
 
     def __init__(self,
@@ -1144,16 +1136,14 @@ class AdaptiveVolatilityMondrianCPS:
                  random_state: int = 42,
                  verbose: bool = False):
         """
-        Inicializa el modelo AV-MCPS.
-
         Args:
-            n_lags (int): Número de observaciones pasadas a usar como características.
-            n_pred_bins (int): Número de cuantiles para categorizar las predicciones.
-            n_vol_bins (int): Número de cuantiles para categorizar la volatilidad.
-            volatility_window (int): Ventana temporal para calcular la volatilidad local.
-            test_size (float): Proporción del dataset a usar para calibración.
-            random_state (int): Semilla para reproducibilidad.
-            verbose (bool): Si es True, imprime información durante la optimización.
+            n_lags: Número de observaciones pasadas como características
+            n_pred_bins: Bins para categorizar predicciones
+            n_vol_bins: Bins para categorizar volatilidad
+            volatility_window: Ventana para calcular volatilidad local
+            test_size: Proporción para calibración
+            random_state: Semilla para reproducibilidad
+            verbose: Imprime información durante optimización
         """
         self.n_lags = n_lags
         self.n_pred_bins = n_pred_bins
@@ -1164,7 +1154,6 @@ class AdaptiveVolatilityMondrianCPS:
         self.verbose = verbose
         self.rng = np.random.default_rng(random_state)
         
-        # Modelo base robusto y rápido
         self.base_model = xgb.XGBRegressor(
             objective='reg:squarederror',
             n_estimators=150,
@@ -1178,7 +1167,7 @@ class AdaptiveVolatilityMondrianCPS:
         self.best_params = {}
 
     def _create_lag_matrix(self, series: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-        """Crea la matriz de características (lags) y el vector objetivo."""
+        """Crea matriz de características (lags) y vector objetivo."""
         X, y = [], []
         for i in range(len(series) - self.n_lags):
             X.append(series[i:(i + self.n_lags)])
@@ -1186,42 +1175,60 @@ class AdaptiveVolatilityMondrianCPS:
         return np.array(X), np.array(y)
     
     def _calculate_volatility(self, series: np.ndarray) -> np.ndarray:
-        """Calcula la volatilidad local para cada punto que puede ser predicho."""
-        # Usamos pandas rolling para un cálculo eficiente y limpio
+        """Calcula volatilidad local para cada punto predicible."""
         volatility = pd.Series(series).rolling(
             window=self.volatility_window
         ).std().bfill().values
         
-        # Devolvemos la volatilidad correspondiente a cada muestra en X
         return volatility[self.n_lags - 1 : -1]
 
     def _create_distribution_from_scores(self, scores: np.ndarray) -> List[Dict[str, float]]:
-        """Crea una distribución de probabilidad discreta a partir de los scores de conformidad."""
+        """
+        Crea distribución de probabilidad discreta con τ ~ U(0,1).
+        """
         if len(scores) == 0:
             return [{'value': 0.0, 'probability': 1.0}]
         
-        counts = pd.Series(scores).value_counts(normalize=True)
-        return [{'value': val, 'probability': prob} for val, prob in counts.items()]
+        unique_scores = np.unique(scores)
+        if len(unique_scores) == 1:
+            return [{'value': float(unique_scores[0]), 'probability': 1.0}]
+        
+        result = []
+        for i, score in enumerate(unique_scores):
+            tau = self.rng.uniform(0, 1)
+            n = np.searchsorted(np.sort(scores), score, side='right')
+            
+            if i == 0:
+                prob = (n + tau) / (len(scores) + 1)
+            else:
+                n_prev = np.searchsorted(np.sort(scores), unique_scores[i-1], side='right')
+                tau_prev = self.rng.uniform(0, 1)
+                prob = ((n + tau) - (n_prev + tau_prev)) / (len(scores) + 1)
+            
+            if prob > 1e-10:
+                result.append({'value': float(score), 'probability': float(prob)})
+        
+        total_prob = sum(d['probability'] for d in result)
+        if total_prob > 0:
+            for d in result:
+                d['probability'] /= total_prob
+        
+        return result if result else [{'value': float(np.mean(unique_scores)), 'probability': 1.0}]
 
     def optimize_hyperparameters(self, df: Union[pd.DataFrame, np.ndarray],
                                  reference_noise: np.ndarray) -> Tuple[Dict, float]:
-        """
-        Optimiza los hiperparámetros clave del modelo usando optimización Bayesiana.
-        """
+        """Optimiza hiperparámetros con optimización Bayesiana."""
         series = df['valor'].values if isinstance(df, pd.DataFrame) else np.asarray(df).flatten()
 
         def objective(n_lags, n_pred_bins, n_vol_bins, volatility_window):
             try:
-                # Guardar estado anterior para restaurarlo después
                 old_params = (self.n_lags, self.n_pred_bins, self.n_vol_bins, self.volatility_window)
                 
-                # Asignar nuevos hiperparámetros (asegurando que sean enteros)
                 self.n_lags = int(n_lags)
                 self.n_pred_bins = int(n_pred_bins)
                 self.n_vol_bins = int(n_vol_bins)
                 self.volatility_window = int(volatility_window)
                 
-                # Validar que los parámetros son factibles
                 if len(series) <= self.n_lags * 2 or self.volatility_window < 2:
                     self.n_lags, self.n_pred_bins, self.n_vol_bins, self.volatility_window = old_params
                     return -1e10
@@ -1235,17 +1242,14 @@ class AdaptiveVolatilityMondrianCPS:
                 probs = [d['probability'] for d in dist]
                 samples = self.rng.choice(values, size=2000, p=probs, replace=True)
                 
-                # Asumiendo que ecrps está definida globalmente
                 ecrps_score = ecrps(samples, reference_noise)
                 
-                # Restaurar estado
                 self.n_lags, self.n_pred_bins, self.n_vol_bins, self.volatility_window = old_params
                 
                 return -ecrps_score
             except Exception:
                 return -1e10
 
-        # Rangos de búsqueda para los hiperparámetros
         pbounds = {
             'n_lags': (5, 30.99),
             'n_pred_bins': (3, 15.99),
@@ -1253,7 +1257,8 @@ class AdaptiveVolatilityMondrianCPS:
             'volatility_window': (5, 40.99)
         }
         
-        optimizer = BayesianOptimization(f=objective, pbounds=pbounds, random_state=self.random_state, verbose=0)
+        optimizer = BayesianOptimization(f=objective, pbounds=pbounds, 
+                                        random_state=self.random_state, verbose=0)
         
         try:
             optimizer.maximize(init_points=5, n_iter=15)
@@ -1266,17 +1271,14 @@ class AdaptiveVolatilityMondrianCPS:
             best_ecrps = float('inf')
         
         if self.verbose:
-            print(f"✅ Opt. AV-MCPS (ECRPS: {best_ecrps:.4f}): {self.best_params}")
+            print(f"✅ Opt. AV-MCPS [τ~U(0,1)] (ECRPS: {best_ecrps:.4f}): {self.best_params}")
             
         return self.best_params, best_ecrps
 
     def fit_predict(self, df: Union[pd.DataFrame, np.ndarray]) -> List[Dict[str, float]]:
-        """
-        Ajusta el modelo y genera la distribución predictiva para el siguiente paso.
-        """
+        """Ajusta el modelo y genera distribución predictiva con estratificación 2D."""
         series = df['valor'].values if isinstance(df, pd.DataFrame) else np.asarray(df).flatten()
         
-        # Usar hiperparámetros optimizados si están disponibles
         if self.best_params:
             self.__dict__.update(self.best_params)
 
@@ -1284,11 +1286,9 @@ class AdaptiveVolatilityMondrianCPS:
             mean_val = np.mean(series) if series.size > 0 else 0
             return [{'value': mean_val, 'probability': 1.0}]
         
-        # 1. Crear lags y calcular volatilidad
         X, y = self._create_lag_matrix(series)
         volatility_features = self._calculate_volatility(series)
         
-        # 2. Preparar datos de prueba y dividir en entrenamiento/calibración
         x_test = series[-self.n_lags:].reshape(1, -1)
         test_volatility = np.std(series[-self.volatility_window:])
         
@@ -1300,44 +1300,37 @@ class AdaptiveVolatilityMondrianCPS:
         y_train, y_calib = y[:-n_calib], y[-n_calib:]
         vol_calib = volatility_features[-n_calib:]
         
-        # 3. Entrenar modelo base y hacer predicciones
         self.base_model.fit(X_train, y_train)
         point_prediction = self.base_model.predict(x_test)[0]
         calib_preds = self.base_model.predict(X_calib)
         
-        # 4. Categorización Mondrian 2D
         try:
-            # Bins para las predicciones
             _, pred_bin_edges = pd.qcut(calib_preds, self.n_pred_bins, retbins=True, duplicates='drop')
-            # Bins para la volatilidad
             _, vol_bin_edges = pd.qcut(vol_calib, self.n_vol_bins, retbins=True, duplicates='drop')
-        except ValueError: # No hay suficientes puntos únicos para crear bins
+        except ValueError:
             return [{'value': float(point_prediction), 'probability': 1.0}]
 
-        # Asignar cada punto de calibración a su bin 2D
-        calib_pred_indices = np.digitize(calib_preds, bins=pred_bin_edges[:-1]) -1
-        calib_vol_indices = np.digitize(vol_calib, bins=vol_bin_edges[:-1]) -1
+        calib_pred_indices = np.digitize(calib_preds, bins=pred_bin_edges[:-1]) - 1
+        calib_vol_indices = np.digitize(vol_calib, bins=vol_bin_edges[:-1]) - 1
         
-        # Encontrar el bin 2D para el punto de prueba
-        test_pred_bin = np.digitize(point_prediction, bins=pred_bin_edges[:-1]) -1
-        test_vol_bin = np.digitize(test_volatility, bins=vol_bin_edges[:-1]) -1
+        test_pred_bin = np.digitize(point_prediction, bins=pred_bin_edges[:-1]) - 1
+        test_vol_bin = np.digitize(test_volatility, bins=vol_bin_edges[:-1]) - 1
 
-        # 5. Seleccionar scores de conformidad del bin correspondiente
         local_mask = (calib_pred_indices == test_pred_bin) & (calib_vol_indices == test_vol_bin)
         
-        # Lógica de fallback robusta
-        if np.sum(local_mask) < 5: # Si el bin 2D está casi vacío...
-            local_mask = (calib_pred_indices == test_pred_bin) # ...usar solo el bin de predicción (1D)
-            if np.sum(local_mask) < 5: # Si incluso ese está vacío...
-                local_mask = np.ones_like(calib_preds, dtype=bool) # ...usar todos los datos (conformal estándar)
+        if np.sum(local_mask) < 5:
+            local_mask = (calib_pred_indices == test_pred_bin)
+            if np.sum(local_mask) < 5:
+                local_mask = np.ones_like(calib_preds, dtype=bool)
 
         local_y = y_calib[local_mask]
         local_preds = calib_preds[local_mask]
         
-        # 6. Calcular scores y construir la distribución final
         calibration_scores = point_prediction + (local_y - local_preds)
         
         return self._create_distribution_from_scores(calibration_scores)
+
+
 
 
 import tensorflow as tf
@@ -2021,3 +2014,454 @@ class ScenarioRunnerMejorado:
             plt.tight_layout(rect=[0, 0.03, 1, 0.95])
             plt.show()
             plt.close(fig)
+
+
+import numpy as np
+import pandas as pd
+import concurrent.futures
+from tqdm import tqdm
+import os
+from typing import List, Dict, Tuple
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+
+class PipelineMCPSOnly:
+    """Pipeline optimizado SOLO para MCPS y AV-MCPS."""
+    N_TEST_STEPS = 5
+
+    def __init__(self, model_type='ARMA(1,1)', phi=[0.7], theta=[0.3], 
+                 sigma=1.2, noise_dist='t-student', n_samples=250, scenario_id=None,
+                 seed=42, verbose=False):
+        self.config = {
+            'model_type': model_type, 'phi': phi, 'theta': theta, 'sigma': sigma,
+            'noise_dist': noise_dist, 'n_samples': n_samples, 'seed': seed,
+            'verbose': verbose
+        }
+        self.scenario_id = scenario_id
+        self.verbose = verbose
+        self.rng = np.random.default_rng(seed)
+        self.simulator, self.full_series, self.full_errors = None, None, None
+        self.rolling_ecrps: List[Dict] = []
+
+    def _setup_models(self) -> Dict:
+        """Inicializa ÚNICAMENTE MCPS y AV-MCPS."""
+        seed = self.config['seed']
+        
+        return {
+            'MCPS': MondrianCPSModel(random_state=seed, verbose=False),
+            'AV-MCPS': AdaptiveVolatilityMondrianCPS(random_state=seed, verbose=False)
+        }
+    
+    def execute(self, show_intermediate_plots=False):
+        """Ejecuta pipeline con optimización única para MCPS y AV-MCPS."""
+        sim_config = {k: v for k, v in self.config.items() 
+                     if k not in ['n_samples', 'verbose']}
+        self.simulator = ARMASimulation(**sim_config)
+        self.full_series, self.full_errors = self.simulator.simulate(
+            n=self.config['n_samples'], burn_in=50
+        )
+        
+        initial_train_len = len(self.full_series) - self.N_TEST_STEPS
+        initial_train_series = self.full_series[:initial_train_len]
+        df_initial_train = pd.DataFrame({'valor': initial_train_series})
+        
+        all_models = self._setup_models()
+        
+        # OPTIMIZACIÓN UNA SOLA VEZ
+        initial_errors = self.full_errors[:initial_train_len]
+        reference_noise_for_opt = self.simulator.get_true_next_step_samples(
+            initial_train_series, initial_errors, 5000
+        )
+
+        for name, model in all_models.items():
+            if hasattr(model, 'optimize_hyperparameters'):
+                try:
+                    model.optimize_hyperparameters(df_initial_train, reference_noise_for_opt)
+                    if self.verbose:
+                        print(f"✅ Optimizado {name}")
+                except Exception as e:
+                    if self.verbose:
+                        print(f"❌ Error optimizando {name}: {e}")
+        
+        # VENTANA RODANTE SIN RE-OPTIMIZACIÓN
+        for t in range(self.N_TEST_STEPS):
+            step_t = initial_train_len + t
+            
+            history_series = self.full_series[:step_t]
+            history_errors = self.full_errors[:step_t]
+            df_history = pd.DataFrame({'valor': history_series})
+            
+            theoretical_samples = self.simulator.get_true_next_step_samples(
+                history_series, history_errors, 20000
+            )
+
+            step_ecrps = {'Paso': t + 1}
+            step_distributions = {'Teórica': theoretical_samples}
+            
+            # Predicción con modelos MCPS
+            for name, model in all_models.items():
+                try:
+                    distribution = model.fit_predict(df_history)
+                    
+                    if distribution and len(distribution) > 0:
+                        values = np.array([d['value'] for d in distribution])
+                        probs = np.array([d['probability'] for d in distribution])
+                        
+                        # Normalizar probabilidades
+                        probs = probs / probs.sum()
+                        
+                        # Generar muestras
+                        samples = self.rng.choice(values, size=5000, p=probs, replace=True)
+                        step_distributions[name] = samples
+                        step_ecrps[name] = ecrps(samples, theoretical_samples)
+                    else:
+                        step_ecrps[name] = np.nan
+                        
+                except Exception as e:
+                    if self.verbose:
+                        print(f"Error en {name} paso {t+1}: {e}")
+                    step_ecrps[name] = np.nan
+            
+            self.rolling_ecrps.append(step_ecrps)
+            
+            # Graficar si está activado
+            if show_intermediate_plots:
+                plots_directory = "plots_densidades_mcps_only"
+                os.makedirs(plots_directory, exist_ok=True)
+                
+                plot_filename = os.path.join(
+                    plots_directory, 
+                    f"escenario_{self.scenario_id}_paso_{t + 1}.png"
+                )
+                
+                title = f"MCPS vs AV-MCPS - Escenario {self.scenario_id} - Paso {t + 1}"
+                metrics_for_plot = {k: v for k, v in step_ecrps.items() if k != 'Paso'}
+                
+                PlotManager.plot_density_comparison(
+                    step_distributions, 
+                    metrics_for_plot, 
+                    title, 
+                    save_path=plot_filename
+                )
+            
+            clear_all_sessions()
+        
+        # Limpieza final
+        del all_models
+        clear_all_sessions()
+        
+        return self._prepare_results_df()
+        
+    def _prepare_results_df(self):
+        """Prepara DataFrame con resultados."""
+        if not self.rolling_ecrps:
+            return pd.DataFrame()
+        
+        ecrps_df = pd.DataFrame(self.rolling_ecrps).set_index('Paso')
+        model_cols = ['MCPS', 'AV-MCPS']
+        
+        # Determinar mejor modelo por paso
+        ecrps_df['Mejor Modelo'] = ecrps_df[model_cols].idxmin(axis=1)
+        
+        # Calcular promedios
+        averages = ecrps_df[model_cols].mean(numeric_only=True)
+        best_overall_model = averages.idxmin()
+        
+        ecrps_df.loc['Promedio'] = averages
+        ecrps_df.loc['Promedio', 'Mejor Modelo'] = best_overall_model
+        
+        return ecrps_df
+
+
+class ScenarioRunnerMCPSOnly:
+    """Runner exclusivo para MCPS y AV-MCPS con todos los escenarios."""
+    
+    def __init__(self, seed=420):
+        self.seed = seed
+        self.model_names = ['MCPS', 'AV-MCPS']
+        
+        # Configuraciones de modelos ARMA
+        self.models_config = [
+            {'model_type': 'AR(1)', 'phi': [0.9], 'theta': []},
+            {'model_type': 'AR(2)', 'phi': [0.5, -0.3], 'theta': []},
+            {'model_type': 'MA(1)', 'phi': [], 'theta': [0.7]},
+            {'model_type': 'MA(2)', 'phi': [], 'theta': [0.4, 0.2]},
+            {'model_type': 'ARMA(1,1)', 'phi': [0.6], 'theta': [0.3]},
+            {'model_type': 'ARMA(2,2)', 'phi': [0.4, -0.2], 'theta': [0.5, 0.1]}
+        ]
+        
+        # Distribuciones de ruido
+        self.distributions = ['normal', 'uniform', 'exponential', 't-student', 'mixture']
+        
+        # Varianzas
+        self.variances = [0.2, 0.5, 1.0, 3.0]
+
+    def _generate_scenarios(self, n_scenarios):
+        """Genera todas las combinaciones de escenarios."""
+        scenarios, count = [], 0
+        for model in self.models_config:
+            for dist in self.distributions:
+                for var in self.variances:
+                    if count < n_scenarios:
+                        scenarios.append({
+                            **model, 
+                            'noise_dist': dist, 
+                            'sigma': np.sqrt(var), 
+                            'scenario_id': count + 1
+                        })
+                        count += 1
+        return [{'config': sc, 'seed': self.seed + i} for i, sc in enumerate(scenarios)]
+
+    def _prepare_rows_from_result(self, scenario_config, results_df):
+        """Convierte resultados en filas para Excel."""
+        rows = []
+        if results_df is None or results_df.empty:
+            return rows
+             
+        for step, data_row in results_df.iterrows():
+            row = {
+                'Paso': step,
+                'Modelo ARMA': scenario_config['model_type'],
+                'Valores de AR': str(scenario_config['phi']),
+                'Valores MA': str(scenario_config['theta']),
+                'Distribución': scenario_config['noise_dist'],
+                'Varianza error': np.round(scenario_config['sigma'] ** 2, 2),
+                'MCPS': data_row.get('MCPS', np.nan),
+                'AV-MCPS': data_row.get('AV-MCPS', np.nan),
+                'Mejor Modelo': data_row.get('Mejor Modelo', 'Error')
+            }
+            rows.append(row)
+        return rows
+
+    def _run_single_scenario(self, scenario_dict):
+        """Ejecuta un solo escenario."""
+        try:
+            config = scenario_dict['config']
+            seed = scenario_dict['seed']
+            plot = scenario_dict.get('plot', False)
+            
+            pipeline = PipelineMCPSOnly(
+                model_type=config['model_type'],
+                phi=config['phi'],
+                theta=config['theta'],
+                sigma=config['sigma'],
+                noise_dist=config['noise_dist'],
+                n_samples=250,
+                scenario_id=config['scenario_id'],
+                seed=seed,
+                verbose=False
+            )
+            
+            results_df = pipeline.execute(show_intermediate_plots=plot)
+            return (config, results_df)
+            
+        except Exception as e:
+            print(f"Error en escenario {scenario_dict['config'].get('scenario_id', '?')}: {e}")
+            return (scenario_dict['config'], None)
+
+    def _run_batch(self, batch_scenarios, restart_every=10, plot=False):
+        """Ejecuta lote con reinicio periódico."""
+        batch_results = []
+        max_workers = 1  # Procesamiento secuencial para estabilidad
+        
+        # Dividir en sublotes
+        sublotes = [batch_scenarios[i:i+restart_every] 
+                   for i in range(0, len(batch_scenarios), restart_every)]
+        
+        for sublote_idx, sublote in enumerate(sublotes):
+            print(f"    Sublote {sublote_idx + 1}/{len(sublotes)}")
+            
+            # Añadir flag de plot
+            for sc in sublote:
+                sc['plot'] = plot
+
+            # Nuevo executor por sublote
+            with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
+                futures = {
+                    executor.submit(self._run_single_scenario, sc): sc 
+                    for sc in sublote
+                }
+                
+                for future in tqdm(concurrent.futures.as_completed(futures), 
+                                  total=len(futures), desc="      Escenarios"):
+                    try:
+                        scenario_config, results_df = future.result(timeout=600)
+                        if results_df is not None:
+                            batch_results.append((scenario_config, results_df))
+                    except concurrent.futures.TimeoutError:
+                        sc_id = futures[future]['config'].get('scenario_id', 'N/A')
+                        print(f"      ⏱ Timeout en escenario {sc_id}")
+                    except Exception as e:
+                        print(f"      ❌ Error: {e}")
+            
+            # Limpieza entre sublotes
+            clear_all_sessions()
+            import time
+            time.sleep(2)
+        
+        return batch_results
+
+    def run(self, n_scenarios=120, excel_filename="resultados_mcps_only.xlsx", 
+            batch_size=20, restart_every=5, plot: bool = False):
+        """
+        Ejecuta todos los escenarios solo con MCPS y AV-MCPS.
+        
+        Args:
+            n_scenarios: Número total de escenarios a ejecutar
+            excel_filename: Nombre del archivo Excel de salida
+            batch_size: Tamaño de cada lote
+            restart_every: Reiniciar executor cada N escenarios
+            plot: Si True, guarda gráficos de densidad por paso
+        """
+        # Crear directorio para plots si es necesario
+        if plot:
+            self.plots_directory = "plots_densidades_mcps_only"
+            os.makedirs(self.plots_directory, exist_ok=True)
+            print(f"✅ Gráficos activados. Carpeta: '{self.plots_directory}'")
+        
+        all_scenarios_configs = self._generate_scenarios(n_scenarios)
+        all_excel_rows = []
+        
+        n_batches = (len(all_scenarios_configs) + batch_size - 1) // batch_size
+        
+        print(f"\n{'='*70}")
+        print(f"🚀 EJECUTANDO {len(all_scenarios_configs)} ESCENARIOS")
+        print(f"📊 Modelos: MCPS y AV-MCPS únicamente")
+        print(f"📦 {n_batches} lotes de máximo {batch_size} escenarios")
+        print(f"{'='*70}\n")
+        
+        for batch_num in range(n_batches):
+            start_idx = batch_num * batch_size
+            end_idx = min((batch_num + 1) * batch_size, len(all_scenarios_configs))
+            batch = all_scenarios_configs[start_idx:end_idx]
+            
+            print(f"\n{'='*60}")
+            print(f"LOTE {batch_num + 1}/{n_batches} (Escenarios {start_idx + 1}-{end_idx})")
+            print(f"{'='*60}")
+            
+            batch_results = self._run_batch(batch, restart_every=restart_every, plot=plot)
+            
+            for scenario_config, results_df in batch_results:
+                new_rows = self._prepare_rows_from_result(scenario_config, results_df)
+                all_excel_rows.extend(new_rows)
+            
+            print(f"  🧹 Limpiando memoria del lote...")
+            clear_all_sessions()
+            import time
+            time.sleep(3)
+            
+            # Checkpoint cada 3 lotes
+            if all_excel_rows and (batch_num + 1) % 3 == 0:
+                temp_filename = f"checkpoint_mcps_batch_{batch_num + 1}.xlsx"
+                pd.DataFrame(all_excel_rows).to_excel(temp_filename, index=False)
+                print(f"  💾 Checkpoint guardado: {temp_filename}")
+
+        # Guardar resultados finales
+        if all_excel_rows:
+            df_final = pd.DataFrame(all_excel_rows)
+            
+            # Ordenar columnas
+            ordered_columns = [
+                'Paso', 'Modelo ARMA', 'Valores de AR', 'Valores MA', 
+                'Distribución', 'Varianza error', 
+                'MCPS', 'AV-MCPS', 'Mejor Modelo'
+            ]
+            df_final = df_final[ordered_columns]
+            
+            df_final.to_excel(excel_filename, index=False)
+            print(f"\n✅ {len(all_excel_rows)} resultados guardados en '{excel_filename}'")
+            
+            # Generar plots de resumen
+            self.plot_results_from_excel(excel_filename)
+        else:
+            print("\n❌ No se generaron resultados.")
+
+    def plot_results_from_excel(self, filename):
+        """Genera visualizaciones comparativas de MCPS vs AV-MCPS."""
+        try:
+            df_total = pd.read_excel(filename)
+        except FileNotFoundError:
+            print(f"❌ No se encontró '{filename}'.")
+            return
+
+        if df_total.empty:
+            print("⚠️ Archivo vacío.")
+            return
+
+        pasos_disponibles = df_total['Paso'].unique()
+
+        for step_name in pasos_disponibles:
+            df_step = df_total[df_total['Paso'] == step_name]
+
+            df_melted = df_step.melt(
+                value_vars=['MCPS', 'AV-MCPS'], 
+                var_name='Modelo', 
+                value_name='ECRPS'
+            )
+            wins = df_step['Mejor Modelo'].value_counts()
+            
+            title_prefix = (f"MCPS vs AV-MCPS - Paso {step_name}" 
+                          if step_name != "Promedio" 
+                          else "MCPS vs AV-MCPS - Resultados Generales")
+            
+            fig, axes = plt.subplots(1, 2, figsize=(16, 6))
+            fig.suptitle(title_prefix, fontsize=16, fontweight='bold')
+
+            # Boxplot
+            sns.boxplot(
+                ax=axes[0], 
+                data=df_melted, 
+                x='Modelo', 
+                y='ECRPS', 
+                palette=['#2E86AB', '#A23B72']
+            )
+            axes[0].set_title('Distribución de ECRPS', fontsize=13)
+            axes[0].set_xlabel('')
+            axes[0].set_ylabel('ECRPS', fontsize=11)
+            axes[0].grid(axis='y', alpha=0.3)
+            
+            # Pie chart
+            if not wins.empty:
+                colors = ['#2E86AB' if label == 'MCPS' else '#A23B72' 
+                         for label in wins.index]
+                
+                axes[1].pie(
+                    wins, 
+                    labels=wins.index, 
+                    autopct='%1.1f%%', 
+                    startangle=140,
+                    colors=colors, 
+                    wedgeprops={'edgecolor': 'black', 'linewidth': 1.5}
+                )
+                axes[1].set_title('Distribución de Victorias', fontsize=13)
+            else:
+                axes[1].text(0.5, 0.5, 'Sin datos', ha='center', va='center')
+                axes[1].set_title('Distribución de Victorias', fontsize=13)
+            
+            plt.tight_layout()
+            plt.show()
+            plt.close(fig)
+
+
+# Función auxiliar para ejecutar desde el main
+def run_mcps_comparison(n_scenarios=120, plot=False):
+    """
+    Función principal para ejecutar comparación MCPS vs AV-MCPS.
+    
+    Args:
+        n_scenarios: Número de escenarios (máximo 120)
+        plot: Si True, guarda gráficos de densidad por cada paso
+    """
+    runner = ScenarioRunnerMCPSOnly(seed=420)
+    runner.run(
+        n_scenarios=n_scenarios,
+        excel_filename="resultados_mcps_vs_av-mcps.xlsx",
+        batch_size=20,
+        restart_every=5,
+        plot=plot
+    )
+
+
+# USO:
+# run_mcps_comparison(n_scenarios=120, plot=False)
