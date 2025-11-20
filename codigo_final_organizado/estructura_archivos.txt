@@ -1,0 +1,31 @@
+﻿============================================================
+ESTRUCTURA DE ARCHIVOS Y CARPETAS
+============================================================
+Directorio base: C:\Users\pleal\Documents\Unal\Tesis\Codigo\Prediccion_Probabilistica\codigo_final_organizado
+Fecha de generacion: 2025-11-19 16:19:56
+
+[DIR] codigo_final_organizado (Directorio Raiz)
+
+[DIR] analisis
+[FILE] orden.ps1 (2,64 KB)
+[DIR] Simulaciones
+  [DIR] codigo_base
+    [DIR] __pycache__
+      [FILE] pipeline.cpython-312.pyc (8,74 KB)
+    [FILE] figuras.py (8,62 KB)
+    [FILE] metricas.py (2,89 KB)
+    [FILE] modelos.py (63,09 KB)
+    [FILE] pipeline.py (5,96 KB)
+    [FILE] runner.py (0,00 KB)
+    [FILE] simulacion.py (5,43 KB)
+  [DIR] lineal_estacionario
+    [FILE] ARMA.ipynb (2,09 KB)
+  [DIR] lineal_NO_estacionario
+  [DIR] NO_lineal_estacionario
+
+------------------------------------------------------------
+ESTADISTICAS:
+Total de archivos: 9
+Total de carpetas: 8
+TamaÃ±o total: 0,10 MB
+------------------------------------------------------------
