@@ -1,82 +1,78 @@
-# metricas.py
+# metricas.py (VERSIÓN ULTRA-OPTIMIZADA)
 
 import numpy as np
-from typing import Union
+from numba import jit, prange
 
+@jit(nopython=True, fastmath=True, cache=True)
 def crps(F_samples: np.ndarray, x: float) -> float:
     """
-    Calcula el Continuous Ranked Probability Score (CRPS) para una observación puntual.
-    
-    Implementa la fórmula (21) del paper Gneiting & Raftery (2007):
+    CRPS optimizado con Numba JIT.
     CRPS(F, x) = E_F|X - x| - (1/2) * E_F|X - X'|
-    
-    donde X y X' son copias independientes de la distribución F.
-    
-    Args:
-        F_samples: Muestras de la distribución predictiva F (puede ser de cualquier tamaño)
-        x: Valor observado (observación real que materializó)
-    
-    Returns:
-        Valor del CRPS (negativo, donde valores más cercanos a 0 son mejores)
-    
-    Referencias:
-        Gneiting, T., & Raftery, A. E. (2007). Strictly proper scoring rules, 
-        prediction, and estimation. Journal of the American Statistical Association, 
-        102(477), 359-378. Ecuación (21).
     """
-    F_samples = np.asarray(F_samples).flatten()
-    
-    if len(F_samples) == 0:
+    n = len(F_samples)
+    if n == 0:
         return np.nan
     
-    # Término 1: E_F|X - x| (distancia esperada entre predicción y observación)
-    term1 = np.mean(np.abs(F_samples - x))
+    # Término 1: E_F|X - x|
+    term1 = 0.0
+    for i in range(n):
+        term1 += abs(F_samples[i] - x)
+    term1 /= n
     
-    # Término 2: (1/2) * E_F|X - X'| (nitidez/dispersión de la predicción)
-    # Usamos broadcasting para calcular todas las diferencias
-    pairwise_diffs = np.abs(F_samples[:, np.newaxis] - F_samples)
-    term2 = 0.5 * np.mean(pairwise_diffs)
+    # Término 2: (1/2) * E_F|X - X'| - usando fórmula eficiente
+    # Para muestras ordenadas: E|X-X'| = (2/n²) * Σᵢ (2i - n - 1) * X_{(i)}
+    sorted_samples = np.sort(F_samples)
+    term2 = 0.0
+    for i in range(n):
+        term2 += (2.0 * i - n + 1.0) * sorted_samples[i]
+    term2 = abs(term2) / (n * n)
     
-    # CRPS = término1 - término2 (en orientación negativa: valores más negativos = peor)
     return term1 - term2
 
 
-def ecrps(samples_F: np.ndarray, samples_G: np.ndarray) -> float:
+@jit(nopython=True, fastmath=True, parallel=True, cache=True)
+def ecrps_fast(forecast_samples: np.ndarray, ground_truth_samples: np.ndarray) -> float:
     """
-    Calcula el Expected CRPS (ECRPS) como el promedio de múltiples CRPS.
-    
-    El ECRPS es simplemente el promedio del CRPS calculado para cada muestra
-    de la distribución verdadera G. Es decir:
-    
-    ECRPS(F, G) = (1/n_g) * Σ_i CRPS(F, g_i)
-    
-    donde g_i son las muestras de G.
-    
-    Args:
-        samples_F: Muestras de la distribución predictiva (pronóstico)
-        samples_G: Muestras de la distribución real (ground truth)
-    
-    Returns:
-        Valor escalar del ECRPS (promedio de CRPS individuales)
-    
-    Nota:
-        Esta métrica se usa cuando la distribución verdadera también es empírica
-        (representada por muestras), y queremos promediar el error de predicción
-        sobre todas las posibles observaciones de esa distribución.
+    ECRPS ultra-optimizado con Numba paralelo.
+    Pre-calcula término constante y paraleliza sobre ground_truth.
     """
-    forecast_samples = np.asarray(samples_F).flatten()
-    ground_truth_samples = np.asarray(samples_G).flatten()
-
+    n_f = len(forecast_samples)
     n_g = len(ground_truth_samples)
-
-    if len(forecast_samples) == 0 or n_g == 0:
-        return np.nan
-
-    # Calcular CRPS para cada muestra de G y promediar
-    crps_values = []
-    for g_i in ground_truth_samples:
-        crps_i = crps(forecast_samples, g_i)
-        crps_values.append(crps_i)
     
-    # ECRPS es simplemente el promedio de todos los CRPS
-    return np.mean(crps_values)
+    if n_f == 0 or n_g == 0:
+        return np.nan
+    
+    # Pre-ordenar forecast para cálculo eficiente del término 2
+    sorted_forecast = np.sort(forecast_samples)
+    
+    # Pre-calcular término 2 (constante para todos los g_i)
+    term2_base = 0.0
+    for i in range(n_f):
+        term2_base += (2.0 * i - n_f + 1.0) * sorted_forecast[i]
+    term2_base = abs(term2_base) / (n_f * n_f)
+    
+    # Calcular CRPS para cada muestra de ground truth en paralelo
+    total_crps = 0.0
+    for k in prange(n_g):
+        g_k = ground_truth_samples[k]
+        
+        # Término 1 para este g_k
+        term1 = 0.0
+        for i in range(n_f):
+            term1 += abs(forecast_samples[i] - g_k)
+        term1 /= n_f
+        
+        total_crps += (term1 - term2_base)
+    
+    return total_crps / n_g
+
+
+def ecrps(samples_F: np.ndarray, samples_G: np.ndarray) -> float:
+    """Wrapper para compatibilidad."""
+    F = np.asarray(samples_F, dtype=np.float64).flatten()
+    G = np.asarray(samples_G, dtype=np.float64).flatten()
+    
+    if len(F) == 0 or len(G) == 0:
+        return np.nan
+    
+    return ecrps_fast(F, G)
