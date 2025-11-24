@@ -4,7 +4,6 @@ import os
 from tqdm import tqdm
 warnings.filterwarnings("ignore")
 
-# Configuración de hilos para evitar conflictos con joblib
 n_threads = str(os.cpu_count())
 os.environ["OMP_NUM_THREADS"] = n_threads
 os.environ["OPENBLAS_NUM_THREADS"] = n_threads
@@ -12,7 +11,7 @@ os.environ["MKL_NUM_THREADS"] = n_threads
 os.environ["NUMEXPR_NUM_THREADS"] = n_threads
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
-from pipeline import Pipeline140SinSesgos
+from pipeline import Pipeline140SinSesgos_ARMA, Pipeline140SinSesgos_ARIMA
 import pandas as pd
 import numpy as np
 
@@ -26,7 +25,6 @@ def run_analysis(df_final):
     model_cols = ['AREPD', 'AV-MCPS', 'Block Bootstrapping', 'DeepAR', 
                   'EnCQR-LSTM', 'LSPM', 'LSPMW', 'MCPS', 'Sieve Bootstrap']
     
-    # Filtrar columnas que realmente existen en el DF
     model_cols = [c for c in model_cols if c in df_final.columns]
     
     if 'Paso' in df_final.columns:
@@ -85,22 +83,17 @@ def main_full_140():
     print("INICIANDO SIMULACIÓN DE 140 ESCENARIOS")
     print("="*80)
     
-    # Crear pipeline
-    pipeline = Pipeline140SinSesgos(
+    pipeline = Pipeline140SinSesgos_ARMA(
         n_boot=1000,
         seed=42,
         verbose=False
     )
     
-    # Ejecutar por lotes
-    # batch_size=10 significa que procesará 10 escenarios en paralelo, 
-    # limpiará RAM, guardará Excel y seguirá con los siguientes 10.
     df_final = pipeline.run_all(
         excel_filename="resultados_140_FINAL_FIXED.xlsx",
         batch_size=10 
     )
     
-    # Análisis final
     run_analysis(df_final)
     
     elapsed = time.time() - start_time
@@ -110,45 +103,94 @@ def main_full_140():
 
 
 def main_two_scenarios():
-    """Ejecución con SOLO DOS ESCENARIOS (para verificación rápida)."""
+    """
+    FIX: Ejecuta solo 2 escenarios DENTRO del wrapper de paralelización.
+    No hace monkey patching problemático.
+    """
     start_time = time.time()
     
     print("="*80)
     print("EVALUACIÓN CON SOLO 2 ESCENARIOS")
     print("="*80)
     
-    pipeline = Pipeline140SinSesgos(n_boot=1000, seed=42, verbose=False)
+    # Crear pipeline con configuración especial
+    pipeline = Pipeline140SinSesgos_ARMA(n_boot=1000, seed=42, verbose=True)
     
-    # --- MONKEY PATCHING PARA PRUEBA RÁPIDA ---
-    # Sobreescribimos el método que genera escenarios para que solo devuelva 2
-    # IMPORTANTE: Debe devolver la tupla completa de 8 elementos que espera el wrapper paralelo
+    # Configurar solo 2 escenarios manualmente
+    pipeline.ARMA_CONFIGS = [
+        {'nombre': 'AR(1)', 'phi': [0.9], 'theta': []},
+        {'nombre': 'MA(1)', 'phi': [], 'theta': [0.7]}
+    ]
+    pipeline.DISTRIBUTIONS = ['normal']
+    pipeline.VARIANCES = [1.0]
     
-    def generate_two_scenarios(self):
-        scenarios = []
-        
-        # Escenario 1: AR(1) normal
-        arma_cfg1 = {'nombre': 'AR(1)', 'phi': [0.9], 'theta': []}
-        scenarios.append((
-            arma_cfg1, 'normal', 1.0, self.seed + 0,
-            self.N_TEST_STEPS, self.N_TRAIN, self.N_CALIBRATION, self.n_boot
-        ))
-        
-        # Escenario 2: MA(1) t-student
-        arma_cfg2 = {'nombre': 'MA(1)', 'phi': [], 'theta': [0.7]}
-        scenarios.append((
-            arma_cfg2, 't-student', 1.0, self.seed + 1,
-            self.N_TEST_STEPS, self.N_TRAIN, self.N_CALIBRATION, self.n_boot
-        ))
-        
-        return scenarios
-    
-    # Inyectar el método en la instancia
-    pipeline.generate_all_scenarios = generate_two_scenarios.__get__(pipeline)
-    
-    # Ejecutar
-    # NOTA: Eliminado batch_size=2 porque run_all ya no lo acepta
+    # Ahora generate_all_scenarios() solo generará 2 escenarios
     df_final = pipeline.run_all(
-        excel_filename="resultados_2_ESCENARIOS.xlsx"
+        excel_filename="resultados_2_ESCENARIOS.xlsx",
+        batch_size=2
+    )
+    
+    run_analysis(df_final)
+    
+    elapsed = time.time() - start_time
+    print(f"\n⏱  Tiempo total: {elapsed:.1f}s")
+    
+    return df_final
+
+def main_full_140_ARIMA():
+    """
+    Ejecución completa de 140 escenarios ARIMA con gestión de memoria.
+    """
+    start_time = time.time()
+    
+    print("="*80)
+    print("INICIANDO SIMULACIÓN DE 140 ESCENARIOS ARIMA")
+    print("="*80)
+    
+    pipeline = Pipeline140SinSesgos_ARIMA(
+        n_boot=1000,
+        seed=42,
+        verbose=False
+    )
+    
+    df_final = pipeline.run_all(
+        excel_filename="resultados_140_ARIMA_FINAL.xlsx",
+        batch_size=10 
+    )
+    
+    run_analysis(df_final)
+    
+    elapsed = time.time() - start_time
+    print(f"\n⏱  Tiempo total: {elapsed:.1f}s ({elapsed/3600:.2f} horas)")
+    
+    return df_final
+
+
+def main_two_scenarios_ARIMA():
+    """
+    Ejecuta solo 2 escenarios ARIMA para pruebas rápidas.
+    """
+    start_time = time.time()
+    
+    print("="*80)
+    print("EVALUACIÓN CON SOLO 2 ESCENARIOS ARIMA")
+    print("="*80)
+    
+    # Crear pipeline con configuración especial
+    pipeline = Pipeline140SinSesgos_ARIMA(n_boot=1000, seed=42, verbose=True)
+    
+    # Configurar solo 2 escenarios manualmente
+    pipeline.ARIMA_CONFIGS = [
+        {'nombre': 'ARIMA(1,1,0)', 'phi': [0.7], 'theta': []},
+        {'nombre': 'ARIMA(0,1,1)', 'phi': [], 'theta': [0.6]}
+    ]
+    pipeline.DISTRIBUTIONS = ['normal']
+    pipeline.VARIANCES = [1.0]
+    
+    # Ahora generate_all_scenarios() solo generará 2 escenarios
+    df_final = pipeline.run_all(
+        excel_filename="resultados_2_ESCENARIOS_ARIMA.xlsx",
+        batch_size=2
     )
     
     run_analysis(df_final)

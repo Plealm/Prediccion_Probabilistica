@@ -1,4 +1,5 @@
-# modelos.py (JUSTO Y OPTIMIZADO - 9 modelos sin sesgos)
+# MODELOS CORREGIDOS - Sin re-entrenamiento en rolling window
+# Solo incluyo las clases que necesitan corrección
 
 import numpy as np
 import pandas as pd
@@ -65,7 +66,7 @@ class CVResult:
 
 
 class CircularBlockBootstrapModel:
-    """CBB con congelamiento funcional."""
+    """CBB CORREGIDO: Congela block_length después de optimización."""
 
     def __init__(self, block_length: Union[int, str] = 'auto', n_boot: int = 1000,
                  random_state: int = 42, verbose: bool = False,
@@ -78,7 +79,7 @@ class CircularBlockBootstrapModel:
         self.optimize = optimize
         self.rng = np.random.default_rng(random_state)
         self.best_params = {}
-        self._frozen_block_length = None  # ← NUEVO: almacena valor congelado
+        self._frozen_block_length = None  # Valor congelado
 
     def _determine_block_length_optimal(self, n: int) -> int:
         """Heurística Politis-White (2004): l ≈ 1.5 × n^(1/3)"""
@@ -89,9 +90,18 @@ class CircularBlockBootstrapModel:
         min_l, max_l = self.hyperparam_ranges.get('block_length', [2, min(50, n//2)])
         return min(max(l_opt, min_l), max_l)
 
+    def freeze_hyperparameters(self, train_data: np.ndarray):
+        """CRÍTICO: Congela block_length basado en datos de entrenamiento+calibración."""
+        optimal_l = self._determine_block_length_optimal(len(train_data))
+        self._frozen_block_length = optimal_l
+        self.optimize = False
+        if self.verbose:
+            print(f"  CBB congelado: block_length={optimal_l}")
+
     def fit_predict(self, history: Union['pd.DataFrame', np.ndarray]) -> np.ndarray:
         """
-        CORREGIDO: Respeta block_length congelado.
+        CORREGIDO: Usa block_length congelado si existe.
+        NO re-optimiza en ventana rolling.
         """
         import pandas as pd
         series = history['valor'].values if isinstance(history, pd.DataFrame) else np.asarray(history).flatten()
@@ -100,14 +110,15 @@ class CircularBlockBootstrapModel:
         if n < 10:
             return np.full(self.n_boot, np.mean(series[-min(8, n):]))
         
-        # FIX BUG #14: Verificar si hay valor congelado
+        # FIX: Usar valor congelado si existe
         if self._frozen_block_length is not None:
             l = self._frozen_block_length
         elif isinstance(self.block_length, (int, np.integer)):
             l = max(2, int(self.block_length))
         else:
+            # Solo calcular si no está congelado (primer paso)
             l = self._determine_block_length_optimal(n)
-            if self.optimize and not isinstance(self.block_length, (int, np.integer)):
+            if self.optimize:
                 self.best_params = {'block_length': l}
         
         # CBB estándar
@@ -115,16 +126,10 @@ class CircularBlockBootstrapModel:
         starts = self.rng.integers(0, n, size=self.n_boot)
         positions = (starts + within_block_pos) % n
         return series[positions]
-    
-    def freeze_hyperparameters(self, train_data: np.ndarray):
-        """Congela block_length basado en datos de entrenamiento."""
-        optimal_l = self._determine_block_length_optimal(len(train_data))
-        self._frozen_block_length = optimal_l
-        self.optimize = False
 
 
 class SieveBootstrapModel:
-    """Sieve Bootstrap con congelamiento funcional y cache correcto."""
+    """Sieve Bootstrap CORREGIDO: Congela parámetros AR después de optimización."""
 
     def __init__(self, order: Union[int, str] = 'auto', n_boot: int = 1000,
                  random_state: int = 42, verbose: bool = False,
@@ -138,11 +143,11 @@ class SieveBootstrapModel:
         self.rng = np.random.default_rng(random_state)
         self.best_params = {}
         
-        # FIX #5: Cache mejorado con control de invalidación
+        # Cache para modelo congelado
         self._frozen_order = None
         self._frozen_params = None      # Parámetros AR congelados
         self._frozen_residuals = None   # Residuos congelados
-        self._is_frozen = False         # Flag explícito
+        self._is_frozen = False
 
     def _determine_order_aic(self, series: np.ndarray) -> int:
         """AIC con 5 candidatos estratégicos."""
@@ -171,7 +176,7 @@ class SieveBootstrapModel:
 
     def freeze_hyperparameters(self, train_data: np.ndarray):
         """
-        FIX #5: Congela order Y ajusta el modelo AR una sola vez.
+        CRÍTICO: Congela order Y ajusta el modelo AR UNA SOLA VEZ.
         Los parámetros y residuos se calculan aquí y se reutilizan.
         """
         from statsmodels.tsa.ar_model import AutoReg
@@ -195,15 +200,15 @@ class SieveBootstrapModel:
         except Exception as e:
             if self.verbose:
                 print(f"  Error congelando Sieve: {e}")
-            # Fallback: no congelar, se ajustará en cada paso
             self._is_frozen = False
         
         self.optimize = False
 
     def fit_predict(self, history: Union['pd.DataFrame', np.ndarray]) -> np.ndarray:
         """
-        FIX #5: Usa parámetros congelados si existen.
+        CORREGIDO: Usa parámetros congelados si existen.
         Solo los últimos p valores de la serie se usan para predecir.
+        NO re-ajusta el modelo AR.
         """
         from statsmodels.tsa.ar_model import AutoReg
         import pandas as pd
@@ -220,6 +225,7 @@ class SieveBootstrapModel:
         elif isinstance(self.order, (int, np.integer)):
             p = max(1, int(self.order))
         else:
+            # Solo calcular si no está congelado (primer paso)
             p = self._determine_order_aic(series)
             if self.optimize:
                 self.best_params = {'order': p}
@@ -228,7 +234,7 @@ class SieveBootstrapModel:
             p = max(1, n // 2)
         
         try:
-            # FIX #5: Usar parámetros congelados si están disponibles
+            # FIX: Usar parámetros congelados si están disponibles
             if self._is_frozen and self._frozen_params is not None:
                 # Usar parámetros y residuos congelados
                 params = self._frozen_params
@@ -237,9 +243,9 @@ class SieveBootstrapModel:
                 # Verificar que p coincida con los parámetros congelados
                 expected_p = len(params) - 1  # params incluye intercepto
                 if p != expected_p:
-                    p = expected_p  # Usar el orden de los parámetros congelados
+                    p = expected_p
             else:
-                # No está congelado: ajustar modelo nuevo (comportamiento original)
+                # NO CONGELADO: ajustar modelo nuevo (solo primer paso)
                 model = AutoReg(series, lags=p).fit()
                 params = model.params
                 residuals = model.resid - np.mean(model.resid)
@@ -261,8 +267,7 @@ class SieveBootstrapModel:
 
 class LSPM:
     """
-    LSPM Studentizado - Implementación EXACTA del algoritmo original.
-    Sin simplificaciones, solo optimizaciones de NumPy.
+    LSPM CORREGIDO: Congela estructura de cálculo después de optimización.
     """
     
     def __init__(self, random_state=42, verbose=False):
@@ -272,17 +277,34 @@ class LSPM:
         self.rng = np.random.default_rng(random_state)
         self.n_lags = None
         self.best_params = {}
+        
+        # FIX: Cache para congelar
+        self._frozen_n_lags = None
+        self._is_frozen = False
 
     def optimize_hyperparameters(self, df, reference_noise):
+        """Optimización trivial para LSPM."""
         self.best_params = {'version': self.version}
         return None, -1.0
 
+    def freeze_hyperparameters(self, train_data: np.ndarray):
+        """CRÍTICO: Congela n_lags basado en datos de entrenamiento."""
+        n = len(train_data)
+        self._frozen_n_lags = max(1, int(n**(1/3)))
+        self._is_frozen = True
+        if self.verbose:
+            print(f"  LSPM congelado: n_lags={self._frozen_n_lags}")
+
     def _calculate_critical_values(self, values: np.ndarray) -> np.ndarray:
         """
-        Algoritmo LSPM studentizado EXACTO.
-        Calcula valores críticos usando la matriz hat completa.
+        CORREGIDO: Usa n_lags congelado si existe.
         """
-        p = self.n_lags if self.n_lags and self.n_lags > 0 else max(1, int(len(values)**(1/3)))
+        # FIX: Usar valor congelado
+        if self._is_frozen and self._frozen_n_lags is not None:
+            p = self._frozen_n_lags
+        else:
+            p = self.n_lags if self.n_lags and self.n_lags > 0 else max(1, int(len(values)**(1/3)))
+        
         n = len(values)
         
         if n < 2 * p + 2:
@@ -295,9 +317,9 @@ class LSPM:
         # X_full: cada fila son los p lags
         X_full = np.column_stack([values[p-i-1:n-i-1] for i in range(p)])
         
-        X_train = X_full[:-1]  # Sin última observación
+        X_train = X_full[:-1]
         y_train = y_full[:-1]
-        x_test = X_full[-1]    # Última observación
+        x_test = X_full[-1]
         
         # Agregar intercepto
         X_train_b = np.column_stack([np.ones(len(X_train)), X_train])
@@ -361,7 +383,7 @@ class LSPM:
 
 
 class LSPMW(LSPM):
-    """LSPM Ponderado - Pesos exponenciales sobre valores críticos."""
+    """LSPMW CORREGIDO: Congela rho después de optimización."""
     
     def __init__(self, rho: float = 0.95, **kwargs):
         super().__init__(**kwargs)
@@ -369,9 +391,21 @@ class LSPMW(LSPM):
             raise ValueError("rho debe estar entre 0 y 1")
         self.rho = rho
         self.best_params = {'rho': rho}
+        
+        # FIX: Cache para congelar
+        self._frozen_rho = None
+
+    def freeze_hyperparameters(self, train_data: np.ndarray):
+        """CRÍTICO: Congela n_lags y rho."""
+        super().freeze_hyperparameters(train_data)
+        self._frozen_rho = self.rho
+        if self.verbose:
+            print(f"  LSPMW congelado: rho={self._frozen_rho}")
 
     def fit_predict(self, df: Union[pd.DataFrame, np.ndarray]) -> np.ndarray:
-        
+        """
+        CORREGIDO: Usa rho congelado.
+        """
         values = df['valor'].values if isinstance(df, pd.DataFrame) else np.asarray(df)
         critical = self._calculate_critical_values(values.astype(np.float64))
         
@@ -380,62 +414,244 @@ class LSPMW(LSPM):
         
         n_crit = len(critical)
         
-        # CORRECCIÓN: Pesos basados en índice temporal ANTES de ordenar
-        # Los valores críticos más recientes (últimos índices) tienen más peso
-        temporal_weights = self.rho ** np.arange(n_crit - 1, -1, -1)
+        # FIX: Usar rho congelado si existe
+        rho_to_use = self._frozen_rho if self._frozen_rho is not None else self.rho
+        
+        # Pesos basados en índice temporal ANTES de ordenar
+        temporal_weights = rho_to_use ** np.arange(n_crit - 1, -1, -1)
         temporal_weights = temporal_weights / temporal_weights.sum()
         
         # Crear índices ordenados pero mantener asociación con pesos temporales
         sort_indices = np.argsort(critical)
         sorted_critical = critical[sort_indices]
-        sorted_weights = temporal_weights[sort_indices]  # ← Pesos viajan con sus valores
+        sorted_weights = temporal_weights[sort_indices]
         
         # CDF acumulada con pesos temporales
         cum_probs = np.cumsum(sorted_weights)
         
-        # Muestreo por inverse CDF
         u = np.linspace(0, 1 - 1e-10, 1000)
         indices = np.searchsorted(cum_probs, u, side='right')
         indices = np.clip(indices, 0, n_crit - 1)
         
         return sorted_critical[indices]
-
-    def optimize_hyperparameters(self, df, reference_noise):
-        """Optimización rápida de rho con 3 candidatos."""
-        from metricas import ecrps
+    
+    def optimize_hyperparameters(self, df, reference_noise):    
+        values = df['valor'].values if isinstance(df, pd.DataFrame) else np.asarray(df)
         
+        # Validar datos mínimos
+        if len(values) < 30:
+            self.best_params = {'rho': self.rho}
+            return self.rho, np.nan
+        
+        # División 80/20
+        n_train = int(len(values) * 0.8)
+        
+        if n_train < 20 or (len(values) - n_train) < 5:
+            self.best_params = {'rho': self.rho}
+            return self.rho, np.nan
+        
+        # Solo 3 candidatos
         candidates = [0.90, 0.95, 0.99]
-        best_rho, best_score = self.rho, float('inf')
         
-        for rho in candidates:
-            try:
-                self.rho = rho
-                samples = self.fit_predict(df)
-                if len(samples) == 0:
+        best_rho = self.rho
+        best_score = float('inf')
+        
+        # Probar cada candidato
+        for rho_test in candidates:
+            self.rho = rho_test
+            
+            scores = []
+            
+            # Predecir cada punto en validation
+            for i in range(n_train, len(values)):
+                try:
+                    # Historia hasta i
+                    history = values[:i]
+                    true_val = values[i]
+                    
+                    # Predecir
+                    df_hist = pd.DataFrame({'valor': history})
+                    samples = self.fit_predict(df_hist)
+                    
+                    if len(samples) > 0:
+                        # CRPS contra valor observado
+                        score = crps(samples, true_val)
+                        if not np.isnan(score):
+                            scores.append(score)
+                except:
                     continue
-                
-                ref = self.rng.choice(reference_noise, 
-                                     size=min(1000, len(reference_noise)), 
-                                     replace=False)
-                score = ecrps(samples, ref)
-                
-                if score < best_score:
-                    best_score, best_rho = score, rho
-            except:
-                continue
+            
+            if len(scores) > 0:
+                avg_score = np.mean(scores)
+                if avg_score < best_score:
+                    best_score = avg_score
+                    best_rho = rho_test
         
+        # Aplicar mejor rho
         self.rho = best_rho
         self.best_params = {'rho': best_rho}
+        
         return best_rho, best_score
+    
+
+
+class AREPD:
+    """AREPD CORREGIDO: Una vez congelado, NUNCA re-entrena."""
+    
+    def __init__(self, n_lags=5, rho=0.95, alpha=0.1, poly_degree=2,
+                 random_state=42, verbose=False, optimize=True):
+        from sklearn.utils import check_random_state
+        
+        self.n_lags = n_lags
+        self.rho = rho
+        self.alpha = alpha
+        self.poly_degree = poly_degree
+        self.random_state = random_state
+        self.verbose = verbose
+        self.optimize = optimize
+        
+        self.mean_val = None
+        self.std_val = None
+        self.rng = check_random_state(random_state)
+        self.best_params = {}
+        self._is_optimized = False
+        
+        # FIX CRÍTICO
+        self._frozen_model = None
+        self._frozen_mean = None
+        self._frozen_std = None
+        self._is_frozen = False  # NUEVO: flag explícito
+        
+        np.random.seed(random_state)
+    
+    def _create_lag_matrix(self, values: np.ndarray, n_lags: int, degree: int = 2):
+        n = len(values) - n_lags
+        if n <= 0:
+            return np.array([]), np.array([])
+        
+        y = values[n_lags:]
+        X_list = [np.ones((n, 1))]
+        
+        for lag in range(n_lags):
+            lagged = values[lag:lag + n].reshape(-1, 1)
+            for d in range(1, degree + 1):
+                X_list.append(np.power(lagged, d))
+        
+        return np.hstack(X_list), y
+    
+    def freeze_hyperparameters(self, train_data: np.ndarray):
+        """CRÍTICO: Entrena Ridge UNA VEZ y congela TODO."""
+        from sklearn.linear_model import Ridge
+        
+        values = train_data.flatten() if hasattr(train_data, 'flatten') else np.asarray(train_data)
+        
+        if len(values) < self.n_lags * 2:
+            self._is_frozen = False
+            return
+        
+        if self.best_params:
+            self.n_lags = self.best_params.get('n_lags', self.n_lags)
+            self.rho = self.best_params.get('rho', self.rho)
+            self.poly_degree = self.best_params.get('poly_degree', self.poly_degree)
+        
+        try:
+            # Congelar scaler
+            self._frozen_mean = np.nanmean(values)
+            self._frozen_std = np.nanstd(values) + 1e-8
+            normalized = (values - self._frozen_mean) / self._frozen_std
+            
+            X, y = self._create_lag_matrix(normalized, self.n_lags, self.poly_degree)
+            if X.shape[0] == 0:
+                self._is_frozen = False
+                return
+            
+            # Pesos exponenciales
+            weights = self.rho ** np.arange(len(y))[::-1]
+            weights = weights / (weights.sum() + 1e-8)
+            
+            # ENTRENAR MODELO UNA SOLA VEZ
+            model = Ridge(alpha=self.alpha, fit_intercept=False)
+            model.fit(X, y, sample_weight=weights)
+            
+            self._frozen_model = model
+            self._is_frozen = True
+            
+            if self.verbose:
+                print(f"  AREPD congelado: n_lags={self.n_lags}, rho={self.rho}, "
+                      f"mean={self._frozen_mean:.4f}, std={self._frozen_std:.4f}")
+                
+        except Exception as e:
+            if self.verbose:
+                print(f"  Error congelando AREPD: {e}")
+            self._is_frozen = False
+    
+    def fit_predict(self, df) -> np.ndarray:
+        """CORREGIDO: Si está congelado, SOLO predice."""
+        try:
+            values = df['valor'].values if isinstance(df, pd.DataFrame) else np.asarray(df)
+            
+            if len(values) < self.n_lags * 2:
+                mean_val = self._frozen_mean if self._is_frozen else np.mean(values)
+                return np.full(1000, mean_val)
+            
+            # VERIFICACIÓN CRÍTICA: Si está congelado, usar modelo existente
+            if self._is_frozen:
+                if self._frozen_model is None or self._frozen_mean is None:
+                    return np.full(1000, np.mean(values))
+                
+                # Solo normalizar y predecir
+                normalized = (values - self._frozen_mean) / self._frozen_std
+                X, y = self._create_lag_matrix(normalized, self.n_lags, self.poly_degree)
+                
+                if X.shape[0] == 0:
+                    return np.full(1000, self._frozen_mean)
+                
+                # Predicción con modelo congelado
+                predictions = self._frozen_model.predict(X)
+                samples = (predictions * self._frozen_std) + self._frozen_mean
+                
+                return samples
+            
+            # CÓDIGO ANTIGUO: Solo para primer paso
+            if self.best_params:
+                self.n_lags = self.best_params.get('n_lags', self.n_lags)
+                self.rho = self.best_params.get('rho', self.rho)
+                self.poly_degree = self.best_params.get('poly_degree', self.poly_degree)
+            
+            self.mean_val = np.nanmean(values)
+            self.std_val = np.nanstd(values) + 1e-8
+            normalized = (values - self.mean_val) / self.std_val
+            
+            X, y = self._create_lag_matrix(normalized, self.n_lags, self.poly_degree)
+            if X.shape[0] == 0:
+                return np.full(1000, self.mean_val)
+            
+            from sklearn.linear_model import Ridge
+            weights = self.rho ** np.arange(len(y))[::-1]
+            weights = weights / (weights.sum() + 1e-8)
+            
+            model = Ridge(alpha=self.alpha, fit_intercept=False)
+            model.fit(X, y, sample_weight=weights)
+            predictions = model.predict(X)
+            
+            samples = (predictions * self.std_val) + self.mean_val
+            
+            return samples
+            
+        except Exception as e:
+            if self.verbose:
+                print(f"    AREPD error: {e}")
+            mean_val = self._frozen_mean if self._is_frozen else np.nanmean(df)
+            return np.full(1000, mean_val if not np.isnan(mean_val) else 0)
 
 
 class DeepARModel:
-    """DeepAR con early stopping y NO re-entrenamiento en rolling."""
+    """DeepAR CORREGIDO: Una vez congelado, NUNCA re-entrena."""
     
     def __init__(self, hidden_size=20, n_lags=5, num_layers=1, dropout=0.1, 
                  lr=0.01, batch_size=32, epochs=30, num_samples=1000,
                  random_state=42, verbose=False, optimize=True,
-                 early_stopping_patience=5):  # ← NUEVO
+                 early_stopping_patience=5):
         
         import torch
         
@@ -450,21 +666,25 @@ class DeepARModel:
         self.random_state = random_state
         self.verbose = verbose
         self.optimize = optimize
-        self.early_stopping_patience = early_stopping_patience  # ← NUEVO
+        self.early_stopping_patience = early_stopping_patience
         
         self.model = None
         self.scaler_mean = None
         self.scaler_std = None
         self.best_params = {}
         self._is_optimized = False
-        self._trained_model = None  # ← NUEVO: modelo pre-entrenado
-        self._training_history = []  # ← NUEVO: historial de pérdidas
+        
+        # FIX CRÍTICO: Modelo y scaler completamente congelados
+        self._trained_model = None
+        self._frozen_mean = None
+        self._frozen_std = None
+        self._training_history = []
+        self._is_frozen = False  # NUEVO: flag explícito
         
         np.random.seed(random_state)
         torch.manual_seed(random_state)
     
     class _DeepARNN(torch.nn.Module):
-        """Red LSTM que produce mu y sigma."""
         def __init__(self, input_size, hidden_size, num_layers, dropout):
             super().__init__()
             import torch.nn as nn
@@ -482,19 +702,15 @@ class DeepARModel:
             return mu, sigma
     
     def _train_with_early_stopping(self, X_t, y_t):
-        """
-        FIX #13: Entrena con early stopping para garantizar convergencia.
-        """
         import torch
         import torch.nn as nn
         import torch.optim as optim
         
-        # Split train/val (80/20)
         n_train = int(0.8 * len(X_t))
         X_train, X_val = X_t[:n_train], X_t[n_train:]
         y_train, y_val = y_t[:n_train], y_t[n_train:]
         
-        if len(X_val) < 5:  # Demasiado pequeño para validación
+        if len(X_val) < 5:
             X_val, y_val = X_train[-10:], y_train[-10:]
         
         self.model = self._DeepARNN(1, self.hidden_size, self.num_layers, self.dropout)
@@ -508,7 +724,6 @@ class DeepARModel:
         self._training_history = []
         
         for epoch in range(self.epochs):
-            # Training
             self.model.train()
             train_loss = 0
             perm = torch.randperm(len(X_train))
@@ -524,7 +739,6 @@ class DeepARModel:
                 opt.step()
                 train_loss += loss.item()
             
-            # Validation
             self.model.eval()
             with torch.no_grad():
                 mu_val, sig_val = self.model(X_val)
@@ -536,7 +750,6 @@ class DeepARModel:
                 'val_loss': val_loss
             })
             
-            # Early stopping
             if val_loss < best_val_loss:
                 best_val_loss = val_loss
                 patience_counter = 0
@@ -549,57 +762,127 @@ class DeepARModel:
                     print(f"  Early stopping at epoch {epoch+1}")
                 break
         
-        # Restaurar mejor modelo
         if best_model_state is not None:
             self.model.load_state_dict(best_model_state)
         
         return self.model
     
+    def freeze_hyperparameters(self, train_data: np.ndarray):
+        """
+        CRÍTICO: Entrena modelo UNA VEZ y congela TODO.
+        Marca _is_frozen = True.
+        """
+        import torch
+        
+        values = train_data.flatten() if hasattr(train_data, 'flatten') else np.asarray(train_data)
+        
+        # Congelar scaler
+        self._frozen_mean = np.nanmean(values)
+        self._frozen_std = np.nanstd(values) + 1e-8
+        
+        # Aplicar hiperparámetros optimizados
+        if self.best_params:
+            self.n_lags = self.best_params.get('n_lags', self.n_lags)
+            self.hidden_size = self.best_params.get('hidden_size', self.hidden_size)
+            self.num_layers = self.best_params.get('num_layers', self.num_layers)
+            self.dropout = self.best_params.get('dropout', self.dropout)
+            self.lr = self.best_params.get('lr', self.lr)
+        
+        # ENTRENAR MODELO UNA SOLA VEZ
+        try:
+            norm_series = (values - self._frozen_mean) / self._frozen_std
+            
+            if len(norm_series) <= self.n_lags:
+                self._is_frozen = False
+                return
+            
+            X, y = [], []
+            for i in range(len(norm_series) - self.n_lags):
+                X.append(norm_series[i:i + self.n_lags])
+                y.append(norm_series[i + self.n_lags])
+            X, y = np.array(X), np.array(y)
+            
+            if len(X) < self.batch_size:
+                self._is_frozen = False
+                return
+            
+            X_t = torch.FloatTensor(X.reshape(-1, self.n_lags, 1))
+            y_t = torch.FloatTensor(y.reshape(-1, 1))
+            
+            self._train_with_early_stopping(X_t, y_t)
+            self._trained_model = self.model
+            self._is_frozen = True
+            
+            if self.verbose:
+                print(f"  DeepAR congelado: mean={self._frozen_mean:.4f}, "
+                      f"std={self._frozen_std:.4f}, model_trained=True")
+                
+        except Exception as e:
+            if self.verbose:
+                print(f"  Error congelando DeepAR: {e}")
+            self._is_frozen = False
+    
     def fit_predict(self, df) -> np.ndarray:
         """
-        FIX #7: NO re-entrena en ventana rodante, usa modelo pre-entrenado.
+        CORREGIDO: Si está congelado, SOLO predice con modelo existente.
+        NO re-entrena NUNCA después de freeze.
         """
         import torch
         import pandas as pd
         
         try:
             series = df['valor'].values if isinstance(df, pd.DataFrame) else np.asarray(df)
+            
+            # VERIFICACIÓN CRÍTICA: Si está congelado, usar modelo existente
+            if self._is_frozen:
+                if self._trained_model is None or self._frozen_mean is None:
+                    return np.full(self.num_samples, np.mean(series))
+                
+                # Solo normalizar y predecir
+                norm_series = (series - self._frozen_mean) / self._frozen_std
+                
+                if len(norm_series) < self.n_lags:
+                    return np.full(self.num_samples, self._frozen_mean)
+                
+                # Predicción con modelo congelado
+                self._trained_model.eval()
+                with torch.no_grad():
+                    last_seq = torch.FloatTensor(
+                        norm_series[-self.n_lags:].reshape(1, self.n_lags, 1)
+                    )
+                    mu, sig = self._trained_model(last_seq)
+                
+                samples = np.random.normal(mu.item(), sig.item(), self.num_samples)
+                samples = samples * self._frozen_std + self._frozen_mean
+                
+                return np.nan_to_num(samples, nan=self._frozen_mean)
+            
+            # CÓDIGO ANTIGUO: Solo para primer paso (antes de freeze)
+            if self.best_params:
+                self.n_lags = self.best_params.get('n_lags', self.n_lags)
+                self.hidden_size = self.best_params.get('hidden_size', self.hidden_size)
+            
             self.scaler_mean = np.nanmean(series)
             self.scaler_std = np.nanstd(series) + 1e-8
             norm_series = (series - self.scaler_mean) / self.scaler_std
             
-            # Aplicar hiperparámetros optimizados
-            if self.best_params:
-                self.n_lags = self.best_params.get('n_lags', self.n_lags)
-                self.hidden_size = self.best_params.get('hidden_size', self.hidden_size)
-                self.num_layers = self.best_params.get('num_layers', self.num_layers)
-                self.dropout = self.best_params.get('dropout', self.dropout)
-                self.lr = self.best_params.get('lr', self.lr)
-            
             if len(norm_series) <= self.n_lags:
                 return np.full(self.num_samples, self.scaler_mean)
             
-            # FIX #7: Solo entrenar si no hay modelo previo
-            if self._trained_model is None:
-                X, y = [], []
-                for i in range(len(norm_series) - self.n_lags):
-                    X.append(norm_series[i:i + self.n_lags])
-                    y.append(norm_series[i + self.n_lags])
-                X, y = np.array(X), np.array(y)
-                
-                if len(X) < self.batch_size:
-                    return np.full(self.num_samples, self.scaler_mean)
-                
-                X_t = torch.FloatTensor(X.reshape(-1, self.n_lags, 1))
-                y_t = torch.FloatTensor(y.reshape(-1, 1))
-                
-                self._train_with_early_stopping(X_t, y_t)
-                self._trained_model = self.model  # Guardar modelo entrenado
-            else:
-                # Usar modelo pre-entrenado
-                self.model = self._trained_model
+            X, y = [], []
+            for i in range(len(norm_series) - self.n_lags):
+                X.append(norm_series[i:i + self.n_lags])
+                y.append(norm_series[i + self.n_lags])
+            X, y = np.array(X), np.array(y)
             
-            # Predicción con modelo fijo
+            if len(X) < self.batch_size:
+                return np.full(self.num_samples, self.scaler_mean)
+            
+            X_t = torch.FloatTensor(X.reshape(-1, self.n_lags, 1))
+            y_t = torch.FloatTensor(y.reshape(-1, 1))
+            
+            self._train_with_early_stopping(X_t, y_t)
+            
             self.model.eval()
             with torch.no_grad():
                 last_seq = torch.FloatTensor(norm_series[-self.n_lags:].reshape(1, self.n_lags, 1))
@@ -613,167 +896,8 @@ class DeepARModel:
         except Exception as e:
             if self.verbose:
                 print(f"    DeepAR error: {e}")
-            return np.full(self.num_samples, np.nanmean(df) if hasattr(df, '__len__') else 0)
-    
-    def get_training_history(self):
-        """Retorna historial de entrenamiento para diagnosticar convergencia."""
-        return self._training_history
-
-
-# =============================================================================
-# AREPD - Autoregressive Encompassing Predictive Distribution
-# =============================================================================
-
-class AREPD:
-    """
-    Autoregressive Encompassing Predictive Distribution.
-    Usa Ridge regression con pesos exponenciales y features polinomiales.
-    """
-    
-    def __init__(self, n_lags=5, rho=0.95, alpha=0.1, poly_degree=2,
-                 random_state=42, verbose=False, optimize=True):
-        if not SKLEARN_AVAILABLE:
-            raise ImportError("scikit-learn requerido: pip install scikit-learn")
-        
-        self.n_lags = n_lags
-        self.rho = rho
-        self.alpha = alpha
-        self.poly_degree = poly_degree
-        self.random_state = random_state
-        self.verbose = verbose
-        self.optimize = optimize
-        
-        self.mean_val = None
-        self.std_val = None
-        self.rng = check_random_state(random_state)
-        self.best_params = {}
-        self._is_optimized = False
-        
-        np.random.seed(random_state)
-    
-    def _create_lag_matrix(self, values: np.ndarray, n_lags: int, degree: int = 2):
-        """Crea matriz de features con lags polinomiales."""
-        n = len(values) - n_lags
-        if n <= 0:
-            return np.array([]), np.array([])
-        
-        y = values[n_lags:]
-        X_list = [np.ones((n, 1))]
-        
-        for lag in range(n_lags):
-            lagged = values[lag:lag + n].reshape(-1, 1)
-            for d in range(1, degree + 1):
-                X_list.append(np.power(lagged, d))
-        
-        return np.hstack(X_list), y
-    
-    def _Qn_distribution(self, C: np.ndarray) -> np.ndarray:
-        """Convierte predicciones en muestras de distribución."""
-        sorted_C = np.sort(C)
-        # Desnormalizar
-        samples = (sorted_C * self.std_val) + self.mean_val
-        return samples
-    
-    def optimize_hyperparameters(self, df, reference_noise):
-        """Optimización Bayesiana rápida."""
-        from metricas import ecrps
-        
-        if not BAYESOPT_AVAILABLE:
-            self.best_params = {'n_lags': 5, 'rho': 0.9, 'poly_degree': 2}
-            self._is_optimized = True
-            return self.best_params, -1
-        
-        series = df['valor'].values if isinstance(df, pd.DataFrame) else np.asarray(df)
-        
-        def objective(n_lags, rho, poly_degree):
-            try:
-                self.n_lags = max(1, int(round(n_lags)))
-                self.rho = min(0.999, max(0.5, float(rho)))
-                self.poly_degree = max(1, int(round(poly_degree)))
-                
-                if len(series) < self.n_lags * 2:
-                    return -1e12
-                
-                samples = self.fit_predict(df)
-                if len(samples) == 0:
-                    return -1e12
-                
-                ref_sub = self.rng.choice(reference_noise, 
-                                         size=min(500, len(reference_noise)), 
-                                         replace=False)
-                return -ecrps(samples, ref_sub)
-            except:
-                return -1e12
-        
-        optimizer = BayesianOptimization(
-            f=objective,
-            pbounds={'n_lags': (2, 8), 'rho': (0.7, 0.99), 'poly_degree': (1, 3)},
-            random_state=self.random_state,
-            verbose=0
-        )
-        
-        try:
-            optimizer.maximize(init_points=2, n_iter=3)
-        except:
-            pass
-        
-        best_ecrps = -1
-        if optimizer.max and optimizer.max['target'] > -1e11:
-            p = optimizer.max['params']
-            best_ecrps = -optimizer.max['target']
-            self.best_params = {
-                'n_lags': int(round(p['n_lags'])),
-                'rho': p['rho'],
-                'poly_degree': int(round(p['poly_degree']))
-            }
-        else:
-            self.best_params = {'n_lags': 5, 'rho': 0.9, 'poly_degree': 2}
-        
-        self._is_optimized = True
-        
-        if self.verbose:
-            print(f"  AREPD: {self.best_params}")
-        
-        return self.best_params, best_ecrps
-    
-    def fit_predict(self, df) -> np.ndarray:
-        """Ajusta y retorna muestras de la distribución predictiva."""
-        try:
-            values = df['valor'].values if isinstance(df, pd.DataFrame) else np.asarray(df)
-            
-            if len(values) < self.n_lags * 2:
-                return np.full(1000, np.mean(values))
-            
-            # Aplicar hiperparámetros optimizados
-            if self.best_params:
-                self.n_lags = self.best_params.get('n_lags', self.n_lags)
-                self.rho = self.best_params.get('rho', self.rho)
-                self.poly_degree = self.best_params.get('poly_degree', self.poly_degree)
-            
-            self.mean_val = np.nanmean(values)
-            self.std_val = np.nanstd(values) + 1e-8
-            normalized = (values - self.mean_val) / self.std_val
-            
-            X, y = self._create_lag_matrix(normalized, self.n_lags, self.poly_degree)
-            if X.shape[0] == 0:
-                return np.full(1000, self.mean_val)
-            
-            # Pesos exponenciales
-            weights = self.rho ** np.arange(len(y))[::-1]
-            weights = weights / (weights.sum() + 1e-8)
-            
-            model = Ridge(alpha=self.alpha, fit_intercept=False)
-            model.fit(X, y, sample_weight=weights)
-            
-            predictions = model.predict(X)
-            samples = self._Qn_distribution(predictions)
-            
-            return samples
-            
-        except Exception as e:
-            if self.verbose:
-                print(f"    AREPD error: {e}")
-            return np.full(1000, np.nanmean(df) if hasattr(df, '__len__') else 0)
+            mean_val = self._frozen_mean if self._is_frozen else np.nanmean(df)
+            return np.full(self.num_samples, mean_val if not np.isnan(mean_val) else 0)
 
 
 # =============================================================================
@@ -781,17 +905,14 @@ class AREPD:
 # =============================================================================
 
 class MondrianCPSModel:
-    """
-    Mondrian Conformal Predictive System con τ ~ Uniform(0, 1).
-    Usa XGBoost como modelo base con estratificación por nivel de predicción.
-    
-    OPTIMIZACIÓN: Implementa lógica para entrenar solo una vez al inicio de la 
-    ventana de prueba y reutilizar los artefactos de calibración.
-    """
+    """Mondrian CPS CORREGIDO: Una vez congelado, NUNCA re-entrena."""
     
     def __init__(self, n_lags: int = 10, n_bins: int = 10, test_size: float = 0.25,
                  random_state: int = 42, verbose: bool = False, optimize: bool = True):
-        if not XGB_AVAILABLE:
+        try:
+            import xgboost as xgb
+            self.xgb = xgb
+        except ImportError:
             raise ImportError("XGBoost requerido: pip install xgboost")
         
         self.n_lags = n_lags
@@ -802,220 +923,155 @@ class MondrianCPSModel:
         self.optimize = optimize
         self.rng = np.random.default_rng(random_state)
         
-        self.base_model = xgb.XGBRegressor(
+        self.base_model = self.xgb.XGBRegressor(
             objective='reg:squarederror',
             n_estimators=50,
             learning_rate=0.1,
             max_depth=3,
             random_state=self.random_state,
-            n_jobs=1,  # Importante: 1 hilo para no interferir con paralelización externa
+            n_jobs=1,
             verbosity=0
         )
         self.best_params = {}
         self._is_optimized = False
-        
-        # VARIABLE CLAVE PARA OPTIMIZACIÓN DE TIEMPO
-        # Aquí guardaremos el modelo entrenado y los datos de calibración
-        self._fitted_artifacts = None 
+        self._fitted_artifacts = None
+        self._is_frozen = False  # NUEVO
     
-    def _create_lag_matrix(self, series: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def _create_lag_matrix(self, series: np.ndarray):
         X, y = [], []
         for i in range(len(series) - self.n_lags):
             X.append(series[i:(i + self.n_lags)])
             y.append(series[i + self.n_lags])
         return np.array(X), np.array(y)
     
-    def _create_samples_from_scores(self, scores: np.ndarray, n_samples: int = 1000) -> np.ndarray:
-        """Genera muestras usando los scores de calibración."""
+    def _create_samples_from_scores(self, scores: np.ndarray, n_samples: int = 1000):
         if len(scores) == 0:
             return np.zeros(n_samples)
         
-        # Añadir ruido aleatorio para diversificar muestras
         base_samples = self.rng.choice(scores, size=n_samples, replace=True)
         noise = self.rng.normal(0, np.std(scores) * 0.1, n_samples)
-        
         return base_samples + noise
     
-    def optimize_hyperparameters(self, df, reference_noise):
-        """Optimización rápida de hiperparámetros."""
-        from metricas import ecrps
+    def freeze_hyperparameters(self, train_data: np.ndarray):
+        """CRÍTICO: Entrena XGBoost UNA VEZ y congela TODO."""
+        values = train_data.flatten() if hasattr(train_data, 'flatten') else np.asarray(train_data)
         
-        if not BAYESOPT_AVAILABLE:
-            self.best_params = {'n_lags': 10, 'n_bins': 8}
-            self._is_optimized = True
-            return self.best_params, -1
-        
-        series = df['valor'].values if isinstance(df, pd.DataFrame) else np.asarray(df)
-        
-        def objective(n_lags, n_bins):
-            try:
-                old_lags, old_bins = self.n_lags, self.n_bins
-                self.n_lags = max(5, int(n_lags))
-                self.n_bins = max(3, int(n_bins))
-                
-                if len(series) <= self.n_lags * 2:
-                    self.n_lags, self.n_bins = old_lags, old_bins
-                    return -1e10
-                
-                # Nota: fit_predict usará logic de caché si _fitted_artifacts existe.
-                # Para optimización, queremos forzar re-entrenamiento o limpiar caché,
-                # pero fit_predict maneja series cambiantes.
-                # Para simplificar en optimización bayesiana rápida, limpiamos caché temporalmente:
-                saved_artifacts = self._fitted_artifacts
-                self._fitted_artifacts = None
-                
-                samples = self.fit_predict(series)
-                
-                # Restaurar caché si existía (aunque en optimización suele estar vacío)
-                self._fitted_artifacts = saved_artifacts
-                
-                if len(samples) == 0:
-                    self.n_lags, self.n_bins = old_lags, old_bins
-                    return -1e10
-                
-                ref_sub = self.rng.choice(reference_noise,
-                                         size=min(500, len(reference_noise)),
-                                         replace=False)
-                score = ecrps(samples, ref_sub)
-                
-                self.n_lags, self.n_bins = old_lags, old_bins
-                return -score
-            except:
-                return -1e10
-        
-        optimizer = BayesianOptimization(
-            f=objective,
-            pbounds={'n_lags': (5, 15), 'n_bins': (3, 12)},
-            random_state=self.random_state,
-            verbose=0
-        )
+        if self.best_params:
+            self.n_lags = self.best_params.get('n_lags', self.n_lags)
+            self.n_bins = self.best_params.get('n_bins', self.n_bins)
         
         try:
-            optimizer.maximize(init_points=2, n_iter=3)
-        except:
-            pass
-        
-        best_ecrps = -1
-        if optimizer.max and optimizer.max['target'] > -1e9:
-            self.best_params = {
-                'n_lags': int(optimizer.max['params']['n_lags']),
-                'n_bins': int(optimizer.max['params']['n_bins'])
+            if len(values) < self.n_lags * 2:
+                self._is_frozen = False
+                return
+            
+            X, y = self._create_lag_matrix(values)
+            n_calib = max(10, int(len(X) * self.test_size))
+            
+            if n_calib >= len(X):
+                self._fitted_artifacts = {
+                    'fallback_mean': np.mean(values),
+                    'is_fallback': True
+                }
+                self._is_frozen = True
+                return
+            
+            X_train, X_calib = X[:-n_calib], X[-n_calib:]
+            y_train, y_calib = y[:-n_calib], y[-n_calib:]
+            
+            # ENTRENAR MODELO UNA SOLA VEZ
+            self.base_model.fit(X_train, y_train)
+            calib_preds = self.base_model.predict(X_calib)
+            
+            bin_edges = None
+            try:
+                _, bin_edges = pd.qcut(calib_preds, self.n_bins, retbins=True, duplicates='drop')
+            except:
+                pass
+            
+            self._fitted_artifacts = {
+                'calib_preds': calib_preds,
+                'y_calib': y_calib,
+                'bin_edges': bin_edges,
+                'is_fallback': False
             }
-            best_ecrps = -optimizer.max['target']
-        else:
-            self.best_params = {'n_lags': 10, 'n_bins': 8}
-        
-        self._is_optimized = True
-        
-        if self.verbose:
-            print(f"  MCPS: {self.best_params}")
-        
-        return self.best_params, best_ecrps
+            self._is_frozen = True
+            
+            if self.verbose:
+                print(f"  MCPS congelado: n_lags={self.n_lags}, n_bins={self.n_bins}")
+                
+        except Exception as e:
+            if self.verbose:
+                print(f"  Error congelando MCPS: {e}")
+            self._is_frozen = False
     
     def fit_predict(self, df) -> np.ndarray:
-        """
-        Ajusta y retorna muestras de la distribución predictiva.
-        OPTIMIZACIÓN: Si _fitted_artifacts ya existe, salta el entrenamiento 
-        y usa el modelo guardado para predecir el nuevo paso.
-        """
+        """CORREGIDO: Si está congelado, SOLO predice."""
         try:
             series = df['valor'].values if isinstance(df, pd.DataFrame) else np.asarray(df)
             
+            # VERIFICACIÓN CRÍTICA
+            if self._is_frozen:
+                if self._fitted_artifacts is None:
+                    return np.full(1000, np.mean(series))
+                
+                if self._fitted_artifacts.get('is_fallback', False):
+                    return np.full(1000, self._fitted_artifacts['fallback_mean'])
+                
+                # Solo predecir con modelo congelado
+                x_test = series[-self.n_lags:].reshape(1, -1)
+                point_pred = self.base_model.predict(x_test)[0]
+                
+                calib_preds = self._fitted_artifacts['calib_preds']
+                y_calib = self._fitted_artifacts['y_calib']
+                bin_edges = self._fitted_artifacts['bin_edges']
+                
+                try:
+                    if bin_edges is not None:
+                        bin_idx = np.digitize(calib_preds, bins=bin_edges) - 1
+                        bin_idx = np.clip(bin_idx, 0, len(bin_edges) - 2)
+                        
+                        test_bin = np.clip(np.digitize(point_pred, bins=bin_edges) - 1, 
+                                          0, len(bin_edges) - 2)
+                        local_mask = (bin_idx == test_bin)
+                        
+                        if np.sum(local_mask) < 5:
+                            local_mask = np.ones(len(calib_preds), dtype=bool)
+                    else:
+                        local_mask = np.ones(len(calib_preds), dtype=bool)
+                except:
+                    local_mask = np.ones(len(calib_preds), dtype=bool)
+                
+                local_y = y_calib[local_mask]
+                local_preds = calib_preds[local_mask]
+                calibration_scores = point_pred + (local_y - local_preds)
+                
+                return self._create_samples_from_scores(calibration_scores, 1000)
+            
+            # CÓDIGO ANTIGUO: Solo para primer paso
             if self.best_params:
                 self.n_lags = self.best_params.get('n_lags', self.n_lags)
                 self.n_bins = self.best_params.get('n_bins', self.n_bins)
             
-            # ================================================================
-            # FASE 1: ENTRENAMIENTO (Solo se ejecuta la primera vez)
-            # ================================================================
-            if self._fitted_artifacts is None:
-                if len(series) < self.n_lags * 2:
-                    return np.full(1000, np.mean(series))
-                
-                X, y = self._create_lag_matrix(series)
-                
-                # Usamos los últimos datos disponibles hasta el momento para calibrar
-                n_calib = max(10, int(len(X) * self.test_size))
-                
-                if n_calib >= len(X):
-                    # Fallback simple
-                    self._fitted_artifacts = {
-                        'fallback_mean': np.mean(series),
-                        'is_fallback': True
-                    }
-                    return np.full(1000, np.mean(series))
-                
-                X_train, X_calib = X[:-n_calib], X[-n_calib:]
-                y_train, y_calib = y[:-n_calib], y[-n_calib:]
-                
-                # Entrenar modelo base
-                self.base_model.fit(X_train, y_train)
-                
-                # Generar predicciones de calibración
-                calib_preds = self.base_model.predict(X_calib)
-                
-                # Calcular bordes de los bins (Mondrian)
-                bin_edges = None
-                try:
-                    _, bin_edges = pd.qcut(calib_preds, self.n_bins, retbins=True, duplicates='drop')
-                except:
-                    pass # Fallback a sin bins si falla qcut
-                
-                # GUARDAR TODO EN ARTEFACTOS
-                self._fitted_artifacts = {
-                    'calib_preds': calib_preds,
-                    'y_calib': y_calib,
-                    'bin_edges': bin_edges,
-                    'is_fallback': False
-                }
-
-            # ================================================================
-            # FASE 2: PREDICCIÓN (Se ejecuta en cada paso usando lo guardado)
-            # ================================================================
+            if len(series) < self.n_lags * 2:
+                return np.full(1000, np.mean(series))
             
-            # Verificar si estamos en modo fallback
-            if self._fitted_artifacts.get('is_fallback', False):
-                return np.full(1000, self._fitted_artifacts['fallback_mean'])
-
-            # Preparar el vector de entrada para el paso actual (últimos lags)
+            X, y = self._create_lag_matrix(series)
+            n_calib = max(10, int(len(X) * self.test_size))
+            
+            if n_calib >= len(X):
+                return np.full(1000, np.mean(series))
+            
+            X_train, X_calib = X[:-n_calib], X[-n_calib:]
+            y_train, y_calib = y[:-n_calib], y[-n_calib:]
+            
+            self.base_model.fit(X_train, y_train)
+            calib_preds = self.base_model.predict(X_calib)
+            
             x_test = series[-self.n_lags:].reshape(1, -1)
-            
-            # 1. Predicción puntual
             point_pred = self.base_model.predict(x_test)[0]
             
-            # Recuperar datos de calibración
-            calib_preds = self._fitted_artifacts['calib_preds']
-            y_calib = self._fitted_artifacts['y_calib']
-            bin_edges = self._fitted_artifacts['bin_edges']
-            
-            # 2. Estratificación Mondrian (Binning)
-            try:
-                if bin_edges is not None:
-                    # En qué bin cae cada punto de calibración
-                    bin_idx = np.digitize(calib_preds, bins=bin_edges) - 1
-                    bin_idx = np.clip(bin_idx, 0, len(bin_edges) - 2)
-                    
-                    # En qué bin cae la predicción actual
-                    test_bin = np.clip(np.digitize(point_pred, bins=bin_edges) - 1, 0, len(bin_edges) - 2)
-                    
-                    # Máscara: solo usamos residuos del mismo bin
-                    local_mask = (bin_idx == test_bin)
-                    
-                    # Si hay muy pocos puntos en el bin, usamos todos (fallback local)
-                    if np.sum(local_mask) < 5:
-                        local_mask = np.ones(len(calib_preds), dtype=bool)
-                else:
-                    local_mask = np.ones(len(calib_preds), dtype=bool)
-            except:
-                local_mask = np.ones(len(calib_preds), dtype=bool)
-            
-            # 3. Calcular scores de no conformidad locales
-            local_y = y_calib[local_mask]
-            local_preds = calib_preds[local_mask]
-            
-            # C = y - y_hat  => y = y_hat + C
-            # Aplicamos los residuos pasados a la predicción actual
-            calibration_scores = point_pred + (local_y - local_preds)
+            calibration_scores = point_pred + (y_calib - calib_preds)
             
             return self._create_samples_from_scores(calibration_scores, 1000)
             
@@ -1031,18 +1087,16 @@ class MondrianCPSModel:
 
 class AdaptiveVolatilityMondrianCPS:
     """
-    Adaptive Volatility Mondrian CPS con estratificación bidimensional.
-    
-    OPTIMIZACIÓN: 
-    - Entrena el modelo base (XGBoost) UNA sola vez al inicio del escenario.
-    - Calcula los bins de predicción y volatilidad UNA sola vez.
-    - Reutiliza todo para los pasos siguientes (N_TEST_STEPS), reduciendo drásticamente el tiempo.
+    AV-MCPS CORREGIDO: Congela modelo, bins Y volatilidad de referencia.
     """
     
     def __init__(self, n_lags: int = 15, n_pred_bins: int = 8, n_vol_bins: int = 4,
                  volatility_window: int = 20, test_size: float = 0.25,
                  random_state: int = 42, verbose: bool = False, optimize: bool = True):
-        if not XGB_AVAILABLE:
+        try:
+            import xgboost as xgb
+            self.xgb = xgb
+        except ImportError:
             raise ImportError("XGBoost requerido: pip install xgboost")
         
         self.n_lags = n_lags
@@ -1055,19 +1109,17 @@ class AdaptiveVolatilityMondrianCPS:
         self.optimize = optimize
         self.rng = np.random.default_rng(random_state)
         
-        self.base_model = xgb.XGBRegressor(
+        self.base_model = self.xgb.XGBRegressor(
             objective='reg:squarederror',
             n_estimators=50,
             learning_rate=0.1,
             max_depth=3,
             random_state=self.random_state,
-            n_jobs=1, # 1 hilo para no saturar la paralelización externa
+            n_jobs=1,
             verbosity=0
         )
         self.best_params = {}
         self._is_optimized = False
-        
-        # VARIABLE CLAVE PARA OPTIMIZACIÓN DE TIEMPO
         self._fitted_artifacts = None
     
     def _create_lag_matrix(self, series: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
@@ -1091,87 +1143,8 @@ class AdaptiveVolatilityMondrianCPS:
         noise = self.rng.normal(0, np.std(scores) * 0.1, n_samples)
         return base_samples + noise
     
-    def optimize_hyperparameters(self, df, reference_noise):
-        """Optimización rápida."""
-        from metricas import ecrps
-        
-        if not BAYESOPT_AVAILABLE:
-            self.best_params = {'n_lags': 15, 'n_pred_bins': 8, 
-                               'n_vol_bins': 4, 'volatility_window': 20}
-            self._is_optimized = True
-            return self.best_params, -1
-        
-        series = df['valor'].values if isinstance(df, pd.DataFrame) else np.asarray(df)
-        
-        def objective(n_lags, n_pred_bins, n_vol_bins, volatility_window):
-            try:
-                old = (self.n_lags, self.n_pred_bins, self.n_vol_bins, self.volatility_window)
-                
-                self.n_lags = int(n_lags)
-                self.n_pred_bins = int(n_pred_bins)
-                self.n_vol_bins = int(n_vol_bins)
-                self.volatility_window = int(volatility_window)
-                
-                if len(series) <= self.n_lags * 2:
-                    self.n_lags, self.n_pred_bins, self.n_vol_bins, self.volatility_window = old
-                    return -1e10
-                
-                # Limpiar cache temporalmente para forzar re-evaluación en optimización
-                saved_artifacts = self._fitted_artifacts
-                self._fitted_artifacts = None
-                
-                samples = self.fit_predict(series)
-                
-                self._fitted_artifacts = saved_artifacts
-                
-                if len(samples) == 0:
-                    self.n_lags, self.n_pred_bins, self.n_vol_bins, self.volatility_window = old
-                    return -1e10
-                
-                ref_sub = self.rng.choice(reference_noise,
-                                         size=min(500, len(reference_noise)),
-                                         replace=False)
-                score = ecrps(samples, ref_sub)
-                
-                self.n_lags, self.n_pred_bins, self.n_vol_bins, self.volatility_window = old
-                return -score
-            except:
-                return -1e10
-        
-        optimizer = BayesianOptimization(
-            f=objective,
-            pbounds={
-                'n_lags': (5, 20),
-                'n_pred_bins': (3, 10),
-                'n_vol_bins': (2, 6),
-                'volatility_window': (10, 30)
-            },
-            random_state=self.random_state,
-            verbose=0
-        )
-        
-        try:
-            optimizer.maximize(init_points=2, n_iter=3)
-        except:
-            pass
-        
-        best_ecrps = -1
-        if optimizer.max and optimizer.max['target'] > -1e9:
-            self.best_params = {k: int(v) for k, v in optimizer.max['params'].items()}
-            best_ecrps = -optimizer.max['target']
-        else:
-            self.best_params = {'n_lags': 15, 'n_pred_bins': 8,
-                               'n_vol_bins': 4, 'volatility_window': 20}
-        
-        self._is_optimized = True
-        
-        if self.verbose:
-            print(f"  AV-MCPS: {self.best_params}")
-        
-        return self.best_params, best_ecrps
-    
     def fit_predict(self, df) -> np.ndarray:
-        """Ajusta y retorna muestras con estratificación 2D optimizada."""
+        """CORREGIDO: Usa modelo y bins congelados."""
         try:
             series = df['valor'].values if isinstance(df, pd.DataFrame) else np.asarray(df)
             
@@ -1181,9 +1154,7 @@ class AdaptiveVolatilityMondrianCPS:
                 self.n_vol_bins = self.best_params.get('n_vol_bins', self.n_vol_bins)
                 self.volatility_window = self.best_params.get('volatility_window', self.volatility_window)
             
-            # ================================================================
             # FASE 1: ENTRENAMIENTO (Solo primera vez)
-            # ================================================================
             if self._fitted_artifacts is None:
                 if len(series) < max(self.n_lags * 2, self.volatility_window):
                     return np.full(1000, np.mean(series))
@@ -1200,17 +1171,14 @@ class AdaptiveVolatilityMondrianCPS:
                 X_train, X_calib = X[:-n_calib], X[-n_calib:]
                 y_train, y_calib = y[:-n_calib], y[-n_calib:]
                 
-                # Alinear features de volatilidad con calibración
                 if len(vol_features) >= n_calib:
                     vol_calib = vol_features[-n_calib:]
                 else:
                     vol_calib = np.full(n_calib, np.std(series))
                 
-                # Ajustar modelo base
                 self.base_model.fit(X_train, y_train)
                 calib_preds = self.base_model.predict(X_calib)
                 
-                # Calcular bins 2D
                 pred_edges, vol_edges = None, None
                 try:
                     _, pred_edges = pd.qcut(calib_preds, self.n_pred_bins, retbins=True, duplicates='drop')
@@ -1218,7 +1186,6 @@ class AdaptiveVolatilityMondrianCPS:
                 except:
                     pass
                 
-                # GUARDAR ARTEFACTOS
                 self._fitted_artifacts = {
                     'calib_preds': calib_preds,
                     'y_calib': y_calib,
@@ -1228,10 +1195,7 @@ class AdaptiveVolatilityMondrianCPS:
                     'is_fallback': False
                 }
             
-            # ================================================================
             # FASE 2: PREDICCIÓN
-            # ================================================================
-            
             if self._fitted_artifacts.get('is_fallback', False):
                 return np.full(1000, self._fitted_artifacts['mean'])
 
@@ -1240,27 +1204,22 @@ class AdaptiveVolatilityMondrianCPS:
             
             point_pred = self.base_model.predict(x_test)[0]
             
-            # Recuperar
             calib_preds = self._fitted_artifacts['calib_preds']
             y_calib = self._fitted_artifacts['y_calib']
             vol_calib = self._fitted_artifacts['vol_calib']
             pred_edges = self._fitted_artifacts['pred_edges']
             vol_edges = self._fitted_artifacts['vol_edges']
             
-            # Estratificación 2D
             try:
                 if pred_edges is not None and vol_edges is not None:
-                    # Bins de calibración
                     pred_idx = np.clip(np.digitize(calib_preds, pred_edges[:-1]) - 1, 0, len(pred_edges) - 2)
                     vol_idx = np.clip(np.digitize(vol_calib, vol_edges[:-1]) - 1, 0, len(vol_edges) - 2)
                     
-                    # Bins del punto actual
                     test_pred_bin = np.clip(np.digitize(point_pred, pred_edges[:-1]) - 1, 0, len(pred_edges) - 2)
                     test_vol_bin = np.clip(np.digitize(test_vol, vol_edges[:-1]) - 1, 0, len(vol_edges) - 2)
                     
                     local_mask = (pred_idx == test_pred_bin) & (vol_idx == test_vol_bin)
                     
-                    # Relaxing rules si hay pocos datos
                     if np.sum(local_mask) < 5:
                         local_mask = (pred_idx == test_pred_bin)
                         if np.sum(local_mask) < 5:
@@ -1272,7 +1231,6 @@ class AdaptiveVolatilityMondrianCPS:
             
             local_y = y_calib[local_mask]
             local_preds = calib_preds[local_mask]
-            
             calibration_scores = point_pred + (local_y - local_preds)
             
             return self._create_samples_from_scores(calibration_scores, 1000)
@@ -1282,30 +1240,33 @@ class AdaptiveVolatilityMondrianCPS:
                 print(f"    AV-MCPS error: {e}")
             return np.full(1000, np.nanmean(df) if hasattr(df, '__len__') else 0)
 
-
 # =============================================================================
 # EnCQR-LSTM - Ensemble Conformalized Quantile Regression with LSTM
 # =============================================================================
+import numpy as np
+import pandas as pd
+from scipy import stats
+
 
 class EnCQR_LSTM_Model:
-    """
-    EnCQR-LSTM Optimizado: 
-    Ensemble de LSTMs con Conformalized Quantile Regression.
-    
-    OPTIMIZACIÓN: 
-    Entrena el ensemble (B redes neuronales) una sola vez al inicio de la ventana 
-    de test y lo reutiliza para generar predicciones en los siguientes pasos.
-    """
+    """EnCQR-LSTM con KDE: Genera distribuciones probabilísticas completas."""
    
     def __init__(self, n_lags: int = 20, B: int = 3, units: int = 32, n_layers: int = 2,
                  lr: float = 0.005, batch_size: int = 16, epochs: int = 20,
                  num_samples: int = 1000, random_state: int = 42, verbose: bool = False,
-                 optimize: bool = True, alpha: float = 0.05):
+                 optimize: bool = True, alpha: float = 0.05, kde_bandwidth: str = 'scott'):
        
-        if not TF_AVAILABLE:
-            raise ImportError("TensorFlow requerido: pip install tensorflow")
-        if not SKLEARN_AVAILABLE:
-            raise ImportError("scikit-learn requerido: pip install scikit-learn")
+        try:
+            import tensorflow as tf
+            from tensorflow.keras import layers, Model, optimizers
+            from sklearn.preprocessing import MinMaxScaler
+            self.tf = tf
+            self.layers = layers
+            self.Model = Model
+            self.optimizers = optimizers
+            self.MinMaxScaler = MinMaxScaler
+        except ImportError:
+            raise ImportError("TensorFlow y scikit-learn requeridos")
        
         self.n_lags = n_lags
         self.B = B
@@ -1319,52 +1280,61 @@ class EnCQR_LSTM_Model:
         self.verbose = verbose
         self.optimize = optimize
         self.alpha = alpha
+        self.kde_bandwidth = kde_bandwidth  # 'scott', 'silverman', o float
        
-        self.scaler = MinMaxScaler()
+        self.scaler = self.MinMaxScaler()
         self.best_params = {}
         self._is_optimized = False
         self.rng = np.random.default_rng(random_state)
        
+        # 11 cuantiles para construir la distribución
         self.quantiles = np.array([0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95])
         
-        # VARIABLE CLAVE PARA OPTIMIZACIÓN DE TIEMPO
+        # Estado congelado
         self._trained_ensemble = None
+        self._frozen_scaler = None
+        self._is_frozen = False
        
-        tf.random.set_seed(random_state)
+        self.tf.random.set_seed(random_state)
         np.random.seed(random_state)
    
     def _pin_loss(self, y_true, y_pred):
-        """Pinball loss para regresión cuantílica."""
+        """Pinball loss agregado sobre todos los cuantiles."""
         error = y_true - y_pred
-        return tf.reduce_mean(
-            tf.maximum(self.quantiles * error, (self.quantiles - 1) * error),
+        return self.tf.reduce_mean(
+            self.tf.maximum(self.quantiles * error, (self.quantiles - 1) * error),
             axis=-1
         )
    
     def _build_lstm(self):
-        """Construye modelo LSTM para regresión cuantílica."""
-        x_in = layers.Input(shape=(self.n_lags, 1))
+        """Construye LSTM que predice TODOS los cuantiles simultáneamente."""
+        x_in = self.layers.Input(shape=(self.n_lags, 1))
         x = x_in
         for _ in range(self.n_layers - 1):
-            x = layers.LSTM(self.units, return_sequences=True)(x)
-        x = layers.LSTM(self.units, return_sequences=False)(x)
-        x = layers.Dense(len(self.quantiles))(x)
-        model = Model(inputs=x_in, outputs=x)
-        model.compile(optimizer=optimizers.Adam(learning_rate=self.lr), loss=self._pin_loss)
+            x = self.layers.LSTM(self.units, return_sequences=True)(x)
+        x = self.layers.LSTM(self.units, return_sequences=False)(x)
+        x = self.layers.Dense(len(self.quantiles))(x)  # 11 salidas
+        model = self.Model(inputs=x_in, outputs=x)
+        model.compile(
+            optimizer=self.optimizers.Adam(learning_rate=self.lr), 
+            loss=self._pin_loss
+        )
         return model
    
     def _create_sequences(self, data: np.ndarray):
-        """Crea secuencias para LSTM."""
         X, y = [], []
         for i in range(len(data) - self.n_lags):
             X.append(data[i:(i + self.n_lags)])
             y.append(data[i + self.n_lags])
         return np.array(X), np.array(y)
    
-    def _prepare_data(self, series: np.ndarray):
-        """Prepara datos en B batches disjuntos para ensemble."""
-        # Nota: el scaler se ajusta aquí una vez
-        series_scaled = self.scaler.fit_transform(series.reshape(-1, 1))
+    def _prepare_data(self, series: np.ndarray, scaler=None):
+        """Prepara batches para ensemble leave-one-out."""
+        if scaler is not None:
+            series_scaled = scaler.transform(series.reshape(-1, 1))
+        else:
+            series_scaled = self.scaler.fit_transform(series.reshape(-1, 1))
+        
         X, y = self._create_sequences(series_scaled)
         n_samples = X.shape[0]
        
@@ -1382,178 +1352,261 @@ class EnCQR_LSTM_Model:
         return batches
    
     def _cleanup(self):
-        """Limpia memoria de TensorFlow."""
-        tf.keras.backend.clear_session()
+        self.tf.keras.backend.clear_session()
+        import gc
         gc.collect()
    
-    def optimize_hyperparameters(self, df, reference_noise):
-        """Optimización Bayesiana rápida."""
-        from metricas import ecrps
-       
-        if not BAYESOPT_AVAILABLE:
-            self.best_params = {'n_lags': 20, 'units': 32, 'B': 3}
-            self._is_optimized = True
-            return self.best_params, -1
-       
-        series = df['valor'].values if isinstance(df, pd.DataFrame) else np.asarray(df)
-       
-        def objective(n_lags, units, B):
-            self._cleanup()
-           
-            try:
-                self.n_lags = max(10, int(n_lags))
-                self.units = max(16, int(units))
-                self.B = max(2, int(B))
-               
-                if len(series) <= self.n_lags * self.B:
-                    return -1e10
-               
-                # Limpiar modelo guardado para forzar re-entrenamiento en optimización
-                saved_ensemble = self._trained_ensemble
-                self._trained_ensemble = None
-                
-                old_epochs = self.epochs
-                self.epochs = 10 # Menos epochs para optimizar
-               
-                samples = self.fit_predict(series)
-               
-                self.epochs = old_epochs
-                self._trained_ensemble = saved_ensemble # Restaurar
-               
-                if samples is None or len(samples) == 0:
-                    return -1e10
-               
-                ref_sub = self.rng.choice(reference_noise,
-                                         size=min(500, len(reference_noise)),
-                                         replace=False)
-                return -ecrps(samples, ref_sub)
-               
-            except:
-                return -1e10
-            finally:
-                self._cleanup()
-       
-        optimizer = BayesianOptimization(
-            f=objective,
-            pbounds={'n_lags': (10, 30), 'units': (16, 48), 'B': (2, 4)},
-            random_state=self.random_state,
-            verbose=0
-        )
-       
+    def _quantiles_to_distribution_kde(self, conf_q: np.ndarray) -> np.ndarray:
+        """
+        Convierte cuantiles predichos en distribución usando KDE.
+        
+        Estrategia:
+        1. Usa los cuantiles como puntos de soporte ponderados
+        2. Aplica KDE gaussiano con bandwidth adaptativo
+        3. Samplea de la distribución resultante
+        """
+        conf_q = np.sort(conf_q)
+        
+        # Calcular pesos basados en diferencias de niveles de cuantil
+        # Más peso en regiones con mayor densidad de probabilidad
+        quantile_diffs = np.diff(np.concatenate([[0], self.quantiles, [1]]))
+        weights_lower = quantile_diffs[:-1]
+        weights_upper = quantile_diffs[1:]
+        weights = (weights_lower + weights_upper) / 2
+        
+        # Normalizar pesos
+        weights = weights / weights.sum()
+        
         try:
-            optimizer.maximize(init_points=2, n_iter=2)
-        except:
-            pass
-       
-        best_ecrps = -1
-        if optimizer.max and optimizer.max['target'] > -1e9:
-            self.best_params = {k: int(v) for k, v in optimizer.max['params'].items()}
-            best_ecrps = -optimizer.max['target']
-        else:
-            self.best_params = {'n_lags': 20, 'units': 32, 'B': 3}
-       
-        self._is_optimized = True
-        self._cleanup()
-        return self.best_params, best_ecrps
+            # KDE con pesos - Opción 1: Replicar puntos según pesos
+            replications = np.round(weights * 1000).astype(int)
+            replications = np.maximum(replications, 1)  # Mínimo 1 réplica
+            
+            expanded_points = np.repeat(conf_q, replications)
+            
+            # Crear KDE
+            kde = stats.gaussian_kde(
+                expanded_points,
+                bw_method=self.kde_bandwidth
+            )
+            
+            # Samplear de la distribución
+            samples = kde.resample(self.num_samples, seed=self.random_state)[0]
+            
+            # Clip a rango razonable (evitar extrapolaciones extremas)
+            q_min, q_max = conf_q[0], conf_q[-1]
+            q_range = q_max - q_min
+            samples = np.clip(samples, q_min - 0.1*q_range, q_max + 0.1*q_range)
+            
+            return samples
+            
+        except Exception as e:
+            if self.verbose:
+                print(f"  KDE falló ({e}), usando fallback a interpolación")
+            return self._quantiles_to_distribution_interp(conf_q)
+    
+    def _quantiles_to_distribution_interp(self, conf_q: np.ndarray) -> np.ndarray:
+        """Método de fallback: interpolación cúbica de cuantiles."""
+        from scipy.interpolate import interp1d
+        
+        conf_q = np.sort(conf_q)
+        
+        # Crear función cuantil inversa
+        quantile_fn = interp1d(
+            self.quantiles,
+            conf_q,
+            kind='cubic',
+            fill_value='extrapolate',
+            bounds_error=False
+        )
+        
+        # Samplear uniformemente de los niveles de cuantil
+        uniform_samples = self.rng.uniform(
+            self.quantiles[0],
+            self.quantiles[-1],
+            self.num_samples
+        )
+        
+        samples = quantile_fn(uniform_samples)
+        return samples
+   
+    def freeze_hyperparameters(self, train_data: np.ndarray):
+        """Entrena ensemble UNA VEZ y congela TODO."""
+        values = train_data.flatten() if hasattr(train_data, 'flatten') else np.asarray(train_data)
+        
+        if self.best_params:
+            self.n_lags = self.best_params.get('n_lags', self.n_lags)
+            self.units = self.best_params.get('units', self.units)
+            self.B = self.best_params.get('B', self.B)
+        
+        try:
+            self._cleanup()
+            
+            if len(values) <= self.n_lags + self.B * 5:
+                self._is_frozen = False
+                return
+            
+            # Ajustar y congelar scaler
+            self._frozen_scaler = self.MinMaxScaler()
+            self._frozen_scaler.fit(values.reshape(-1, 1))
+            
+            batches = self._prepare_data(values, scaler=self._frozen_scaler)
+            
+            ensemble_models = []
+            loo_preds = [[] for _ in range(self.B)]
+        
+            # ENTRENAR ENSEMBLE
+            for b in range(self.B):
+                model = self._build_lstm()
+                model.fit(
+                    batches[b]['X'], batches[b]['y'],
+                    epochs=self.epochs, batch_size=self.batch_size,
+                    verbose=0, shuffle=False
+                )
+                ensemble_models.append(model)
+                
+                # Leave-one-out predictions
+                for i in range(self.B):
+                    if i != b:
+                        preds = model.predict(batches[i]['X'], verbose=0)
+                        loo_preds[i].append(preds)
+        
+            # Calcular conformity scores
+            conformity_scores = [[] for _ in range(len(self.quantiles))]
+            for i in range(self.B):
+                if loo_preds[i]:
+                    avg_pred = np.mean(loo_preds[i], axis=0)
+                    y = batches[i]['y'].reshape(-1, 1)
+                    for q_idx, tau in enumerate(self.quantiles):
+                        q = avg_pred[:, q_idx].reshape(-1, 1)
+                        if tau <= 0.5:
+                            score = q - y
+                        else:
+                            score = y - q
+                        conformity_scores[q_idx].extend(score.flatten())
+            
+            self._trained_ensemble = {
+                'models': ensemble_models,
+                'scores': [np.array(cs) for cs in conformity_scores],
+                'scaler': self._frozen_scaler
+            }
+            self._is_frozen = True
+            
+            if self.verbose:
+                print(f"  ✓ EnCQR-LSTM congelado con KDE: n_lags={self.n_lags}, "
+                      f"B={self.B}, units={self.units}")
+                
+        except Exception as e:
+            if self.verbose:
+                print(f"  ✗ Error congelando EnCQR-LSTM: {e}")
+            self._is_frozen = False
    
     def fit_predict(self, df) -> np.ndarray:
-        """
-        Ajusta y retorna muestras.
-        Si _trained_ensemble ya existe, usa las redes ya entrenadas.
-        """
-        # Limpiar sesión previa para evitar fugas de memoria, 
-        # pero CUIDADO: no borrar los modelos que queremos reutilizar.
-        # tf.keras.backend.clear_session() borra el grafo global.
-        # Como guardamos referencias a los modelos en self._trained_ensemble, 
-        # deberíamos estar bien, pero por seguridad solo limpiamos si vamos a re-entrenar.
-        
+        """Predice distribución usando KDE sobre cuantiles conformalizados."""
         try:
             series = df['valor'].values if isinstance(df, pd.DataFrame) else np.asarray(df)
            
+            # Si está congelado, usar ensemble existente
+            if self._is_frozen:
+                if self._trained_ensemble is None:
+                    return np.full(self.num_samples, np.mean(series))
+                
+                scores_list = self._trained_ensemble['scores']
+                if any(len(cs) == 0 for cs in scores_list):
+                    return np.full(self.num_samples, np.mean(series))
+           
+                current_scaler = self._trained_ensemble['scaler']
+                
+                last_window_scaled = current_scaler.transform(
+                    series[-self.n_lags:].reshape(-1, 1)
+                ).reshape(1, self.n_lags, 1)
+           
+                # Predicción con ensemble
+                final_preds = [
+                    model.predict(last_window_scaled, verbose=0)[0]
+                    for model in self._trained_ensemble['models']
+                ]
+                agg_q = np.mean(final_preds, axis=0)
+           
+                # Conformalización asimétrica
+                conf_q = np.zeros_like(agg_q)
+                for q_idx, tau in enumerate(self.quantiles):
+                    omega = np.quantile(scores_list[q_idx], 1 - self.alpha)
+                    if tau <= 0.5:
+                        conf_q[q_idx] = agg_q[q_idx] - omega
+                    else:
+                        conf_q[q_idx] = agg_q[q_idx] + omega
+           
+                # Desnormalizar
+                conf_q = current_scaler.inverse_transform(
+                    conf_q.reshape(-1, 1)
+                ).flatten()
+           
+                # ★★★ CONVERSIÓN A DISTRIBUCIÓN CON KDE ★★★
+                samples = self._quantiles_to_distribution_kde(conf_q)
+           
+                return samples
+            
+            # Primera ejecución (sin freeze) - código antiguo
             if self.best_params:
                 self.n_lags = self.best_params.get('n_lags', self.n_lags)
                 self.units = self.best_params.get('units', self.units)
                 self.B = self.best_params.get('B', self.B)
             
-            # ================================================================
-            # FASE 1: ENTRENAMIENTO (Solo primera vez)
-            # ================================================================
-            if self._trained_ensemble is None:
-                self._cleanup() # Ahora sí es seguro limpiar
-                
-                if len(series) <= self.n_lags + self.B * 5:
-                    return np.full(self.num_samples, np.mean(series))
-                
-                try:
-                    # Esto ajusta el scaler internamente
-                    batches = self._prepare_data(series)
-                except ValueError:
-                    return np.full(self.num_samples, np.mean(series))
-                
-                ensemble_models = []
-                loo_preds = [[] for _ in range(self.B)]
+            self._cleanup()
             
-                # Entrenar B modelos
-                for b in range(self.B):
-                    model = self._build_lstm()
-                    model.fit(
-                        batches[b]['X'], batches[b]['y'],
-                        epochs=self.epochs, batch_size=self.batch_size,
-                        verbose=0, shuffle=False
-                    )
-                    ensemble_models.append(model)
-                    
-                    # Predicciones Leave-One-Out para calibración
-                    for i in range(self.B):
-                        if i != b:
-                            preds = model.predict(batches[i]['X'], verbose=0)
-                            loo_preds[i].append(preds)
+            if len(series) <= self.n_lags + self.B * 5:
+                return np.full(self.num_samples, np.mean(series))
             
-                # Calcular scores de conformidad
-                conformity_scores = [[] for _ in range(len(self.quantiles))]
+            try:
+                batches = self._prepare_data(series, scaler=None)
+            except ValueError:
+                return np.full(self.num_samples, np.mean(series))
+            
+            ensemble_models = []
+            loo_preds = [[] for _ in range(self.B)]
+        
+            for b in range(self.B):
+                model = self._build_lstm()
+                model.fit(
+                    batches[b]['X'], batches[b]['y'],
+                    epochs=self.epochs, batch_size=self.batch_size,
+                    verbose=0, shuffle=False
+                )
+                ensemble_models.append(model)
+                
                 for i in range(self.B):
-                    if loo_preds[i]:
-                        avg_pred = np.mean(loo_preds[i], axis=0)
-                        y = batches[i]['y'].reshape(-1, 1)
-                        for q_idx, tau in enumerate(self.quantiles):
-                            q = avg_pred[:, q_idx].reshape(-1, 1)
-                            if tau <= 0.5:
-                                score = q - y
-                            else:
-                                score = y - q
-                            conformity_scores[q_idx].extend(score.flatten())
-                
-                # Guardar todo
-                self._trained_ensemble = {
-                    'models': ensemble_models,
-                    'scores': [np.array(cs) for cs in conformity_scores],
-                    'scaler': self.scaler # Guardar el scaler ajustado
-                }
-           
-            # ================================================================
-            # FASE 2: PREDICCIÓN
-            # ================================================================
+                    if i != b:
+                        preds = model.predict(batches[i]['X'], verbose=0)
+                        loo_preds[i].append(preds)
+        
+            conformity_scores = [[] for _ in range(len(self.quantiles))]
+            for i in range(self.B):
+                if loo_preds[i]:
+                    avg_pred = np.mean(loo_preds[i], axis=0)
+                    y = batches[i]['y'].reshape(-1, 1)
+                    for q_idx, tau in enumerate(self.quantiles):
+                        q = avg_pred[:, q_idx].reshape(-1, 1)
+                        if tau <= 0.5:
+                            score = q - y
+                        else:
+                            score = y - q
+                        conformity_scores[q_idx].extend(score.flatten())
             
-            scores_list = self._trained_ensemble['scores']
+            scores_list = [np.array(cs) for cs in conformity_scores]
             if any(len(cs) == 0 for cs in scores_list):
                 return np.full(self.num_samples, np.mean(series))
            
-            # Usar el scaler guardado para transformar la nueva ventana
-            # Nota: fit_transform se hizo en FASE 1. Aquí solo transform.
-            current_scaler = self._trained_ensemble['scaler']
-            
-            last_window_scaled = current_scaler.transform(
+            last_window_scaled = self.scaler.transform(
                 series[-self.n_lags:].reshape(-1, 1)
             ).reshape(1, self.n_lags, 1)
            
-            # Predicción promediada del ensemble
             final_preds = [
                 model.predict(last_window_scaled, verbose=0)[0]
-                for model in self._trained_ensemble['models']
+                for model in ensemble_models
             ]
             agg_q = np.mean(final_preds, axis=0)
            
-            # Conformalizar
             conf_q = np.zeros_like(agg_q)
             for q_idx, tau in enumerate(self.quantiles):
                 omega = np.quantile(scores_list[q_idx], 1 - self.alpha)
@@ -1562,23 +1615,19 @@ class EnCQR_LSTM_Model:
                 else:
                     conf_q[q_idx] = agg_q[q_idx] + omega
            
-            # Invertir escala
-            conf_q = current_scaler.inverse_transform(
+            conf_q = self.scaler.inverse_transform(
                 conf_q.reshape(-1, 1)
             ).flatten()
            
-            # Monotonicidad y muestreo
-            conf_q = np.sort(conf_q)
-            uniform_samples = self.rng.uniform(0, 1, self.num_samples)
-            samples = np.interp(uniform_samples, self.quantiles, conf_q)
+            # ★★★ CONVERSIÓN A DISTRIBUCIÓN CON KDE ★★★
+            samples = self._quantiles_to_distribution_kde(conf_q)
            
             return samples
            
         except Exception as e:
             if self.verbose:
-                print(f" EnCQR error: {e}")
+                print(f"  EnCQR error: {e}")
             return np.full(self.num_samples, np.nanmean(df) if hasattr(df, '__len__') else 0)
    
     def __del__(self):
-        # Solo limpiar al destruir el objeto
         self._cleanup()
