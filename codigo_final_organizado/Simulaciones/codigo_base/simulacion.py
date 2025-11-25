@@ -139,9 +139,8 @@ class ARMASimulation:
         return series
     
 
-
-
 class ARIMASimulation:
+
     """
     Genera series temporales ARIMA(p,1,q) con diferentes tipos de ruido y puede
     proporcionar la distribución teórica del siguiente paso, dado el historial completo.
@@ -273,3 +272,237 @@ class ARIMASimulation:
             return mixture - np.mean(mixture) # Forzar media cero
         else:
             raise ValueError(f"Distribución de ruido no soportada: {self.noise_dist}")
+        
+
+class SETARSimulation:
+    """
+    Genera series temporales SETAR (Self-Exciting Threshold AutoRegressive) con diferentes 
+    tipos de ruido y puede proporcionar la distribución teórica del siguiente paso.
+    
+    SETAR(k; p1, p2, ..., pk) con k regímenes y órdenes autorregresivos p1, p2, ..., pk.
+    Esta implementación se enfoca en SETAR(2; p1, p2) con dos regímenes.
+    """
+    def __init__(self, model_type: str = 'SETAR(2;1,1)', 
+                 phi_regime1: List[float] = [0.6], 
+                 phi_regime2: List[float] = [-0.5],
+                 threshold: float = 0.0,
+                 delay: int = 1,
+                 noise_dist: str = 'normal', 
+                 sigma: float = 1.0, 
+                 seed: int = None, 
+                 verbose: bool = False):
+        """
+        Inicializa el simulador SETAR.
+        
+        Args:
+            model_type: Nombre del modelo (e.g., 'SETAR(2;1,1)')
+            phi_regime1: Coeficientes AR para el régimen 1 (y_{t-d} <= threshold)
+            phi_regime2: Coeficientes AR para el régimen 2 (y_{t-d} > threshold)
+            threshold: Umbral que separa los regímenes (r)
+            delay: Retardo para la variable de umbral (d)
+            noise_dist: Distribución del ruido ('normal', 'uniform', 'exponential', 't-student', 'mixture')
+            sigma: Desviación estándar del ruido
+            seed: Semilla para reproducibilidad
+            verbose: Mostrar información adicional
+        """
+        self.model_type = model_type
+        self.phi_regime1 = np.array(phi_regime1)
+        self.phi_regime2 = np.array(phi_regime2)
+        self.threshold = threshold
+        self.delay = delay
+        self.noise_dist = noise_dist
+        self.sigma = sigma
+        self.seed = seed
+        self.rng = np.random.default_rng(seed)
+        self.verbose = verbose
+        self.series = None
+        self.errors = None
+        self.regime_history = None  # Para tracking de regímenes
+
+    def model_params(self) -> Dict:
+        """Devuelve los parámetros del modelo en un diccionario."""
+        return {
+            'model_type': self.model_type,
+            'phi_regime1': self.phi_regime1.tolist(),
+            'phi_regime2': self.phi_regime2.tolist(),
+            'threshold': self.threshold,
+            'delay': self.delay,
+            'sigma': self.sigma
+        }
+
+    def _determine_regime(self, series_history: np.ndarray) -> int:
+        """
+        Determina el régimen basado en el valor retardado de la serie.
+        
+        Args:
+            series_history: Historial de la serie temporal
+            
+        Returns:
+            1 si y_{t-d} <= threshold, 2 si y_{t-d} > threshold
+        """
+        if len(series_history) < self.delay:
+            # Si no hay suficiente historia, usar régimen 1 por defecto
+            return 1
+        
+        threshold_value = series_history[-self.delay]
+        return 1 if threshold_value <= self.threshold else 2
+
+    def simulate(self, n: int = 250, burn_in: int = 50, 
+                 return_just_series: bool = False) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Simula una serie temporal SETAR.
+        
+        Args:
+            n: Número de observaciones a generar (sin burn-in)
+            burn_in: Período de calentamiento
+            return_just_series: Si True, devuelve (serie_completa, None)
+            
+        Returns:
+            Tupla (serie, errores) o (serie_completa, None)
+        """
+        total_length = n + burn_in
+        p1, p2 = len(self.phi_regime1), len(self.phi_regime2)
+        max_p = max(p1, p2, self.delay)
+        
+        # Generar errores
+        errors = self._generate_errors(total_length)
+        series = np.zeros(total_length)
+        regime_history = np.zeros(total_length, dtype=int)
+        
+        # Inicialización con valores pequeños
+        initial_values = self.rng.normal(0, self.sigma * 0.5, max_p)
+        series[:max_p] = initial_values
+        
+        # Simular la serie
+        for t in range(max_p, total_length):
+            # Determinar el régimen basado en y_{t-d}
+            regime = self._determine_regime(series[:t])
+            regime_history[t] = regime
+            
+            if regime == 1:
+                # Régimen 1: y_{t-d} <= threshold
+                phi = self.phi_regime1
+                p = p1
+            else:
+                # Régimen 2: y_{t-d} > threshold
+                phi = self.phi_regime2
+                p = p2
+            
+            # Calcular la parte AR
+            if p > 0:
+                ar_part = np.dot(phi, series[t-p:t][::-1])
+            else:
+                ar_part = 0
+            
+            series[t] = ar_part + errors[t]
+        
+        if return_just_series:
+            return series, None
+
+        # Guardar resultados sin burn-in
+        self.series = series[burn_in:]
+        self.errors = errors[burn_in:]
+        self.regime_history = regime_history[burn_in:]
+        
+        return self.series, self.errors
+
+    def get_true_next_step_samples(self, series_history: np.ndarray, 
+                                   errors_history: np.ndarray,
+                                   n_samples: int = 10000) -> np.ndarray:
+        """
+        Calcula una muestra grande de la distribución real para el siguiente paso (X_{n+1}).
+        Para SETAR, esto depende del régimen determinado por y_{n-d+1}.
+        
+        Args:
+            series_history: El historial de valores de la serie (X_1, ..., X_n)
+            errors_history: El historial de errores (no se usa en SETAR puro, pero se mantiene por compatibilidad)
+            n_samples: El número de muestras a generar
+            
+        Returns:
+            Array de numpy con las muestras de la distribución del siguiente paso
+        """
+        p1, p2 = len(self.phi_regime1), len(self.phi_regime2)
+        max_p = max(p1, p2)
+        
+        if len(series_history) < max(max_p, self.delay):
+            raise ValueError(f"El historial de la serie es insuficiente. "
+                           f"Se necesitan al menos {max(max_p, self.delay)} observaciones.")
+        
+        # Determinar el régimen para la predicción
+        regime = self._determine_regime(series_history)
+        
+        if regime == 1:
+            phi = self.phi_regime1
+            p = p1
+        else:
+            phi = self.phi_regime2
+            p = p2
+        
+        # Calcular la parte determinística
+        if p > 0:
+            deterministic_part = np.dot(phi, series_history[-p:][::-1])
+        else:
+            deterministic_part = 0
+        
+        # Generar errores futuros
+        future_errors = self._generate_errors(n_samples)
+        
+        # Retornar las muestras
+        return deterministic_part + future_errors
+
+    def _generate_errors(self, n: int) -> np.ndarray:
+        """Genera el término de error según la distribución especificada."""
+        if self.noise_dist == 'normal':
+            return self.rng.normal(0, self.sigma, n)
+        if self.noise_dist == 'uniform':
+            limit = np.sqrt(3) * self.sigma
+            return self.rng.uniform(-limit, limit, size=n)
+        if self.noise_dist == 'exponential':
+            return self.rng.exponential(scale=self.sigma, size=n) - self.sigma
+        if self.noise_dist == 't-student':
+            df = 5
+            scale_factor = self.sigma * np.sqrt((df - 2) / df)
+            return t.rvs(df, scale=scale_factor, size=n, random_state=self.rng)
+        elif self.noise_dist == 'mixture':
+            n1 = int(n * 0.75)
+            n2 = n - n1
+            variance_of_means = 0.75 * (-0.25 * self.sigma * 2)**2 + 0.25 * (0.75 * self.sigma * 2)**2
+            if self.sigma**2 < variance_of_means:
+                raise ValueError("La varianza de la mezcla no puede ser la sigma deseada.")
+            component_std = np.sqrt(self.sigma**2 - variance_of_means)
+            comp1 = self.rng.normal(-0.25 * self.sigma * 2, component_std, n1)
+            comp2 = self.rng.normal(0.75 * self.sigma * 2, component_std, n2)
+            mixture = np.concatenate([comp1, comp2])
+            self.rng.shuffle(mixture)
+            return mixture - np.mean(mixture)
+        else:
+            raise ValueError(f"Distribución de ruido no soportada: {self.noise_dist}")
+
+    def generate_series(self, n_total: int = 505, seed: int = None) -> np.ndarray:
+        """
+        MÉTODO NUEVO - 100% compatible con el pipeline honesto.
+        Genera una serie SETAR limpia de n_total puntos útiles (ya sin burn-in).
+        """
+        if seed is not None:
+            old_rng_state = self.rng.bit_generator.state
+            self.rng = np.random.default_rng(seed)
+        
+        series, _ = self.simulate(n=n_total, burn_in=200, return_just_series=False)
+        
+        if seed is not None:
+            self.rng.bit_generator.state = old_rng_state
+        
+        return series
+    
+    def get_regime_proportions(self) -> Dict[int, float]:
+        """
+        Calcula la proporción de observaciones en cada régimen.
+        Solo funciona después de llamar a simulate().
+        """
+        if self.regime_history is None:
+            raise ValueError("Primero debe llamar a simulate()")
+        
+        unique, counts = np.unique(self.regime_history, return_counts=True)
+        total = len(self.regime_history)
+        
+        return {int(regime): count/total for regime, count in zip(unique, counts)}

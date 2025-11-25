@@ -11,7 +11,7 @@ os.environ["MKL_NUM_THREADS"] = n_threads
 os.environ["NUMEXPR_NUM_THREADS"] = n_threads
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
-from pipeline import Pipeline140SinSesgos_ARMA, Pipeline140SinSesgos_ARIMA
+from pipeline import Pipeline140SinSesgos_ARMA, Pipeline140SinSesgos_ARIMA, Pipeline140SinSesgos_SETAR, Pipeline140ConDiferenciacion_ARIMA
 import pandas as pd
 import numpy as np
 
@@ -197,5 +197,163 @@ def main_two_scenarios_ARIMA():
     
     elapsed = time.time() - start_time
     print(f"\n⏱  Tiempo total: {elapsed:.1f}s")
+    
+    return df_final
+
+def main_full_140_SETAR():
+    """
+    Ejecución completa de 140 escenarios SETAR con gestión de memoria.
+    """
+    start_time = time.time()
+    
+    print("="*80)
+    print("INICIANDO SIMULACIÓN DE 140 ESCENARIOS SETAR")
+    print("="*80)
+    
+    pipeline = Pipeline140SinSesgos_SETAR(
+        n_boot=1000,
+        seed=42,
+        verbose=False
+    )
+    
+    df_final = pipeline.run_all(
+        excel_filename="resultados_140_SETAR_FINAL.xlsx",
+        batch_size=10 
+    )
+    
+    run_analysis(df_final)
+    
+    elapsed = time.time() - start_time
+    print(f"\n⏱  Tiempo total: {elapsed:.1f}s ({elapsed/3600:.2f} horas)")
+    
+    return df_final
+
+
+def main_two_scenarios_SETAR():
+    """
+    Ejecuta solo 2 escenarios SETAR para pruebas rápidas.
+    """
+    start_time = time.time()
+    
+    print("="*80)
+    print("EVALUACIÓN CON SOLO 2 ESCENARIOS SETAR")
+    print("="*80)
+    
+    # Crear pipeline con configuración especial
+    pipeline = Pipeline140SinSesgos_SETAR(n_boot=1000, seed=42, verbose=True)
+    
+    # Configurar solo 2 escenarios manualmente
+    pipeline.SETAR_CONFIGS = [
+        {
+            'nombre': 'SETAR-1',
+            'phi_regime1': [0.6],
+            'phi_regime2': [-0.5],
+            'threshold': 0.0,
+            'delay': 1,
+            'description': 'SETAR(2;1,1) - AR(1) con d=1'
+        },
+        {
+            'nombre': 'SETAR-3',
+            'phi_regime1': [0.5, -0.2],
+            'phi_regime2': [-0.3, 0.1],
+            'threshold': 0.5,
+            'delay': 1,
+            'description': 'SETAR(2;2,2) - AR(2) con d=1'
+        }
+    ]
+    pipeline.DISTRIBUTIONS = ['normal']
+    pipeline.VARIANCES = [1.0]
+    
+    # Ahora generate_all_scenarios() solo generará 2 escenarios
+    df_final = pipeline.run_all(
+        excel_filename="resultados_2_ESCENARIOS_SETAR.xlsx",
+        batch_size=2
+    )
+    
+    run_analysis(df_final)
+    
+    elapsed = time.time() - start_time
+    print(f"\n⏱  Tiempo total: {elapsed:.1f}s")
+    
+    return df_final
+
+def main_two_scenarios_diferenciado():
+    """
+    Ejecuta 2 escenarios ARIMA CON diferenciación adicional para pruebas rápidas.
+    """
+    start_time = time.time()
+    
+    print("="*80)
+    print("EVALUACIÓN CON 2 ESCENARIOS ARIMA - CON DIFERENCIACIÓN ADICIONAL")
+    print("="*80)
+    
+    from pipeline import Pipeline140ConDiferenciacion_ARIMA
+    
+    # Crear pipeline CON diferenciación
+    pipeline = Pipeline140ConDiferenciacion_ARIMA(
+        n_boot=1000, 
+        seed=42, 
+        verbose=True,
+        usar_diferenciacion=True  # ✅ ACTIVAR DIFERENCIACIÓN
+    )
+    
+    # Configurar solo 2 escenarios
+    pipeline.ARIMA_CONFIGS = [
+        {'nombre': 'ARIMA(1,1,0)', 'phi': [0.7], 'theta': []},
+        {'nombre': 'ARIMA(0,1,1)', 'phi': [], 'theta': [0.6]}
+    ]
+    pipeline.DISTRIBUTIONS = ['normal']
+    pipeline.VARIANCES = [1.0]
+    
+    df_final = pipeline.run_all(
+        excel_filename="resultados_2_ESCENARIOS_ARIMA_CON_DIFF.xlsx",
+        batch_size=2
+    )
+    
+    run_analysis(df_final)
+    
+    elapsed = time.time() - start_time
+    print(f"\n⏱  Tiempo total: {elapsed:.1f}s")
+    
+    return df_final
+
+
+def main_full_140_diferenciado():
+    """
+    Ejecución completa de 140 escenarios ARIMA CON diferenciación adicional.
+    
+    Este pipeline aplica diferenciación ANTES de pasar los datos a los modelos,
+    permitiendo comparar si trabajar en espacio de incrementos (ΔY_t) mejora
+    el desempeño de los métodos de predicción conformal.
+    """
+    start_time = time.time()
+    
+    print("="*80)
+    print("INICIANDO SIMULACIÓN DE 140 ESCENARIOS ARIMA - CON DIFERENCIACIÓN")
+    print("="*80)
+    
+    from pipeline import Pipeline140ConDiferenciacion_ARIMA
+    
+    # Crear pipeline CON diferenciación
+    pipeline = Pipeline140ConDiferenciacion_ARIMA(
+        n_boot=1000,
+        seed=42,
+        verbose=False,
+        usar_diferenciacion=True  # ✅ ACTIVAR DIFERENCIACIÓN
+    )
+    
+    df_final = pipeline.run_all(
+        excel_filename="resultados_140_ARIMA_CON_DIFERENCIACION.xlsx",
+        batch_size=10
+    )
+    
+    print("\n" + "="*80)
+    print("ANÁLISIS DE RESULTADOS - CON DIFERENCIACIÓN")
+    print("="*80)
+    
+    run_analysis(df_final)
+    
+    elapsed = time.time() - start_time
+    print(f"\n⏱  Tiempo total: {elapsed:.1f}s ({elapsed/3600:.2f} horas)")
     
     return df_final
