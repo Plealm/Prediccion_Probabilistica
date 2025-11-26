@@ -11,7 +11,7 @@ os.environ["MKL_NUM_THREADS"] = n_threads
 os.environ["NUMEXPR_NUM_THREADS"] = n_threads
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
-from pipeline import Pipeline140SinSesgos_ARMA, Pipeline140SinSesgos_ARIMA, Pipeline140SinSesgos_SETAR, Pipeline140ConDiferenciacion_ARIMA
+from pipeline import Pipeline140SinSesgos_ARMA, Pipeline140SinSesgos_ARIMA, Pipeline140SinSesgos_SETAR, Pipeline140ConDiferenciacion_ARIMA, PipelineARIMA_MultiD_DobleModalidad
 import pandas as pd
 import numpy as np
 
@@ -357,3 +357,472 @@ def main_full_140_diferenciado():
     print(f"\n⏱  Tiempo total: {elapsed:.1f}s ({elapsed/3600:.2f} horas)")
     
     return df_final
+
+
+# ============================================================================
+# CÓDIGO PARA AGREGAR AL FINAL DE runner.py
+# ============================================================================
+
+def analisis_completo_doble_modalidad(df_final):
+    """
+    Análisis exhaustivo para resultados con doble modalidad (SIN_DIFF vs CON_DIFF).
+    
+    Compara:
+    1. Desempeño por cada valor de d
+    2. SIN_DIFF vs CON_DIFF: ¿cuál funciona mejor?
+    3. Tendencias según d aumenta
+    4. Mejor d por modelo y modalidad
+    """
+    print("\n" + "="*80)
+    print("ANÁLISIS EXHAUSTIVO - DOBLE MODALIDAD (SIN_DIFF vs CON_DIFF)")
+    print("="*80)
+    
+    model_cols = ['AREPD', 'AV-MCPS', 'Block Bootstrapping', 'DeepAR', 
+                  'EnCQR-LSTM', 'LSPM', 'LSPMW', 'MCPS', 'Sieve Bootstrap']
+    model_cols = [c for c in model_cols if c in df_final.columns]
+    
+    if 'Paso' in df_final.columns:
+        df_steps = df_final[df_final['Paso'] != 'Promedio'].copy()
+    else:
+        df_steps = df_final.copy()
+    
+    if len(df_steps) == 0:
+        print("⚠️ No hay datos suficientes para el análisis.")
+        return
+    
+    # Asegurar tipos correctos
+    if 'd' in df_steps.columns:
+        df_steps['d'] = pd.to_numeric(df_steps['d'], errors='coerce')
+    
+    d_values = sorted(df_steps['d'].unique())
+    modalidades = sorted(df_steps['Modalidad'].unique()) if 'Modalidad' in df_steps.columns else []
+    
+    # =================================================================
+    # 1. COMPARACIÓN GLOBAL: SIN_DIFF vs CON_DIFF
+    # =================================================================
+    print("\n" + "="*80)
+    print("🔍 1. COMPARACIÓN GLOBAL POR MODALIDAD")
+    print("="*80)
+    
+    for modalidad in modalidades:
+        df_mod = df_steps[df_steps['Modalidad'] == modalidad]
+        
+        if len(df_mod) == 0:
+            continue
+        
+        print(f"\n{'='*60}")
+        print(f"MODALIDAD: {modalidad}")
+        print(f"{'='*60}")
+        
+        means = {}
+        for model in model_cols:
+            if model in df_mod.columns:
+                val = df_mod[model].mean()
+                if not pd.isna(val):
+                    means[model] = val
+        
+        if not means:
+            print("  (Sin datos válidos)")
+            continue
+        
+        sorted_models = sorted(means.keys(), key=lambda x: means[x])
+        
+        print(f"{'Rank':<6} {'Modelo':<25} {'CRPS Medio':<15}")
+        print("-" * 60)
+        for i, m in enumerate(sorted_models):
+            print(f"{i+1:<6} {m:<25} {means[m]:.6f}")
+    
+    # =================================================================
+    # 2. RANKING POR CADA d Y MODALIDAD
+    # =================================================================
+    print("\n" + "="*80)
+    print("📊 2. RANKING POR CADA VALOR DE d (AMBAS MODALIDADES)")
+    print("="*80)
+    
+    for d_val in d_values:
+        df_d = df_steps[df_steps['d'] == d_val]
+        
+        if len(df_d) == 0:
+            continue
+        
+        print(f"\n{'='*70}")
+        print(f"d = {d_val}")
+        print(f"{'='*70}")
+        
+        for modalidad in modalidades:
+            df_d_mod = df_d[df_d['Modalidad'] == modalidad]
+            
+            if len(df_d_mod) == 0:
+                continue
+            
+            print(f"\n  --- {modalidad} ---")
+            
+            means = {}
+            for model in model_cols:
+                if model in df_d_mod.columns:
+                    val = df_d_mod[model].mean()
+                    if not pd.isna(val):
+                        means[model] = val
+            
+            if not means:
+                print("    (Sin datos válidos)")
+                continue
+            
+            sorted_models = sorted(means.keys(), key=lambda x: means[x])
+            
+            print(f"  {'Rank':<6} {'Modelo':<25} {'CRPS':<12}")
+            print("  " + "-" * 50)
+            for i, m in enumerate(sorted_models[:5]):  # Top 5
+                print(f"  {i+1:<6} {m:<25} {means[m]:.6f}")
+    
+    # =================================================================
+    # 3. VICTORIAS POR MODELO EN CADA MODALIDAD
+    # =================================================================
+    print("\n" + "="*80)
+    print("🎯 3. VICTORIAS POR MODALIDAD (Mejor modelo por paso)")
+    print("="*80)
+    
+    for modalidad in modalidades:
+        df_mod = df_steps[df_steps['Modalidad'] == modalidad]
+        
+        if len(df_mod) == 0:
+            continue
+        
+        print(f"\n{'='*60}")
+        print(f"MODALIDAD: {modalidad}")
+        print(f"{'='*60}")
+        
+        wins = {m: 0 for m in model_cols}
+        total = 0
+        
+        for _, row in df_mod.iterrows():
+            scores = {m: row[m] for m in model_cols if not pd.isna(row[m])}
+            if scores:
+                winner = min(scores, key=scores.get)
+                wins[winner] += 1
+                total += 1
+        
+        if total == 0:
+            print("  (Sin datos válidos)")
+            continue
+        
+        for m in sorted(wins, key=wins.get, reverse=True):
+            if wins[m] > 0:
+                pct = (wins[m] / total) * 100
+                print(f"  {m:<25}: {wins[m]:4d} victorias ({pct:.1f}%)")
+    
+    # =================================================================
+    # 4. TENDENCIAS: Desempeño según d (por modalidad)
+    # =================================================================
+    print("\n" + "="*80)
+    print("📈 4. TENDENCIAS: Desempeño según d aumenta")
+    print("="*80)
+    
+    for modalidad in modalidades:
+        print(f"\n{'='*70}")
+        print(f"MODALIDAD: {modalidad}")
+        print(f"{'='*70}")
+        
+        print(f"\n{'Modelo':<25} ", end="")
+        for d_val in d_values:
+            print(f"d={d_val:<3}", end="  ")
+        print()
+        print("-" * (25 + 7 * len(d_values)))
+        
+        for model in model_cols:
+            print(f"{model:<25} ", end="")
+            for d_val in d_values:
+                df_d_mod = df_steps[(df_steps['d'] == d_val) & 
+                                    (df_steps['Modalidad'] == modalidad)]
+                if model in df_d_mod.columns:
+                    val = df_d_mod[model].mean()
+                    if not pd.isna(val):
+                        print(f"{val:.4f}", end="  ")
+                    else:
+                        print("  ---  ", end="  ")
+                else:
+                    print("  ---  ", end="  ")
+            print()
+    
+    # =================================================================
+    # 5. COMPARACIÓN DIRECTA: SIN_DIFF vs CON_DIFF por modelo
+    # =================================================================
+    print("\n" + "="*80)
+    print("⚖️  5. COMPARACIÓN DIRECTA: SIN_DIFF vs CON_DIFF")
+    print("="*80)
+    
+    if len(modalidades) == 2:
+        mod_sin = [m for m in modalidades if 'SIN' in m][0]
+        mod_con = [m for m in modalidades if 'CON' in m][0]
+        
+        print(f"\n{'Modelo':<25} {mod_sin:<12} {mod_con:<12} {'Diferencia':<12} {'Mejor':<10}")
+        print("-" * 75)
+        
+        for model in model_cols:
+            df_sin = df_steps[df_steps['Modalidad'] == mod_sin]
+            df_con = df_steps[df_steps['Modalidad'] == mod_con]
+            
+            if model in df_sin.columns and model in df_con.columns:
+                val_sin = df_sin[model].mean()
+                val_con = df_con[model].mean()
+                
+                if not pd.isna(val_sin) and not pd.isna(val_con):
+                    diff = val_con - val_sin
+                    mejor = mod_sin if val_sin < val_con else mod_con
+                    
+                    print(f"{model:<25} {val_sin:.6f}   {val_con:.6f}   "
+                          f"{diff:+.6f}   {mejor:<10}")
+    
+    # =================================================================
+    # 6. MEJOR d POR MODELO Y MODALIDAD
+    # =================================================================
+    print("\n" + "="*80)
+    print("🎲 6. MEJOR VALOR DE d PARA CADA MODELO Y MODALIDAD")
+    print("="*80)
+    
+    for modalidad in modalidades:
+        print(f"\n{'='*60}")
+        print(f"MODALIDAD: {modalidad}")
+        print(f"{'='*60}")
+        
+        print(f"\n{'Modelo':<25} {'Mejor d':<10} {'CRPS en ese d':<15}")
+        print("-" * 60)
+        
+        for model in model_cols:
+            best_d = None
+            best_crps = float('inf')
+            
+            for d_val in d_values:
+                df_d_mod = df_steps[(df_steps['d'] == d_val) & 
+                                    (df_steps['Modalidad'] == modalidad)]
+                if model in df_d_mod.columns:
+                    val = df_d_mod[model].mean()
+                    if not pd.isna(val) and val < best_crps:
+                        best_crps = val
+                        best_d = d_val
+            
+            if best_d is not None:
+                print(f"{model:<25} {best_d:<10} {best_crps:.6f}")
+    
+    # =================================================================
+    # 7. RESUMEN EJECUTIVO
+    # =================================================================
+    print("\n" + "="*80)
+    print("📋 7. RESUMEN EJECUTIVO")
+    print("="*80)
+    
+    # Mejor modalidad global
+    if len(modalidades) == 2:
+        crps_sin = df_steps[df_steps['Modalidad'] == mod_sin][model_cols].mean().mean()
+        crps_con = df_steps[df_steps['Modalidad'] == mod_con][model_cols].mean().mean()
+        
+        print(f"\n✓ MEJOR MODALIDAD GLOBAL:")
+        print(f"  • {mod_sin}: CRPS promedio = {crps_sin:.6f}")
+        print(f"  • {mod_con}: CRPS promedio = {crps_con:.6f}")
+        
+        if crps_sin < crps_con:
+            print(f"  → GANADOR: {mod_sin} (diferencia: {crps_con - crps_sin:.6f})")
+        else:
+            print(f"  → GANADOR: {mod_con} (diferencia: {crps_sin - crps_con:.6f})")
+    
+    # Mejor modelo global
+    global_means = {}
+    for model in model_cols:
+        if model in df_steps.columns:
+            val = df_steps[model].mean()
+            if not pd.isna(val):
+                global_means[model] = val
+    
+    if global_means:
+        best_model = min(global_means, key=global_means.get)
+        print(f"\n✓ MEJOR MODELO GLOBAL:")
+        print(f"  → {best_model}: CRPS = {global_means[best_model]:.6f}")
+    
+    print("\n" + "="*80)
+    print("FIN DEL ANÁLISIS")
+    print("="*80)
+
+
+def main_full_2800():
+    """
+    Ejecución completa: 2,800 filas (1,400 escenarios × 2 modalidades).
+    - d = 1, 2, ..., 10
+    - 7 configuraciones ARMA
+    - 5 distribuciones
+    - 4 varianzas
+    - 2 modalidades (SIN_DIFF + CON_DIFF)
+    """
+    start_time = time.time()
+    
+    print("="*80)
+    print("INICIANDO SIMULACIÓN COMPLETA: 2,800 FILAS")
+    print("="*80)
+    
+    from pipeline import PipelineARIMA_MultiD_DobleModalidad
+    
+    pipeline = PipelineARIMA_MultiD_DobleModalidad(
+        n_boot=1000,
+        seed=42,
+        verbose=False
+    )
+    
+    df_final = pipeline.run_all(
+        excel_filename="resultados_ARIMA_d1_a_d10_DOBLE_MODALIDAD_COMPLETO.xlsx",
+        batch_size=20
+    )
+    
+    # Análisis exhaustivo
+    analisis_completo_doble_modalidad(df_final)
+    
+    elapsed = time.time() - start_time
+    print(f"\n⏱  Tiempo total: {elapsed:.1f}s ({elapsed/3600:.2f} horas)")
+    
+    return df_final
+
+
+def main_test_reducido_doble():
+    """
+    Test reducido: 2 valores de d, 2 ARMA, 1 distribución, 1 varianza, 2 modalidades.
+    Total: 2 × 2 × 1 × 1 × 2 = 8 filas base
+    Con 12 pasos + 1 promedio = 104 filas totales
+    """
+    start_time = time.time()
+    
+    print("="*80)
+    print("TEST REDUCIDO: DOBLE MODALIDAD (d=1,2)")
+    print("="*80)
+    
+    from pipeline import PipelineARIMA_MultiD_DobleModalidad
+    
+    pipeline = PipelineARIMA_MultiD_DobleModalidad(
+        n_boot=1000, seed=42, verbose=True
+    )
+    
+    # Configuración reducida
+    pipeline.D_VALUES = [1, 2]
+    pipeline.ARMA_CONFIGS = [
+        {'nombre': 'RW', 'phi': [], 'theta': []},
+        {'nombre': 'AR(1)', 'phi': [0.6], 'theta': []}
+    ]
+    pipeline.DISTRIBUTIONS = ['normal']
+    pipeline.VARIANCES = [1.0]
+    
+    df_final = pipeline.run_all(
+        excel_filename="resultados_TEST_DOBLE_MODALIDAD.xlsx",
+        batch_size=4
+    )
+    
+    analisis_completo_doble_modalidad(df_final)
+    
+    elapsed = time.time() - start_time
+    print(f"\n⏱  Tiempo total: {elapsed:.1f}s")
+    
+    return df_final
+
+
+def main_rango_d_doble_modalidad(d_min=1, d_max=5):
+    """
+    Rango personalizado de d con ambas modalidades.
+    
+    Args:
+        d_min: Valor mínimo de d (default: 1)
+        d_max: Valor máximo de d (default: 5)
+    
+    Ejemplo: main_rango_d_doble_modalidad(d_min=1, d_max=5)
+    """
+    start_time = time.time()
+    
+    print("="*80)
+    print(f"SIMULACIÓN ARIMA d={d_min},...,{d_max} - DOBLE MODALIDAD")
+    print("="*80)
+    
+    from pipeline import PipelineARIMA_MultiD_DobleModalidad
+    
+    pipeline = PipelineARIMA_MultiD_DobleModalidad(
+        n_boot=1000, seed=42, verbose=False
+    )
+    
+    # Configurar rango de d
+    pipeline.D_VALUES = list(range(d_min, d_max + 1))
+    
+    total_base_scenarios = (len(pipeline.D_VALUES) * len(pipeline.ARMA_CONFIGS) * 
+                           len(pipeline.DISTRIBUTIONS) * len(pipeline.VARIANCES))
+    
+    print(f"📊 Escenarios base: {total_base_scenarios}")
+    print(f"   • Valores de d: {pipeline.D_VALUES}")
+    print(f"   • Modalidades: 2 (SIN_DIFF + CON_DIFF)")
+    print(f"   • Filas esperadas: ~{total_base_scenarios * 2 * 13}")
+    print("="*80 + "\n")
+    
+    df_final = pipeline.run_all(
+        excel_filename=f"resultados_ARIMA_d{d_min}_a_d{d_max}_DOBLE_MOD.xlsx",
+        batch_size=20
+    )
+    
+    analisis_completo_doble_modalidad(df_final)
+    
+    elapsed = time.time() - start_time
+    print(f"\n⏱  Tiempo total: {elapsed:.1f}s ({elapsed/3600:.2f} horas)")
+    
+    return df_final
+
+
+def comparar_d_especificos_doble(d_lista=[1, 3, 5, 10]):
+    """
+    Compara valores específicos de d en ambas modalidades.
+    
+    Args:
+        d_lista: Lista de valores de d a comparar (default: [1, 3, 5, 10])
+    
+    Ejemplo: comparar_d_especificos_doble([1, 5, 10])
+    """
+    start_time = time.time()
+    
+    print("="*80)
+    print(f"COMPARACIÓN d={d_lista} - DOBLE MODALIDAD")
+    print("="*80)
+    
+    from pipeline import PipelineARIMA_MultiD_DobleModalidad
+    
+    pipeline = PipelineARIMA_MultiD_DobleModalidad(
+        n_boot=1000, seed=42, verbose=False
+    )
+    
+    # Configurar valores específicos de d
+    pipeline.D_VALUES = d_lista
+    
+    total_base_scenarios = (len(pipeline.D_VALUES) * len(pipeline.ARMA_CONFIGS) * 
+                           len(pipeline.DISTRIBUTIONS) * len(pipeline.VARIANCES))
+    
+    print(f"📊 Escenarios base: {total_base_scenarios}")
+    print(f"   • Modalidades: 2 (SIN_DIFF + CON_DIFF)")
+    print("="*80 + "\n")
+    
+    filename = f"resultados_ARIMA_d_{'_'.join(map(str, d_lista))}_DOBLE_MOD.xlsx"
+    df_final = pipeline.run_all(excel_filename=filename, batch_size=20)
+    
+    analisis_completo_doble_modalidad(df_final)
+    
+    elapsed = time.time() - start_time
+    print(f"\n⏱  Tiempo total: {elapsed:.1f}s ({elapsed/3600:.2f} horas)")
+    
+    return df_final
+
+
+# ============================================================================
+# EJEMPLO DE USO - Agregar al final del __main__ existente
+# ============================================================================
+"""
+if __name__ == "__main__":
+    # Opción 1: Simulación completa (2,800 filas, mucho tiempo)
+    # df_results = main_full_2800()
+    
+    # Opción 2: Test reducido (recomendado para probar)
+    df_results = main_test_reducido_doble()
+    
+    # Opción 3: Rango personalizado (ejemplo: d=1 a 5)
+    # df_results = main_rango_d_doble_modalidad(d_min=1, d_max=5)
+    
+    # Opción 4: Valores específicos de d
+    # df_results = comparar_d_especificos_doble([1, 3, 5, 10])
+"""
