@@ -2469,3 +2469,480 @@ class PipelineARIMA_MultiD_DobleModalidad:
         
         df_temp = df_temp[final_cols]
         df_temp.to_excel(filename, index=False)
+
+class Pipeline140_TamanosCrecientes:
+    """
+    Pipeline unificado que evalúa ARMA, ARIMA y SETAR con TAMAÑOS CRECIENTES
+    de datos de entrenamiento y calibración.
+    
+    Objetivo: Determinar cómo el tamaño de los datos históricos afecta el
+    desempeño de los métodos de predicción conformal.
+    
+    Configuración:
+    - N_TEST_STEPS = 12 (FIJO - no cambia)
+    - N_TRAIN: Variable [100, 200, 300, 500, 1000]
+    - N_CALIBRATION: Variable [20, 40, 60, 100, 200]
+    
+    Para cada combinación (N_TRAIN, N_CALIBRATION):
+    - 7 configs ARMA × 5 dist × 4 var = 140 escenarios
+    - 7 configs ARIMA × 5 dist × 4 var = 140 escenarios  
+    - 7 configs SETAR × 5 dist × 4 var = 140 escenarios
+    
+    Total por tamaño: 420 escenarios base
+    """
+    
+    N_TEST_STEPS = 12  # FIJO
+    
+    # Tamaños de entrenamiento y calibración a probar
+    TRAIN_SIZES = [100, 200, 300, 500, 1000]
+    CALIB_SIZES = [20, 40, 60, 100, 200]
+    
+    # Configuraciones ARMA
+    ARMA_CONFIGS = [
+        {'nombre': 'AR(1)', 'phi': [0.9], 'theta': []},
+        {'nombre': 'AR(2)', 'phi': [0.5, -0.3], 'theta': []},
+        {'nombre': 'MA(1)', 'phi': [], 'theta': [0.7]},
+        {'nombre': 'MA(2)', 'phi': [], 'theta': [0.4, 0.2]},
+        {'nombre': 'ARMA(1,1)', 'phi': [0.6], 'theta': [0.3]},
+        {'nombre': 'ARMA(2,2)', 'phi': [0.4, -0.2], 'theta': [0.5, 0.1]},
+        {'nombre': 'ARMA(2,1)', 'phi': [0.7, 0.2], 'theta': [0.5]}
+    ]
+    
+    # Configuraciones ARIMA
+    ARIMA_CONFIGS = [
+        {'nombre': 'ARIMA(0,1,0)', 'phi': [], 'theta': []},
+        {'nombre': 'ARIMA(1,1,0)', 'phi': [0.6], 'theta': []},
+        {'nombre': 'ARIMA(2,1,0)', 'phi': [0.5, -0.2], 'theta': []},
+        {'nombre': 'ARIMA(0,1,1)', 'phi': [], 'theta': [0.5]},
+        {'nombre': 'ARIMA(0,1,2)', 'phi': [], 'theta': [0.4, 0.25]},
+        {'nombre': 'ARIMA(1,1,1)', 'phi': [0.7], 'theta': [-0.3]},
+        {'nombre': 'ARIMA(2,1,2)', 'phi': [0.6, 0.2], 'theta': [0.4, -0.1]}
+    ]
+    
+    # Configuraciones SETAR
+    SETAR_CONFIGS = [
+        {
+            'nombre': 'SETAR-1',
+            'phi_regime1': [0.6],
+            'phi_regime2': [-0.5],
+            'threshold': 0.0,
+            'delay': 1
+        },
+        {
+            'nombre': 'SETAR-2',
+            'phi_regime1': [0.7],
+            'phi_regime2': [-0.7],
+            'threshold': 0.0,
+            'delay': 2
+        },
+        {
+            'nombre': 'SETAR-3',
+            'phi_regime1': [0.5, -0.2],
+            'phi_regime2': [-0.3, 0.1],
+            'threshold': 0.5,
+            'delay': 1
+        },
+        {
+            'nombre': 'SETAR-4',
+            'phi_regime1': [0.8, -0.15],
+            'phi_regime2': [-0.6, 0.2],
+            'threshold': 1.0,
+            'delay': 2
+        },
+        {
+            'nombre': 'SETAR-5',
+            'phi_regime1': [0.4, -0.1, 0.05],
+            'phi_regime2': [-0.3, 0.1, -0.05],
+            'threshold': 0.0,
+            'delay': 1
+        },
+        {
+            'nombre': 'SETAR-6',
+            'phi_regime1': [0.5, -0.3, 0.1],
+            'phi_regime2': [-0.4, 0.2, -0.05],
+            'threshold': 0.5,
+            'delay': 2
+        },
+        {
+            'nombre': 'SETAR-7',
+            'phi_regime1': [0.3, 0.1],
+            'phi_regime2': [-0.2, -0.1],
+            'threshold': 0.8,
+            'delay': 3
+        }
+    ]
+    
+    DISTRIBUTIONS = ['normal', 'uniform', 'exponential', 't-student', 'mixture']
+    VARIANCES = [0.2, 0.5, 1.0, 3.0]
+    
+    def __init__(self, n_boot: int = 1000, seed: int = 42, verbose: bool = False,
+                 proceso_tipo: str = 'ARMA'):
+        """
+        Args:
+            n_boot: Número de muestras bootstrap
+            seed: Semilla aleatoria
+            verbose: Mostrar información detallada
+            proceso_tipo: 'ARMA', 'ARIMA' o 'SETAR'
+        """
+        self.n_boot = n_boot
+        self.seed = seed
+        self.verbose = verbose
+        self.proceso_tipo = proceso_tipo.upper()
+        self.rng = np.random.default_rng(seed)
+        
+        if self.proceso_tipo not in ['ARMA', 'ARIMA', 'SETAR']:
+            raise ValueError(f"proceso_tipo debe ser 'ARMA', 'ARIMA' o 'SETAR', recibido: {proceso_tipo}")
+    
+    def _setup_models(self, seed: int):
+        """Inicializa los 9 modelos."""
+        return {
+            'Block Bootstrapping': CircularBlockBootstrapModel(
+                block_length='auto', n_boot=self.n_boot,
+                random_state=seed, verbose=False,
+                hyperparam_ranges={'block_length': [2, 50]}, optimize=True
+            ),
+            'Sieve Bootstrap': SieveBootstrapModel(
+                order='auto', n_boot=self.n_boot,
+                random_state=seed, verbose=False,
+                hyperparam_ranges={'order': [1, 20]}, optimize=True
+            ),
+            'LSPM': LSPM(random_state=seed, verbose=False),
+            'LSPMW': LSPMW(rho=0.95, random_state=seed, verbose=False),
+            'DeepAR': DeepARModel(
+                hidden_size=15, n_lags=5, num_layers=1, dropout=0.1,
+                lr=0.01, batch_size=32, epochs=30, num_samples=self.n_boot,
+                random_state=seed, verbose=False, optimize=True
+            ),
+            'AREPD': AREPD(
+                n_lags=5, rho=0.9, alpha=0.1, poly_degree=2,
+                random_state=seed, verbose=False, optimize=True
+            ),
+            'MCPS': MondrianCPSModel(
+                n_lags=10, n_bins=8, test_size=0.25,
+                random_state=seed, verbose=False, optimize=True
+            ),
+            'AV-MCPS': AdaptiveVolatilityMondrianCPS(
+                n_lags=15, n_pred_bins=8, n_vol_bins=4, volatility_window=20,
+                test_size=0.25, random_state=seed, verbose=False, optimize=True
+            ),
+            'EnCQR-LSTM': EnCQR_LSTM_Model(
+                n_lags=20, B=3, units=32, n_layers=2, lr=0.005,
+                batch_size=16, epochs=20, num_samples=self.n_boot,
+                random_state=seed, verbose=False, optimize=True
+            )
+        }
+    
+    def _create_simulator(self, config: dict, distribution: str, variance: float, seed: int):
+        """Crea el simulador apropiado según el tipo de proceso."""
+        if self.proceso_tipo == 'ARMA':
+            return ARMASimulation(
+                model_type=config['nombre'],
+                phi=config['phi'],
+                theta=config['theta'],
+                noise_dist=distribution,
+                sigma=np.sqrt(variance),
+                seed=seed,
+                verbose=False
+            )
+        elif self.proceso_tipo == 'ARIMA':
+            return ARIMASimulation(
+                model_type=config['nombre'],
+                phi=config['phi'],
+                theta=config['theta'],
+                noise_dist=distribution,
+                sigma=np.sqrt(variance),
+                seed=seed,
+                verbose=False
+            )
+        else:  # SETAR
+            return SETARSimulation(
+                model_type=config['nombre'],
+                phi_regime1=config['phi_regime1'],
+                phi_regime2=config['phi_regime2'],
+                threshold=config['threshold'],
+                delay=config['delay'],
+                noise_dist=distribution,
+                sigma=np.sqrt(variance),
+                seed=seed,
+                verbose=False
+            )
+    
+    def _generate_true_distribution(self, simulator, series_history: np.ndarray,
+                                    errors_history: np.ndarray,
+                                    n_samples: int = 5000) -> np.ndarray:
+        """Genera distribución verdadera del siguiente paso."""
+        return simulator.get_true_next_step_samples(
+            series_history=series_history,
+            errors_history=errors_history,
+            n_samples=n_samples
+        )
+    
+    def _optimize_models(self, models: dict, train_calib_series: np.ndarray,
+                        train_calib_errors: np.ndarray, simulator):
+        """PASO 1: Optimización con distribución verdadera."""
+        true_distribution = self._generate_true_distribution(
+            simulator=simulator,
+            series_history=train_calib_series,
+            errors_history=train_calib_errors,
+            n_samples=5000
+        )
+        
+        for name, model in models.items():
+            try:
+                if hasattr(model, 'optimize_hyperparameters'):
+                    df_tc = pd.DataFrame({'valor': train_calib_series})
+                    model.optimize_hyperparameters(df_tc, true_distribution)
+                    
+                    if hasattr(model, 'optimize'):
+                        model.optimize = False
+            except Exception as e:
+                if self.verbose:
+                    print(f"    Error optimizando {name}: {e}")
+    
+    def _freeze_models(self, models: dict, train_calib_series: np.ndarray):
+        """PASO 2: Congelamiento de modelos."""
+        for name, model in models.items():
+            try:
+                if hasattr(model, 'freeze_hyperparameters'):
+                    model.freeze_hyperparameters(train_calib_series)
+            except Exception as e:
+                if self.verbose:
+                    print(f"    Error congelando {name}: {e}")
+    
+    def _run_single_scenario(self, config: dict, distribution: str, variance: float,
+                            n_train: int, n_calib: int, scenario_seed: int) -> list:
+        """
+        Ejecuta un escenario completo con un tamaño específico de train/calib.
+        """
+        try:
+            total_needed = n_train + n_calib + self.N_TEST_STEPS
+            
+            # Crear simulador
+            simulator = self._create_simulator(config, distribution, variance, scenario_seed)
+            
+            # Simular serie
+            full_series, full_errors = simulator.simulate(n=total_needed, burn_in=50)
+            
+            # Dividir datos
+            calib_end = n_train + n_calib
+            train_calib_series = full_series[:calib_end]
+            train_calib_errors = full_errors[:calib_end]
+            
+            # Inicializar modelos
+            models = self._setup_models(scenario_seed)
+            
+            # PASO 1: Optimizar
+            self._optimize_models(models, train_calib_series, train_calib_errors, simulator)
+            
+            # PASO 2: Congelar
+            self._freeze_models(models, train_calib_series)
+            
+            # PASO 3: Predicción rodante
+            results_rows = []
+            
+            for step in range(self.N_TEST_STEPS):
+                current_idx = calib_end + step
+                history_series = full_series[:current_idx]
+                true_value = full_series[current_idx]
+                
+                step_result = {
+                    'Paso': step + 1,
+                    'Proceso': config['nombre'],
+                    'Tipo_Proceso': self.proceso_tipo,
+                    'Distribución': distribution,
+                    'Varianza': variance,
+                    'N_Train': n_train,
+                    'N_Calib': n_calib,
+                    'N_Total': n_train + n_calib,
+                    'Valor_Observado': true_value
+                }
+                
+                for name, model in models.items():
+                    try:
+                        if isinstance(model, (CircularBlockBootstrapModel, SieveBootstrapModel)):
+                            pred_samples = model.fit_predict(history_series)
+                        else:
+                            df_hist = pd.DataFrame({'valor': history_series})
+                            pred_samples = model.fit_predict(df_hist)
+                        
+                        pred_samples = np.asarray(pred_samples).flatten()
+                        crps_val = crps(pred_samples, true_value)
+                        step_result[name] = crps_val
+                    except Exception as e:
+                        if self.verbose:
+                            print(f"    {name} error: {e}")
+                        step_result[name] = np.nan
+                
+                results_rows.append(step_result)
+            
+            # Promedio del escenario
+            avg_row = {
+                'Paso': 'Promedio',
+                'Proceso': config['nombre'],
+                'Tipo_Proceso': self.proceso_tipo,
+                'Distribución': distribution,
+                'Varianza': variance,
+                'N_Train': n_train,
+                'N_Calib': n_calib,
+                'N_Total': n_train + n_calib,
+                'Valor_Observado': np.nan
+            }
+            
+            model_names = list(models.keys())
+            for model_name in model_names:
+                vals = [r[model_name] for r in results_rows if not pd.isna(r.get(model_name))]
+                avg_row[model_name] = np.mean(vals) if vals else np.nan
+            
+            results_rows.append(avg_row)
+            
+            del models, simulator
+            clear_all_sessions()
+            
+            return results_rows
+            
+        except Exception as e:
+            if self.verbose:
+                print(f"Error en escenario: {e}")
+            return []
+    
+    def generate_all_scenarios(self) -> list:
+        """Genera lista de todos los escenarios para ejecución paralela."""
+        # Seleccionar configuraciones según el tipo de proceso
+        if self.proceso_tipo == 'ARMA':
+            configs = self.ARMA_CONFIGS
+        elif self.proceso_tipo == 'ARIMA':
+            configs = self.ARIMA_CONFIGS
+        else:  # SETAR
+            configs = self.SETAR_CONFIGS
+        
+        scenarios = []
+        scenario_id = 0
+        
+        # Para cada combinación de tamaños
+        for n_train in self.TRAIN_SIZES:
+            for n_calib in self.CALIB_SIZES:
+                # Para cada configuración de proceso
+                for config in configs:
+                    for dist in self.DISTRIBUTIONS:
+                        for var in self.VARIANCES:
+                            scenarios.append((
+                                config.copy(),
+                                dist,
+                                var,
+                                n_train,
+                                n_calib,
+                                self.seed + scenario_id
+                            ))
+                            scenario_id += 1
+        
+        return scenarios
+    
+    def run_all(self, excel_filename: str = None, batch_size: int = 20):
+        """Ejecuta todos los escenarios."""
+        if excel_filename is None:
+            excel_filename = f"resultados_TAMANOS_CRECIENTES_{self.proceso_tipo}.xlsx"
+        
+        print("="*80)
+        print(f"EVALUACIÓN TAMAÑOS CRECIENTES - PROCESO {self.proceso_tipo}")
+        print("="*80)
+        
+        cpu_count = os.cpu_count() or 4
+        safe_jobs = min(6, max(1, int(cpu_count * 0.75)))
+        
+        # Calcular totales
+        if self.proceso_tipo == 'ARMA':
+            configs = self.ARMA_CONFIGS
+        elif self.proceso_tipo == 'ARIMA':
+            configs = self.ARIMA_CONFIGS
+        else:
+            configs = self.SETAR_CONFIGS
+        
+        total_size_combinations = len(self.TRAIN_SIZES) * len(self.CALIB_SIZES)
+        scenarios_per_size = len(configs) * len(self.DISTRIBUTIONS) * len(self.VARIANCES)
+        total_base_scenarios = total_size_combinations * scenarios_per_size
+        
+        print(f"⚡ Usando {safe_jobs} núcleos en paralelo")
+        print(f"⚡ Tamaño del lote: {batch_size}")
+        print(f"\n📊 CONFIGURACIÓN:")
+        print(f"  • Tamaños de entrenamiento: {self.TRAIN_SIZES}")
+        print(f"  • Tamaños de calibración: {self.CALIB_SIZES}")
+        print(f"  • Combinaciones de tamaños: {total_size_combinations}")
+        print(f"  • Configuraciones {self.proceso_tipo}: {len(configs)}")
+        print(f"  • Distribuciones: {len(self.DISTRIBUTIONS)}")
+        print(f"  • Varianzas: {len(self.VARIANCES)}")
+        print(f"  • ESCENARIOS BASE TOTALES: {total_base_scenarios}")
+        print(f"  • FILAS ESPERADAS: ~{total_base_scenarios * (self.N_TEST_STEPS + 1)}")
+        print("="*80 + "\n")
+        
+        all_scenarios = self.generate_all_scenarios()
+        total_scenarios = len(all_scenarios)
+        all_rows = []
+        
+        num_batches = (total_scenarios + batch_size - 1) // batch_size
+        
+        for i in range(num_batches):
+            start_idx = i * batch_size
+            end_idx = min((i + 1) * batch_size, total_scenarios)
+            current_batch = all_scenarios[start_idx:end_idx]
+            
+            print(f"\n🚀 Lote {i+1}/{num_batches} (Escenarios {start_idx+1} a {end_idx})...")
+            
+            try:
+                batch_results = Parallel(n_jobs=safe_jobs, backend='loky', timeout=99999)(
+                    delayed(self._run_scenario_wrapper)(args)
+                    for args in tqdm(current_batch, desc=f"  Lote {i+1}", leave=False)
+                )
+                
+                for res in batch_results:
+                    all_rows.extend(res)
+                
+                self._save_checkpoint(all_rows, excel_filename)
+                
+                del batch_results, current_batch
+                clear_all_sessions()
+                gc.collect()
+                
+            except Exception as e:
+                print(f"❌ Error en lote {i+1}: {e}")
+                self._save_checkpoint(all_rows, f"RECOVERY_{excel_filename}")
+                raise e
+        
+        print("\n" + "="*80)
+        print(f"✅ COMPLETADO - {len(all_rows)} filas generadas")
+        print("="*80)
+        
+        return pd.DataFrame(all_rows)
+    
+    def _run_scenario_wrapper(self, args):
+        """Wrapper para ejecución paralela."""
+        config, dist, var, n_train, n_calib, seed = args
+        
+        pipeline = Pipeline140_TamanosCrecientes(
+            n_boot=self.n_boot,
+            seed=seed,
+            verbose=False,
+            proceso_tipo=self.proceso_tipo
+        )
+        pipeline.N_TEST_STEPS = self.N_TEST_STEPS
+        
+        return pipeline._run_single_scenario(config, dist, var, n_train, n_calib, seed)
+    
+    def _save_checkpoint(self, rows, filename):
+        """Guarda progreso en Excel."""
+        if not rows:
+            return
+        
+        df_temp = pd.DataFrame(rows)
+        
+        ordered_cols = [
+            'Paso', 'Proceso', 'Tipo_Proceso', 'Distribución', 'Varianza',
+            'N_Train', 'N_Calib', 'N_Total', 'Valor_Observado',
+            'AREPD', 'AV-MCPS', 'Block Bootstrapping', 'DeepAR', 'EnCQR-LSTM',
+            'LSPM', 'LSPMW', 'MCPS', 'Sieve Bootstrap'
+        ]
+        final_cols = [c for c in ordered_cols if c in df_temp.columns]
+        remaining_cols = [c for c in df_temp.columns if c not in final_cols]
+        final_cols.extend(remaining_cols)
+        
+        df_temp = df_temp[final_cols]
+        df_temp.to_excel(filename, index=False)

@@ -11,7 +11,7 @@ os.environ["MKL_NUM_THREADS"] = n_threads
 os.environ["NUMEXPR_NUM_THREADS"] = n_threads
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
-from pipeline import Pipeline140SinSesgos_ARMA, Pipeline140SinSesgos_ARIMA, Pipeline140SinSesgos_SETAR, Pipeline140ConDiferenciacion_ARIMA, PipelineARIMA_MultiD_DobleModalidad
+from pipeline import Pipeline140SinSesgos_ARMA, Pipeline140SinSesgos_ARIMA, Pipeline140SinSesgos_SETAR, Pipeline140_TamanosCrecientes 
 import pandas as pd
 import numpy as np
 
@@ -809,20 +809,545 @@ def comparar_d_especificos_doble(d_lista=[1, 3, 5, 10]):
     return df_final
 
 
-# ============================================================================
-# EJEMPLO DE USO - Agregar al final del __main__ existente
-# ============================================================================
-"""
-if __name__ == "__main__":
-    # Opción 1: Simulación completa (2,800 filas, mucho tiempo)
-    # df_results = main_full_2800()
+def analisis_tamanos_crecientes(df_final):
+    """
+    Análisis especializado para resultados con tamaños crecientes de datos.
     
-    # Opción 2: Test reducido (recomendado para probar)
-    df_results = main_test_reducido_doble()
+    Evalúa:
+    1. Impacto de N_Train en el desempeño
+    2. Impacto de N_Calib en el desempeño
+    3. Mejor combinación (N_Train, N_Calib) por modelo
+    4. Rendimiento marginal de agregar más datos
+    5. Punto de saturación (cuando más datos no ayudan)
+    """
+    print("\n" + "="*80)
+    print("ANÁLISIS EXHAUSTIVO - TAMAÑOS CRECIENTES DE DATOS")
+    print("="*80)
     
-    # Opción 3: Rango personalizado (ejemplo: d=1 a 5)
-    # df_results = main_rango_d_doble_modalidad(d_min=1, d_max=5)
+    model_cols = ['AREPD', 'AV-MCPS', 'Block Bootstrapping', 'DeepAR', 
+                  'EnCQR-LSTM', 'LSPM', 'LSPMW', 'MCPS', 'Sieve Bootstrap']
+    model_cols = [c for c in model_cols if c in df_final.columns]
     
-    # Opción 4: Valores específicos de d
-    # df_results = comparar_d_especificos_doble([1, 3, 5, 10])
-"""
+    if 'Paso' in df_final.columns:
+        df_steps = df_final[df_final['Paso'] != 'Promedio'].copy()
+    else:
+        df_steps = df_final.copy()
+    
+    if len(df_steps) == 0:
+        print("⚠️ No hay datos suficientes para el análisis.")
+        return
+    
+    # Asegurar tipos numéricos
+    for col in ['N_Train', 'N_Calib', 'N_Total']:
+        if col in df_steps.columns:
+            df_steps[col] = pd.to_numeric(df_steps[col], errors='coerce')
+    
+    train_sizes = sorted(df_steps['N_Train'].unique())
+    calib_sizes = sorted(df_steps['N_Calib'].unique())
+    
+    # =================================================================
+    # 1. RANKING GLOBAL POR TAMAÑO TOTAL
+    # =================================================================
+    print("\n" + "="*80)
+    print("📊 1. RANKING GLOBAL POR TAMAÑO TOTAL DE DATOS")
+    print("="*80)
+    
+    for n_total in sorted(df_steps['N_Total'].unique()):
+        df_size = df_steps[df_steps['N_Total'] == n_total]
+        
+        if len(df_size) == 0:
+            continue
+        
+        print(f"\n{'='*70}")
+        print(f"N_Total = {n_total}")
+        print(f"{'='*70}")
+        
+        means = {}
+        for model in model_cols:
+            if model in df_size.columns:
+                val = df_size[model].mean()
+                if not pd.isna(val):
+                    means[model] = val
+        
+        if not means:
+            print("  (Sin datos válidos)")
+            continue
+        
+        sorted_models = sorted(means.keys(), key=lambda x: means[x])
+        
+        print(f"{'Rank':<6} {'Modelo':<25} {'CRPS Medio':<15}")
+        print("-" * 60)
+        for i, m in enumerate(sorted_models[:5]):  # Top 5
+            print(f"{i+1:<6} {m:<25} {means[m]:.6f}")
+    
+    # =================================================================
+    # 2. IMPACTO DE N_TRAIN (fijando N_CALIB)
+    # =================================================================
+    print("\n" + "="*80)
+    print("📈 2. IMPACTO DE N_TRAIN EN EL DESEMPEÑO")
+    print("="*80)
+    
+    for n_calib in calib_sizes:
+        df_calib = df_steps[df_steps['N_Calib'] == n_calib]
+        
+        if len(df_calib) == 0:
+            continue
+        
+        print(f"\n{'='*70}")
+        print(f"N_Calib = {n_calib} (fijo)")
+        print(f"{'='*70}")
+        
+        print(f"\n{'Modelo':<25} ", end="")
+        for n_train in train_sizes:
+            print(f"N_Train={n_train:<5}", end="  ")
+        print()
+        print("-" * (25 + 13 * len(train_sizes)))
+        
+        for model in model_cols:
+            print(f"{model:<25} ", end="")
+            for n_train in train_sizes:
+                df_subset = df_calib[df_calib['N_Train'] == n_train]
+                if model in df_subset.columns:
+                    val = df_subset[model].mean()
+                    if not pd.isna(val):
+                        print(f"{val:.5f}", end="  ")
+                    else:
+                        print("  ----  ", end="  ")
+                else:
+                    print("  ----  ", end="  ")
+            print()
+    
+    # =================================================================
+    # 3. IMPACTO DE N_CALIB (fijando N_TRAIN)
+    # =================================================================
+    print("\n" + "="*80)
+    print("📈 3. IMPACTO DE N_CALIB EN EL DESEMPEÑO")
+    print("="*80)
+    
+    for n_train in train_sizes:
+        df_train = df_steps[df_steps['N_Train'] == n_train]
+        
+        if len(df_train) == 0:
+            continue
+        
+        print(f"\n{'='*70}")
+        print(f"N_Train = {n_train} (fijo)")
+        print(f"{'='*70}")
+        
+        print(f"\n{'Modelo':<25} ", end="")
+        for n_calib in calib_sizes:
+            print(f"N_Calib={n_calib:<4}", end="  ")
+        print()
+        print("-" * (25 + 12 * len(calib_sizes)))
+        
+        for model in model_cols:
+            print(f"{model:<25} ", end="")
+            for n_calib in calib_sizes:
+                df_subset = df_train[df_train['N_Calib'] == n_calib]
+                if model in df_subset.columns:
+                    val = df_subset[model].mean()
+                    if not pd.isna(val):
+                        print(f"{val:.5f}", end="  ")
+                    else:
+                        print(" ---- ", end="  ")
+                else:
+                    print(" ---- ", end="  ")
+            print()
+    
+    # =================================================================
+    # 4. MEJOR COMBINACIÓN POR MODELO
+    # =================================================================
+    print("\n" + "="*80)
+    print("🎯 4. MEJOR COMBINACIÓN (N_TRAIN, N_CALIB) POR MODELO")
+    print("="*80)
+    
+    print(f"\n{'Modelo':<25} {'Mejor N_Train':<15} {'Mejor N_Calib':<15} {'CRPS':<12}")
+    print("-" * 75)
+    
+    for model in model_cols:
+        best_crps = float('inf')
+        best_train = None
+        best_calib = None
+        
+        for n_train in train_sizes:
+            for n_calib in calib_sizes:
+                df_subset = df_steps[(df_steps['N_Train'] == n_train) & 
+                                     (df_steps['N_Calib'] == n_calib)]
+                if model in df_subset.columns:
+                    val = df_subset[model].mean()
+                    if not pd.isna(val) and val < best_crps:
+                        best_crps = val
+                        best_train = n_train
+                        best_calib = n_calib
+        
+        if best_train is not None:
+            print(f"{model:<25} {best_train:<15} {best_calib:<15} {best_crps:.6f}")
+
+    # =================================================================
+    # 5. MEJORA MARGINAL AL AGREGAR DATOS
+    # =================================================================
+    print("\n" + "="*80)
+    print("💹 5. MEJORA MARGINAL AL INCREMENTAR DATOS")
+    print("="*80)
+    
+    print("\n--- Mejora al incrementar N_Train (N_Calib fijo) ---")
+    
+    for n_calib in calib_sizes:
+        df_calib = df_steps[df_steps['N_Calib'] == n_calib]
+        
+        if len(df_calib) == 0:
+            continue
+        
+        print(f"\nN_Calib = {n_calib}:")
+        print(f"{'Modelo':<25} ", end="")
+        
+        # Calcular mejoras entre tamaños consecutivos
+        for i in range(len(train_sizes) - 1):
+            n_small = train_sizes[i]
+            n_large = train_sizes[i+1]
+            print(f"{n_small}→{n_large:<5}", end="  ")
+        print()
+        print("-" * 60)
+        
+        for model in model_cols:
+            print(f"{model:<25} ", end="")
+            
+            for i in range(len(train_sizes) - 1):
+                n_small = train_sizes[i]
+                n_large = train_sizes[i+1]
+                
+                df_small = df_calib[df_calib['N_Train'] == n_small]
+                df_large = df_calib[df_calib['N_Train'] == n_large]
+                
+                if model in df_small.columns and model in df_large.columns:
+                    val_small = df_small[model].mean()
+                    val_large = df_large[model].mean()
+                    
+                    if not pd.isna(val_small) and not pd.isna(val_large):
+                        mejora = val_small - val_large  # Positivo = mejora
+                        mejora_pct = (mejora / val_small) * 100 if val_small != 0 else 0
+                        print(f"{mejora_pct:+5.1f}%", end="  ")
+                    else:
+                        print("  --- ", end="  ")
+                else:
+                    print("  --- ", end="  ")
+            print()
+
+    # =================================================================
+    # 6. PUNTO DE SATURACIÓN
+    # =================================================================
+    print("\n" + "="*80)
+    print("🎚️ 6. ANÁLISIS DE SATURACIÓN (¿Cuándo más datos no ayudan?)")
+    print("="*80)
+    
+    print("\nCriterio: Mejora < 2% al incrementar datos = SATURADO\n")
+    
+    for model in model_cols:
+        print(f"\n{model}:")
+        
+        # Buscar saturación en N_Train
+        saturado_train = False
+        for n_calib in calib_sizes:
+            if saturado_train:
+                break
+            
+            for i in range(len(train_sizes) - 1):
+                n_small = train_sizes[i]
+                n_large = train_sizes[i+1]
+                
+                df_small = df_steps[(df_steps['N_Train'] == n_small) & 
+                                   (df_steps['N_Calib'] == n_calib)]
+                df_large = df_steps[(df_steps['N_Train'] == n_large) & 
+                                   (df_steps['N_Calib'] == n_calib)]
+                
+                if model in df_small.columns and model in df_large.columns:
+                    val_small = df_small[model].mean()
+                    val_large = df_large[model].mean()
+                    
+                    if not pd.isna(val_small) and not pd.isna(val_large):
+                        mejora_pct = ((val_small - val_large) / val_small) * 100 if val_small != 0 else 0
+                        
+                        if mejora_pct < 2.0:
+                            print(f"  ✓ Saturado en N_Train ≥ {n_small} (N_Calib={n_calib})")
+                            saturado_train = True
+                            break
+
+    # =================================================================
+    # 7. RESUMEN EJECUTIVO
+    # =================================================================
+    print("\n" + "="*80)
+    print("📋 7. RESUMEN EJECUTIVO")
+    print("="*80)
+    
+    # Mejor modelo global
+    global_means = {}
+    for model in model_cols:
+        if model in df_steps.columns:
+            val = df_steps[model].mean()
+            if not pd.isna(val):
+                global_means[model] = val
+    
+    if global_means:
+        best_model = min(global_means, key=global_means.get)
+        worst_model = max(global_means, key=global_means.get)
+        
+        print(f"\n✅ MEJOR MODELO GLOBAL:")
+        print(f"   → {best_model}: CRPS = {global_means[best_model]:.6f}")
+        
+        print(f"\n❌ PEOR MODELO GLOBAL:")
+        print(f"   → {worst_model}: CRPS = {global_means[worst_model]:.6f}")
+    
+    # Mejor tamaño total
+    size_means = df_steps.groupby('N_Total')[model_cols].mean().mean(axis=1)
+    best_size = size_means.idxmin()
+    
+    print(f"\n🎯 MEJOR TAMAÑO TOTAL DE DATOS:")
+    print(f"   → N_Total = {best_size}: CRPS promedio = {size_means[best_size]:.6f}")
+    
+    print("\n" + "="*80)
+    print("FIN DEL ANÁLISIS")
+    print("="*80)
+
+
+# =================================================================
+# FUNCIONES RUNNER PRINCIPALES
+# =================================================================
+
+def main_tamanos_crecientes_ARMA(train_sizes=None, calib_sizes=None):
+    """
+    Ejecuta análisis de tamaños crecientes para procesos ARMA.
+    Args:
+        train_sizes: Lista de tamaños de entrenamiento (default: [100, 200, 300, 500, 1000])
+        calib_sizes: Lista de tamaños de calibración (default: [20, 40, 60, 100, 200])
+    """
+    start_time = time.time()
+    
+    print("="*80)
+    print("ANÁLISIS TAMAÑOS CRECIENTES - PROCESOS ARMA")
+    print("="*80)
+    
+    pipeline = Pipeline140_TamanosCrecientes(
+        n_boot=1000,
+        seed=42,
+        verbose=False,
+        proceso_tipo='ARMA'
+    )
+    
+    # Configurar tamaños personalizados si se proporcionan
+    if train_sizes is not None:
+        pipeline.TRAIN_SIZES = train_sizes
+    if calib_sizes is not None:
+        pipeline.CALIB_SIZES = calib_sizes
+    
+    df_final = pipeline.run_all(
+        excel_filename="resultados_TAMANOS_CRECIENTES_ARMA.xlsx",
+        batch_size=20
+    )
+    
+    analisis_tamanos_crecientes(df_final)
+    
+    elapsed = time.time() - start_time
+    print(f"\n⏱  Tiempo total: {elapsed:.1f}s ({elapsed/3600:.2f} horas)")
+    
+    return df_final
+
+
+def main_tamanos_crecientes_ARIMA(train_sizes=None, calib_sizes=None):
+    """
+    Ejecuta análisis de tamaños crecientes para procesos ARIMA.
+    """
+    start_time = time.time()
+    print("="*80)
+    print("ANÁLISIS TAMAÑOS CRECIENTES - PROCESOS ARIMA")
+    print("="*80)
+    
+    pipeline = Pipeline140_TamanosCrecientes(
+        n_boot=1000,
+        seed=42,
+        verbose=False,
+        proceso_tipo='ARIMA'
+    )
+    
+    if train_sizes is not None:
+        pipeline.TRAIN_SIZES = train_sizes
+    if calib_sizes is not None:
+        pipeline.CALIB_SIZES = calib_sizes
+    
+    df_final = pipeline.run_all(
+        excel_filename="resultados_TAMANOS_CRECIENTES_ARIMA.xlsx",
+        batch_size=20
+    )
+    
+    analisis_tamanos_crecientes(df_final)
+    
+    elapsed = time.time() - start_time
+    print(f"\n⏱  Tiempo total: {elapsed:.1f}s ({elapsed/3600:.2f} horas)")
+    
+    return df_final
+
+
+def main_tamanos_crecientes_SETAR(train_sizes=None, calib_sizes=None):
+    """
+    Ejecuta análisis de tamaños crecientes para procesos SETAR.
+    """
+    start_time = time.time()
+    print("="*80)
+    print("ANÁLISIS TAMAÑOS CRECIENTES - PROCESOS SETAR")
+    print("="*80)
+    
+    pipeline = Pipeline140_TamanosCrecientes(
+        n_boot=1000,
+        seed=42,
+        verbose=False,
+        proceso_tipo='SETAR'
+    )
+    
+    if train_sizes is not None:
+        pipeline.TRAIN_SIZES = train_sizes
+    if calib_sizes is not None:
+        pipeline.CALIB_SIZES = calib_sizes
+    
+    df_final = pipeline.run_all(
+        excel_filename="resultados_TAMANOS_CRECIENTES_SETAR.xlsx",
+        batch_size=20
+    )
+    
+    analisis_tamanos_crecientes(df_final)
+    
+    elapsed = time.time() - start_time
+    print(f"\n⏱  Tiempo total: {elapsed:.1f}s ({elapsed/3600:.2f} horas)")
+    
+    return df_final
+
+
+def main_test_tamanos_reducido():
+    """
+    Test reducido: solo 2 tamaños de train y 2 de calib para cada proceso.
+    """
+    start_time = time.time()
+    print("="*80)
+    print("TEST REDUCIDO - TAMAÑOS CRECIENTES (TODOS LOS PROCESOS)")
+    print("="*80)
+    
+    test_train_sizes = [100, 200]
+    test_calib_sizes = [20, 40]
+    
+    results = {}
+    
+    # ARMA
+    print("\n" + "="*60)
+    print("EJECUTANDO ARMA...")
+    print("="*60)
+    pipeline_arma = Pipeline140_TamanosCrecientes(
+        n_boot=1000, seed=42, verbose=False, proceso_tipo='ARMA'
+    )
+    pipeline_arma.TRAIN_SIZES = test_train_sizes
+    pipeline_arma.CALIB_SIZES = test_calib_sizes
+    pipeline_arma.ARMA_CONFIGS = pipeline_arma.ARMA_CONFIGS[:2]  # Solo 2 configs
+    pipeline_arma.DISTRIBUTIONS = ['normal']
+    pipeline_arma.VARIANCES = [1.0]
+    
+    results['ARMA'] = pipeline_arma.run_all(
+        excel_filename="resultados_TEST_TAMANOS_ARMA.xlsx",
+        batch_size=4
+    )
+    
+    # ARIMA
+    print("\n" + "="*60)
+    print("EJECUTANDO ARIMA...")
+    print("="*60)
+    pipeline_arima = Pipeline140_TamanosCrecientes(
+        n_boot=1000, seed=42, verbose=False, proceso_tipo='ARIMA'
+    )
+    pipeline_arima.TRAIN_SIZES = test_train_sizes
+    pipeline_arima.CALIB_SIZES = test_calib_sizes
+    pipeline_arima.ARIMA_CONFIGS = pipeline_arima.ARIMA_CONFIGS[:2]
+    pipeline_arima.DISTRIBUTIONS = ['normal']
+    pipeline_arima.VARIANCES = [1.0]
+    
+    results['ARIMA'] = pipeline_arima.run_all(
+        excel_filename="resultados_TEST_TAMANOS_ARIMA.xlsx",
+        batch_size=4
+    )
+    
+    # SETAR
+    print("\n" + "="*60)
+    print("EJECUTANDO SETAR...")
+    print("="*60)
+    pipeline_setar = Pipeline140_TamanosCrecientes(
+        n_boot=1000, seed=42, verbose=False, proceso_tipo='SETAR'
+    )
+    pipeline_setar.TRAIN_SIZES = test_train_sizes
+    pipeline_setar.CALIB_SIZES = test_calib_sizes
+    pipeline_setar.SETAR_CONFIGS = pipeline_setar.SETAR_CONFIGS[:2]
+    pipeline_setar.DISTRIBUTIONS = ['normal']
+    pipeline_setar.VARIANCES = [1.0]
+    
+    results['SETAR'] = pipeline_setar.run_all(
+        excel_filename="resultados_TEST_TAMANOS_SETAR.xlsx",
+        batch_size=4
+    )
+    
+    # Análisis conjunto
+    print("\n" + "="*80)
+    print("ANÁLISIS COMPARATIVO DE LOS TRES PROCESOS")
+    print("="*80)
+    
+    for proceso_tipo, df in results.items():
+        print(f"\n{'='*60}")
+        print(f"PROCESO: {proceso_tipo}")
+        print(f"{'='*60}")
+        analisis_tamanos_crecientes(df)
+    
+    elapsed = time.time() - start_time
+    print(f"\n⏱  Tiempo total: {elapsed:.1f}s")
+    
+    return results
+
+
+def main_comparacion_todos_procesos(train_sizes=None, calib_sizes=None):
+    """
+    Ejecuta análisis completo para los 3 tipos de procesos y genera comparación.
+    Args:
+        train_sizes: Lista de tamaños de entrenamiento
+        calib_sizes: Lista de tamaños de calibración
+    """
+    start_time = time.time()
+    
+    print("="*80)
+    print("ANÁLISIS COMPARATIVO COMPLETO - ARMA vs ARIMA vs SETAR")
+    print("="*80)
+    
+    results = {}
+    
+    # ARMA
+    results['ARMA'] = main_tamanos_crecientes_ARMA(train_sizes, calib_sizes)
+    
+    # ARIMA
+    results['ARIMA'] = main_tamanos_crecientes_ARIMA(train_sizes, calib_sizes)
+    
+    # SETAR
+    results['SETAR'] = main_tamanos_crecientes_SETAR(train_sizes, calib_sizes)
+    
+    # Comparación final
+    print("\n" + "="*80)
+    print("📊 COMPARACIÓN FINAL: ARMA vs ARIMA vs SETAR")
+    print("="*80)
+    
+    model_cols = ['AREPD', 'AV-MCPS', 'Block Bootstrapping', 'DeepAR', 
+                  'EnCQR-LSTM', 'LSPM', 'LSPMW', 'MCPS', 'Sieve Bootstrap']
+    
+    for proceso_tipo, df in results.items():
+        df_steps = df[df['Paso'] != 'Promedio'] if 'Paso' in df.columns else df
+        
+        print(f"\n{proceso_tipo}:")
+        for model in model_cols:
+            if model in df_steps.columns:
+                val = df_steps[model].mean()
+                if not pd.isna(val):
+                    print(f"  {model:<25}: {val:.6f}")
+    
+    elapsed = time.time() - start_time
+    print(f"\n⏱  Tiempo total: {elapsed:.1f}s ({elapsed/3600:.2f} horas)")
+    
+    return results
