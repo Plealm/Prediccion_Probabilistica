@@ -287,10 +287,10 @@ def main_two_scenarios_diferenciado():
     print("EVALUACIÓN CON 2 ESCENARIOS ARIMA - CON DIFERENCIACIÓN ADICIONAL")
     print("="*80)
     
-    from pipeline import Pipeline140ConDiferenciacion_ARIMA
+    from pipeline import Pipeline140SinSesgos_ARIMA_ConDiferenciacion
     
     # Crear pipeline CON diferenciación
-    pipeline = Pipeline140ConDiferenciacion_ARIMA(
+    pipeline = Pipeline140SinSesgos_ARIMA_ConDiferenciacion(
         n_boot=1000, 
         seed=42, 
         verbose=True,
@@ -332,10 +332,10 @@ def main_full_140_diferenciado():
     print("INICIANDO SIMULACIÓN DE 140 ESCENARIOS ARIMA - CON DIFERENCIACIÓN")
     print("="*80)
     
-    from pipeline import Pipeline140ConDiferenciacion_ARIMA
+    from pipeline import Pipeline140SinSesgos_ARIMA_ConDiferenciacion
     
     # Crear pipeline CON diferenciación
-    pipeline = Pipeline140ConDiferenciacion_ARIMA(
+    pipeline = Pipeline140SinSesgos_ARIMA_ConDiferenciacion(
         n_boot=1000,
         seed=42,
         verbose=False,
