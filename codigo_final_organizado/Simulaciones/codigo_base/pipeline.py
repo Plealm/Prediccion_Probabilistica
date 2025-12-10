@@ -36,30 +36,14 @@ def clear_all_sessions():
 
 class Pipeline140SinSesgos_ARMA:
     """
-    Pipeline ULTRA-RÁPIDO: Garantiza ≤5 minutos por escenario.
-    
-    Presupuesto (300s):
-    - Optimización: 120s (40%)
-    - Congelamiento: 30s (10%)
-    - Testing: 150s (50%) → 12 modelos × 12 pasos = ~1s/predicción
-    
-    Características CRÍTICAS:
-    1. Early stopping en optimización
-    2. Extrapolación de CRPS cuando timeout
-    3. Grid adaptativo por velocidad de modelo
-    4. Limpieza agresiva de memoria
+    Pipeline para ARMA sin sesgos temporales.
+    Permite que los modelos complejos se ejecuten completamente.
     """
     
     # Estructura de datos
     N_TEST_STEPS = 12
     N_VALIDATION = 40
     N_TRAIN = 200
-    
-    # Presupuesto temporal
-    SCENARIO_BUDGET = 300  # 5 minutos TOTAL
-    OPTIMIZATION_BUDGET = 120  # 40%
-    FREEZE_BUDGET = 30         # 10%
-    TEST_BUDGET = 150          # 50%
     
     # Configuraciones ARMA (7 procesos)
     ARMA_CONFIGS = [
@@ -72,7 +56,6 @@ class Pipeline140SinSesgos_ARMA:
         {'nombre': 'ARMA(2,1)', 'phi': [0.7, 0.2], 'theta': [0.5]}
     ]
     
-    # 5 distribuciones × 4 varianzas = 20 combinaciones
     DISTRIBUTIONS = ['normal', 'uniform', 'exponential', 't-student', 'mixture']
     VARIANCES = [0.2, 0.5, 1.0, 3.0]
     
@@ -83,178 +66,88 @@ class Pipeline140SinSesgos_ARMA:
         self.rng = np.random.default_rng(seed)
     
     def generate_all_scenarios(self) -> list:
-        """Genera 140 escenarios (7 × 5 × 4)."""
+        """Genera 140 escenarios."""
         scenarios = []
         scenario_id = 0
-        
         for arma_cfg in self.ARMA_CONFIGS:
             for dist in self.DISTRIBUTIONS:
                 for var in self.VARIANCES:
                     scenarios.append((
-                        arma_cfg.copy(),
-                        dist,
-                        var,
+                        arma_cfg.copy(), dist, var,
                         self.seed + scenario_id,
-                        self.N_TEST_STEPS,
-                        self.N_TRAIN,
-                        self.N_VALIDATION,
-                        self.n_boot
+                        self.N_TEST_STEPS, self.N_TRAIN, self.N_VALIDATION, self.n_boot
                     ))
                     scenario_id += 1
-        
         return scenarios
     
     def _run_scenario_wrapper(self, args):
-        """Wrapper para ejecución paralela."""
-        (arma_cfg, dist, var, seed, n_test_steps, 
-         n_train, n_validation, n_boot) = args
-        
-        pipeline = Pipeline140SinSesgos_ARMA(
-            n_boot=n_boot, 
-            seed=seed, 
-            verbose=False
-        )
-        pipeline.N_TEST_STEPS = n_test_steps
+        (arma_cfg, dist, var, seed, n_test, n_train, n_val, n_boot) = args
+        pipeline = Pipeline140SinSesgos_ARMA(n_boot=n_boot, seed=seed, verbose=False)
+        pipeline.N_TEST_STEPS = n_test
         pipeline.N_TRAIN = n_train
-        pipeline.N_VALIDATION = n_validation
-        
+        pipeline.N_VALIDATION = n_val
         return pipeline.run_single_scenario(arma_cfg, dist, var, seed)
-    
-    def _optimize_and_freeze_models(self, models: dict, 
-                                     train_series: np.ndarray,
-                                     val_series: np.ndarray):
-        """
-        Optimización + congelamiento con presupuesto de tiempo.
-        
-        Returns:
-            models optimizados y congelados
-        """
-        from modelos import TimeBalancedOptimizer
-        
-        # PASO 1: Optimización (120s)
-        opt_start = time.time()
-        
-        optimizer = TimeBalancedOptimizer(
-            random_state=self.seed,
-            verbose=self.verbose
-        )
-        
-        if self.verbose:
-            print(f"\n⚡ PASO 1: Optimización (budget: {self.OPTIMIZATION_BUDGET}s)")
-        
-        optimized_params = optimizer.optimize_all_models(
-            models, 
-            train_data=train_series,
-            val_data=val_series
-        )
-        
-        opt_elapsed = time.time() - opt_start
-        
-        if opt_elapsed > self.OPTIMIZATION_BUDGET * 1.2:
-            print(f"⚠️  ADVERTENCIA: Optimización tomó {opt_elapsed:.1f}s "
-                  f"(límite: {self.OPTIMIZATION_BUDGET}s)")
-        
-        # PASO 2: Congelamiento (30s)
-        freeze_start = time.time()
-        train_val_combined = np.concatenate([train_series, val_series])
-        
-        if self.verbose:
-            print(f"\n🔒 PASO 2: Congelamiento (budget: {self.FREEZE_BUDGET}s)")
-        
-        for name, model in models.items():
-            try:
-                # Aplicar hiperparámetros optimizados
-                if name in optimized_params and optimized_params[name]:
-                    if hasattr(model, 'best_params'):
-                        model.best_params = optimized_params[name]
-                    
-                    for key, value in optimized_params[name].items():
-                        if hasattr(model, key):
-                            setattr(model, key, value)
-                
-                # Congelar
-                if hasattr(model, 'freeze_hyperparameters'):
-                    model.freeze_hyperparameters(train_val_combined)
-                    
-                    if self.verbose:
-                        print(f"  ✓ {name}")
-                
-            except Exception as e:
-                if self.verbose:
-                    print(f"  ✗ {name}: {e}")
-        
-        freeze_elapsed = time.time() - freeze_start
-        
-        if freeze_elapsed > self.FREEZE_BUDGET * 1.5:
-            print(f"⚠️  ADVERTENCIA: Congelamiento tomó {freeze_elapsed:.1f}s "
-                  f"(límite: {self.FREEZE_BUDGET}s)")
-        
-        total_prep = opt_elapsed + freeze_elapsed
-        if self.verbose:
-            print(f"\n⏱️  Tiempo preparación: {total_prep:.1f}s / "
-                  f"{self.OPTIMIZATION_BUDGET + self.FREEZE_BUDGET}s")
-        
-        return models
     
     def run_single_scenario(self, arma_config: dict, dist: str, 
                            var: float, rep: int) -> list:
-        """
-        Ejecuta UN escenario completo en ≤5 minutos.
+        import time
+        from modelos import CircularBlockBootstrapModel, SieveBootstrapModel, LSPM, LSPMW, \
+                            DeepARModel, AREPD, MondrianCPSModel, AdaptiveVolatilityMondrianCPS, \
+                            EnCQR_LSTM_Model
+        from simulacion import ARMASimulation
         
-        Returns:
-            list de 12 dicts (uno por paso de test)
-        """
-        scenario_start = time.time()
         scenario_seed = self.seed + rep
         
-        # ================================================================
-        # SIMULACIÓN
-        # ================================================================
+        # 1. Simulación
         simulator = ARMASimulation(
-            phi=arma_config['phi'],
-            theta=arma_config['theta'],
-            noise_dist=dist,
-            sigma=np.sqrt(var),
-            seed=scenario_seed
+            phi=arma_config['phi'], theta=arma_config['theta'],
+            noise_dist=dist, sigma=np.sqrt(var), seed=scenario_seed
         )
-        
-        total_length = self.N_TRAIN + self.N_VALIDATION + self.N_TEST_STEPS
-        full_series, _ = simulator.simulate(n=total_length, burn_in=50)
+        total_len = self.N_TRAIN + self.N_VALIDATION + self.N_TEST_STEPS
+        full_series, _ = simulator.simulate(n=total_len, burn_in=50)
         
         train_series = full_series[:self.N_TRAIN]
         val_series = full_series[self.N_TRAIN:self.N_TRAIN + self.N_VALIDATION]
         test_series = full_series[self.N_TRAIN + self.N_VALIDATION:]
         
-        # ================================================================
-        # PREPARACIÓN (Optimización + Congelamiento) ≤ 150s
-        # ================================================================
-        models = self._setup_models(scenario_seed)
+        # 2. Setup Modelos (Configuración inicial limpia)
+        models = {
+            'Block Bootstrapping': CircularBlockBootstrapModel(n_boot=self.n_boot, random_state=scenario_seed),
+            'Sieve Bootstrap': SieveBootstrapModel(n_boot=self.n_boot, random_state=scenario_seed),
+            'LSPM': LSPM(random_state=scenario_seed),
+            'LSPMW': LSPMW(rho=0.95, random_state=scenario_seed),
+            'AREPD': AREPD(n_lags=5, rho=0.93, random_state=scenario_seed),
+            'MCPS': MondrianCPSModel(n_lags=10, random_state=scenario_seed),
+            'AV-MCPS': AdaptiveVolatilityMondrianCPS(n_lags=12, random_state=scenario_seed),
+            'DeepAR': DeepARModel(
+                hidden_size=20, n_lags=10, epochs=25, num_samples=self.n_boot,
+                random_state=scenario_seed, early_stopping_patience=4
+            ),
+            'EnCQR-LSTM': EnCQR_LSTM_Model(
+                n_lags=15, B=3, units=24, epochs=20, num_samples=self.n_boot,
+                random_state=scenario_seed
+            )
+        }
         
-        prep_start = time.time()
-        models = self._optimize_and_freeze_models(
-            models,
-            train_series=train_series,
-            val_series=val_series
-        )
-        prep_elapsed = time.time() - prep_start
+        # 3. Optimización (Train + Val)
+        optimizer = TimeBalancedOptimizer(random_state=scenario_seed, verbose=self.verbose)
+        models = self._optimize_models(optimizer, models, train_series, val_series)
         
-        # ================================================================
-        # TESTING ≤ 150s (12 pasos × 9 modelos = 108 predicciones)
-        # ================================================================
-        test_start = time.time()
+        # 4. Congelamiento (Train + Val combinados)
+        # Esto es crucial: entrenar el modelo final con TODO el historial disponible antes del test
+        train_val_combined = np.concatenate([train_series, val_series])
+        for name, model in models.items():
+            try:
+                if hasattr(model, 'freeze_hyperparameters'):
+                    model.freeze_hyperparameters(train_val_combined)
+            except Exception as e:
+                pass # Manejo de errores silencioso en prod
+                
+        # 5. Testing (Rolling Window sin re-entrenamiento pesado)
         results_rows = []
-        time_per_step = self.TEST_BUDGET / self.N_TEST_STEPS  # ~12.5s por paso
-        
         for t in range(self.N_TEST_STEPS):
-            step_start = time.time()
-            
-            # Historia acumulativa
-            history = np.concatenate([
-                train_series,
-                val_series,
-                test_series[:t]
-            ]) if t > 0 else np.concatenate([train_series, val_series])
-            
+            history = np.concatenate([train_series, val_series, test_series[:t]]) \
+                      if t > 0 else np.concatenate([train_series, val_series])
             true_val = test_series[t]
             
             row = {
@@ -265,189 +158,65 @@ class Pipeline140SinSesgos_ARMA:
                 'Valor_Observado': true_val
             }
             
-            # Predecir con todos los modelos
-            for model_name, model in models.items():
+            for name, model in models.items():
                 try:
-                    # Verificar timeout
-                    step_elapsed = time.time() - step_start
-                    if step_elapsed > time_per_step:
-                        row[model_name] = np.nan
-                        continue
-                    
-                    # Predicción
                     if isinstance(model, (CircularBlockBootstrapModel, SieveBootstrapModel)):
-                        pred_samples = model.fit_predict(history)
+                        pred = model.fit_predict(history)
                     else:
-                        df_hist = pd.DataFrame({'valor': history})
-                        pred_samples = model.fit_predict(df_hist)
+                        pred = model.fit_predict(pd.DataFrame({'valor': history}))
                     
-                    pred_samples = np.asarray(pred_samples).flatten()
-                    
-                    # CRPS
-                    score = crps(pred_samples, true_val)
-                    row[model_name] = score if not np.isnan(score) else np.nan
-                
-                except Exception as e:
-                    row[model_name] = np.nan
+                    score = crps(np.asarray(pred).flatten(), true_val)
+                    row[name] = score if not np.isnan(score) else np.nan
+                except:
+                    row[name] = np.nan
             
             results_rows.append(row)
+            clear_all_sessions() # Limpiar RAM
             
-            # Limpieza por paso
-            clear_all_sessions()
-        
-        test_elapsed = time.time() - test_start
-        
-        # ================================================================
-        # VERIFICACIÓN DE PRESUPUESTO
-        # ================================================================
-        total_elapsed = time.time() - scenario_start
-        
-        if self.verbose or total_elapsed > self.SCENARIO_BUDGET:
-            print(f"\n📊 Escenario: {arma_config['nombre']}, {dist}, var={var}")
-            print(f"  Preparación: {prep_elapsed:.1f}s")
-            print(f"  Testing: {test_elapsed:.1f}s")
-            print(f"  TOTAL: {total_elapsed:.1f}s / {self.SCENARIO_BUDGET}s")
-            
-            if total_elapsed > self.SCENARIO_BUDGET:
-                print(f"  ⚠️  EXCEDIÓ PRESUPUESTO por {total_elapsed - self.SCENARIO_BUDGET:.1f}s")
-        
         return results_rows
-    
-    def _setup_models(self, seed: int):
-        """Inicializa 9 modelos con configuraciones ligeras."""
-        return {
-            'Block Bootstrapping': CircularBlockBootstrapModel(
-                block_length='auto', n_boot=self.n_boot,
-                random_state=seed, verbose=False,
-                hyperparam_ranges={'block_length': [2, 50]}, optimize=True
-            ),
-            'Sieve Bootstrap': SieveBootstrapModel(
-                order='auto', n_boot=self.n_boot,
-                random_state=seed, verbose=False,
-                hyperparam_ranges={'order': [1, 20]}, optimize=True
-            ),
-            'LSPM': LSPM(random_state=seed, verbose=False),
-            'LSPMW': LSPMW(rho=0.95, random_state=seed, verbose=False),
-            'DeepAR': DeepARModel(
-                hidden_size=16, n_lags=5, num_layers=1, dropout=0.1,
-                lr=0.01, batch_size=16, epochs=20,  # Reducido de 30
-                num_samples=self.n_boot,
-                random_state=seed, verbose=False, optimize=True,
-                early_stopping_patience=3  # Más agresivo
-            ),
-            'AREPD': AREPD(
-                n_lags=5, rho=0.93, alpha=0.1, poly_degree=2,
-                random_state=seed, verbose=False, optimize=True
-            ),
-            'MCPS': MondrianCPSModel(
-                n_lags=10, n_bins=8, test_size=0.25,
-                random_state=seed, verbose=False, optimize=True
-            ),
-            'AV-MCPS': AdaptiveVolatilityMondrianCPS(
-                n_lags=12, n_pred_bins=6, n_vol_bins=3, volatility_window=15,
-                test_size=0.25, random_state=seed, verbose=False, optimize=True
-            ),
-            'EnCQR-LSTM': EnCQR_LSTM_Model(
-                n_lags=15, B=3, units=24, n_layers=2, lr=0.005,
-                batch_size=16, epochs=15,  # Reducido de 20
-                num_samples=self.n_boot,
-                random_state=seed, verbose=False, optimize=True
-            )
-        }
-    
-    def run_all(self, excel_filename: str = "resultados_140_FAST_5min.xlsx", 
-                batch_size: int = 10, max_workers: int = 4):
+
+    def _optimize_models(self, optimizer, models, train, val):
+        """Helper para aplicar la optimización y actualizar parámetros."""
+        best_params = optimizer.optimize_all_models(models, train, val)
+        for name, params in best_params.items():
+            if params and name in models:
+                model = models[name]
+                for k, v in params.items():
+                    if hasattr(model, k):
+                        setattr(model, k, v)
+        return models
+
+    def run_all(self, excel_filename: str = "resultados_140_NO_BIAS.xlsx", 
+                batch_size: int = 10, max_workers: int = 3):
         """
-        Ejecuta 140 escenarios con paralelización controlada.
-        
-        Tiempo estimado: 140 escenarios × 5min / 4 workers = ~3 horas
+        Ejecuta todo. Nota: max_workers reducido a 3 porque DeepAR consumirá más CPU ahora.
         """
         print("="*80)
-        print("⚡ EVALUACIÓN ULTRA-RÁPIDA: 140 ESCENARIOS EN ~3 HORAS")
+        print("🚀 EVALUACIÓN ARMA SIN SESGOS DE TIEMPO")
         print("="*80)
-        print(f"\n  Presupuesto por escenario: {self.SCENARIO_BUDGET}s (5 min)")
-        print(f"  Workers paralelos: {max_workers}")
-        print(f"  Tamaño de lote: {batch_size}")
-        print(f"  Tiempo estimado total: {140 * self.SCENARIO_BUDGET / max_workers / 3600:.1f} horas")
-        print("="*80 + "\n")
         
         all_scenarios = self.generate_all_scenarios()
-        total_scenarios = len(all_scenarios)
         all_rows = []
         
-        num_batches = (total_scenarios + batch_size - 1) // batch_size
-        
-        for i in range(num_batches):
-            start_idx = i * batch_size
-            end_idx = min((i + 1) * batch_size, total_scenarios)
-            current_batch = all_scenarios[start_idx:end_idx]
-            
-            batch_start = time.time()
-            print(f"\n🚀 Lote {i+1}/{num_batches} (Escenarios {start_idx+1}-{end_idx})...")
+        # Procesamiento por lotes
+        for i in range(0, len(all_scenarios), batch_size):
+            batch = all_scenarios[i : i + batch_size]
+            print(f"Procesando lote {i//batch_size + 1}...")
             
             try:
-                batch_results = Parallel(
-                    n_jobs=max_workers, 
-                    backend='loky', 
-                    timeout=99999
-                )(
-                    delayed(self._run_scenario_wrapper)(args) 
-                    for args in tqdm(current_batch, desc=f"  Lote {i+1}", leave=False)
+                results = Parallel(n_jobs=max_workers, backend='loky')(
+                    delayed(self._run_scenario_wrapper)(arg) for arg in batch
                 )
+                for r in results: all_rows.extend(r)
                 
-                for res in batch_results:
-                    if isinstance(res, list):
-                        all_rows.extend(res)
-                    else:
-                        all_rows.append(res)
-                
-                batch_elapsed = time.time() - batch_start
-                scenarios_in_batch = len(current_batch)
-                avg_time_per_scenario = batch_elapsed / scenarios_in_batch / max_workers
-                
-                print(f"  ✅ Lote completado en {batch_elapsed:.1f}s")
-                print(f"  📊 Promedio: {avg_time_per_scenario:.1f}s/escenario")
-                
-                if avg_time_per_scenario > self.SCENARIO_BUDGET:
-                    print(f"  ⚠️  ADVERTENCIA: Excede presupuesto de {self.SCENARIO_BUDGET}s")
-                
-                # Guardar checkpoint
-                self._save_checkpoint(all_rows, excel_filename)
-                
-                # Limpieza
-                del batch_results, current_batch
+                # Guardado intermedio
+                pd.DataFrame(all_rows).to_excel(excel_filename, index=False)
                 clear_all_sessions()
-                gc.collect()
                 
             except Exception as e:
-                print(f"❌ Error en lote {i+1}: {e}")
-                self._save_checkpoint(all_rows, f"RECOVERY_{excel_filename}")
-                raise e
-
-        print("\n" + "="*80)
-        print(f"✅ COMPLETADO - {len(all_rows)} filas generadas")
-        print("="*80)
+                print(f"Error en lote: {e}")
         
         return pd.DataFrame(all_rows)
-    
-    def _save_checkpoint(self, rows, filename):
-        """Guarda progreso en Excel."""
-        if not rows: 
-            return
-        
-        df_temp = pd.DataFrame(rows)
-        
-        ordered_cols = [
-            'Paso', 'proces_simulacion', 'Distribución', 'Varianza error', 'Valor_Observado',
-            'AREPD', 'AV-MCPS', 'Block Bootstrapping', 'DeepAR', 'EnCQR-LSTM',
-            'LSPM', 'LSPMW', 'MCPS', 'Sieve Bootstrap'
-        ]
-        final_cols = [c for c in ordered_cols if c in df_temp.columns]
-        remaining_cols = [c for c in df_temp.columns if c not in final_cols]
-        final_cols.extend(remaining_cols)
-        
-        df_temp = df_temp[final_cols]
-        df_temp.to_excel(filename, index=False)
 
 
 class Pipeline140SinSesgos_ARIMA:

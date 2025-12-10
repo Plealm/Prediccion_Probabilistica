@@ -383,71 +383,50 @@ class LSPM:
 
 
 class LSPMW(LSPM):
-    """LSPMW CORREGIDO: Congela rho después de optimización."""
+    """
+    LSPMW CORREGIDO siguiendo el paper de Barber et al. (2023).
     
-    def __init__(self, rho: float = 0.95, **kwargs):
-        super().__init__(**kwargs)
+    Principios clave:
+    1. Optimización de ρ usa SOLO k-fold CV en train_data
+    2. Congelamiento usa train_data + val_data (SIN re-optimizar)
+    3. Predicción usa estructura congelada (no re-calcula críticos)
+    
+    Referencias:
+    - Barber, R. F., Candès, E. J., Ramdas, A., & Tibshirani, R. J. (2023).
+      "Conformal Prediction Beyond Exchangeability"
+    """
+    
+    def __init__(self, rho: float = 0.95, random_state: int = 42, 
+                 verbose: bool = False):
+        super().__init__(random_state=random_state, verbose=verbose)
         if not (0 < rho < 1):
             raise ValueError("rho debe estar entre 0 y 1")
         self.rho = rho
         self.best_params = {'rho': rho}
         
-        # FIX: Cache para congelar
+        # Estado congelado
         self._frozen_rho = None
-
-    def freeze_hyperparameters(self, train_data: np.ndarray):
-        """CRÍTICO: Congela n_lags y rho."""
-        super().freeze_hyperparameters(train_data)
-        self._frozen_rho = self.rho
-        if self.verbose:
-            print(f"  LSPMW congelado: rho={self._frozen_rho}")
-
-    def fit_predict(self, df: Union[pd.DataFrame, np.ndarray]) -> np.ndarray:
-        """
-        CORREGIDO: Usa rho congelado.
-        """
-        values = df['valor'].values if isinstance(df, pd.DataFrame) else np.asarray(df)
-        critical = self._calculate_critical_values(values.astype(np.float64))
-        
-        if len(critical) == 0:
-            return np.full(1000, np.mean(values[-min(8, len(values)):]))
-        
-        n_crit = len(critical)
-        
-        # FIX: Usar rho congelado si existe
-        rho_to_use = self._frozen_rho if self._frozen_rho is not None else self.rho
-        
-        # Pesos basados en índice temporal ANTES de ordenar
-        temporal_weights = rho_to_use ** np.arange(n_crit - 1, -1, -1)
-        temporal_weights = temporal_weights / temporal_weights.sum()
-        
-        # Crear índices ordenados pero mantener asociación con pesos temporales
-        sort_indices = np.argsort(critical)
-        sorted_critical = critical[sort_indices]
-        sorted_weights = temporal_weights[sort_indices]
-        
-        # CDF acumulada con pesos temporales
-        cum_probs = np.cumsum(sorted_weights)
-        
-        u = np.linspace(0, 1 - 1e-10, 1000)
-        indices = np.searchsorted(cum_probs, u, side='right')
-        indices = np.clip(indices, 0, n_crit - 1)
-        
-        return sorted_critical[indices]
+        self._frozen_critical_values = None  # ✅ NUEVO: Congela valores críticos
+        self._frozen_weights = None          # ✅ NUEVO: Congela pesos temporales
+        self._is_frozen = False
     
-    def optimize_hyperparameters(self, train_data: np.ndarray, val_data: np.ndarray):
+    def optimize_hyperparameters_cv(self, train_data: np.ndarray, 
+                                    k_folds: int = 5) -> tuple:
         """
-        CORREGIDO: Optimiza usando SOLO expanding window en validation.
-        NO usa distribución verdadera.
+        CORRECCIÓN CRÍTICA: Optimización con k-fold CV SOLO en train_data.
+        
+        NO usa val_data. Esto elimina el data leakage.
         
         Args:
             train_data: Datos de entrenamiento (200 puntos)
-            val_data: Datos de validación (40 puntos)
+            k_folds: Número de folds para CV
         
         Returns:
-            best_rho, best_score
+            (best_rho, best_score)
         """
-        if len(train_data) < 30 or len(val_data) < 5:
+        if len(train_data) < k_folds * 10:
+            if self.verbose:
+                print(f"  Datos insuficientes para CV ({len(train_data)} < {k_folds*10})")
             self.best_params = {'rho': self.rho}
             return self.rho, np.nan
         
@@ -457,41 +436,184 @@ class LSPMW(LSPM):
         best_rho = self.rho
         best_score = float('inf')
         
+        # K-fold CV split
+        fold_size = len(train_data) // k_folds
+        
         for rho_test in candidates:
-            self.rho = rho_test
-            scores = []
+            fold_scores = []
             
-            # Expanding window en validation
-            for i in range(len(val_data)):
+            # K-fold cross-validation
+            for fold in range(k_folds):
                 try:
-                    # Historia: train + val hasta i
-                    history = np.concatenate([train_data, val_data[:i]]) if i > 0 else train_data
-                    true_val = val_data[i]  # Valor OBSERVADO, NO distribución
+                    # Split train/val dentro de train_data
+                    val_start = fold * fold_size
+                    val_end = val_start + fold_size if fold < k_folds - 1 else len(train_data)
                     
-                    # Predecir
-                    df_hist = pd.DataFrame({'valor': history})
-                    samples = self.fit_predict(df_hist)
+                    # Fold train: todos excepto el fold actual
+                    fold_train = np.concatenate([
+                        train_data[:val_start],
+                        train_data[val_end:]
+                    ])
+                    fold_val = train_data[val_start:val_end]
                     
-                    if len(samples) > 0:
-                        # CRPS contra valor observado (NO distribución verdadera)
+                    if len(fold_train) < 30 or len(fold_val) < 5:
+                        continue
+                    
+                    # Calcular critical values con fold_train
+                    critical_vals = self._calculate_critical_values(fold_train)
+                    if len(critical_vals) == 0:
+                        continue
+                    
+                    # Aplicar pesos con rho_test
+                    n_crit = len(critical_vals)
+                    temporal_weights = rho_test ** np.arange(n_crit - 1, -1, -1)
+                    temporal_weights = temporal_weights / temporal_weights.sum()
+                    
+                    # Ordenar y crear CDF
+                    sort_indices = np.argsort(critical_vals)
+                    sorted_critical = critical_vals[sort_indices]
+                    sorted_weights = temporal_weights[sort_indices]
+                    cum_probs = np.cumsum(sorted_weights)
+                    
+                    # Evaluar en fold_val
+                    for true_val in fold_val:
+                        # Samplear de la distribución ponderada
+                        u = self.rng.uniform(0, 1 - 1e-10, size=1000)
+                        indices = np.searchsorted(cum_probs, u, side='right')
+                        indices = np.clip(indices, 0, n_crit - 1)
+                        samples = sorted_critical[indices]
+                        
+                        # CRPS contra valor observado
                         from metricas import crps
                         score = crps(samples, true_val)
                         if not np.isnan(score):
-                            scores.append(score)
-                except:
+                            fold_scores.append(score)
+                
+                except Exception as e:
+                    if self.verbose:
+                        print(f"    Error en fold {fold}: {e}")
                     continue
             
-            if len(scores) > 0:
-                avg_score = np.mean(scores)
+            if len(fold_scores) > 0:
+                avg_score = np.mean(fold_scores)
                 if avg_score < best_score:
                     best_score = avg_score
                     best_rho = rho_test
+                
+                if self.verbose:
+                    print(f"    ρ={rho_test:.2f} → CRPS={avg_score:.4f} "
+                          f"({len(fold_scores)} validaciones)")
         
         self.rho = best_rho
         self.best_params = {'rho': best_rho}
         
+        if self.verbose:
+            print(f"  ✅ Mejor ρ={best_rho:.2f} (CRPS={best_score:.4f})")
+        
         return best_rho, best_score
     
+    def freeze_hyperparameters(self, train_data: np.ndarray):
+        """
+        CORRECCIÓN CRÍTICA: Congela TODA la estructura predictiva.
+        
+        Usa train_data (que ya incluye train + val originales).
+        NO re-optimiza ρ aquí.
+        
+        Args:
+            train_data: train_original + val_original (240 puntos)
+        """
+        # Congelar n_lags
+        super().freeze_hyperparameters(train_data)
+        
+        # Congelar rho
+        self._frozen_rho = self.best_params.get('rho', self.rho)
+        
+        # CRÍTICO: Congelar critical values y pesos
+        try:
+            self._frozen_critical_values = self._calculate_critical_values(train_data)
+            
+            if len(self._frozen_critical_values) > 0:
+                n_crit = len(self._frozen_critical_values)
+                
+                # Calcular pesos temporales congelados
+                temporal_weights = self._frozen_rho ** np.arange(n_crit - 1, -1, -1)
+                temporal_weights = temporal_weights / temporal_weights.sum()
+                
+                # Ordenar y guardar
+                sort_indices = np.argsort(self._frozen_critical_values)
+                self._frozen_critical_values = self._frozen_critical_values[sort_indices]
+                self._frozen_weights = temporal_weights[sort_indices]
+                
+                self._is_frozen = True
+                
+                if self.verbose:
+                    print(f"  ✅ LSPMW congelado: ρ={self._frozen_rho:.2f}, "
+                          f"n_lags={self._frozen_n_lags}, "
+                          f"n_critical={len(self._frozen_critical_values)}")
+            else:
+                self._is_frozen = False
+                if self.verbose:
+                    print(f"  ⚠️  No se pudieron calcular critical values")
+                
+        except Exception as e:
+            self._is_frozen = False
+            if self.verbose:
+                print(f"  ✗ Error congelando LSPMW: {e}")
+    
+    def fit_predict(self, df: Union[pd.DataFrame, np.ndarray]) -> np.ndarray:
+        """
+        CORRECCIÓN CRÍTICA: Usa estructura congelada si existe.
+        
+        Durante testing (rolling window):
+        - SI está congelado: Usa critical values + pesos congelados
+        - NO está congelado: Calcula desde cero (solo primer paso)
+        """
+        values = df['valor'].values if isinstance(df, pd.DataFrame) else np.asarray(df)
+        
+        # CASO 1: Modelo congelado (testing)
+        if self._is_frozen and self._frozen_critical_values is not None:
+            if len(self._frozen_critical_values) == 0:
+                return np.full(1000, np.mean(values[-min(8, len(values)):]))
+            
+            # Usar distribución congelada
+            cum_probs = np.cumsum(self._frozen_weights)
+            
+            # Samplear
+            u = np.linspace(0, 1 - 1e-10, 1000)
+            indices = np.searchsorted(cum_probs, u, side='right')
+            indices = np.clip(indices, 0, len(self._frozen_critical_values) - 1)
+            
+            return self._frozen_critical_values[indices]
+        
+        # CASO 2: NO congelado (primer paso de optimización)
+        critical = self._calculate_critical_values(values.astype(np.float64))
+        
+        if len(critical) == 0:
+            return np.full(1000, np.mean(values[-min(8, len(values)):]))
+        
+        n_crit = len(critical)
+        
+        # Usar rho de best_params o self.rho
+        rho_to_use = self.best_params.get('rho', self.rho)
+        
+        # Pesos temporales
+        temporal_weights = rho_to_use ** np.arange(n_crit - 1, -1, -1)
+        temporal_weights = temporal_weights / temporal_weights.sum()
+        
+        # Ordenar
+        sort_indices = np.argsort(critical)
+        sorted_critical = critical[sort_indices]
+        sorted_weights = temporal_weights[sort_indices]
+        
+        # CDF
+        cum_probs = np.cumsum(sorted_weights)
+        
+        # Samplear
+        u = np.linspace(0, 1 - 1e-10, 1000)
+        indices = np.searchsorted(cum_probs, u, side='right')
+        indices = np.clip(indices, 0, n_crit - 1)
+        
+        return sorted_critical[indices]
 
 
 class AREPD:
@@ -1636,417 +1758,190 @@ class EnCQR_LSTM_Model:
 
 class TimeBalancedOptimizer:
     """
-    Optimizador con restricción CRÍTICA: TODO un escenario ≤ 5 minutos.
+    Optimizador Eficiente sin Restricción de Tiempo Rígida.
     
-    Estrategia:
-    - 12 modelos × 12 pasos test = 144 predicciones por escenario
-    - Presupuesto total: 300s
-    - Optimización: 120s (40%)
-    - Congelamiento: 30s (10%)
-    - Testing: 150s (50%) → ~1s por predicción
-    
-    Distribución de optimización:
-    - Modelos rápidos (CBB/Sieve/LSPM): 5s cada uno = 15s
-    - Modelos medios (AREPD/MCPS): 15s cada uno = 30s
-    - Modelos lentos (DeepAR/EnCQR): 37.5s cada uno = 75s
-    Total: 120s
+    Filosofía:
+    - NO corta la evaluación por tiempo (evita sesgo contra Deep Learning).
+    - Usa 'Smart Grids': Pocas configuraciones pero bien elegidas.
+    - Usa 'Statistical Early Stopping': Detiene la validación si el CRPS converge.
     """
     
-    # Presupuesto TOTAL por escenario
-    SCENARIO_BUDGET = 300  # 5 minutos TOTAL
-    
-    # Distribución del presupuesto
-    OPTIMIZATION_FRACTION = 0.40  # 40% = 120s
-    FREEZE_FRACTION = 0.10        # 10% = 30s
-    TEST_FRACTION = 0.50          # 50% = 150s
-    
-    # Presupuestos por modelo (suman 120s)
-    MODEL_TIME_BUDGETS = {
-        'Block Bootstrapping': 5,   # Ultra-rápido
-        'Sieve Bootstrap': 5,        # Ultra-rápido
-        'LSPM': 5,                   # Sin optimización, placeholder
-        'LSPMW': 15,                 # Rápido
-        'AREPD': 15,                 # Rápido
-        'MCPS': 15,                  # Medio
-        'AV-MCPS': 15,               # Medio
-        'DeepAR': 37.5,              # Lento (necesita más tiempo)
-        'EnCQR-LSTM': 37.5           # Muy lento
-    }
-    
-    # Tiempos estimados POR PASO de validación (no por evaluación completa)
-    ESTIMATED_TIME_PER_STEP = {
-        'Block Bootstrapping': 0.025,   # 25ms
-        'Sieve Bootstrap': 0.025,       # 25ms
-        'LSPM': 0.15,                   # 150ms
-        'LSPMW': 0.15,                  # 150ms
-        'AREPD': 0.10,                  # 100ms
-        'MCPS': 0.50,                   # 500ms (XGBoost)
-        'AV-MCPS': 0.50,                # 500ms
-        'DeepAR': 3.0,                  # 3s (inferencia + scaler)
-        'EnCQR-LSTM': 5.0               # 5s (ensemble de 3 LSTMs)
-    }
-    
     def __init__(self, random_state: int = 42, verbose: bool = False):
         self.random_state = random_state
         self.verbose = verbose
         self.rng = np.random.default_rng(random_state)
-    
-    def _estimate_config_time(self, model_name: str, n_val_steps: int) -> float:
+
+    def _get_efficient_grid(self, model_name: str, n_train: int) -> List[Dict]:
         """
-        Estima tiempo REAL para evaluar UNA configuración.
-        
-        Args:
-            model_name: Nombre del modelo
-            n_val_steps: Pasos de validación (típicamente 40)
-        
-        Returns:
-            Tiempo estimado en segundos
+        Retorna un Grid de búsqueda pequeño pero efectivo (3-5 configuraciones).
         """
-        time_per_step = self.ESTIMATED_TIME_PER_STEP.get(model_name, 1.0)
-        
-        # Para modelos profundos, agregar overhead de setup
-        if model_name in ['DeepAR', 'EnCQR-LSTM']:
-            setup_time = 10.0  # Inicialización de red
-            return setup_time + (time_per_step * n_val_steps)
-        else:
-            return time_per_step * n_val_steps
-    
-    def __init__(self, random_state: int = 42, verbose: bool = False):
-        self.random_state = random_state
-        self.verbose = verbose
-        self.rng = np.random.default_rng(random_state)
-    
-    def _get_param_grid_adaptive(self, model_name: str, train_size: int, 
-                                  n_val_steps: int = 40) -> list:
-        """
-        Grid ultra-agresivo: Maximiza configuraciones dentro del presupuesto.
-        
-        Estrategia CRÍTICA para cumplir 5min/escenario:
-        1. Calcular cuántas configuraciones caben en el presupuesto
-        2. Priorizar diversidad sobre exhaustividad
-        3. Usar random search para modelos lentos
-        
-        Args:
-            model_name: Nombre del modelo
-            train_size: Tamaño de train set
-            n_val_steps: Pasos de validación (40)
-        
-        Returns:
-            Lista de configuraciones a probar
-        """
-        budget = self.MODEL_TIME_BUDGETS.get(model_name, 10.0)
-        time_per_config = self._estimate_config_time(model_name, n_val_steps)
-        max_configs = max(1, int(budget / time_per_config))
-        
-        if self.verbose:
-            print(f"    {model_name}: budget={budget}s, "
-                  f"~{time_per_config:.1f}s/config → {max_configs} configs")
-        
-        # ====================================================================
-        # MODELOS ULTRA-RÁPIDOS: Grid exhaustivo
-        # ====================================================================
+        # --- Modelos Bootstrap (Rápidos) ---
         if model_name == 'Block Bootstrapping':
-            # 5s / 1s = ~5 configuraciones
-            if max_configs >= 5:
-                candidates = [3, 5, 10, 15, 20]
-            else:
-                candidates = [5, 10, 15]
-            candidates = [c for c in candidates if c < train_size // 2]
-            return [{'block_length': int(c)} for c in candidates[:max_configs]]
+            # Probar bloques pequeños, medios y grandes
+            return [{'block_length': 5}, {'block_length': int(np.sqrt(n_train))}, {'block_length': int(n_train/5)}]
         
         elif model_name == 'Sieve Bootstrap':
-            # ~5 configuraciones
-            if max_configs >= 5:
-                candidates = [2, 3, 5, 8, 12]
-            else:
-                candidates = [3, 5, 8]
-            candidates = [c for c in candidates if c < train_size // 3]
-            return [{'order': int(c)} for c in candidates[:max_configs]]
+            # Probar órdenes AR bajos y medios
+            return [{'order': 5}, {'order': 10}, {'order': 20}]
         
-        # ====================================================================
-        # MODELOS RÁPIDOS: Grid moderado
-        # ====================================================================
+        # --- Modelos Basados en Regresión (Medios) ---
         elif model_name == 'LSPMW':
-            # 15s / 6s = ~2 configuraciones
-            if max_configs >= 3:
-                rhos = [0.90, 0.95, 0.99]
-            else:
-                rhos = [0.95, 0.99]
-            return [{'rho': float(r)} for r in rhos[:max_configs]]
+            return [{'rho': 0.95}, {'rho': 0.99}]
         
         elif model_name == 'AREPD':
-            # 15s / 4s = ~3-4 configuraciones
-            configs = [
-                {'n_lags': 5, 'rho': 0.93, 'poly_degree': 2},
-                {'n_lags': 8, 'rho': 0.95, 'poly_degree': 2},
-                {'n_lags': 5, 'rho': 0.97, 'poly_degree': 3},
-                {'n_lags': 10, 'rho': 0.95, 'poly_degree': 2}
+            return [
+                {'n_lags': 5, 'rho': 0.95, 'poly_degree': 2},
+                {'n_lags': 10, 'rho': 0.90, 'poly_degree': 2},
+                {'n_lags': 5, 'rho': 0.98, 'poly_degree': 3}
             ]
-            return configs[:max_configs]
         
-        # ====================================================================
-        # MODELOS MEDIOS: Grid reducido
-        # ====================================================================
         elif model_name == 'MCPS':
-            # 15s / 20s = ~0.75 configuraciones → SOLO 1
-            configs = [
+            return [
                 {'n_lags': 10, 'n_bins': 8},
-                {'n_lags': 12, 'n_bins': 10}
+                {'n_lags': 15, 'n_bins': 15}
             ]
-            return configs[:max(1, max_configs)]
         
         elif model_name == 'AV-MCPS':
-            # ~1 configuración
-            configs = [
-                {'n_lags': 12, 'n_pred_bins': 6, 'n_vol_bins': 3, 'volatility_window': 15},
-                {'n_lags': 15, 'n_pred_bins': 8, 'n_vol_bins': 4, 'volatility_window': 20}
+            return [
+                {'n_lags': 10, 'n_pred_bins': 8, 'n_vol_bins': 3},
+                {'n_lags': 15, 'n_pred_bins': 10, 'n_vol_bins': 5}
             ]
-            return configs[:max(1, max_configs)]
         
-        # ====================================================================
-        # MODELOS LENTOS: Random search con early stopping
-        # ====================================================================
+        # --- Modelos Deep Learning (Lentos - Grid Mínimo) ---
         elif model_name == 'DeepAR':
-            # 37.5s / 130s = ~0.3 configuraciones
-            # ESTRATEGIA: Reducir n_val_steps con early stopping
-            configs = [
-                {'hidden_size': 16, 'n_lags': 5, 'dropout': 0.1, 'lr': 0.01},
-                {'hidden_size': 20, 'n_lags': 8, 'dropout': 0.1, 'lr': 0.01}
+            # Una config ligera y una más profunda
+            return [
+                {'hidden_size': 20, 'n_lags': 10, 'num_layers': 1, 'epochs': 25, 'lr': 0.01},
+                {'hidden_size': 32, 'n_lags': 15, 'num_layers': 2, 'epochs': 30, 'lr': 0.005}
             ]
-            # Si solo cabe 1, tomar el más conservador
-            return configs[:max(1, max_configs)]
         
         elif model_name == 'EnCQR-LSTM':
-            # 37.5s / 210s = ~0.18 configuraciones
-            # SOLO probar 1 configuración
-            configs = [
-                {'n_lags': 15, 'B': 3, 'units': 24, 'lr': 0.005, 'epochs': 15},
+            # EnCQR es muy costoso (Ensemble), probamos solo 2 variantes clave
+            return [
+                {'n_lags': 10, 'units': 24, 'epochs': 20},
+                {'n_lags': 20, 'units': 32, 'epochs': 25}
             ]
-            return configs[:1]  # FORZAR a 1
         
-        else:
-            return [{}]
-    
-    def _evaluate_on_validation_with_budget(self, model, train_data: np.ndarray,
-                                            val_data: np.ndarray,
-                                            time_budget: float,
-                                            min_steps: int = 10) -> float:
+        # Default
+        return [{}]
+
+    def _evaluate_with_convergence(self, model, train_data: np.ndarray,
+                                   val_data: np.ndarray, min_steps: int = 15) -> float:
         """
-        Evalúa modelo con early stopping AGRESIVO.
-        
-        Estrategias:
-        1. Si timeout, extrapolar CRPS basado en pasos completados
-        2. Si convergencia temprana, dejar de evaluar
-        3. Mínimo min_steps para tener señal confiable
-        
-        Args:
-            model: Modelo a evaluar
-            train_data: Datos de entrenamiento (200)
-            val_data: Datos de validación (40)
-            time_budget: Presupuesto de tiempo en segundos
-            min_steps: Mínimo de pasos antes de early stopping
-        
-        Returns:
-            CRPS promedio (real o extrapolado)
+        Evalúa el modelo en el set de validación usando predicción rolling.
+        Usa convergencia estadística para parar antes si el error es estable.
         """
-        import time
         from metricas import crps
-        
         scores = []
-        start_time = time.time()
         
-        # Para early stopping por convergencia
-        window_size = 5
-        convergence_threshold = 0.02  # 2% de cambio
+        # Ventana para chequear estabilidad
+        window = 10 
         
         for i in range(len(val_data)):
-            # ============================================================
-            # CHECK 1: Timeout
-            # ============================================================
-            elapsed = time.time() - start_time
-            if elapsed > time_budget and i >= min_steps:
-                # Extrapolar CRPS restante
-                if len(scores) >= window_size:
-                    avg_recent = np.mean(scores[-window_size:])
-                    remaining = len(val_data) - i
-                    if self.verbose:
-                        print(f"    ⏱️  Timeout en {i}/{len(val_data)}, "
-                              f"extrapolando {remaining} pasos")
-                    # Retornar promedio ponderado: real + extrapolado
-                    total_score = (sum(scores) + avg_recent * remaining) / len(val_data)
-                    return total_score
-                else:
-                    # Muy pocos datos, retornar lo que tenemos
-                    return np.mean(scores) if scores else np.inf
-            
-            # ============================================================
-            # PREDICCIÓN
-            # ============================================================
+            # Construir historia creciente
             history = np.concatenate([train_data, val_data[:i]]) if i > 0 else train_data
             true_val = val_data[i]
             
             try:
-                if isinstance(model, (CircularBlockBootstrapModel, SieveBootstrapModel)):
-                    pred_samples = model.fit_predict(history)
+                # Predicción
+                if hasattr(model, 'fit_predict'):
+                    # Manejo de tipos de entrada según el modelo
+                    if "Bootstrap" in str(type(model)):
+                        pred_samples = model.fit_predict(history)
+                    else:
+                        pred_samples = model.fit_predict(pd.DataFrame({'valor': history}))
                 else:
-                    df_hist = pd.DataFrame({'valor': history})
-                    pred_samples = model.fit_predict(df_hist)
+                    continue
                 
+                # Calcular métrica
                 pred_samples = np.asarray(pred_samples).flatten()
                 score = crps(pred_samples, true_val)
                 
-                if not np.isnan(score) and not np.isinf(score):
+                if not np.isnan(score):
                     scores.append(score)
-                else:
-                    # Score inválido, usar último válido
-                    if scores:
-                        scores.append(scores[-1])
-                    continue
-                    
-            except Exception as e:
-                # Error en predicción, usar último score válido
-                if scores:
-                    scores.append(scores[-1])
+            
+            except Exception:
                 continue
             
-            # ============================================================
-            # CHECK 2: Convergencia (solo después de min_steps)
-            # ============================================================
-            if i >= min_steps and len(scores) >= window_size:
-                recent_mean = np.mean(scores[-window_size:])
-                older_mean = np.mean(scores[-2*window_size:-window_size]) if len(scores) >= 2*window_size else recent_mean
+            # --- CRITERIO DE CONVERGENCIA ---
+            # Si hemos evaluado suficientes pasos (min_steps)
+            # y el promedio de los últimos X scores no cambia mucho respecto a los anteriores
+            if len(scores) > min_steps + window:
+                recent_mean = np.mean(scores[-window:])
+                prev_mean = np.mean(scores[-2*window:-window])
                 
-                if older_mean > 0:
-                    relative_change = abs(recent_mean - older_mean) / older_mean
-                    
-                    if relative_change < convergence_threshold:
-                        # Convergió, extrapolar el resto
-                        remaining = len(val_data) - i - 1
-                        if self.verbose:
-                            print(f"    ✓ Convergencia en {i}/{len(val_data)}")
-                        total_score = (sum(scores) + recent_mean * remaining) / len(val_data)
-                        return total_score
+                # Si el error se estabilizó (cambio < 1%), paramos para ahorrar tiempo
+                # Esto asume que el modelo ya "aprendió" o falló consistentemente
+                if prev_mean > 0 and abs(recent_mean - prev_mean) / prev_mean < 0.01:
+                    break
         
-        # Completó todos los pasos
         return np.mean(scores) if scores else np.inf
-    
+
     def optimize_all_models(self, models: Dict, train_data: np.ndarray,
                            val_data: np.ndarray) -> Dict:
         """
-        Optimización ULTRA-RÁPIDA: Total ≤ 120s para 9 modelos.
-        
-        Workflow:
-        1. Para cada modelo, calcular cuántas configs caben en su presupuesto
-        2. Evaluar con early stopping agresivo
-        3. Seleccionar mejor configuración
-        
-        Returns:
-            Dict con mejores hiperparámetros por modelo
+        Optimiza todos los modelos buscando el mejor CRPS en validación.
         """
         import time
-        
-        if self.verbose:
-            print("\n" + "="*80)
-            print("⚡ OPTIMIZACIÓN ULTRA-RÁPIDA (Budget: 120s)")
-            print("="*80)
-            print(f"  Train: {len(train_data)} | Validation: {len(val_data)}")
+        import copy
         
         optimized_params = {}
-        global_start = time.time()
+        
+        if self.verbose:
+            print(f"\n⚡ OPTIMIZACIÓN EFICIENTE (Sin límite rígido de tiempo)")
         
         for name, model in models.items():
             model_start = time.time()
             
-            if self.verbose:
-                budget = self.MODEL_TIME_BUDGETS.get(name, 10.0)
-                print(f"\n  🔍 {name} (budget: {budget}s)...")
+            # Obtener grid eficiente
+            param_grid = self._get_efficient_grid(name, len(train_data))
             
-            try:
-                # Obtener grid adaptativo
-                param_grid = self._get_param_grid_adaptive(name, len(train_data), len(val_data))
-                
-                if not param_grid or param_grid == [{}]:
-                    optimized_params[name] = {}
-                    if self.verbose:
-                        print(f"    ✓ Sin hiperparámetros")
-                    continue
-                
-                # Grid search con early stopping
-                best_params = None
-                best_score = np.inf
-                budget = self.MODEL_TIME_BUDGETS.get(name, 10.0)
-                time_per_config = budget / len(param_grid)
-                
-                for idx, params in enumerate(param_grid):
-                    config_start = time.time()
+            # Si no hay nada que optimizar
+            if len(param_grid) <= 1 and not param_grid[0]:
+                optimized_params[name] = {}
+                continue
+            
+            best_score = np.inf
+            best_params = {}
+            
+            for idx, params in enumerate(param_grid):
+                try:
+                    # Crear copia limpia del modelo
+                    model_copy = copy.deepcopy(model)
                     
-                    # Crear modelo temporal
-                    model_copy = self._create_model_copy(model, params)
+                    # Aplicar parámetros
+                    for key, val in params.items():
+                        if hasattr(model_copy, key):
+                            setattr(model_copy, key, val)
                     
-                    # Evaluar con early stopping
-                    score = self._evaluate_on_validation_with_budget(
-                        model_copy, 
-                        train_data, 
-                        val_data, 
-                        time_per_config,
-                        min_steps=10
+                    # Evaluar
+                    score = self._evaluate_with_convergence(
+                        model_copy, train_data, val_data
                     )
-                    
-                    config_elapsed = time.time() - config_start
                     
                     if score < best_score:
                         best_score = score
-                        best_params = params.copy()
+                        best_params = params
                     
-                    if self.verbose:
-                        print(f"    Config {idx+1}/{len(param_grid)}: "
-                              f"{params} → CRPS={score:.4f} ({config_elapsed:.1f}s)")
-                    
-                    # Limpieza agresiva
+                    # Limpieza memoria
                     del model_copy
-                    clear_all_sessions()
-                
-                # Aplicar mejores parámetros
-                optimized_params[name] = best_params
-                self._apply_params_to_model(model, best_params)
-                
-                if hasattr(model, 'best_params'):
-                    model.best_params = best_params
-                
-                model_elapsed = time.time() - model_start
-                
-                if self.verbose:
-                    print(f"    ✅ Mejor: {best_params} → CRPS={best_score:.4f}")
-                    print(f"    ⏱️  Tiempo: {model_elapsed:.1f}s")
-                
-            except Exception as e:
-                if self.verbose:
-                    print(f"    ❌ Error: {e}")
-                optimized_params[name] = {}
-        
-        total_elapsed = time.time() - global_start
-        
-        if self.verbose:
-            print("\n" + "="*80)
-            print(f"✅ OPTIMIZACIÓN COMPLETADA en {total_elapsed:.1f}s")
-            if total_elapsed > self.SCENARIO_BUDGET * self.OPTIMIZATION_FRACTION:
-                print(f"⚠️  ADVERTENCIA: Excedió presupuesto de optimización "
-                      f"({self.SCENARIO_BUDGET * self.OPTIMIZATION_FRACTION}s)")
-            print("="*80)
-        
-        return optimized_params
-    
-    def _create_model_copy(self, model, params: dict):
-        import copy
-        model_copy = copy.deepcopy(model)
-        self._apply_params_to_model(model_copy, params)
-        return model_copy
-    
-    def _apply_params_to_model(self, model, params: dict):
-        if not params:
-            return
-        for key, value in params.items():
-            if hasattr(model, key):
-                setattr(model, key, value)
+                    
+                except Exception as e:
+                    if self.verbose:
+                        print(f"    Error en config {params}: {e}")
+            
+            # Guardar mejores parámetros
+            optimized_params[name] = best_params
+            
+            # Aplicar al modelo original para referencia
+            for key, val in best_params.items():
+                if hasattr(model, key):
+                    setattr(model, key, val)
             if hasattr(model, 'best_params'):
-                model.best_params[key] = value
+                model.best_params = best_params
+
+            if self.verbose:
+                elapsed = time.time() - model_start
+                print(f"  ✓ {name}: Mejor CRPS={best_score:.4f} [{elapsed:.1f}s]")
+
+        return optimized_params
