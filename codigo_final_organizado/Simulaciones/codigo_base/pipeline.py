@@ -1909,7 +1909,7 @@ class ARIMAMultiDSimulation:
         return y_next_samples
 
 
-class PipelineARMA_MultiD_DobleModalidad:
+class PipelineARIMA_MultiD_DobleModalidad:
     """
     Pipeline que evalúa procesos ARMA diferenciados manualmente d=2,3,4,5,7,10 
     en DOS MODALIDADES, utilizando optimización justa sin data leakage.
@@ -2343,7 +2343,7 @@ class PipelineARMA_MultiD_DobleModalidad:
         """Wrapper para paralelización."""
         arma_cfg, d_val, dist, var, seed = args
         
-        pipeline = PipelineARMA_MultiD_DobleModalidad(
+        pipeline = PipelineARIMA_MultiD_DobleModalidad(
             n_boot=self.n_boot, seed=seed, verbose=False
         )
         
