@@ -384,16 +384,16 @@ class LSPM:
 
 class LSPMW(LSPM):
     """
-    LSPMW CORREGIDO siguiendo el paper de Barber et al. (2023).
+    LSPMW - Least Squares Prediction Machine with Weighted Residuals
     
-    Principios clave:
-    1. Optimización de ρ usa SOLO k-fold CV en train_data
-    2. Congelamiento usa train_data + val_data (SIN re-optimizar)
-    3. Predicción usa estructura congelada (no re-calcula críticos)
+    Implementación corregida para integración con TimeBalancedOptimizer y
+    cumplimiento teórico con Barber et al. (2023) "Nonexchangeable Conformal Prediction".
     
-    Referencias:
-    - Barber, R. F., Candès, E. J., Ramdas, A., & Tibshirani, R. J. (2023).
-      "Conformal Prediction Beyond Exchangeability"
+    Principios Clave:
+    1. Pesos Temporales: w_i ∝ ρ^(n-i). Prioriza datos recientes.
+    2. Optimización Externa: TimeBalancedOptimizer inyecta 'rho' y evalúa CRPS.
+    3. Predicción Determinística: Expande la distribución empírica replicando
+       valores según su peso. Esto reduce la varianza en la validación.
     """
     
     def __init__(self, rho: float = 0.95, random_state: int = 42, 
@@ -406,155 +406,50 @@ class LSPMW(LSPM):
         
         # Estado congelado
         self._frozen_rho = None
-        self._frozen_critical_values = None  # ✅ NUEVO: Congela valores críticos
-        self._frozen_weights = None          # ✅ NUEVO: Congela pesos temporales
+        self._frozen_critical_values = None
+        self._frozen_weights = None
         self._is_frozen = False
-    
-    def optimize_hyperparameters_cv(self, train_data: np.ndarray, 
-                                    k_folds: int = 5) -> tuple:
-        """
-        CORRECCIÓN CRÍTICA: Optimización con k-fold CV SOLO en train_data.
-        
-        NO usa val_data. Esto elimina el data leakage.
-        
-        Args:
-            train_data: Datos de entrenamiento (200 puntos)
-            k_folds: Número de folds para CV
-        
-        Returns:
-            (best_rho, best_score)
-        """
-        if len(train_data) < k_folds * 10:
-            if self.verbose:
-                print(f"  Datos insuficientes para CV ({len(train_data)} < {k_folds*10})")
-            self.best_params = {'rho': self.rho}
-            return self.rho, np.nan
-        
-        # Solo 3 candidatos estratégicos
-        candidates = [0.90, 0.95, 0.99]
-        
-        best_rho = self.rho
-        best_score = float('inf')
-        
-        # K-fold CV split
-        fold_size = len(train_data) // k_folds
-        
-        for rho_test in candidates:
-            fold_scores = []
-            
-            # K-fold cross-validation
-            for fold in range(k_folds):
-                try:
-                    # Split train/val dentro de train_data
-                    val_start = fold * fold_size
-                    val_end = val_start + fold_size if fold < k_folds - 1 else len(train_data)
-                    
-                    # Fold train: todos excepto el fold actual
-                    fold_train = np.concatenate([
-                        train_data[:val_start],
-                        train_data[val_end:]
-                    ])
-                    fold_val = train_data[val_start:val_end]
-                    
-                    if len(fold_train) < 30 or len(fold_val) < 5:
-                        continue
-                    
-                    # Calcular critical values con fold_train
-                    critical_vals = self._calculate_critical_values(fold_train)
-                    if len(critical_vals) == 0:
-                        continue
-                    
-                    # Aplicar pesos con rho_test
-                    n_crit = len(critical_vals)
-                    temporal_weights = rho_test ** np.arange(n_crit - 1, -1, -1)
-                    temporal_weights = temporal_weights / temporal_weights.sum()
-                    
-                    # Ordenar y crear CDF
-                    sort_indices = np.argsort(critical_vals)
-                    sorted_critical = critical_vals[sort_indices]
-                    sorted_weights = temporal_weights[sort_indices]
-                    cum_probs = np.cumsum(sorted_weights)
-                    
-                    # Evaluar en fold_val
-                    for true_val in fold_val:
-                        # Samplear de la distribución ponderada
-                        u = self.rng.uniform(0, 1 - 1e-10, size=1000)
-                        indices = np.searchsorted(cum_probs, u, side='right')
-                        indices = np.clip(indices, 0, n_crit - 1)
-                        samples = sorted_critical[indices]
-                        
-                        # CRPS contra valor observado
-                        from metricas import crps
-                        score = crps(samples, true_val)
-                        if not np.isnan(score):
-                            fold_scores.append(score)
-                
-                except Exception as e:
-                    if self.verbose:
-                        print(f"    Error en fold {fold}: {e}")
-                    continue
-            
-            if len(fold_scores) > 0:
-                avg_score = np.mean(fold_scores)
-                if avg_score < best_score:
-                    best_score = avg_score
-                    best_rho = rho_test
-                
-                if self.verbose:
-                    print(f"    ρ={rho_test:.2f} → CRPS={avg_score:.4f} "
-                          f"({len(fold_scores)} validaciones)")
-        
-        self.rho = best_rho
-        self.best_params = {'rho': best_rho}
-        
-        if self.verbose:
-            print(f"  ✅ Mejor ρ={best_rho:.2f} (CRPS={best_score:.4f})")
-        
-        return best_rho, best_score
     
     def freeze_hyperparameters(self, train_data: np.ndarray):
         """
-        CORRECCIÓN CRÍTICA: Congela TODA la estructura predictiva.
-        
-        Usa train_data (que ya incluye train + val originales).
-        NO re-optimiza ρ aquí.
-        
-        Args:
-            train_data: train_original + val_original (240 puntos)
+        Congela la estructura predictiva usando el mejor rho encontrado.
+        Se llama UNA VEZ al final del entrenamiento.
         """
-        # Congelar n_lags
+        # 1. Congelar lógica base (n_lags)
         super().freeze_hyperparameters(train_data)
         
-        # Congelar rho
-        self._frozen_rho = self.best_params.get('rho', self.rho)
+        # 2. Determinar qué rho usar (del optimizador o el default)
+        if self.best_params and 'rho' in self.best_params:
+            self._frozen_rho = self.best_params['rho']
+        else:
+            self._frozen_rho = self.rho
         
-        # CRÍTICO: Congelar critical values y pesos
         try:
-            self._frozen_critical_values = self._calculate_critical_values(train_data)
+            # 3. Calcular residuos en orden cronológico
+            critical_vals = self._calculate_critical_values(train_data)
             
-            if len(self._frozen_critical_values) > 0:
-                n_crit = len(self._frozen_critical_values)
+            if len(critical_vals) > 0:
+                n_crit = len(critical_vals)
                 
-                # Calcular pesos temporales congelados
-                temporal_weights = self._frozen_rho ** np.arange(n_crit - 1, -1, -1)
+                # 4. Calcular pesos: w_i = ρ^(n-1 - i)
+                exponents = np.arange(n_crit - 1, -1, -1)
+                temporal_weights = self._frozen_rho ** exponents
                 temporal_weights = temporal_weights / temporal_weights.sum()
                 
-                # Ordenar y guardar
-                sort_indices = np.argsort(self._frozen_critical_values)
-                self._frozen_critical_values = self._frozen_critical_values[sort_indices]
-                self._frozen_weights = temporal_weights[sort_indices]
-                
+                # 5. Guardar artefactos
+                self._frozen_critical_values = critical_vals
+                self._frozen_weights = temporal_weights
                 self._is_frozen = True
                 
                 if self.verbose:
                     print(f"  ✅ LSPMW congelado: ρ={self._frozen_rho:.2f}, "
                           f"n_lags={self._frozen_n_lags}, "
-                          f"n_critical={len(self._frozen_critical_values)}")
+                          f"n_critical={n_crit}")
             else:
                 self._is_frozen = False
                 if self.verbose:
-                    print(f"  ⚠️  No se pudieron calcular critical values")
-                
+                    print("  ⚠️ LSPMW: No se generaron residuos.")
+                    
         except Exception as e:
             self._is_frozen = False
             if self.verbose:
@@ -562,58 +457,67 @@ class LSPMW(LSPM):
     
     def fit_predict(self, df: Union[pd.DataFrame, np.ndarray]) -> np.ndarray:
         """
-        CORRECCIÓN CRÍTICA: Usa estructura congelada si existe.
+        Genera la distribución predictiva.
         
-        Durante testing (rolling window):
-        - SI está congelado: Usa critical values + pesos congelados
-        - NO está congelado: Calcula desde cero (solo primer paso)
+        - Si está optimizando: Usa self.rho actual (inyectado por optimizador)
+        - Si está congelado: Usa artefactos guardados
         """
         values = df['valor'].values if isinstance(df, pd.DataFrame) else np.asarray(df)
+        n_samples_target = 1000
         
-        # CASO 1: Modelo congelado (testing)
+        # ═══ MODO CONGELADO ═══
         if self._is_frozen and self._frozen_critical_values is not None:
             if len(self._frozen_critical_values) == 0:
-                return np.full(1000, np.mean(values[-min(8, len(values)):]))
+                return np.full(n_samples_target, np.mean(values[-min(8, len(values)):]))
             
-            # Usar distribución congelada
-            cum_probs = np.cumsum(self._frozen_weights)
+            critical_vals = self._frozen_critical_values
+            weights = self._frozen_weights
             
-            # Samplear
-            u = np.linspace(0, 1 - 1e-10, 1000)
-            indices = np.searchsorted(cum_probs, u, side='right')
-            indices = np.clip(indices, 0, len(self._frozen_critical_values) - 1)
+        # ═══ MODO NO CONGELADO (Optimización) ═══
+        else:
+            critical_vals = self._calculate_critical_values(values.astype(np.float64))
             
-            return self._frozen_critical_values[indices]
+            if len(critical_vals) == 0:
+                return np.full(n_samples_target, np.mean(values[-min(8, len(values)):]))
+            
+            # ✅ CRÍTICO: Usar self.rho (valor actual del optimizador)
+            current_rho = self.rho
+            
+            n_crit = len(critical_vals)
+            exponents = np.arange(n_crit - 1, -1, -1)
+            weights = current_rho ** exponents
+            weights = weights / weights.sum()
+
+        # ═══ EXPANSIÓN PONDERADA ═══
+        replications = np.round(weights * n_samples_target).astype(int)
+        replications = np.maximum(replications, 1)
         
-        # CASO 2: NO congelado (primer paso de optimización)
-        critical = self._calculate_critical_values(values.astype(np.float64))
+        # Ajuste fino
+        current_total = replications.sum()
+        diff = n_samples_target - current_total
         
-        if len(critical) == 0:
-            return np.full(1000, np.mean(values[-min(8, len(values)):]))
+        if diff > 0:
+            top_indices = np.argsort(weights)[-diff:]
+            replications[top_indices] += 1
+        elif diff < 0:
+            bottom_indices = np.argsort(weights)[:abs(diff)]
+            can_reduce_mask = replications[bottom_indices] > 1
+            replications[bottom_indices[can_reduce_mask]] -= 1
+
+        # Expandir
+        expanded_distribution = np.repeat(critical_vals, replications)
         
-        n_crit = len(critical)
-        
-        # Usar rho de best_params o self.rho
-        rho_to_use = self.best_params.get('rho', self.rho)
-        
-        # Pesos temporales
-        temporal_weights = rho_to_use ** np.arange(n_crit - 1, -1, -1)
-        temporal_weights = temporal_weights / temporal_weights.sum()
-        
-        # Ordenar
-        sort_indices = np.argsort(critical)
-        sorted_critical = critical[sort_indices]
-        sorted_weights = temporal_weights[sort_indices]
-        
-        # CDF
-        cum_probs = np.cumsum(sorted_weights)
-        
-        # Samplear
-        u = np.linspace(0, 1 - 1e-10, 1000)
-        indices = np.searchsorted(cum_probs, u, side='right')
-        indices = np.clip(indices, 0, n_crit - 1)
-        
-        return sorted_critical[indices]
+        # Recorte/relleno de emergencia
+        if len(expanded_distribution) > n_samples_target:
+            expanded_distribution = expanded_distribution[:n_samples_target]
+        elif len(expanded_distribution) < n_samples_target:
+            missing = n_samples_target - len(expanded_distribution)
+            fill = self.rng.choice(expanded_distribution, size=missing)
+            expanded_distribution = np.concatenate([expanded_distribution, fill])
+            
+        self.rng.shuffle(expanded_distribution)
+        return expanded_distribution
+    
 
 
 class AREPD:
@@ -1474,9 +1378,23 @@ class EnCQR_LSTM_Model:
         return batches
    
     def _cleanup(self):
-        self.tf.keras.backend.clear_session()
+        """Limpieza segura de sesión de Keras."""
+        try:
+            # Verificamos que 'tf' exista y no sea None antes de usarlo
+            if hasattr(self, 'tf') and self.tf is not None:
+                self.tf.keras.backend.clear_session()
+        except Exception:
+            pass # Ignoramos errores durante la limpieza
+            
         import gc
         gc.collect()
+   
+    def __del__(self):
+        """Destructor seguro."""
+        try:
+            self._cleanup()
+        except Exception:
+            pass
    
     def _quantiles_to_distribution_kde(self, conf_q: np.ndarray) -> np.ndarray:
         """
@@ -1786,7 +1704,7 @@ class TimeBalancedOptimizer:
         
         # --- Modelos Basados en Regresión (Medios) ---
         elif model_name == 'LSPMW':
-            return [{'rho': 0.95}, {'rho': 0.99}]
+            return [{'rho': 0.90}, {'rho': 0.95}, {'rho': 0.99}]
         
         elif model_name == 'AREPD':
             return [

@@ -32,9 +32,8 @@ def clear_all_sessions():
     except:
         pass
 
-# =============================================================================
-# CLASE OPTIMIZADOR CON MANEJO SEGURO DE COPIAS
-# =============================================================================
+
+
 class TimeBalancedOptimizerWithTQDM:
     """
     Optimizador robusto que evita errores de Pickle y muestra errores reales.
@@ -509,6 +508,192 @@ class PipelineTraffic:
             
             results_rows.append(row)
             if t % 6 == 0: clear_all_sessions()
+            
+        df_results = pd.DataFrame(results_rows)
+        return df_results, predictions_dict
+    
+
+class PipelineExchange:
+    """
+    Pipeline para el dataset Exchange Rate de GluonTS.
+    Configuración específica:
+    - Datos totales: Últimos 1825 puntos (aprox 5 años).
+    - Test: Últimos 30 puntos (30 días).
+    """
+    
+    N_TEST_DAYS = 30
+    TOTAL_DATA_POINTS = 1825
+    
+    def __init__(self, n_boot: int = 1000, seed: int = 42, verbose: bool = False,
+                 val_ratio: float = 0.15):
+        self.n_boot = n_boot
+        self.seed = seed
+        self.verbose = verbose
+        self.val_ratio = val_ratio
+        self.rng = np.random.default_rng(seed)
+    
+    def load_exchange_data(self, series_index: int = 0):
+        if self.verbose: print("💱 Descargando dataset Exchange Rate...")
+        exchange = get_dataset("exchange_rate")
+        series_list = list(exchange.train)
+        
+        if series_index >= len(series_list): 
+            raise ValueError(f"Index error: El dataset solo tiene {len(series_list)} series.")
+        
+        # Extraer serie
+        exch_series = series_list[series_index]
+        values_full = exch_series['target']
+        start_timestamp = exch_series['start'].to_timestamp()
+        
+        # Generar índice temporal
+        timestamps_full = pd.date_range(
+            start=start_timestamp, 
+            periods=len(values_full), 
+            freq=exch_series['start'].freq
+        )
+        
+        # REGLA: Tomar solo los últimos 1825 datos
+        if len(values_full) > self.TOTAL_DATA_POINTS:
+            if self.verbose: 
+                print(f"   Cortando datos: Tomando los últimos {self.TOTAL_DATA_POINTS} registros de {len(values_full)}.")
+            values_full = values_full[-self.TOTAL_DATA_POINTS:]
+            timestamps_full = timestamps_full[-self.TOTAL_DATA_POINTS:]
+        else:
+            if self.verbose:
+                print(f"   Nota: El dataset es menor a {self.TOTAL_DATA_POINTS}, usando todo ({len(values_full)}).")
+            
+        return values_full, timestamps_full
+    
+    def split_data(self, values, timestamps):
+        """
+        Divide en Train/Val/Test asegurando que Test sean los últimos 30 días.
+        """
+        n_total = len(values)
+        n_test = self.N_TEST_DAYS
+        
+        # Validación dinámica basada en el ratio sobre los datos restantes
+        n_rest = n_total - n_test
+        n_val = int(n_rest * self.val_ratio)
+        n_train = n_rest - n_val
+        
+        if n_train < 50:
+             raise ValueError(f"Datos insuficientes para entrenar: n_train={n_train}")
+        
+        return {
+            'train': {'values': values[:n_train], 'timestamps': timestamps[:n_train]},
+            'val': {'values': values[n_train:n_train+n_val], 'timestamps': timestamps[n_train:n_train+n_val]},
+            'test': {'values': values[n_train+n_val:], 'timestamps': timestamps[n_train+n_val:]},
+            'metadata': {'n_train': n_train, 'n_val': n_val, 'n_test': n_test}
+        }
+    
+    def _setup_models(self, seed: int) -> Dict:
+        """
+        Inicializa los modelos.
+        NOTA: Se cambia n_lags a 30 (días) por defecto para adaptarse mejor a datos diarios.
+        """
+        return {
+            'Block Bootstrapping': CircularBlockBootstrapModel(n_boot=self.n_boot, random_state=seed, verbose=self.verbose),
+            'Sieve Bootstrap': SieveBootstrapModel(n_boot=self.n_boot, random_state=seed, verbose=self.verbose),
+            'LSPM': LSPM(random_state=seed, verbose=self.verbose),
+            'LSPMW': LSPMW(rho=0.95, random_state=seed, verbose=self.verbose),
+            'AREPD': AREPD(n_lags=30, rho=0.95, random_state=seed, verbose=self.verbose),
+            'MCPS': MondrianCPSModel(n_lags=30, n_bins=10, random_state=seed, verbose=self.verbose),
+            'AV-MCPS': AdaptiveVolatilityMondrianCPS(n_lags=30, random_state=seed, verbose=self.verbose),
+            'DeepAR': DeepARModel(hidden_size=30, n_lags=30, epochs=10, num_samples=self.n_boot, random_state=seed, verbose=self.verbose),
+            'EnCQR-LSTM': EnCQR_LSTM_Model(n_lags=30, units=30, epochs=10, num_samples=self.n_boot, random_state=seed, verbose=self.verbose)
+        }
+    
+    def _optimize_and_freeze_models(self, models, train_data, val_data):
+        # Reutilizamos el optimizador existente
+        optimizer = TimeBalancedOptimizerWithTQDM(random_state=self.seed, verbose=self.verbose)
+        optimized_params = optimizer.optimize_all_models(models, train_data, val_data)
+        
+        # Aplicar params optimizados
+        for name, params in optimized_params.items():
+            if params and name in models:
+                model = models[name]
+                if hasattr(model, 'best_params'): model.best_params = params
+                for k, v in params.items():
+                    if hasattr(model, k): setattr(model, k, v)
+        
+        if self.verbose: print("\n🔒 Fase 2: Congelamiento (Entrenamiento Final)")
+        train_val_combined = np.concatenate([train_data, val_data])
+        
+        pbar = tqdm(models.items(), desc="Congelando modelos")
+        for name, model in pbar:
+            try:
+                if hasattr(model, 'freeze_hyperparameters'):
+                    model.freeze_hyperparameters(train_val_combined)
+            except Exception as e:
+                if self.verbose: tqdm.write(f"  ⚠️ Error congelando {name}: {e}")
+        
+        return models
+    
+    def run_evaluation(self, series_index=0, save_predictions=False):
+        print("="*60)
+        print(f"💱 EXCHANGE RATE DATASET - Serie {series_index}")
+        print("="*60)
+        
+        try:
+            values, timestamps = self.load_exchange_data(series_index)
+            split = self.split_data(values, timestamps)
+            
+            if self.verbose:
+                print(f"   Datos Totales usados: {len(values)}")
+                print(f"   Train: {len(split['train']['values'])} | Val: {len(split['val']['values'])} | Test: {len(split['test']['values'])}")
+                
+        except Exception as e:
+            print(f"❌ Error cargando datos: {e}")
+            import traceback
+            traceback.print_exc()
+            return pd.DataFrame(), None
+        
+        models = self._setup_models(self.seed)
+        models = self._optimize_and_freeze_models(models, split['train']['values'], split['val']['values'])
+        
+        if self.verbose: print(f"\n🔮 Fase 3: Predicción ({self.N_TEST_DAYS} pasos)")
+        
+        results_rows = []
+        predictions_dict = {} if save_predictions else None
+        
+        test_vals = split['test']['values']
+        history = np.concatenate([split['train']['values'], split['val']['values']])
+        
+        # Loop de predicción paso a paso
+        for t in tqdm(range(len(test_vals)), desc="Prediciendo Días"):
+            curr_hist = np.concatenate([history, test_vals[:t]])
+            true_val = test_vals[t]
+            row = {'Paso': t+1, 'Valor_Observado': true_val}
+            
+            if save_predictions:
+                predictions_dict[t] = {'timestamp': split['test']['timestamps'][t], 'true_value': true_val, 'predictions': {}}
+            
+            for name, model in models.items():
+                try:
+                    # Adaptación de input según el modelo
+                    if isinstance(model, (CircularBlockBootstrapModel, SieveBootstrapModel)):
+                        preds = model.fit_predict(curr_hist)
+                    else:
+                        preds = model.fit_predict(pd.DataFrame({'valor': curr_hist}))
+                    
+                    preds = np.asarray(preds).flatten()
+                    
+                    if len(preds) == 0 or np.isnan(preds).all():
+                        row[name] = np.nan
+                    else:
+                        preds = np.nan_to_num(preds, nan=np.nanmean(preds))
+                        row[name] = crps(preds, true_val)
+                        
+                    if save_predictions: 
+                        predictions_dict[t]['predictions'][name] = preds
+                        
+                except Exception as e:
+                    # if self.verbose: tqdm.write(f"Error {name} step {t}: {e}")
+                    row[name] = np.nan
+            
+            results_rows.append(row)
+            # Limpiar memoria cada 5 pasos para evitar overflow
+            if t % 5 == 0: clear_all_sessions()
             
         df_results = pd.DataFrame(results_rows)
         return df_results, predictions_dict

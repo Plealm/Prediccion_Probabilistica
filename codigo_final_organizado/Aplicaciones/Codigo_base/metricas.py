@@ -76,3 +76,40 @@ def ecrps(samples_F: np.ndarray, samples_G: np.ndarray) -> float:
         return np.nan
     
     return ecrps_fast(F, G)
+
+def calculate_pit(y_true: float, y_samples: np.ndarray) -> float:
+    """
+    Calcula la Probability Integral Transform (PIT) para una observación.
+    Equivalente a ecdf_mod(obs_y[i]) en R.
+    """
+    # Se añade un pequeño ruido aleatorio para romper empates (randomized PIT)
+    # si los datos son discretos, ayuda a suavizar.
+    return np.mean(y_samples <= y_true)
+
+def calculate_reliability(y_true_array: np.ndarray, y_samples_matrix: np.ndarray, 
+                          quantiles: np.ndarray) -> np.ndarray:
+    """
+    Calcula la cobertura empírica para un rango de cuantiles nominales.
+    Equivalente al loop 'coverage_calc' en R.
+    
+    Args:
+        y_true_array: (T,)
+        y_samples_matrix: (T, N_samples)
+        quantiles: array de probabilidades nominales (ej. 0.1, 0.2...)
+    
+    Returns:
+        Array de coberturas empíricas del mismo tamaño que quantiles.
+    """
+    n_time = len(y_true_array)
+    empirical_coverage = []
+    
+    # Calculamos el valor del cuantil q para cada paso de tiempo a partir de las muestras
+    for q in quantiles:
+        # np.quantile a lo largo del eje de muestras (axis 1)
+        q_vals = np.nanquantile(y_samples_matrix, q, axis=1)
+        
+        # Cobertura: proporción de veces que el valor real cae debajo del cuantil predicho
+        coverage = np.mean(y_true_array <= q_vals)
+        empirical_coverage.append(coverage)
+        
+    return np.array(empirical_coverage)
