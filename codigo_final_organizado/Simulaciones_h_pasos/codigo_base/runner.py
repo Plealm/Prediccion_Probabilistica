@@ -4,6 +4,7 @@ import os
 from tqdm import tqdm
 warnings.filterwarnings("ignore")
 
+# Configuración de threads para optimización
 n_threads = str(os.cpu_count())
 os.environ["OMP_NUM_THREADS"] = n_threads
 os.environ["OPENBLAS_NUM_THREADS"] = n_threads
@@ -12,12 +13,13 @@ os.environ["NUMEXPR_NUM_THREADS"] = n_threads
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 from pipeline import PipelineARMA_100Trayectorias
+from figuras import PlotManager
 import pandas as pd
 import numpy as np
 
 
 def run_analysis(df_final):
-    """Función común para análisis exhaustivo de resultados."""
+    """Análisis exhaustivo de resultados."""
     print("\n" + "="*80)
     print("ANÁLISIS EXHAUSTIVO DE RESULTADOS - 100 TRAYECTORIAS")
     print("="*80)
@@ -31,7 +33,7 @@ def run_analysis(df_final):
         return
 
     # 1. RANKING GLOBAL POR MODELO
-    print("\n🏆 1. RANKING GLOBAL (Media CRPS)")
+    print("\n🏆 1. RANKING GLOBAL (Media ECRPS)")
     print("-" * 80)
     
     means = {}
@@ -41,10 +43,11 @@ def run_analysis(df_final):
     
     sorted_models = sorted(means.keys(), key=lambda x: means[x])
     
-    print(f"{'Rank':<6} {'Modelo':<25} {'CRPS Medio':<15}")
-    print("-" * 60)
+    print(f"{'Rank':<6} {'Modelo':<25} {'ECRPS Medio':<15} {'Std':<15}")
+    print("-" * 70)
     for i, m in enumerate(sorted_models):
-        print(f"{i+1:<6} {m:<25} {means[m]:.6f}")
+        std = df_final[m].std()
+        print(f"{i+1:<6} {m:<25} {means[m]:.6f}      {std:.6f}")
 
     # 2. VICTORIAS POR PASO
     print("\n🎯 2. VICTORIAS (Mejor modelo por cada paso-escenario)")
@@ -69,24 +72,33 @@ def run_analysis(df_final):
     print("-" * 80)
     
     if 'Paso_H' in df_final.columns:
-        for h in sorted(df_final['Paso_H'].unique()):
+        horizons = sorted(df_final['Paso_H'].unique())
+        print(f"\n{'Paso':<6} ", end="")
+        for m in model_cols:
+            print(f"{m:<15}", end="")
+        print("\n" + "-"*80)
+        
+        for h in horizons:
             df_h = df_final[df_final['Paso_H'] == h]
-            print(f"\n  Paso H={h}:")
+            print(f"{h:<6} ", end="")
             for model in model_cols:
-                mean_crps = df_h[model].mean()
-                print(f"    {model:<20}: {mean_crps:.6f}")
+                mean_ecrps = df_h[model].mean()
+                print(f"{mean_ecrps:<15.6f}", end="")
+            print()
 
     # 4. ANÁLISIS POR TIPO DE PROCESO
     print("\n🔄 4. RENDIMIENTO POR PROCESO ARMA")
     print("-" * 80)
     
-    if 'proces_simulacion' in df_final.columns:
-        for proceso in sorted(df_final['proces_simulacion'].unique()):
-            df_proc = df_final[df_final['proces_simulacion'] == proceso]
+    if 'Proceso' in df_final.columns:
+        for proceso in sorted(df_final['Proceso'].unique()):
+            df_proc = df_final[df_final['Proceso'] == proceso]
             print(f"\n  {proceso}:")
             for model in model_cols:
-                mean_crps = df_proc[model].mean()
-                print(f"    {model:<20}: {mean_crps:.6f}")
+                mean_ecrps = df_proc[model].mean()
+                wins_proc = sum(1 for _, row in df_proc.iterrows() 
+                               if row[model] == min(row[model_cols]))
+                print(f"    {model:<20}: {mean_ecrps:.6f} ({wins_proc} victorias)")
 
     # 5. ANÁLISIS POR DISTRIBUCIÓN
     print("\n📊 5. RENDIMIENTO POR DISTRIBUCIÓN")
@@ -97,8 +109,20 @@ def run_analysis(df_final):
             df_dist = df_final[df_final['Distribución'] == dist]
             print(f"\n  {dist}:")
             for model in model_cols:
-                mean_crps = df_dist[model].mean()
-                print(f"    {model:<20}: {mean_crps:.6f}")
+                mean_ecrps = df_dist[model].mean()
+                print(f"    {model:<20}: {mean_ecrps:.6f}")
+
+    # 6. ANÁLISIS POR VARIANZA
+    print("\n📉 6. RENDIMIENTO POR NIVEL DE VARIANZA")
+    print("-" * 80)
+    
+    if 'Varianza' in df_final.columns:
+        for var in sorted(df_final['Varianza'].unique()):
+            df_var = df_final[df_final['Varianza'] == var]
+            print(f"\n  Varianza = {var}:")
+            for model in model_cols:
+                mean_ecrps = df_var[model].mean()
+                print(f"    {model:<20}: {mean_ecrps:.6f}")
 
     print("\n" + "="*80)
     print("FIN DEL ANÁLISIS")
@@ -110,20 +134,54 @@ def main_full_140():
     start_time = time.time()
     
     print("="*80)
-    print("INICIANDO SIMULACIÓN DE 140 ESCENARIOS CON 100 TRAYECTORIAS")
+    print("SIMULACIÓN COMPLETA - 140 ESCENARIOS CON 100 TRAYECTORIAS")
     print("="*80)
     
+    # Crear pipeline
     pipeline = PipelineARMA_100Trayectorias(
         n_boot=1000,
         seed=42,
         verbose=False
     )
     
+    # Ejecutar todos los escenarios
     df_final = pipeline.run_all(
-        filename="resultados_140_trayectorias_FINAL.xlsx"
+        excel_filename="resultados_140_trayectorias_FINAL.xlsx",
+        n_jobs=4
     )
     
+    # Análisis de resultados
     run_analysis(df_final)
+    
+    # Generar gráficos resumidos
+    print("\n📊 Generando gráficos resumidos...")
+    model_cols = ['LSPM', 'DeepAR', 'Sieve Bootstrap', 'MCPS']
+    
+    # Gráfico de evolución por horizonte
+    results_by_step = {}
+    for h in range(1, 13):
+        step_data = df_final[df_final['Paso_H'] == h][model_cols].mean().to_frame().T
+        results_by_step[h] = step_data
+    
+    PlotManager.plot_ecrps_evolution(
+        results_by_step, model_cols,
+        save_path="evolucion_ecrps_horizonte.png"
+    )
+    
+    # Resumen general
+    PlotManager.plot_results_summary(
+        df_final, model_cols,
+        step_name="Todos los escenarios",
+        save_path="resumen_global_ecrps.png"
+    )
+    
+    # Ranking heatmap
+    PlotManager.plot_ranking_heatmap(
+        df_final.groupby('Paso_H')[model_cols].mean().reset_index(drop=True),
+        model_cols,
+        title="Ranking por Horizonte de Predicción",
+        save_path="ranking_heatmap.png"
+    )
     
     elapsed = time.time() - start_time
     print(f"\n⏱  Tiempo total: {elapsed:.1f}s ({elapsed/3600:.2f} horas)")
@@ -131,65 +189,87 @@ def main_full_140():
     return df_final
 
 
-def main_one_scenario():
+def main_two_scenarios():
     """
-    Ejecuta solo UN escenario para pruebas rápidas.
+    Ejecuta DOS escenarios para pruebas intermedias.
+    Genera gráficos detallados de densidades paso a paso.
     """
     start_time = time.time()
     
     print("="*80)
-    print("EVALUACIÓN CON SOLO 1 ESCENARIO (100 TRAYECTORIAS)")
+    print("EVALUACIÓN CON 2 ESCENARIOS (100 TRAYECTORIAS CADA UNO)")
     print("="*80)
     
     # Crear pipeline
     pipeline = PipelineARMA_100Trayectorias(n_boot=1000, seed=42, verbose=True)
     
-    # Configurar solo 1 escenario: AR(1) con ruido normal y varianza 1.0
+    # Configurar 2 escenarios diferentes
     pipeline.ARMA_CONFIGS = [
-        {'nombre': 'AR(1)', 'phi': [0.9], 'theta': []}
+        {'nombre': 'AR(1)', 'phi': [0.9], 'theta': []},
+        {'nombre': 'MA(1)', 'phi': [], 'theta': [0.7]}
     ]
     pipeline.DISTRIBUTIONS = ['normal']
     pipeline.VARIANCES = [1.0]
     
-    print(f"\n📊 Configuración del escenario:")
-    print(f"   - Proceso: AR(1) con φ=0.9")
+    print(f"\n📊 Configuración:")
+    print(f"   - Escenarios: 2 (AR(1) y MA(1))")
     print(f"   - Distribución: Normal")
     print(f"   - Varianza: 1.0")
-    print(f"   - Trayectorias: {pipeline.N_TRAJECTORIES}")
-    print(f"   - Pasos adelante: {pipeline.N_TEST_STEPS}")
+    print(f"   - Trayectorias por modelo: {pipeline.N_TRAJECTORIES_MODEL}")
+    print(f"   - Trayectorias teóricas: {pipeline.N_TRAJECTORIES_TRUE}")
     print()
     
     # Ejecutar
     df_final = pipeline.run_all(
-        filename="resultados_1_escenario_trayectorias.xlsx"
+        excel_filename="resultados_2_escenarios_trayectorias.xlsx",
+        n_jobs=2
     )
     
-    # Análisis simplificado
-    print("\n" + "="*60)
-    print("RESULTADOS DEL ESCENARIO ÚNICO")
-    print("="*60)
+    # Análisis
+    run_analysis(df_final)
     
-    model_cols = ['LSPM', 'DeepAR', 'Sieve Bootstrap', 'MCPS']
-    model_cols = [c for c in model_cols if c in df_final.columns]
+    # Generar gráficos detallados por escenario
+    print("\n📊 Generando gráficos de densidades...")
     
-    print(f"\n{'Paso_H':<8} {'Valor_Real':<12} ", end="")
-    for m in model_cols:
-        print(f"{m:<15}", end="")
-    print()
-    print("-" * 80)
-    
-    for _, row in df_final.iterrows():
-        print(f"{row['Paso_H']:<8} {row['Valor_Real']:<12.4f} ", end="")
-        for m in model_cols:
-            print(f"{row[m]:<15.6f}", end="")
-        print()
-    
-    # Resumen
-    print("\n📊 CRPS PROMEDIO POR MODELO:")
-    print("-" * 40)
-    for m in model_cols:
-        mean_crps = df_final[m].mean()
-        print(f"  {m:<20}: {mean_crps:.6f}")
+    try:
+        predictions_dict = pipeline.get_predictions_dict()
+        model_cols = ['LSPM', 'DeepAR', 'Sieve Bootstrap', 'MCPS']
+        
+        os.makedirs("graficos_densidades", exist_ok=True)
+        
+        for scenario_name, preds_by_step in predictions_dict.items():
+            # Extraer componentes del nombre del escenario
+            parts = scenario_name.split('_')
+            proceso = parts[0]
+            dist = parts[1] if len(parts) > 1 else 'normal'
+            var_str = parts[2] if len(parts) > 2 else 'var1.0'
+            var = float(var_str.replace('var', ''))
+            
+            # Filtrar resultados para este escenario
+            df_scenario = df_final[
+                (df_final['Proceso'] == proceso) & 
+                (df_final['Distribución'] == dist) & 
+                (df_final['Varianza'] == var)
+            ].copy()
+            
+            if len(df_scenario) == 0:
+                print(f"  ⚠️ No se encontraron resultados para {scenario_name}")
+                continue
+            
+            # Generar gráfico vertical
+            PlotManager.plot_scenario_densities(
+                scenario_name=scenario_name,
+                predictions_dict=preds_by_step,
+                df_results=df_scenario,
+                model_names=model_cols,
+                save_path=f"graficos_densidades/densidades_{scenario_name}.png"
+            )
+        
+        print(f"\n✅ Gráficos guardados en: graficos_densidades/")
+        
+    except Exception as e:
+        print(f"\n⚠️ Error al generar gráficos: {e}")
+        print("   Los resultados en Excel están disponibles.")
     
     elapsed = time.time() - start_time
     print(f"\n⏱  Tiempo total: {elapsed:.1f}s")
@@ -197,3 +277,5 @@ def main_one_scenario():
     return df_final
 
 
+
+    # df = main_full_140()
