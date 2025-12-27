@@ -1113,242 +1113,151 @@ def analisis_tamanos_crecientes(df_final):
 # FUNCIONES RUNNER PRINCIPALES
 # =================================================================
 
-def main_tamanos_crecientes_ARMA(train_sizes=None, calib_sizes=None):
+def analisis_tamanos_crecientes(df_final):
     """
-    Ejecuta análisis de tamaños crecientes para procesos ARMA.
-    Args:
-        train_sizes: Lista de tamaños de entrenamiento (default: [100, 200, 300, 500, 1000])
-        calib_sizes: Lista de tamaños de calibración (default: [20, 40, 60, 100, 200])
+    Análisis especializado para resultados con tamaños crecientes de datos.
     """
-    start_time = time.time()
-    
-    print("="*80)
-    print("ANÁLISIS TAMAÑOS CRECIENTES - PROCESOS ARMA")
-    print("="*80)
-    
-    pipeline = Pipeline140_TamanosCrecientes(
-        n_boot=1000,
-        seed=42,
-        verbose=False,
-        proceso_tipo='ARMA'
-    )
-    
-    # Configurar tamaños personalizados si se proporcionan
-    if train_sizes is not None:
-        pipeline.TRAIN_SIZES = train_sizes
-    if calib_sizes is not None:
-        pipeline.CALIB_SIZES = calib_sizes
-    
-    df_final = pipeline.run_all(
-        excel_filename="resultados_TAMANOS_CRECIENTES_ARMA.xlsx",
-        batch_size=20
-    )
-    
-    analisis_tamanos_crecientes(df_final)
-    
-    elapsed = time.time() - start_time
-    print(f"\n⏱  Tiempo total: {elapsed:.1f}s ({elapsed/3600:.2f} horas)")
-    
-    return df_final
-
-
-def main_tamanos_crecientes_ARIMA(train_sizes=None, calib_sizes=None):
-    """
-    Ejecuta análisis de tamaños crecientes para procesos ARIMA.
-    """
-    start_time = time.time()
-    print("="*80)
-    print("ANÁLISIS TAMAÑOS CRECIENTES - PROCESOS ARIMA")
-    print("="*80)
-    
-    pipeline = Pipeline140_TamanosCrecientes(
-        n_boot=1000,
-        seed=42,
-        verbose=False,
-        proceso_tipo='ARIMA'
-    )
-    
-    if train_sizes is not None:
-        pipeline.TRAIN_SIZES = train_sizes
-    if calib_sizes is not None:
-        pipeline.CALIB_SIZES = calib_sizes
-    
-    df_final = pipeline.run_all(
-        excel_filename="resultados_TAMANOS_CRECIENTES_ARIMA.xlsx",
-        batch_size=20
-    )
-    
-    analisis_tamanos_crecientes(df_final)
-    
-    elapsed = time.time() - start_time
-    print(f"\n⏱  Tiempo total: {elapsed:.1f}s ({elapsed/3600:.2f} horas)")
-    
-    return df_final
-
-
-def main_tamanos_crecientes_SETAR(train_sizes=None, calib_sizes=None):
-    """
-    Ejecuta análisis de tamaños crecientes para procesos SETAR.
-    """
-    start_time = time.time()
-    print("="*80)
-    print("ANÁLISIS TAMAÑOS CRECIENTES - PROCESOS SETAR")
-    print("="*80)
-    
-    pipeline = Pipeline140_TamanosCrecientes(
-        n_boot=1000,
-        seed=42,
-        verbose=False,
-        proceso_tipo='SETAR'
-    )
-    
-    if train_sizes is not None:
-        pipeline.TRAIN_SIZES = train_sizes
-    if calib_sizes is not None:
-        pipeline.CALIB_SIZES = calib_sizes
-    
-    df_final = pipeline.run_all(
-        excel_filename="resultados_TAMANOS_CRECIENTES_SETAR.xlsx",
-        batch_size=20
-    )
-    
-    analisis_tamanos_crecientes(df_final)
-    
-    elapsed = time.time() - start_time
-    print(f"\n⏱  Tiempo total: {elapsed:.1f}s ({elapsed/3600:.2f} horas)")
-    
-    return df_final
-
-
-def main_test_tamanos_reducido():
-    """
-    Test reducido: solo 2 tamaños de train y 2 de calib para cada proceso.
-    """
-    start_time = time.time()
-    print("="*80)
-    print("TEST REDUCIDO - TAMAÑOS CRECIENTES (TODOS LOS PROCESOS)")
-    print("="*80)
-    
-    test_train_sizes = [100, 200]
-    test_calib_sizes = [20, 40]
-    
-    results = {}
-    
-    # ARMA
-    print("\n" + "="*60)
-    print("EJECUTANDO ARMA...")
-    print("="*60)
-    pipeline_arma = Pipeline140_TamanosCrecientes(
-        n_boot=1000, seed=42, verbose=False, proceso_tipo='ARMA'
-    )
-    pipeline_arma.TRAIN_SIZES = test_train_sizes
-    pipeline_arma.CALIB_SIZES = test_calib_sizes
-    pipeline_arma.ARMA_CONFIGS = pipeline_arma.ARMA_CONFIGS[:2]  # Solo 2 configs
-    pipeline_arma.DISTRIBUTIONS = ['normal']
-    pipeline_arma.VARIANCES = [1.0]
-    
-    results['ARMA'] = pipeline_arma.run_all(
-        excel_filename="resultados_TEST_TAMANOS_ARMA.xlsx",
-        batch_size=4
-    )
-    
-    # ARIMA
-    print("\n" + "="*60)
-    print("EJECUTANDO ARIMA...")
-    print("="*60)
-    pipeline_arima = Pipeline140_TamanosCrecientes(
-        n_boot=1000, seed=42, verbose=False, proceso_tipo='ARIMA'
-    )
-    pipeline_arima.TRAIN_SIZES = test_train_sizes
-    pipeline_arima.CALIB_SIZES = test_calib_sizes
-    pipeline_arima.ARIMA_CONFIGS = pipeline_arima.ARIMA_CONFIGS[:2]
-    pipeline_arima.DISTRIBUTIONS = ['normal']
-    pipeline_arima.VARIANCES = [1.0]
-    
-    results['ARIMA'] = pipeline_arima.run_all(
-        excel_filename="resultados_TEST_TAMANOS_ARIMA.xlsx",
-        batch_size=4
-    )
-    
-    # SETAR
-    print("\n" + "="*60)
-    print("EJECUTANDO SETAR...")
-    print("="*60)
-    pipeline_setar = Pipeline140_TamanosCrecientes(
-        n_boot=1000, seed=42, verbose=False, proceso_tipo='SETAR'
-    )
-    pipeline_setar.TRAIN_SIZES = test_train_sizes
-    pipeline_setar.CALIB_SIZES = test_calib_sizes
-    pipeline_setar.SETAR_CONFIGS = pipeline_setar.SETAR_CONFIGS[:2]
-    pipeline_setar.DISTRIBUTIONS = ['normal']
-    pipeline_setar.VARIANCES = [1.0]
-    
-    results['SETAR'] = pipeline_setar.run_all(
-        excel_filename="resultados_TEST_TAMANOS_SETAR.xlsx",
-        batch_size=4
-    )
-    
-    # Análisis conjunto
     print("\n" + "="*80)
-    print("ANÁLISIS COMPARATIVO DE LOS TRES PROCESOS")
-    print("="*80)
-    
-    for proceso_tipo, df in results.items():
-        print(f"\n{'='*60}")
-        print(f"PROCESO: {proceso_tipo}")
-        print(f"{'='*60}")
-        analisis_tamanos_crecientes(df)
-    
-    elapsed = time.time() - start_time
-    print(f"\n⏱  Tiempo total: {elapsed:.1f}s")
-    
-    return results
-
-
-def main_comparacion_todos_procesos(train_sizes=None, calib_sizes=None):
-    """
-    Ejecuta análisis completo para los 3 tipos de procesos y genera comparación.
-    Args:
-        train_sizes: Lista de tamaños de entrenamiento
-        calib_sizes: Lista de tamaños de calibración
-    """
-    start_time = time.time()
-    
-    print("="*80)
-    print("ANÁLISIS COMPARATIVO COMPLETO - ARMA vs ARIMA vs SETAR")
-    print("="*80)
-    
-    results = {}
-    
-    # ARMA
-    results['ARMA'] = main_tamanos_crecientes_ARMA(train_sizes, calib_sizes)
-    
-    # ARIMA
-    results['ARIMA'] = main_tamanos_crecientes_ARIMA(train_sizes, calib_sizes)
-    
-    # SETAR
-    results['SETAR'] = main_tamanos_crecientes_SETAR(train_sizes, calib_sizes)
-    
-    # Comparación final
-    print("\n" + "="*80)
-    print("📊 COMPARACIÓN FINAL: ARMA vs ARIMA vs SETAR")
+    print("ANÁLISIS EXHAUSTIVO - TAMAÑOS CRECIENTES DE DATOS")
     print("="*80)
     
     model_cols = ['AREPD', 'AV-MCPS', 'Block Bootstrapping', 'DeepAR', 
                   'EnCQR-LSTM', 'LSPM', 'LSPMW', 'MCPS', 'Sieve Bootstrap']
+    model_cols = [c for c in model_cols if c in df_final.columns]
     
-    for proceso_tipo, df in results.items():
-        df_steps = df[df['Paso'] != 'Promedio'] if 'Paso' in df.columns else df
+    if len(df_final) == 0:
+        print("⚠️ No hay datos suficientes para el análisis.")
+        return
+    
+    df_steps = df_final.copy()
+    
+    # Asegurar tipos numéricos
+    for col in ['N_Train', 'N_Calib', 'N_Total']:
+        if col in df_steps.columns:
+            df_steps[col] = pd.to_numeric(df_steps[col], errors='coerce')
+    
+    train_sizes = sorted(df_steps['N_Train'].dropna().unique())
+    calib_sizes = sorted(df_steps['N_Calib'].dropna().unique())
+    
+    # 1. RANKING GLOBAL POR TAMAÑO TOTAL
+    print("\n📊 1. RANKING GLOBAL POR TAMAÑO TOTAL DE DATOS")
+    for n_total in sorted(df_steps['N_Total'].dropna().unique()):
+        df_size = df_steps[df_steps['N_Total'] == n_total]
+        print(f"\n--- N_Total = {n_total} ---")
+        means = df_size[model_cols].mean().sort_values()
+        for i, (model, val) in enumerate(means.head(5).items()):
+            print(f" {i+1}. {model:<20} {val:.6f}")
+
+    # 2. IMPACTO DE N_TRAIN (fijando N_CALIB)
+    print("\n📈 2. IMPACTO DE N_TRAIN EN EL DESEMPEÑO")
+    for n_calib in calib_sizes:
+        print(f"\nN_Calib = {n_calib} (fijo):")
+        pivot = df_steps[df_steps['N_Calib'] == n_calib].groupby('N_Train')[model_cols].mean()
+        print(pivot.T)
+
+    # 3. IMPACTO DE N_CALIB (fijando N_TRAIN)
+    print("\n📈 3. IMPACTO DE N_CALIB EN EL DESEMPEÑO")
+    for n_train in train_sizes:
+        print(f"\nN_Train = {n_train} (fijo):")
+        pivot = df_steps[df_steps['N_Train'] == n_train].groupby('N_Calib')[model_cols].mean()
+        print(pivot.T)
+
+    # 4. MEJOR COMBINACIÓN POR MODELO
+    print("\n🎯 4. MEJOR COMBINACIÓN (N_TRAIN, N_CALIB) POR MODELO")
+    for model in model_cols:
+        idx = df_steps.groupby(['N_Train', 'N_Calib'])[model].mean().idxmin()
+        val = df_steps.groupby(['N_Train', 'N_Calib'])[model].mean().min()
+        print(f" {model:<20}: N_Train={idx[0]}, N_Calib={idx[1]} | CRPS={val:.6f}")
+
+    # 5. RESUMEN EJECUTIVO
+    print("\n📋 5. RESUMEN EJECUTIVO")
+    global_means = df_steps[model_cols].mean()
+    print(f" ✅ MEJOR MODELO GLOBAL: {global_means.idxmin()} ({global_means.min():.6f})")
+    
+    size_means = df_steps.groupby('N_Total')[model_cols].mean().mean(axis=1)
+    print(f" 🎯 MEJOR TAMAÑO TOTAL: N_Total={size_means.idxmin()} ({size_means.min():.6f})")
+
+
+# =================================================================
+# FUNCIONES RUNNER
+# =================================================================
+
+def main_tamanos_crecientes_ARMA(train_sizes=None, calib_sizes=None):
+    start_time = time.time()
+    print("\n" + "="*50 + "\nPROCESO ARMA\n" + "="*50)
+    
+    pipeline = Pipeline140_TamanosCrecientes(proceso_tipo='ARMA')
+    if train_sizes: pipeline.TRAIN_SIZES = train_sizes
+    if calib_sizes: pipeline.CALIB_SIZES = calib_sizes
+    
+    df = pipeline.run_all(excel_filename="resultados_TAMANOS_ARMA.xlsx", batch_size=20)
+    analisis_tamanos_crecientes(df)
+    print(f"⏱ Tiempo: {time.time()-start_time:.1f}s")
+    return df
+
+def main_tamanos_crecientes_ARIMA(train_sizes=None, calib_sizes=None):
+    start_time = time.time()
+    print("\n" + "="*50 + "\nPROCESO ARIMA\n" + "="*50)
+    
+    pipeline = Pipeline140_TamanosCrecientes(proceso_tipo='ARIMA')
+    if train_sizes: pipeline.TRAIN_SIZES = train_sizes
+    if calib_sizes: pipeline.CALIB_SIZES = calib_sizes
+    
+    df = pipeline.run_all(excel_filename="resultados_TAMANOS_ARIMA.xlsx", batch_size=20)
+    analisis_tamanos_crecientes(df)
+    print(f"⏱ Tiempo: {time.time()-start_time:.1f}s")
+    return df
+
+def main_tamanos_crecientes_SETAR(train_sizes=None, calib_sizes=None):
+    start_time = time.time()
+    print("\n" + "="*50 + "\nPROCESO SETAR\n" + "="*50)
+    
+    pipeline = Pipeline140_TamanosCrecientes(proceso_tipo='SETAR')
+    if train_sizes: pipeline.TRAIN_SIZES = train_sizes
+    if calib_sizes: pipeline.CALIB_SIZES = calib_sizes
+    
+    df = pipeline.run_all(excel_filename="resultados_TAMANOS_SETAR.xlsx", batch_size=20)
+    analisis_tamanos_crecientes(df)
+    print(f"⏱ Tiempo: {time.time()-start_time:.1f}s")
+    return df
+
+def main_test_tamanos_reducido():
+    print("🚀 INICIANDO TEST REDUCIDO")
+    test_train = [100, 200]
+    test_calib = [20, 40]
+    results = {}
+
+    for tipo in ['ARMA', 'ARIMA', 'SETAR']:
+        pipeline = Pipeline140_TamanosCrecientes(n_boot=100, proceso_tipo=tipo)
+        pipeline.TRAIN_SIZES = test_train
+        pipeline.CALIB_SIZES = test_calib
         
-        print(f"\n{proceso_tipo}:")
-        for model in model_cols:
-            if model in df_steps.columns:
-                val = df_steps[model].mean()
-                if not pd.isna(val):
-                    print(f"  {model:<25}: {val:.6f}")
+        # Limitar configuraciones para el test
+        pipeline.CONFIGS[tipo] = pipeline.CONFIGS[tipo][:1] 
+        pipeline.DISTRIBUTIONS = ['normal']
+        pipeline.VARIANCES = [1.0]
+        
+        print(f"Ejecutando {tipo}...")
+        results[tipo] = pipeline.run_all(excel_filename=f"test_{tipo}.xlsx", batch_size=2)
     
-    elapsed = time.time() - start_time
-    print(f"\n⏱  Tiempo total: {elapsed:.1f}s ({elapsed/3600:.2f} horas)")
+    return results
+
+def main_comparacion_todos_procesos(train_sizes=None, calib_sizes=None):
+    """
+    Ejecuta el estudio completo para los 3 tipos de procesos.
+    """
+    results = {}
+    results['ARMA'] = main_tamanos_crecientes_ARMA(train_sizes, calib_sizes)
+    results['ARIMA'] = main_tamanos_crecientes_ARIMA(train_sizes, calib_sizes)
+    results['SETAR'] = main_tamanos_crecientes_SETAR(train_sizes, calib_sizes)
+    
+    print("\n" + "="*80)
+    print("📊 COMPARATIVA FINAL GLOBAL")
+    print("="*80)
+    for tipo, df in results.items():
+        media = df[['AREPD', 'AV-MCPS', 'Block Bootstrapping', 'DeepAR', 
+                    'EnCQR-LSTM', 'LSPM', 'LSPMW', 'MCPS', 'Sieve Bootstrap']].mean().mean()
+        print(f" {tipo:<10} | CRPS Promedio Global: {media:.6f}")
     
     return results
 
@@ -1462,8 +1371,8 @@ def main_test_proporciones_240_reducido():
     
     # Definir proporciones de prueba
     test_proportions = [
-        {'n_train': 216, 'n_calib': 24, 'prop_calib': 0.10},   # 10%
-        {'n_train': 168, 'n_calib': 72, 'prop_calib': 0.30}    # 30%
+        {'prop_tag': '10%', 'n_train': 216, 'n_calib': 24, 'prop_val': 0.10},
+        {'prop_tag': '30%', 'n_train': 168, 'n_calib': 72, 'prop_val': 0.30}
     ]
     
     results = {}
@@ -1476,7 +1385,7 @@ def main_test_proporciones_240_reducido():
         n_boot=1000, seed=42, verbose=False, proceso_tipo='ARMA'
     )
     pipeline_arma.SIZE_COMBINATIONS = test_proportions
-    pipeline_arma.ARMA_CONFIGS = pipeline_arma.ARMA_CONFIGS[:2]  # Solo 2 configs
+    pipeline_arma.CONFIGS['ARMA'] = pipeline_arma.CONFIGS['ARMA'][:2]  # Solo 2 configs
     pipeline_arma.DISTRIBUTIONS = ['normal']
     pipeline_arma.VARIANCES = [1.0]
     
@@ -1493,7 +1402,7 @@ def main_test_proporciones_240_reducido():
         n_boot=1000, seed=42, verbose=False, proceso_tipo='ARIMA'
     )
     pipeline_arima.SIZE_COMBINATIONS = test_proportions
-    pipeline_arima.ARIMA_CONFIGS = pipeline_arima.ARIMA_CONFIGS[:2]
+    pipeline_arima.CONFIGS['ARIMA'] = pipeline_arima.CONFIGS['ARIMA'][:2]  # Solo 2 configs
     pipeline_arima.DISTRIBUTIONS = ['normal']
     pipeline_arima.VARIANCES = [1.0]
     
@@ -1510,7 +1419,7 @@ def main_test_proporciones_240_reducido():
         n_boot=1000, seed=42, verbose=False, proceso_tipo='SETAR'
     )
     pipeline_setar.SIZE_COMBINATIONS = test_proportions
-    pipeline_setar.SETAR_CONFIGS = pipeline_setar.SETAR_CONFIGS[:2]
+    pipeline_setar.CONFIGS['SETAR'] = pipeline_setar.CONFIGS['SETAR'][:2]  # Solo 2 configs
     pipeline_setar.DISTRIBUTIONS = ['normal']
     pipeline_setar.VARIANCES = [1.0]
     
@@ -1605,12 +1514,135 @@ def main_comparacion_proporciones_240_todos():
     print("\n" + "="*80)
     print("COMPARACIÓN ENTRE PROCESOS")
     print("="*80)
-    analisis_comparativo_proporciones_240(df_combined)
+    analisis_comparativo_entre_procesos_240(df_combined)
     
     elapsed = time.time() - start_time
     print(f"\n⏱  Tiempo total del experimento: {elapsed:.1f}s ({elapsed/3600:.2f} horas)")
     
     return results, df_combined
+
+
+def analisis_comparativo_entre_procesos_240(df_combined: pd.DataFrame):
+    """
+    Análisis comparativo entre diferentes tipos de procesos (ARMA, ARIMA, SETAR).
+    
+    Args:
+        df_combined: DataFrame combinado con resultados de todos los procesos
+    """
+    print("\n" + "="*60)
+    print("ANÁLISIS COMPARATIVO ENTRE TIPOS DE PROCESOS")
+    print("="*60)
+    
+    # Filtrar solo filas de promedio
+    df_avg = df_combined[df_combined['Paso'] == 'Promedio'].copy()
+    
+    if df_avg.empty:
+        print("⚠️  No hay datos de promedio para analizar")
+        return
+    
+    # Columnas de modelos
+    model_cols = ['AREPD', 'AV-MCPS', 'Block Bootstrapping', 'DeepAR', 
+                  'EnCQR-LSTM', 'LSPM', 'LSPMW', 'MCPS', 'Sieve Bootstrap']
+    model_cols = [col for col in model_cols if col in df_avg.columns]
+    
+    print(f"\n📊 Resumen General:")
+    print(f"  • Total de escenarios: {len(df_avg)}")
+    print(f"  • Tipos de procesos: {sorted(df_avg['Tipo_Proceso'].unique())}")
+    print(f"  • Proporciones: {sorted(df_avg['Prop_Calib'].unique())}")
+    
+    # Desempeño promedio por tipo de proceso
+    print("\n" + "="*60)
+    print("DESEMPEÑO PROMEDIO POR TIPO DE PROCESO")
+    print("="*60)
+    
+    for proceso in sorted(df_avg['Tipo_Proceso'].unique()):
+        df_proc = df_avg[df_avg['Tipo_Proceso'] == proceso]
+        print(f"\n🔹 {proceso}")
+        print("   " + "-"*50)
+        
+        for model in model_cols:
+            if model in df_proc.columns:
+                vals = df_proc[model].dropna()
+                if len(vals) > 0:
+                    print(f"   {model:25s}: {vals.mean():.4f} ± {vals.std():.4f}")
+    
+    # Mejor modelo por tipo de proceso
+    print("\n" + "="*60)
+    print("MEJOR MODELO POR TIPO DE PROCESO")
+    print("="*60)
+    
+    for proceso in sorted(df_avg['Tipo_Proceso'].unique()):
+        df_proc = df_avg[df_avg['Tipo_Proceso'] == proceso]
+        print(f"\n🏆 {proceso}")
+        
+        model_means = {}
+        for model in model_cols:
+            if model in df_proc.columns:
+                vals = df_proc[model].dropna()
+                if len(vals) > 0:
+                    model_means[model] = vals.mean()
+        
+        if model_means:
+            ranked = sorted(model_means.items(), key=lambda x: x[1])
+            for i, (model, score) in enumerate(ranked[:5], 1):
+                print(f"   {i}. {model:25s}: {score:.4f}")
+    
+    # Análisis por proporción y tipo de proceso
+    print("\n" + "="*60)
+    print("MEJOR PROPORCIÓN POR MODELO Y TIPO DE PROCESO")
+    print("="*60)
+    
+    for proceso in sorted(df_avg['Tipo_Proceso'].unique()):
+        print(f"\n📈 {proceso}")
+        df_proc = df_avg[df_avg['Tipo_Proceso'] == proceso]
+        
+        for model in model_cols:
+            if model in df_proc.columns:
+                best_prop = None
+                best_score = float('inf')
+                
+                for prop in df_proc['Prop_Calib'].unique():
+                    df_prop = df_proc[df_proc['Prop_Calib'] == prop]
+                    vals = df_prop[model].dropna()
+                    if len(vals) > 0:
+                        mean_score = vals.mean()
+                        if mean_score < best_score:
+                            best_score = mean_score
+                            best_prop = prop
+                
+                if best_prop:
+                    print(f"   {model:25s}: {best_prop} (CRPS={best_score:.4f})")
+    
+    # Consistencia entre procesos
+    print("\n" + "="*60)
+    print("CONSISTENCIA DE MODELOS ENTRE PROCESOS")
+    print("="*60)
+    print("\n(Modelos que mantienen buen desempeño en todos los tipos de proceso)")
+    
+    for model in model_cols:
+        if model in df_avg.columns:
+            ranks_by_process = {}
+            
+            for proceso in df_avg['Tipo_Proceso'].unique():
+                df_proc = df_avg[df_avg['Tipo_Proceso'] == proceso]
+                
+                model_means = {}
+                for m in model_cols:
+                    if m in df_proc.columns:
+                        vals = df_proc[m].dropna()
+                        if len(vals) > 0:
+                            model_means[m] = vals.mean()
+                
+                if model_means and model in model_means:
+                    ranked = sorted(model_means.items(), key=lambda x: x[1])
+                    rank = next((i+1 for i, (m, _) in enumerate(ranked) if m == model), None)
+                    if rank:
+                        ranks_by_process[proceso] = rank
+            
+            if len(ranks_by_process) == len(df_avg['Tipo_Proceso'].unique()):
+                avg_rank = sum(ranks_by_process.values()) / len(ranks_by_process)
+                ranks_str = ", ".join([f"{k}={v}" for k, v in ranks_by_process.items()])
+                print(f"   {model:25s}: Promedio={avg_rank:.1f} ({ranks_str})")
 
 
 def analisis_proporciones_240(df: pd.DataFrame):

@@ -519,6 +519,10 @@ class Pipeline140SinSesgos_SETAR:
 
         return pd.DataFrame(all_results)
 
+# ============================================================
+# ¿ Es importante diferenciar e integrar en ARIMA?
+# ===========================================================
+
 class TransformadorDiferenciacionIntegracion:
     """
     Maneja la transformación diferenciación ↔ integración.
@@ -597,210 +601,166 @@ class TransformadorDiferenciacionIntegracion:
 
 class Pipeline140SinSesgos_ARIMA_ConDiferenciacion:
     """
-    Pipeline ARIMA con Diferenciación Opcional:
-    1) Comparación de Densidad Predictiva vs Densidad Teórica mediante ECRPS.
-    2) Generación de 9 gráficos (12 niveles) por escenario con colores fijos.
-    3) Si usar_diferenciacion=True, los modelos predicen incrementos que luego
-       se integran para comparar densidades en niveles.
+    Pipeline ARIMA optimizado para generar el formato de Excel solicitado.
+    Evalúa cada escenario en dos modalidades: SIN_DIFF y CON_DIFF.
     """
     
     N_TEST_STEPS = 12
     N_VALIDATION = 40
     N_TRAIN = 200
     
-    SCENARIO_BUDGET = 300  
-    OPTIMIZATION_BUDGET = 120  
-    FREEZE_BUDGET = 30         
-    TEST_BUDGET = 150          
-
+    # Configuraciones ARIMA (d=1 por defecto para estos nombres)
     ARIMA_CONFIGS = [
-        {'nombre': 'ARIMA(0,1,0)', 'phi': [], 'theta': []},
-        {'nombre': 'ARIMA(1,1,0)', 'phi': [0.6], 'theta': []},
-        {'nombre': 'ARIMA(2,1,0)', 'phi': [0.5, -0.2], 'theta': []},
-        {'nombre': 'ARIMA(0,1,1)', 'phi': [], 'theta': [0.5]},
-        {'nombre': 'ARIMA(0,1,2)', 'phi': [], 'theta': [0.4, 0.25]},
-        {'nombre': 'ARIMA(1,1,1)', 'phi': [0.7], 'theta': [-0.3]},
-        {'nombre': 'ARIMA(2,1,2)', 'phi': [0.6, 0.2], 'theta': [0.4, -0.1]}
+        {'nombre': 'RW', 'phi': [], 'theta': []}, # Random Walk es ARIMA(0,1,0)
+        {'nombre': 'AR(1)', 'phi': [0.6], 'theta': []},
+        {'nombre': 'AR(2)', 'phi': [0.5, -0.2], 'theta': []},
+        {'nombre': 'MA(1)', 'phi': [], 'theta': [0.5]},
+        {'nombre': 'MA(2)', 'phi': [], 'theta': [0.4, 0.25]},
+        {'nombre': 'ARMA(1,1)', 'phi': [0.7], 'theta': [-0.3]},
+        {'nombre': 'ARMA(2,2)', 'phi': [0.6, 0.2], 'theta': [0.4, -0.1]}
     ]
     DISTRIBUTIONS = ['normal', 'uniform', 'exponential', 't-student', 'mixture']
     VARIANCES = [0.2, 0.5, 1.0, 3.0]
 
-    def __init__(self, n_boot: int = 1000, seed: int = 42, verbose: bool = False,
-                 usar_diferenciacion: bool = False):
+    def __init__(self, n_boot: int = 1000, seed: int = 42, verbose: bool = False):
         self.n_boot = n_boot
         self.seed = seed
         self.verbose = verbose
-        self.usar_diferenciacion = usar_diferenciacion
         self.rng = np.random.default_rng(seed)
 
-    def generate_all_scenarios(self) -> list:
-        scenarios = []
-        scenario_id = 0
-        for arima_cfg in self.ARIMA_CONFIGS:
-            for dist in self.DISTRIBUTIONS:
-                for var in self.VARIANCES:
-                    scenarios.append((arima_cfg.copy(), dist, var, self.seed + scenario_id))
-                    scenario_id += 1
-        return scenarios
+    def _setup_models(self, seed: int):
+        return {
+            'AREPD': AREPD(n_lags=5, rho=0.9, random_state=seed),
+            'AV-MCPS': AdaptiveVolatilityMondrianCPS(n_lags=15, random_state=seed),
+            'Block Bootstrapping': CircularBlockBootstrapModel(n_boot=self.n_boot, random_state=seed),
+            'DeepAR': DeepARModel(hidden_size=15, n_lags=5, epochs=25, num_samples=self.n_boot, random_state=seed),
+            'EnCQR-LSTM': EnCQR_LSTM_Model(n_lags=20, B=3, units=24, epochs=15, num_samples=self.n_boot, random_state=seed),
+            'LSPM': LSPM(random_state=seed),
+            'LSPMW': LSPMW(rho=0.95, random_state=seed),
+            'MCPS': MondrianCPSModel(n_lags=10, random_state=seed),
+            'Sieve Bootstrap': SieveBootstrapModel(n_boot=self.n_boot, random_state=seed)
+        }
 
-    def _run_scenario_wrapper(self, args):
-        return self.run_single_scenario(*args)
-
-    def run_single_scenario(self, arima_config, dist, var, scenario_seed):
-        scenario_start = time.time()
+    def _run_modalidad(self, simulator, series_levels, errors, arima_config, dist, var, modalidad, scenario_seed):
+        """Ejecuta una modalidad específica (SIN_DIFF o CON_DIFF)"""
         
-        # 1. Simulación ARIMA (Niveles + Errores)
-        simulator = ARIMASimulation(
-            model_type=arima_config['nombre'],
-            phi=arima_config['phi'], theta=arima_config['theta'],
-            noise_dist=dist, sigma=np.sqrt(var), seed=scenario_seed
-        )
-        total_len = self.N_TRAIN + self.N_VALIDATION + self.N_TEST_STEPS
-        series_levels, errors = simulator.simulate(n=total_len, burn_in=100)
-        
-        # 2. Preparar datos según estrategia de diferenciación
-        if self.usar_diferenciacion:
-            # Los modelos verán ΔY_t
+        # 1. Preparar datos según modalidad
+        if modalidad == "CON_DIFF":
+            # Los modelos ven incrementos ΔY_t
             series_to_models = np.diff(series_levels, prepend=series_levels[0])
         else:
-            # Los modelos verán Y_t
+            # Los modelos ven niveles Y_t
             series_to_models = series_levels
 
         train_data = series_to_models[:self.N_TRAIN]
         val_data = series_to_models[self.N_TRAIN : self.N_TRAIN + self.N_VALIDATION]
         
-        # 3. Setup Modelos
+        # 2. Setup y Optimización
         models = self._setup_models(scenario_seed)
-
-        # 4. Optimización y Congelamiento
-        optimizer = TimeBalancedOptimizer(random_state=scenario_seed, verbose=self.verbose)
+        optimizer = TimeBalancedOptimizer(random_state=scenario_seed, verbose=False)
         best_params = optimizer.optimize_all_models(models, train_data, val_data)
         
-        train_val_to_freeze = series_to_models[:self.N_TRAIN + self.N_VALIDATION]
+        train_val_full = series_to_models[:self.N_TRAIN + self.N_VALIDATION]
         for name, model in models.items():
             if name in best_params:
                 for k, v in best_params[name].items():
                     if hasattr(model, k): setattr(model, k, v)
             if hasattr(model, 'freeze_hyperparameters'):
-                model.freeze_hyperparameters(train_val_to_freeze)
+                model.freeze_hyperparameters(train_val_full)
 
-        # 5. Testing Rolling Window con ECRPS
+        # 3. Testing Rolling Window
         results_rows = []
-        plot_data = {}
-        time_per_step = self.TEST_BUDGET / self.N_TEST_STEPS
+        p, q = len(arima_config['phi']), len(arima_config['theta'])
+        d = 1 # Por defecto en esta simulación
 
         for t in range(self.N_TEST_STEPS):
-            step_start = time.time()
             idx = self.N_TRAIN + self.N_VALIDATION + t
-            
-            # Historia acumulativa para el simulador (Niveles para la Realidad Teórica)
             h_series_levels = series_levels[:idx]
             h_errors = errors[:idx]
-            
-            # Historia para el modelo (Niveles o Diferencias)
             h_to_model = series_to_models[:idx]
             
-            # DENSIDAD TEÓRICA (Siempre en espacio de niveles Y_{n+1})
-            true_samples_level = simulator.get_true_next_step_samples(h_series_levels, h_errors, n_samples=1000)
+            # Densidad Teórica (Siguiente paso real)
+            true_samples = simulator.get_true_next_step_samples(h_series_levels, h_errors, n_samples=1000)
             
-            plot_data[t] = {'true_distribution': true_samples_level, 'model_predictions': {}}
+            # Fila base con el formato de la imagen
             row = {
-                'Paso': t + 1, 
-                'Config': arima_config['nombre'], 
-                'Dist': dist, 
-                'Var': var,
-                'Diferenciacion': 'Sí' if self.usar_diferenciacion else 'No'
+                'Paso': t + 1,
+                'Proceso': f"ARMA_I({p},{d},{q})",
+                'p': p,
+                'd': d,
+                'q': q,
+                'ARMA_base': arima_config['nombre'],
+                'Distribución': dist,
+                'Varianza': var,
+                'Modalidad': modalidad,
+                'Valor_Observado': series_levels[idx] # El valor real que ocurrió
             }
             
             for name, model in models.items():
                 try:
-                    if (time.time() - step_start) > time_per_step and t > 0:
-                        row[name] = np.nan
-                        continue
-
-                    # Inferencia del modelo
-                    if "Bootstrap" in name: 
-                        pred = model.fit_predict(h_to_model)
-                    else: 
-                        pred = model.fit_predict(pd.DataFrame({'valor': h_to_model}))
+                    if "Bootstrap" in name: pred = model.fit_predict(h_to_model)
+                    else: pred = model.fit_predict(pd.DataFrame({'valor': h_to_model}))
                     
-                    pred_samples = np.asarray(pred).flatten()
-                    pred_samples = pred_samples[np.isfinite(pred_samples)]
-
-                    # INTEGRACIÓN: Si el modelo predijo incrementos, sumamos el último nivel
-                    if self.usar_diferenciacion:
-                        last_level = series_levels[idx-1]
-                        pred_samples_level = last_level + pred_samples
-                    else:
-                        pred_samples_level = pred_samples
-
-                    plot_data[t]['model_predictions'][name] = pred_samples_level
+                    pred_array = np.asarray(pred).flatten()
                     
-                    # Comparación ECRPS en espacio de niveles
-                    row[name] = ecrps(pred_samples_level, true_samples_level)
+                    # Si predijo incremento, sumar al último nivel para comparar densidades en niveles
+                    if modalidad == "CON_DIFF":
+                        pred_array = series_levels[idx-1] + pred_array
+                    
+                    row[name] = ecrps(pred_array, true_samples)
                 except:
                     row[name] = np.nan
             
             results_rows.append(row)
-        
-        # 6. Gráficos (9 imágenes por modelo)
-        diff_tag = "DIF" if self.usar_diferenciacion else "NIVEL"
-        scen_id = f"ARIMA_{arima_config['nombre']}_{dist}_{diff_tag}_V{var}_S{scenario_seed}"
-        df_res = pd.DataFrame(results_rows)
-        
-        for m_name in models.keys():
-            path = f"reportes_arima_dif/{scen_id}/{m_name.replace(' ', '_')}.png"
-            PlotManager.plot_individual_model_evolution(scen_id, m_name, plot_data, df_res, path)
-
-        clear_all_sessions()
+            
         return results_rows
 
-    def _setup_models(self, seed):
-        return {
-            'Block Bootstrapping': CircularBlockBootstrapModel(n_boot=self.n_boot, random_state=seed),
-            'Sieve Bootstrap': SieveBootstrapModel(n_boot=self.n_boot, random_state=seed),
-            'LSPM': LSPM(random_state=seed),
-            'LSPMW': LSPMW(rho=0.95, random_state=seed),
-            'AREPD': AREPD(n_lags=5, rho=0.93, random_state=seed),
-            'MCPS': MondrianCPSModel(n_lags=10, random_state=seed),
-            'AV-MCPS': AdaptiveVolatilityMondrianCPS(n_lags=12, random_state=seed),
-            'DeepAR': DeepARModel(hidden_size=16, n_lags=5, epochs=20, num_samples=self.n_boot, 
-                                  random_state=seed, early_stopping_patience=3),
-            'EnCQR-LSTM': EnCQR_LSTM_Model(n_lags=15, B=3, units=24, epochs=15, num_samples=self.n_boot, 
-                                          random_state=seed)
-        }
+    def _run_scenario_wrapper(self, args):
+        arima_cfg, dist, var, seed = args
+        
+        # Simulación (Niveles)
+        simulator = ARIMASimulation(
+            phi=arima_cfg['phi'], theta=arima_cfg['theta'],
+            noise_dist=dist, sigma=np.sqrt(var), seed=seed
+        )
+        total_len = self.N_TRAIN + self.N_VALIDATION + self.N_TEST_STEPS
+        series_levels, errors = simulator.simulate(n=total_len, burn_in=100)
+        
+        # Ejecutar ambas modalidades
+        res_sin = self._run_modalidad(simulator, series_levels, errors, arima_cfg, dist, var, "SIN_DIFF", seed)
+        res_con = self._run_modalidad(simulator, series_levels, errors, arima_cfg, dist, var, "CON_DIFF", seed + 1)
+        
+        clear_all_sessions()
+        return res_sin + res_con
 
-    def run_all(self, excel_filename="resultados_arima_dif_ecrps.xlsx", batch_size=10, max_workers=4):
+    def generate_all_scenarios(self) -> list:
+        scenarios = []
+        s_id = 0
+        for arima_cfg in self.ARIMA_CONFIGS:
+            for dist in self.DISTRIBUTIONS:
+                for var in self.VARIANCES:
+                    scenarios.append((arima_cfg.copy(), dist, var, self.seed + s_id))
+                    s_id += 1
+        return scenarios
+
+    def run_all(self, excel_filename="resultados_arima_completo.xlsx", batch_size=5, n_jobs=2):
         tasks = self.generate_all_scenarios()
-        print(f"🚀 Iniciando Pipeline ARIMA (Dif: {self.usar_diferenciacion}): {len(tasks)} escenarios.")
+        print(f"🚀 Ejecutando {len(tasks)} escenarios ARIMA (Doble Modalidad)...")
         
         all_results = []
-        num_batches = (len(tasks) + batch_size - 1) // batch_size
-
-        for i in range(num_batches):
-            start_idx = i * batch_size
-            end_idx = min((i + 1) * batch_size, len(tasks))
-            batch = tasks[start_idx:end_idx]
+        for i in range(0, len(tasks), batch_size):
+            batch = tasks[i:i + batch_size]
+            print(f"  -> Procesando lote {i//batch_size + 1}...")
+            results = Parallel(n_jobs=n_jobs)(delayed(self._run_scenario_wrapper)(t) for t in batch)
+            for r in results:
+                all_results.extend(r)
             
-            print(f"📦 Lote {i+1}/{num_batches}...")
-            results = Parallel(n_jobs=max_workers, backend='loky')(
-                delayed(self._run_scenario_wrapper)(t) for t in batch
-            )
-            
-            for r in results: all_results.extend(r)
             pd.DataFrame(all_results).to_excel(excel_filename, index=False)
-            clear_all_sessions()
-            gc.collect()
 
         return pd.DataFrame(all_results)
 
-
 # ============================================================================
-# CLASES PARA AGREGAR AL FINAL DE pipeline.py
-# ============================================================================
-# Evalúa ARIMA(p,d,q) con d=1,...,10 en DOS MODALIDADES SIMULTÁNEAS:
-# A) Proceso SIN diferenciación adicional (modelos reciben Y_t directamente)
-# B) Proceso CON diferenciación adicional (modelos reciben ΔY_t, se integra después)
+# ¿ Hasta que qué orden de integración d es viable simular ARIMA(p,d,q)?
 # ============================================================================
 
 
@@ -967,8 +927,8 @@ class ARIMAMultiDSimulation:
 class PipelineARIMA_MultiD_DobleModalidad:
     """
     Pipeline Multi-D con comparación de Densidades (ECRPS).
-    Evalúa d=2,3,4,5,7,10 en dos modalidades (Niveles vs Incrementos).
-    Versión optimizada: Sin generación de reportes visuales.
+    Evalúa d=1,2,3,4,5,7,10 en dos modalidades (Niveles vs Incrementos).
+    Versión optimizada para generar el formato de Excel solicitado.
     """
     
     N_TEST_STEPS = 12
@@ -987,7 +947,7 @@ class PipelineARIMA_MultiD_DobleModalidad:
     
     DISTRIBUTIONS = ['normal', 'uniform', 'exponential', 't-student', 'mixture']
     VARIANCES = [0.2, 0.5, 1.0, 3.0]
-    D_VALUES = [2, 3, 4, 5, 7, 10]
+    D_VALUES = [1, 2, 3, 4, 5, 7, 10]
     
     def __init__(self, n_boot: int = 1000, seed: int = 42, verbose: bool = False):
         self.n_boot = n_boot
@@ -997,18 +957,18 @@ class PipelineARIMA_MultiD_DobleModalidad:
 
     def _setup_models(self, seed: int):
         return {
+            'AREPD': AREPD(n_lags=5, rho=0.9, random_state=seed),
+            'AV-MCPS': AdaptiveVolatilityMondrianCPS(n_lags=15, random_state=seed),
             'Block Bootstrapping': CircularBlockBootstrapModel(n_boot=self.n_boot, random_state=seed),
-            'Sieve Bootstrap': SieveBootstrapModel(n_boot=self.n_boot, random_state=seed),
+            'DeepAR': DeepARModel(hidden_size=15, n_lags=5, epochs=25, num_samples=self.n_boot, random_state=seed),
+            'EnCQR-LSTM': EnCQR_LSTM_Model(n_lags=20, B=3, units=24, epochs=15, num_samples=self.n_boot, random_state=seed),
             'LSPM': LSPM(random_state=seed),
             'LSPMW': LSPMW(rho=0.95, random_state=seed),
-            'AREPD': AREPD(n_lags=5, rho=0.9, random_state=seed),
             'MCPS': MondrianCPSModel(n_lags=10, random_state=seed),
-            'AV-MCPS': AdaptiveVolatilityMondrianCPS(n_lags=15, random_state=seed),
-            'DeepAR': DeepARModel(hidden_size=15, n_lags=5, epochs=25, num_samples=self.n_boot, random_state=seed),
-            'EnCQR-LSTM': EnCQR_LSTM_Model(n_lags=20, B=3, units=24, epochs=15, num_samples=self.n_boot, random_state=seed)
+            'Sieve Bootstrap': SieveBootstrapModel(n_boot=self.n_boot, random_state=seed)
         }
 
-    def _get_true_density_samples(self, arma_sim: ARMASimulation, d_value: int, 
+    def _get_true_density_samples(self, arma_sim, d_value: int, 
                                  full_series: np.ndarray, full_errors: np.ndarray, 
                                  current_idx: int, n_samples: int = 1000) -> np.ndarray:
         series_diff = full_series.copy()
@@ -1016,7 +976,6 @@ class PipelineARIMA_MultiD_DobleModalidad:
             series_diff = np.diff(series_diff)
         
         idx_diff = current_idx - d_value
-        
         p, q = len(arma_sim.phi), len(arma_sim.theta)
         hist_x = series_diff[:idx_diff]
         hist_e = full_errors[:idx_diff]
@@ -1033,18 +992,16 @@ class PipelineARIMA_MultiD_DobleModalidad:
             temp_series = np.cumsum(temp_series)
         
         deterministic_y_next = temp_series[-1]
-        
         return deterministic_y_next + next_x_samples
 
     def _run_single_modalidad(self, arma_config: dict, d_value: int,
                              dist: str, var: float, scenario_seed: int,
                              full_series: np.ndarray, full_errors: np.ndarray,
                              test_start_idx: int, usar_diferenciacion: bool,
-                             arma_sim: ARMASimulation) -> list:
+                             arma_sim) -> list:
         
         modalidad_str = "CON_DIFF" if usar_diferenciacion else "SIN_DIFF"
         
-        # 1. Preparar datos según modalidad
         if usar_diferenciacion:
             series_to_models = np.diff(full_series, prepend=full_series[0])
         else:
@@ -1052,7 +1009,6 @@ class PipelineARIMA_MultiD_DobleModalidad:
 
         train_calib_data = series_to_models[:test_start_idx]
         
-        # 2. Optimización y Congelamiento
         models = self._setup_models(scenario_seed)
         optimizer = TimeBalancedOptimizer(random_state=self.seed, verbose=False)
         
@@ -1066,18 +1022,29 @@ class PipelineARIMA_MultiD_DobleModalidad:
             if hasattr(model, 'freeze_hyperparameters'):
                 model.freeze_hyperparameters(train_calib_data)
 
-        # 3. Test Rolling Window con ECRPS
         results_rows = []
+        p = len(arma_config['phi'])
+        q = len(arma_config['theta'])
 
         for t in range(self.N_TEST_STEPS):
             curr_idx = test_start_idx + t
             h_to_model = series_to_models[:curr_idx]
             
-            # Densidad Teórica (Siempre en Niveles)
             true_samples = self._get_true_density_samples(arma_sim, d_value, full_series, full_errors, curr_idx)
             
-            row = {'Paso': t + 1, 'Proceso': f"I({d_value})", 'Modalidad': modalidad_str, 
-                   'Dist': dist, 'Var': var, 'Base': arma_config['nombre']}
+            # FILA RECTIFICADA PARA EL EXCEL (Igual a la imagen)
+            row = {
+                'Paso': t + 1,
+                'Proceso': f"ARMA_I({p},{d_value},{q})",
+                'p': p,
+                'd': d_value,
+                'q': q,
+                'ARMA_base': arma_config['nombre'],
+                'Distribución': dist,
+                'Varianza': var,
+                'Modalidad': modalidad_str,
+                'Valor_Observado': full_series[curr_idx]  # Ground Truth en niveles
+            }
             
             for name, model in models.items():
                 try:
@@ -1086,7 +1053,6 @@ class PipelineARIMA_MultiD_DobleModalidad:
                     
                     pred_array = np.asarray(pred).flatten()
                     
-                    # Si estamos en modalidad incrementos, integrar a niveles
                     if usar_diferenciacion:
                         pred_array = full_series[curr_idx - 1] + pred_array
                     
@@ -1100,7 +1066,6 @@ class PipelineARIMA_MultiD_DobleModalidad:
 
     def _run_scenario_wrapper(self, args):
         arma_cfg, d_val, dist, var, seed = args
-        
         from simulacion import ARMASimulation
         simulator_arma = ARMASimulation(phi=arma_cfg['phi'], theta=arma_cfg['theta'], 
                                        noise_dist=dist, sigma=np.sqrt(var), seed=seed)
@@ -1123,7 +1088,7 @@ class PipelineARIMA_MultiD_DobleModalidad:
 
     def run_all(self, excel_filename: str = "RESULTADOS_MULTID_ECRPS.xlsx", batch_size: int = 10):
         print("="*80)
-        print("🚀 PIPELINE MULTI-D: EVALUACIÓN DE DENSIDADES (SIN GRÁFICOS)")
+        print("🚀 PIPELINE MULTI-D: GENERANDO FORMATO ARIMA_I(p,d,q)")
         print("="*80)
         
         tasks = []
@@ -1145,51 +1110,25 @@ class PipelineARIMA_MultiD_DobleModalidad:
             
         return pd.DataFrame(all_results)
 
+# ============================================================================
+# ¿La cantidad de datos afecta a la calidad de las densidades predictivas?
+# ============================================================================
 
 class Pipeline140_TamanosCrecientes:
-    """
-    Pipeline unificado con Tamaños Crecientes y Evaluación de Densidades.
-    1) Compara Densidad Predictiva vs Densidad Teórica mediante ECRPS.
-    2) Versión optimizada: Sin generación de imágenes.
-    3) Evalúa 3 tamaños: Pequeño (100,20), Mediano (500,100), Grande (1000,200).
-    """
-    
     N_TEST_STEPS = 12 
-    
-    # Combinaciones de (N_TRAIN, N_CALIB)
-    SIZE_COMBINATIONS = [
-        {'tag': 'Pequeno', 'n_train': 100, 'n_calib': 20},
-        {'tag': 'Mediano', 'n_train': 500, 'n_calib': 100},
-        {'tag': 'Grande', 'n_train': 1000, 'n_calib': 200}
-    ]
     
     CONFIGS = {
         'ARMA': [
             {'nombre': 'AR(1)', 'phi': [0.9], 'theta': []},
-            {'nombre': 'AR(2)', 'phi': [0.5, -0.3], 'theta': []},
-            {'nombre': 'MA(1)', 'phi': [], 'theta': [0.7]},
-            {'nombre': 'MA(2)', 'phi': [], 'theta': [0.4, 0.2]},
-            {'nombre': 'ARMA(1,1)', 'phi': [0.6], 'theta': [0.3]},
-            {'nombre': 'ARMA(2,2)', 'phi': [0.4, -0.2], 'theta': [0.5, 0.1]},
-            {'nombre': 'ARMA(2,1)', 'phi': [0.7, 0.2], 'theta': [0.5]}
+            {'nombre': 'AR(2)', 'phi': [0.5, -0.3], 'theta': []}
         ],
         'ARIMA': [
             {'nombre': 'ARIMA(0,1,0)', 'phi': [], 'theta': []},
-            {'nombre': 'ARIMA(1,1,0)', 'phi': [0.6], 'theta': []},
-            {'nombre': 'ARIMA(2,1,0)', 'phi': [0.5, -0.2], 'theta': []},
-            {'nombre': 'ARIMA(0,1,1)', 'phi': [], 'theta': [0.5]},
-            {'nombre': 'ARIMA(0,1,2)', 'phi': [], 'theta': [0.4, 0.25]},
-            {'nombre': 'ARIMA(1,1,1)', 'phi': [0.7], 'theta': [-0.3]},
-            {'nombre': 'ARIMA(2,1,2)', 'phi': [0.6, 0.2], 'theta': [0.4, -0.1]}
+            {'nombre': 'ARIMA(1,1,0)', 'phi': [0.6], 'theta': []}
         ],
         'SETAR': [
             {'nombre': 'SETAR-1', 'phi_regime1': [0.6], 'phi_regime2': [-0.5], 'threshold': 0.0, 'delay': 1},
-            {'nombre': 'SETAR-2', 'phi_regime1': [0.7], 'phi_regime2': [-0.7], 'threshold': 0.0, 'delay': 2},
-            {'nombre': 'SETAR-3', 'phi_regime1': [0.5, -0.2], 'phi_regime2': [-0.3, 0.1], 'threshold': 0.5, 'delay': 1},
-            {'nombre': 'SETAR-4', 'phi_regime1': [0.8, -0.15], 'phi_regime2': [-0.6, 0.2], 'threshold': 1.0, 'delay': 2},
-            {'nombre': 'SETAR-5', 'phi_regime1': [0.4, -0.1, 0.05], 'phi_regime2': [-0.3, 0.1, -0.05], 'threshold': 0.0, 'delay': 1},
-            {'nombre': 'SETAR-6', 'phi_regime1': [0.5, -0.3, 0.1], 'phi_regime2': [-0.4, 0.2, -0.05], 'threshold': 0.5, 'delay': 2},
-            {'nombre': 'SETAR-7', 'phi_regime1': [0.3, 0.1], 'phi_regime2': [-0.2, -0.1], 'threshold': 0.8, 'delay': 3}
+            {'nombre': 'SETAR-2', 'phi_regime1': [0.7], 'phi_regime2': [-0.7], 'threshold': 0.0, 'delay': 2}
         ]
     }
     
@@ -1202,8 +1141,11 @@ class Pipeline140_TamanosCrecientes:
         self.verbose = verbose
         self.proceso_tipo = proceso_tipo.upper()
         self.rng = np.random.default_rng(seed)
+        self.TRAIN_SIZES = [100, 500, 1000]
+        self.CALIB_SIZES = [20, 100, 200]
 
     def _setup_models(self, seed: int):
+        # Asegúrate de que estos modelos estén importados en pipeline.py
         return {
             'Block Bootstrapping': CircularBlockBootstrapModel(n_boot=self.n_boot, random_state=seed),
             'Sieve Bootstrap': SieveBootstrapModel(n_boot=self.n_boot, random_state=seed),
@@ -1222,12 +1164,11 @@ class Pipeline140_TamanosCrecientes:
             return ARMASimulation(phi=config['phi'], theta=config['theta'], noise_dist=dist, sigma=sigma, seed=seed)
         elif self.proceso_tipo == 'ARIMA':
             return ARIMASimulation(phi=config['phi'], theta=config['theta'], noise_dist=dist, sigma=sigma, seed=seed)
-        else: # SETAR
+        else:
             return SETARSimulation(phi_regime1=config['phi_regime1'], phi_regime2=config['phi_regime2'], 
                                    threshold=config['threshold'], delay=config['delay'], noise_dist=dist, sigma=sigma, seed=seed)
 
     def run_single_scenario(self, config, dist, var, n_train, n_calib, size_tag, scenario_seed):
-        # 1. Simulación
         simulator = self._create_simulator(config, dist, var, scenario_seed)
         total_len = n_train + n_calib + self.N_TEST_STEPS
         series, errors = simulator.simulate(n=total_len, burn_in=100)
@@ -1235,7 +1176,6 @@ class Pipeline140_TamanosCrecientes:
         train_data = series[:n_train]
         val_data = series[n_train : n_train + n_calib]
         
-        # 2. Optimización y Congelamiento
         models = self._setup_models(scenario_seed)
         optimizer = TimeBalancedOptimizer(random_state=scenario_seed, verbose=self.verbose)
         best_params = optimizer.optimize_all_models(models, train_data, val_data)
@@ -1248,58 +1188,51 @@ class Pipeline140_TamanosCrecientes:
             if hasattr(model, 'freeze_hyperparameters'):
                 model.freeze_hyperparameters(train_val_full)
 
-        # 3. Test Rolling con ECRPS
         results_rows = []
-
         for t in range(self.N_TEST_STEPS):
             idx = n_train + n_calib + t
             h_series = series[:idx]
             h_errors = errors[:idx]
-            
-            # Densidad Teórica
             true_samples = simulator.get_true_next_step_samples(h_series, h_errors, n_samples=1000)
             
-            row = {'Paso': t + 1, 'Proceso': config['nombre'], 'Dist': dist, 'Var': var, 
-                   'N_Train': n_train, 'N_Calib': n_calib, 'Size': size_tag}
+            row = {
+                'Paso': t + 1, 'Proceso': config['nombre'], 'Distribución': dist,
+                'Varianza': var, 'N_Train': n_train, 'N_Calib': n_calib, 
+                'N_Total': n_train + n_calib, 'Size': size_tag
+            }
             
             for name, model in models.items():
                 try:
-                    if "Bootstrap" in name: pred = model.fit_predict(h_series)
-                    else: pred = model.fit_predict(pd.DataFrame({'valor': h_series}))
-                    
-                    pred_array = np.asarray(pred).flatten()
-                    row[name] = ecrps(pred_array, true_samples)
+                    pred = model.fit_predict(h_series) if "Bootstrap" in name else model.fit_predict(pd.DataFrame({'valor': h_series}))
+                    row[name] = ecrps(np.asarray(pred).flatten(), true_samples)
                 except:
                     row[name] = np.nan
-            
             results_rows.append(row)
-
-        clear_all_sessions()
         return results_rows
 
+    # ESTE MÉTODO ES EL QUE TE FALTABA O ESTABA MAL INDENTADO
     def _run_scenario_wrapper(self, args):
         return self.run_single_scenario(*args)
 
     def generate_all_scenarios(self):
         scenarios = []
         s_id = 0
-        configs = self.CONFIGS[self.proceso_tipo]
-        
-        for size in self.SIZE_COMBINATIONS:
-            for cfg in configs:
-                for dist in self.DISTRIBUTIONS:
-                    for var in self.VARIANCES:
-                        scenarios.append((cfg.copy(), dist, var, size['n_train'], size['n_calib'], size['tag'], self.seed + s_id))
-                        s_id += 1
+        configs = self.CONFIGS.get(self.proceso_tipo, [])
+        for n_train in self.TRAIN_SIZES:
+            for n_calib in self.CALIB_SIZES:
+                tag = f"Tr{n_train}_Ca{n_calib}"
+                for cfg in configs:
+                    for dist in self.DISTRIBUTIONS:
+                        for var in self.VARIANCES:
+                            scenarios.append((cfg.copy(), dist, var, n_train, n_calib, tag, self.seed + s_id))
+                            s_id += 1
         return scenarios
 
     def run_all(self, excel_filename=None, batch_size=10, max_workers=3):
         if excel_filename is None:
-            excel_filename = f"RESULTADOS_TAMANOS_{self.proceso_tipo}.xlsx"
+            excel_filename = f"RESULTADOS_{self.proceso_tipo}.xlsx"
             
         tasks = self.generate_all_scenarios()
-        print(f"🚀 Iniciando Pipeline Tamaños Crecientes ({self.proceso_tipo}): {len(tasks)} escenarios.")
-        
         all_results = []
         num_batches = (len(tasks) + batch_size - 1) // batch_size
 
@@ -1308,24 +1241,25 @@ class Pipeline140_TamanosCrecientes:
             end_idx = min((i + 1) * batch_size, len(tasks))
             batch = tasks[start_idx:end_idx]
             
-            print(f"📦 Procesando Lote {i+1}/{num_batches}...")
+            # El wrapper se llama aquí
             results = Parallel(n_jobs=max_workers, backend='loky')(
                 delayed(self._run_scenario_wrapper)(t) for t in batch
             )
             
             for r in results: all_results.extend(r)
             pd.DataFrame(all_results).to_excel(excel_filename, index=False)
-            clear_all_sessions()
             gc.collect()
-
         return pd.DataFrame(all_results)
+
+# ============================================================================
+# ¿La proporción de datos afecta a la calidad de las densidades predictivas?
+# ============================================================================
 
 class Pipeline240_ProporcionesVariables:
     """
     Pipeline unificado con Tamaño Fijo (240) y Proporciones Variables.
     1) Compara Densidad Predictiva vs Densidad Teórica mediante ECRPS.
-    2) Versión optimizada: Sin generación de imágenes.
-    3) Proporciones de Calibración: 10%, 20%, 30%, 40%, 50%.
+    2) Proporciones de Calibración: 10%, 20%, 30%, 40%, 50%.
     """
     
     N_TOTAL = 240  # Tamaño histórico fijo
@@ -1333,11 +1267,11 @@ class Pipeline240_ProporcionesVariables:
     
     # Configuraciones de Proporciones (N_TRAIN + N_CALIB = 240)
     SIZE_COMBINATIONS = [
-        {'prop_tag': '10_pct', 'n_train': 216, 'n_calib': 24, 'prop_val': 0.10},
-        {'prop_tag': '20_pct', 'n_train': 192, 'n_calib': 48, 'prop_val': 0.20},
-        {'prop_tag': '30_pct', 'n_train': 168, 'n_calib': 72, 'prop_val': 0.30},
-        {'prop_tag': '40_pct', 'n_train': 144, 'n_calib': 96, 'prop_val': 0.40},
-        {'prop_tag': '50_pct', 'n_train': 120, 'n_calib': 120, 'prop_val': 0.50}
+        {'prop_tag': '10%', 'n_train': 216, 'n_calib': 24, 'prop_val': 0.10},
+        {'prop_tag': '20%', 'n_train': 192, 'n_calib': 48, 'prop_val': 0.20},
+        {'prop_tag': '30%', 'n_train': 168, 'n_calib': 72, 'prop_val': 0.30},
+        {'prop_tag': '40%', 'n_train': 144, 'n_calib': 96, 'prop_val': 0.40},
+        {'prop_tag': '50%', 'n_train': 120, 'n_calib': 120, 'prop_val': 0.50}
     ]
     
     CONFIGS = {
@@ -1427,6 +1361,7 @@ class Pipeline240_ProporcionesVariables:
 
         # 3. Test Rolling con ECRPS
         results_rows = []
+        model_names = list(models.keys())
 
         for t in range(self.N_TEST_STEPS):
             idx = self.N_TOTAL + t
@@ -1436,8 +1371,16 @@ class Pipeline240_ProporcionesVariables:
             # Densidad Teórica (Ground Truth)
             true_samples = simulator.get_true_next_step_samples(h_series, h_errors, n_samples=1000)
             
-            row = {'Paso': t + 1, 'Proceso': config['nombre'], 'Dist': dist, 'Var': var, 
-                   'N_Train': n_train, 'N_Calib': n_calib, 'Prop': prop_tag}
+            # FILA RECTIFICADA
+            row = {
+                'Paso': t + 1, 
+                'Proceso': config['nombre'], 
+                'Distribución': dist,   # Cambio Dist -> Distribución
+                'Varianza': var,        # Cambio Var -> Varianza
+                'N_Train': n_train, 
+                'N_Calib': n_calib, 
+                'Prop_Calib': prop_tag  # Cambio Prop -> Prop_Calib
+            }
             
             for name, model in models.items():
                 try:
@@ -1445,13 +1388,27 @@ class Pipeline240_ProporcionesVariables:
                     else: pred = model.fit_predict(pd.DataFrame({'valor': h_series}))
                     
                     pred_array = np.asarray(pred).flatten()
-                    
-                    # Comparación de Densidades
                     row[name] = ecrps(pred_array, true_samples)
                 except:
                     row[name] = np.nan
             
             results_rows.append(row)
+
+        # 4. GENERACIÓN DE FILA "Promedio" (Crucial para analisis_proporciones_240)
+        df_temp = pd.DataFrame(results_rows)
+        avg_row = {
+            'Paso': 'Promedio',
+            'Proceso': config['nombre'],
+            'Distribución': dist,
+            'Varianza': var,
+            'N_Train': n_train,
+            'N_Calib': n_calib,
+            'Prop_Calib': prop_tag
+        }
+        for m_name in model_names:
+            avg_row[m_name] = df_temp[m_name].mean()
+        
+        results_rows.append(avg_row)
 
         clear_all_sessions()
         return results_rows
@@ -1462,13 +1419,21 @@ class Pipeline240_ProporcionesVariables:
     def generate_all_scenarios(self):
         scenarios = []
         s_id = 0
-        configs = self.CONFIGS[self.proceso_tipo]
+        configs = self.CONFIGS.get(self.proceso_tipo, [])
         
         for size in self.SIZE_COMBINATIONS:
             for cfg in configs:
                 for dist in self.DISTRIBUTIONS:
                     for var in self.VARIANCES:
-                        scenarios.append((cfg.copy(), dist, var, size['n_train'], size['n_calib'], size['prop_tag'], self.seed + s_id))
+                        scenarios.append((
+                            cfg.copy(), 
+                            dist, 
+                            var, 
+                            size['n_train'], 
+                            size['n_calib'], 
+                            size['prop_tag'], 
+                            self.seed + s_id
+                        ))
                         s_id += 1
         return scenarios
 
