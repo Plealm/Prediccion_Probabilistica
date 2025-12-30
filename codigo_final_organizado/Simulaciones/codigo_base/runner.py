@@ -11,7 +11,7 @@ os.environ["MKL_NUM_THREADS"] = n_threads
 os.environ["NUMEXPR_NUM_THREADS"] = n_threads
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
-from pipeline import Pipeline140SinSesgos_ARMA, Pipeline140SinSesgos_ARIMA, Pipeline140SinSesgos_SETAR, Pipeline140_TamanosCrecientes, Pipeline240_ProporcionesVariables
+from pipeline import Pipeline140SinSesgos_ARMA, Pipeline140SinSesgos_ARIMA, Pipeline140SinSesgos_SETAR, Pipeline140_TamanosCrecientes, Pipeline240_ProporcionesVariables, PipelineARIMA_MultiD_SieveOnly
 import pandas as pd
 import numpy as np
 
@@ -1813,3 +1813,623 @@ def analisis_comparativo_proporciones_240(df_combined: pd.DataFrame):
                 print(f"  {model:25s}: {best_proceso} (CRPS={best_score:.4f})")
     
     print("\n" + "="*60)
+
+
+# =================================================================
+# Sieve multiple D ARIMA
+# =================================================================
+
+def diebold_mariano_test_modificado(errors1, errors2, h=1):
+    """
+    Test Diebold-Mariano modificado con corrección Harvey-Leybourne-Newbold (1997)
+    
+    Parameters:
+    -----------
+    errors1, errors2 : array-like
+        Errores de pronóstico (ECRPS) de los dos modelos
+    h : int
+        Horizonte de pronóstico (forecast horizon)
+    
+    Returns:
+    --------
+    hln_dm_stat : float
+        Estadístico DM corregido (HLN-DM)
+    p_value : float
+        P-valor usando distribución t-Student con T-1 grados de libertad
+    dm_stat : float
+        Estadístico DM original (sin corrección)
+    """
+    from scipy import stats
+    
+    # Calcular diferencial de pérdida
+    d = errors1 - errors2
+    d_bar = np.mean(d)
+    T = len(d)
+    
+    # Calcular autocovarianzas
+    def gamma_d(k):
+        if k == 0:
+            return np.var(d, ddof=1)
+        else:
+            return np.mean((d[k:] - d_bar) * (d[:-k] - d_bar))
+    
+    # Estimar la varianza de largo plazo usando Newey-West
+    # Para h-step-ahead forecasts, incluimos hasta h-1 lags
+    gamma_0 = gamma_d(0)
+    gamma_sum = gamma_0
+    
+    if h > 1:
+        for k in range(1, h):
+            gamma_k = gamma_d(k)
+            gamma_sum += 2 * gamma_k
+    
+    var_d = gamma_sum / T
+    
+    if var_d <= 0:
+        return 0, 1.0, 0
+    
+    # Estadístico DM original
+    dm_stat = d_bar / np.sqrt(var_d)
+    
+    # Corrección Harvey-Leybourne-Newbold (1997)
+    correction_factor = np.sqrt((T + 1 - 2*h + h*(h-1)) / T)
+    hln_dm_stat = correction_factor * dm_stat
+    
+    # P-valor usando t-Student con T-1 grados de libertad
+    df = T - 1
+    p_value = 2 * (1 - stats.t.cdf(abs(hln_dm_stat), df))
+    
+    return hln_dm_stat, p_value, dm_stat
+
+
+def test_diebold_mariano_por_d(df_final):
+    """
+    Realiza test Diebold-Mariano modificado (HLN) para cada valor de d.
+    Compara SIN_DIFF vs CON_DIFF.
+    
+    Retorna DataFrame con resultados del test estadístico.
+    """
+    print("\n" + "="*100)
+    print("TEST DIEBOLD-MARIANO MODIFICADO (HLN): SIN_DIFF vs CON_DIFF")
+    print("="*100)
+    
+    # Verificar que existe la columna Sieve Bootstrap
+    if 'Sieve Bootstrap' not in df_final.columns:
+        print("⚠️ No se encontró la columna 'Sieve Bootstrap'")
+        return None
+    
+    # Filtrar datos válidos
+    datos = df_final[['d', 'Modalidad', 'Sieve Bootstrap']].copy()
+    datos.rename(columns={'Sieve Bootstrap': 'ECRPS'}, inplace=True)
+    datos = datos.dropna()
+    
+    # Obtener valores únicos de d
+    valores_d = sorted(datos['d'].unique())
+    
+    # Lista para almacenar resultados
+    resultados = []
+    
+    # Iterar sobre cada valor de d
+    for d_val in valores_d:
+        # Filtrar datos para el d actual
+        datos_d = datos[datos['d'] == d_val].copy()
+        
+        # Separar por modalidad
+        sin_diff = datos_d[datos_d['Modalidad'] == 'SIN_DIFF']['ECRPS'].values
+        con_diff = datos_d[datos_d['Modalidad'] == 'CON_DIFF']['ECRPS'].values
+        
+        # Verificar que ambas modalidades tengan datos
+        if len(sin_diff) == 0 or len(con_diff) == 0:
+            print(f"⚠️ d={d_val} no tiene datos para ambas modalidades")
+            continue
+        
+        # Verificar que tengan la misma longitud
+        if len(sin_diff) != len(con_diff):
+            print(f"⚠️ d={d_val} tiene diferente número de observaciones")
+            min_len = min(len(sin_diff), len(con_diff))
+            sin_diff = sin_diff[:min_len]
+            con_diff = con_diff[:min_len]
+        
+        # Calcular estadísticas descriptivas
+        ecrps_sin_diff_mean = np.mean(sin_diff)
+        ecrps_con_diff_mean = np.mean(con_diff)
+        diferencia = ecrps_sin_diff_mean - ecrps_con_diff_mean
+        
+        # Realizar test Diebold-Mariano modificado
+        hln_dm_stat, p_value, dm_stat = diebold_mariano_test_modificado(sin_diff, con_diff, h=1)
+        
+        # Determinar significancia
+        if p_value < 0.01:
+            significativo = "***"
+        elif p_value < 0.05:
+            significativo = "**"
+        elif p_value < 0.10:
+            significativo = "*"
+        else:
+            significativo = "No"
+        
+        # Determinar mejor modalidad
+        if diferencia < 0:
+            mejor = "SIN_DIFF"
+        elif diferencia > 0:
+            mejor = "CON_DIFF"
+        else:
+            mejor = "Empate"
+        
+        # Agregar a resultados
+        resultados.append({
+            'd': int(d_val),
+            'N_obs': len(sin_diff),
+            'ECRPS_SIN_DIFF': ecrps_sin_diff_mean,
+            'ECRPS_CON_DIFF': ecrps_con_diff_mean,
+            'Diferencia': diferencia,
+            'DM_stat': dm_stat,
+            'HLN-DM_stat': hln_dm_stat,
+            'p_valor': p_value,
+            'Significativo': significativo,
+            'Mejor': mejor
+        })
+    
+    # Crear DataFrame con resultados
+    resultados_df = pd.DataFrame(resultados)
+    
+    if len(resultados_df) == 0:
+        print("⚠️ No se pudieron calcular tests estadísticos")
+        return None
+    
+    # Formatear para mejor visualización
+    resultados_df['ECRPS_SIN_DIFF'] = resultados_df['ECRPS_SIN_DIFF'].round(6)
+    resultados_df['ECRPS_CON_DIFF'] = resultados_df['ECRPS_CON_DIFF'].round(6)
+    resultados_df['Diferencia'] = resultados_df['Diferencia'].round(6)
+    resultados_df['DM_stat'] = resultados_df['DM_stat'].round(4)
+    resultados_df['HLN-DM_stat'] = resultados_df['HLN-DM_stat'].round(4)
+    resultados_df['p_valor'] = resultados_df['p_valor'].round(4)
+    
+    # Mostrar resultados
+    print("\nH0: No hay diferencia significativa entre modalidades")
+    print("H1: Hay diferencia significativa entre modalidades")
+    print("\nSignificancia: *** p<0.01, ** p<0.05, * p<0.10, No = no significativo")
+    print("\n")
+    print(resultados_df.to_string(index=False))
+    
+    # Resumen de resultados
+    print("\n" + "="*100)
+    print("RESUMEN DEL TEST ESTADÍSTICO")
+    print("="*100)
+    
+    n_significativos = len(resultados_df[resultados_df['Significativo'] != 'No'])
+    n_total = len(resultados_df)
+    n_sin_diff_mejor = len(resultados_df[resultados_df['Mejor'] == 'SIN_DIFF'])
+    n_con_diff_mejor = len(resultados_df[resultados_df['Mejor'] == 'CON_DIFF'])
+    
+    print(f"\n✓ Total de comparaciones: {n_total}")
+    print(f"✓ Diferencias significativas: {n_significativos} ({100*n_significativos/n_total:.1f}%)")
+    print(f"✓ No significativas: {n_total - n_significativos} ({100*(n_total-n_significativos)/n_total:.1f}%)")
+    print(f"\n✓ SIN_DIFF mejor: {n_sin_diff_mejor} casos ({100*n_sin_diff_mejor/n_total:.1f}%)")
+    print(f"✓ CON_DIFF mejor: {n_con_diff_mejor} casos ({100*n_con_diff_mejor/n_total:.1f}%)")
+    
+    # Calcular estadística global
+    sin_diff_global = datos[datos['Modalidad'] == 'SIN_DIFF']['ECRPS'].mean()
+    con_diff_global = datos[datos['Modalidad'] == 'CON_DIFF']['ECRPS'].mean()
+    
+    print(f"\n✓ ECRPS promedio global:")
+    print(f"  • SIN_DIFF: {sin_diff_global:.6f}")
+    print(f"  • CON_DIFF: {con_diff_global:.6f}")
+    print(f"  • Diferencia: {sin_diff_global - con_diff_global:+.6f}")
+    
+    if sin_diff_global < con_diff_global:
+        mejora = ((con_diff_global - sin_diff_global) / con_diff_global) * 100
+        print(f"  • SIN_DIFF es {mejora:.2f}% mejor globalmente")
+    else:
+        mejora = ((sin_diff_global - con_diff_global) / sin_diff_global) * 100
+        print(f"  • CON_DIFF es {mejora:.2f}% mejor globalmente")
+    
+    return resultados_df
+
+
+def analisis_sieve_doble_modalidad(df_final):
+    """
+    Análisis especializado para resultados de Sieve Bootstrap con doble modalidad.
+    
+    Incluye:
+    1. Test Diebold-Mariano modificado (HLN) por cada d
+    2. Desempeño por valor de d
+    3. SIN_DIFF vs CON_DIFF
+    4. Tendencias según d aumenta
+    5. Mejor d por modalidad
+    """
+    print("\n" + "="*80)
+    print("ANÁLISIS SIEVE BOOTSTRAP - DOBLE MODALIDAD")
+    print("="*80)
+    
+    if 'Sieve Bootstrap' not in df_final.columns:
+        print("⚠️ No se encontró columna 'Sieve Bootstrap'")
+        return
+    
+    if 'Paso' in df_final.columns:
+        df_steps = df_final[df_final['Paso'] != 'Promedio'].copy()
+    else:
+        df_steps = df_final.copy()
+    
+    if len(df_steps) == 0:
+        print("⚠️ No hay datos suficientes para el análisis.")
+        return
+    
+    # Asegurar tipos correctos
+    if 'd' in df_steps.columns:
+        df_steps['d'] = pd.to_numeric(df_steps['d'], errors='coerce')
+    
+    d_values = sorted(df_steps['d'].unique())
+    modalidades = sorted(df_steps['Modalidad'].unique()) if 'Modalidad' in df_steps.columns else []
+    
+    # =================================================================
+    # 0. TEST DIEBOLD-MARIANO MODIFICADO (NUEVO)
+    # =================================================================
+    print("\n" + "="*80)
+    print("🔬 0. TEST ESTADÍSTICO DIEBOLD-MARIANO MODIFICADO")
+    print("="*80)
+    
+    dm_results = test_diebold_mariano_por_d(df_final)
+    
+    if dm_results is not None:
+        # Guardar resultados del test en Excel
+        excel_filename = "resultados_DM_test_sieve.xlsx"
+        dm_results.to_excel(excel_filename, index=False)
+        print(f"\n✅ Resultados del test guardados en: {excel_filename}")
+    
+    # =================================================================
+    # 1. COMPARACIÓN GLOBAL: SIN_DIFF vs CON_DIFF
+    # =================================================================
+    print("\n" + "="*80)
+    print("🔍 1. COMPARACIÓN GLOBAL POR MODALIDAD")
+    print("="*80)
+    
+    for modalidad in modalidades:
+        df_mod = df_steps[df_steps['Modalidad'] == modalidad]
+        
+        if len(df_mod) == 0:
+            continue
+        
+        val = df_mod['Sieve Bootstrap'].mean()
+        n_valid = df_mod['Sieve Bootstrap'].notna().sum()
+        
+        print(f"\n{modalidad}:")
+        print(f"  CRPS Promedio: {val:.6f}")
+        print(f"  Observaciones válidas: {n_valid}/{len(df_mod)}")
+    
+    # =================================================================
+    # 2. DESEMPEÑO POR CADA d Y MODALIDAD
+    # =================================================================
+    print("\n" + "="*80)
+    print("📊 2. DESEMPEÑO POR VALOR DE d")
+    print("="*80)
+    
+    print(f"\n{'d':<6} {'SIN_DIFF':<15} {'CON_DIFF':<15} {'Mejor':<12}")
+    print("-" * 55)
+    
+    for d_val in d_values:
+        df_d = df_steps[df_steps['d'] == d_val]
+        
+        sin_diff = df_d[df_d['Modalidad'] == 'SIN_DIFF']['Sieve Bootstrap'].mean()
+        con_diff = df_d[df_d['Modalidad'] == 'CON_DIFF']['Sieve Bootstrap'].mean()
+        
+        if not pd.isna(sin_diff) and not pd.isna(con_diff):
+            mejor = "SIN_DIFF" if sin_diff < con_diff else "CON_DIFF"
+            print(f"{d_val:<6} {sin_diff:.6f}      {con_diff:.6f}      {mejor:<12}")
+    
+    # =================================================================
+    # 3. TENDENCIAS POR DISTRIBUCIÓN Y VARIANZA
+    # =================================================================
+    print("\n" + "="*80)
+    print("📈 3. TENDENCIAS POR DISTRIBUCIÓN (Promedio por d)")
+    print("="*80)
+    
+    distribuciones = sorted(df_steps['Distribución'].unique())
+    
+    for dist in distribuciones:
+        print(f"\n--- {dist} ---")
+        df_dist = df_steps[df_steps['Distribución'] == dist]
+        
+        print(f"{'d':<6} {'SIN_DIFF':<12} {'CON_DIFF':<12}")
+        print("-" * 35)
+        
+        for d_val in d_values:
+            df_d_dist = df_dist[df_dist['d'] == d_val]
+            
+            sin_val = df_d_dist[df_d_dist['Modalidad'] == 'SIN_DIFF']['Sieve Bootstrap'].mean()
+            con_val = df_d_dist[df_d_dist['Modalidad'] == 'CON_DIFF']['Sieve Bootstrap'].mean()
+            
+            sin_str = f"{sin_val:.6f}" if not pd.isna(sin_val) else "---"
+            con_str = f"{con_val:.6f}" if not pd.isna(con_val) else "---"
+            
+            print(f"{d_val:<6} {sin_str:<12} {con_str:<12}")
+    
+    # =================================================================
+    # 4. MEJOR d POR MODALIDAD
+    # =================================================================
+    print("\n" + "="*80)
+    print("🎲 4. MEJOR VALOR DE d POR MODALIDAD")
+    print("="*80)
+    
+    for modalidad in modalidades:
+        df_mod = df_steps[df_steps['Modalidad'] == modalidad]
+        
+        best_d = None
+        best_crps = float('inf')
+        
+        for d_val in d_values:
+            df_d_mod = df_mod[df_mod['d'] == d_val]
+            val = df_d_mod['Sieve Bootstrap'].mean()
+            
+            if not pd.isna(val) and val < best_crps:
+                best_crps = val
+                best_d = d_val
+        
+        print(f"\n{modalidad}:")
+        print(f"  Mejor d: {best_d}")
+        print(f"  CRPS en d={best_d}: {best_crps:.6f}")
+    
+    # =================================================================
+    # 5. COMPARACIÓN DIRECTA: SIN_DIFF vs CON_DIFF
+    # =================================================================
+    print("\n" + "="*80)
+    print("⚖️  5. COMPARACIÓN DIRECTA GLOBAL")
+    print("="*80)
+    
+    if len(modalidades) == 2:
+        mod_sin = [m for m in modalidades if 'SIN' in m][0]
+        mod_con = [m for m in modalidades if 'CON' in m][0]
+        
+        df_sin = df_steps[df_steps['Modalidad'] == mod_sin]
+        df_con = df_steps[df_steps['Modalidad'] == mod_con]
+        
+        val_sin = df_sin['Sieve Bootstrap'].mean()
+        val_con = df_con['Sieve Bootstrap'].mean()
+        
+        if not pd.isna(val_sin) and not pd.isna(val_con):
+            diff = val_con - val_sin
+            mejor = mod_sin if val_sin < val_con else mod_con
+            pct_diff = abs(diff / val_sin) * 100
+            
+            print(f"\n{mod_sin}: {val_sin:.6f}")
+            print(f"{mod_con}: {val_con:.6f}")
+            print(f"\nDiferencia: {diff:+.6f} ({pct_diff:.2f}%)")
+            print(f"GANADOR: {mejor}")
+    
+    # =================================================================
+    # 6. RESUMEN POR PROCESO ARMA
+    # =================================================================
+    print("\n" + "="*80)
+    print("🔄 6. RESUMEN POR PROCESO ARMA BASE")
+    print("="*80)
+    
+    arma_bases = sorted(df_steps['ARMA_base'].unique())
+    
+    print(f"\n{'ARMA Base':<15} {'SIN_DIFF':<12} {'CON_DIFF':<12} {'Mejor':<12}")
+    print("-" * 55)
+    
+    for arma in arma_bases:
+        df_arma = df_steps[df_steps['ARMA_base'] == arma]
+        
+        sin_val = df_arma[df_arma['Modalidad'] == 'SIN_DIFF']['Sieve Bootstrap'].mean()
+        con_val = df_arma[df_arma['Modalidad'] == 'CON_DIFF']['Sieve Bootstrap'].mean()
+        
+        if not pd.isna(sin_val) and not pd.isna(con_val):
+            mejor = "SIN_DIFF" if sin_val < con_val else "CON_DIFF"
+            print(f"{arma:<15} {sin_val:.6f}   {con_val:.6f}   {mejor:<12}")
+    
+    # =================================================================
+    # 7. RESUMEN EJECUTIVO
+    # =================================================================
+    print("\n" + "="*80)
+    print("📋 7. RESUMEN EJECUTIVO")
+    print("="*80)
+    
+    # Mejor modalidad global
+    if len(modalidades) == 2:
+        crps_sin = df_steps[df_steps['Modalidad'] == mod_sin]['Sieve Bootstrap'].mean()
+        crps_con = df_steps[df_steps['Modalidad'] == mod_con]['Sieve Bootstrap'].mean()
+        
+        print(f"\n✓ MEJOR MODALIDAD GLOBAL:")
+        print(f"  • {mod_sin}: CRPS = {crps_sin:.6f}")
+        print(f"  • {mod_con}: CRPS = {crps_con:.6f}")
+        
+        if crps_sin < crps_con:
+            mejora = ((crps_con - crps_sin) / crps_sin) * 100
+            print(f"  → GANADOR: {mod_sin} (mejora de {mejora:.2f}%)")
+        else:
+            mejora = ((crps_sin - crps_con) / crps_con) * 100
+            print(f"  → GANADOR: {mod_con} (mejora de {mejora:.2f}%)")
+    
+    # Mejor d global
+    best_d_global = None
+    best_crps_global = float('inf')
+    
+    for d_val in d_values:
+        df_d = df_steps[df_steps['d'] == d_val]
+        val = df_d['Sieve Bootstrap'].mean()
+        
+        if not pd.isna(val) and val < best_crps_global:
+            best_crps_global = val
+            best_d_global = d_val
+    
+    if best_d_global is not None:
+        print(f"\n✓ MEJOR VALOR DE d GLOBAL:")
+        print(f"  → d = {best_d_global}: CRPS = {best_crps_global:.6f}")
+    
+    print("\n" + "="*80)
+    print("FIN DEL ANÁLISIS")
+    print("="*80)
+
+
+# =============================================================================
+# RUNNERS ESPECIALIZADOS
+# =============================================================================
+
+def main_sieve_full():
+    """
+    Ejecución completa SOLO con Sieve Bootstrap.
+    Incluye análisis estadístico completo con test Diebold-Mariano.
+    
+    Total esperado: 23,580 filas
+    - 7 valores de d
+    - 7 configuraciones ARMA
+    - 5 distribuciones
+    - 4 varianzas
+    - 2 modalidades (SIN_DIFF + CON_DIFF)
+    - 12 pasos de predicción
+    = 7 × 7 × 5 × 4 × 2 × 12 = 23,520 filas
+    """
+    start_time = time.time()
+    
+    print("="*80)
+    print("SIMULACIÓN SIEVE BOOTSTRAP - CONFIGURACIÓN COMPLETA")
+    print("Ejecutando análisis exhaustivo con test estadístico Diebold-Mariano")
+    print("="*80)
+    
+    pipeline = PipelineARIMA_MultiD_SieveOnly(
+        n_boot=1000,
+        seed=42,
+        verbose=False
+    )
+    
+    df_final = pipeline.run_all(
+        excel_filename="resultados_SIEVE_d1_a_d10_COMPLETO.xlsx",
+        batch_size=30,
+        n_jobs=4
+    )
+    
+    print("\n" + "="*80)
+    print("ANÁLISIS COMPLETO DE RESULTADOS")
+    print("="*80)
+    
+    # Análisis descriptivo especializado
+    analisis_sieve_doble_modalidad(df_final)
+    
+    elapsed = time.time() - start_time
+    print(f"\n⏱  Tiempo total: {elapsed:.1f}s ({elapsed/60:.2f} minutos)")
+    
+    return df_final
+
+
+def main_sieve_test_reducido():
+    """
+    Test reducido SOLO con Sieve Bootstrap.
+    Configuración mínima para validación rápida.
+    Incluye test estadístico Diebold-Mariano.
+    """
+    start_time = time.time()
+    
+    print("="*80)
+    print("TEST REDUCIDO: SIEVE BOOTSTRAP (d=1,2,3)")
+    print("="*80)
+    
+    pipeline = PipelineARIMA_MultiD_SieveOnly(
+        n_boot=1000, 
+        seed=42, 
+        verbose=True
+    )
+    
+    # Configuración reducida
+    pipeline.D_VALUES = [1, 2, 3]
+    pipeline.ARMA_CONFIGS = [
+        {'nombre': 'RW', 'phi': [], 'theta': []},
+        {'nombre': 'AR(1)', 'phi': [0.6], 'theta': []}
+    ]
+    pipeline.DISTRIBUTIONS = ['normal', 'uniform']
+    pipeline.VARIANCES = [0.5, 1.0]
+    
+    df_final = pipeline.run_all(
+        excel_filename="resultados_TEST_SIEVE.xlsx",
+        batch_size=8,
+        n_jobs=2
+    )
+    
+    print("\n" + "="*80)
+    print("ANÁLISIS DE RESULTADOS DEL TEST")
+    print("="*80)
+    
+    analisis_sieve_doble_modalidad(df_final)
+    
+    elapsed = time.time() - start_time
+    print(f"\n⏱  Tiempo total: {elapsed:.1f}s")
+    
+    return df_final
+
+
+def main_sieve_solo_d1():
+    """
+    Configuración especial: SOLO d=1 con Sieve Bootstrap.
+    Útil para comparación directa con Pipeline140SinSesgos_ARIMA_ConDiferenciacion.
+    Incluye test estadístico.
+    """
+    start_time = time.time()
+    
+    print("="*80)
+    print("SIEVE BOOTSTRAP: SOLO d=1 (VALIDACIÓN)")
+    print("="*80)
+    
+    pipeline = PipelineARIMA_MultiD_SieveOnly(
+        n_boot=1000,
+        seed=42,
+        verbose=False
+    )
+    
+    # Solo d=1
+    pipeline.D_VALUES = [1]
+    
+    df_final = pipeline.run_all(
+        excel_filename="resultados_SIEVE_d1_VALIDACION.xlsx",
+        batch_size=20,
+        n_jobs=4
+    )
+    
+    print("\n" + "="*80)
+    print("ANÁLISIS ESPECIALIZADO PARA d=1")
+    print("="*80)
+    
+    analisis_sieve_doble_modalidad(df_final)
+    
+    elapsed = time.time() - start_time
+    print(f"\n⏱  Tiempo total: {elapsed:.1f}s")
+    
+    return df_final
+
+
+def main_sieve_alto_orden():
+    """
+    Configuración especial: SOLO órdenes altos (d=5,7,10).
+    Para investigar comportamiento en integración alta.
+    Incluye test estadístico Diebold-Mariano.
+    """
+    start_time = time.time()
+    
+    print("="*80)
+    print("SIEVE BOOTSTRAP: ÓRDENES ALTOS (d=5,7,10)")
+    print("="*80)
+    
+    pipeline = PipelineARIMA_MultiD_SieveOnly(
+        n_boot=1000,
+        seed=42,
+        verbose=False
+    )
+    
+    # Solo órdenes altos
+    pipeline.D_VALUES = [5, 7, 10]
+    
+    df_final = pipeline.run_all(
+        excel_filename="resultados_SIEVE_ALTO_ORDEN.xlsx",
+        batch_size=25,
+        n_jobs=4
+    )
+    
+    print("\n" + "="*80)
+    print("ANÁLISIS ESPECIALIZADO PARA ÓRDENES ALTOS")
+    print("="*80)
+    
+    analisis_sieve_doble_modalidad(df_final)
+    
+    elapsed = time.time() - start_time
+    print(f"\n⏱  Tiempo total: {elapsed:.1f}s")
+    
+    return df_final

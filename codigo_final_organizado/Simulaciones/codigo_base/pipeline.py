@@ -759,6 +759,8 @@ class Pipeline140SinSesgos_ARIMA_ConDiferenciacion:
 
         return pd.DataFrame(all_results)
 
+
+
 # ============================================================================
 # ¿ Hasta que qué orden de integración d es viable simular ARIMA(p,d,q)?
 # ============================================================================
@@ -926,14 +928,19 @@ class ARIMAMultiDSimulation:
 
 class PipelineARIMA_MultiD_DobleModalidad:
     """
-    Pipeline Multi-D con comparación de Densidades (ECRPS).
-    Evalúa d=1,2,3,4,5,7,10 en dos modalidades (Niveles vs Incrementos).
-    Versión optimizada para generar el formato de Excel solicitado.
+    Pipeline Multi-D CORREGIDO para ARIMA(p,d,q) con múltiples órdenes de integración.
+    
+    CORRECCIONES FUNDAMENTALES (basado en PipelineARIMA_MultiD_SieveOnly):
+    1. Usa ARIMASimulation (no ARIMAMultiDSimulation) para d=1
+    2. Implementa integración manual para d>1 (como Pipeline140)
+    3. Densidades predictivas calculadas en el espacio correcto
+    4. Integración coherente para predicciones
+    5. Evalúa TODOS los modelos (no solo Sieve Bootstrap)
     """
     
     N_TEST_STEPS = 12
     N_VALIDATION_FOR_OPT = 40
-    N_TRAIN_INITIAL = 200     
+    N_TRAIN_INITIAL = 200
 
     ARMA_CONFIGS = [
         {'nombre': 'RW', 'phi': [], 'theta': []},
@@ -956,6 +963,7 @@ class PipelineARIMA_MultiD_DobleModalidad:
         self.rng = np.random.default_rng(seed)
 
     def _setup_models(self, seed: int):
+        """Configura TODOS los modelos (igual que otras pipelines)."""
         return {
             'AREPD': AREPD(n_lags=5, rho=0.9, random_state=seed),
             'AV-MCPS': AdaptiveVolatilityMondrianCPS(n_lags=15, random_state=seed),
@@ -968,71 +976,166 @@ class PipelineARIMA_MultiD_DobleModalidad:
             'Sieve Bootstrap': SieveBootstrapModel(n_boot=self.n_boot, random_state=seed)
         }
 
-    def _get_true_density_samples(self, arma_sim, d_value: int, 
-                                 full_series: np.ndarray, full_errors: np.ndarray, 
-                                 current_idx: int, n_samples: int = 1000) -> np.ndarray:
-        series_diff = full_series.copy()
-        for _ in range(d_value):
-            series_diff = np.diff(series_diff)
+    def _simulate_arima_manual(self, arma_config: dict, d_value: int, 
+                              dist: str, var: float, seed: int, n: int):
+        """
+        Simula ARIMA EXACTAMENTE como Pipeline140SinSesgos_ARIMA_ConDiferenciacion.
         
-        idx_diff = current_idx - d_value
-        p, q = len(arma_sim.phi), len(arma_sim.theta)
-        hist_x = series_diff[:idx_diff]
-        hist_e = full_errors[:idx_diff]
+        Proceso:
+        1. Simula W_t ~ ARMA(p,q) usando ARIMASimulation
+        2. Integra manualmente d veces: Y_t = S^d(W_t)
         
-        det_part = np.dot(arma_sim.phi, hist_x[-p:][::-1]) if p > 0 else 0
-        ma_part = np.dot(arma_sim.theta, hist_e[-q:][::-1]) if q > 0 else 0
-        conditional_mean_x = det_part + ma_part
+        IMPORTANTE: Para d=1, esto es IDÉNTICO a ARIMASimulation directamente.
+        """
+        from simulacion import ARIMASimulation
         
-        future_errors = arma_sim._generate_errors(n_samples)
-        next_x_samples = conditional_mean_x + future_errors
+        # Simular usando ARIMASimulation (siempre con d=1 internamente)
+        simulator = ARIMASimulation(
+            phi=arma_config['phi'],
+            theta=arma_config['theta'],
+            noise_dist=dist,
+            sigma=np.sqrt(var),
+            seed=seed
+        )
         
-        temp_series = np.append(full_series[:current_idx], 0)
-        for _ in range(d_value):
-            temp_series = np.cumsum(temp_series)
+        # Para ARIMASimulation, la serie ya viene con 1 integración
+        # Si d=1, usamos directamente. Si d>1, integramos (d-1) veces adicionales
+        series_base, errors = simulator.simulate(n=n, burn_in=100)
         
-        deterministic_y_next = temp_series[-1]
-        return deterministic_y_next + next_x_samples
+        # Si d=1, ya está integrada correctamente
+        if d_value == 1:
+            y_series = series_base.copy()
+        else:
+            # Para d>1, integrar (d-1) veces adicionales
+            y_series = series_base.copy()
+            for _ in range(d_value - 1):
+                y_series = np.cumsum(y_series)
+        
+        return y_series, series_base, errors, simulator
+
+    def _get_true_density_from_simulator(self, simulator, series_history: np.ndarray,
+                                        errors_history: np.ndarray, 
+                                        n_samples: int = 1000) -> np.ndarray:
+        """
+        Obtiene densidad verdadera usando EXACTAMENTE el método de ARIMASimulation.
+        
+        IDÉNTICO a Pipeline140SinSesgos_ARIMA_ConDiferenciacion.
+        """
+        return simulator.get_true_next_step_samples(
+            series_history, errors_history, n_samples=n_samples
+        )
+
+    def _integrate_d_times_for_prediction(self, w_next_samples: np.ndarray,
+                                         y_series: np.ndarray, 
+                                         current_idx: int,
+                                         d_value: int) -> np.ndarray:
+        """
+        Integra predicciones desde espacio ARMA(d=1) a ARIMA(d>1).
+        
+        BASADO EN: TransformadorDiferenciacionIntegracion del código original
+        
+        Para d=1: Y_{t+1} = Y_t + W_{t+1}
+        Para d>1: Usar fórmula recursiva
+        """
+        if d_value == 1:
+            # Caso simple: Y_{t+1} = Y_t + ΔY_t donde ΔY_t = W_{t+1}
+            return y_series[current_idx - 1] + w_next_samples
+        else:
+            # Para d>1, necesitamos aplicar integración múltiple
+            # Guardamos los últimos d valores de Y
+            y_last_values = []
+            temp_y = y_series[:current_idx].copy()
+            
+            for level in range(d_value):
+                y_last_values.append(temp_y[-1])
+                if level < d_value - 1:
+                    temp_y = np.diff(temp_y)
+            
+            # Integrar desde W_{t+1} hasta Y_{t+1}
+            y_next_samples = w_next_samples.copy()
+            for level in range(d_value - 1, -1, -1):
+                y_next_samples = y_last_values[level] + y_next_samples
+            
+            return y_next_samples
 
     def _run_single_modalidad(self, arma_config: dict, d_value: int,
                              dist: str, var: float, scenario_seed: int,
-                             full_series: np.ndarray, full_errors: np.ndarray,
-                             test_start_idx: int, usar_diferenciacion: bool,
-                             arma_sim) -> list:
+                             y_series: np.ndarray, series_base: np.ndarray,
+                             errors: np.ndarray, test_start_idx: int,
+                             usar_diferenciacion: bool, simulator) -> list:
+        """
+        Ejecuta una modalidad EXACTAMENTE como Pipeline140SinSesgos_ARIMA_ConDiferenciacion.
+        Pero ahora evalúa TODOS los modelos (no solo Sieve Bootstrap).
         
+        MODALIDADES:
+        - SIN_DIFF: Modelos ven Y_t (serie integrada de orden d)
+        - CON_DIFF: Modelos ven ∇Y_t (serie diferenciada 1 vez)
+        """
         modalidad_str = "CON_DIFF" if usar_diferenciacion else "SIN_DIFF"
         
+        # Preparar serie según modalidad (IGUAL que Pipeline140)
         if usar_diferenciacion:
-            series_to_models = np.diff(full_series, prepend=full_series[0])
+            # Los modelos ven incrementos ΔY_t
+            series_to_models = np.diff(y_series, prepend=y_series[0])
         else:
-            series_to_models = full_series
-
+            # Los modelos ven niveles Y_t
+            series_to_models = y_series.copy()
+        
         train_calib_data = series_to_models[:test_start_idx]
         
+        # Crear TODOS los modelos
         models = self._setup_models(scenario_seed)
-        optimizer = TimeBalancedOptimizer(random_state=self.seed, verbose=False)
         
-        split = self.N_VALIDATION_FOR_OPT
-        best_params = optimizer.optimize_all_models(models, train_calib_data[:-split], train_calib_data[-split:])
+        # Optimización (TimeBalancedOptimizer como Pipeline140)
+        optimizer = TimeBalancedOptimizer(random_state=self.seed, verbose=self.verbose)
         
+        split = min(self.N_VALIDATION_FOR_OPT, len(train_calib_data) // 3)
+        best_params = optimizer.optimize_all_models(
+            models, 
+            train_calib_data[:-split], 
+            train_calib_data[-split:]
+        )
+        
+        # Aplicar hiperparámetros óptimos
         for name, model in models.items():
             if name in best_params:
                 for k, v in best_params[name].items():
-                    if hasattr(model, k): setattr(model, k, v)
+                    if hasattr(model, k): 
+                        setattr(model, k, v)
             if hasattr(model, 'freeze_hyperparameters'):
                 model.freeze_hyperparameters(train_calib_data)
 
+        # Testing rolling window
         results_rows = []
         p = len(arma_config['phi'])
         q = len(arma_config['theta'])
 
         for t in range(self.N_TEST_STEPS):
             curr_idx = test_start_idx + t
+            h_series_levels = y_series[:curr_idx]
             h_to_model = series_to_models[:curr_idx]
             
-            true_samples = self._get_true_density_samples(arma_sim, d_value, full_series, full_errors, curr_idx)
+            # DENSIDAD VERDADERA: Usar el simulador base (ARIMASimulation)
+            # Esto da la densidad de Y_{t+1} donde Y tiene 1 integración
+            # Si d=1, es directa. Si d>1, necesitamos integrar
             
-            # FILA RECTIFICADA PARA EL EXCEL (Igual a la imagen)
+            if d_value == 1:
+                # Para d=1, usar directamente get_true_next_step_samples
+                true_samples_base = self._get_true_density_from_simulator(
+                    simulator, series_base[:curr_idx], errors[:curr_idx]
+                )
+                true_samples = true_samples_base
+            else:
+                # Para d>1, obtener densidad base y luego integrar
+                true_samples_base = self._get_true_density_from_simulator(
+                    simulator, series_base[:curr_idx], errors[:curr_idx]
+                )
+                # Integrar las muestras (d-1) veces adicionales
+                true_samples = self._integrate_d_times_for_prediction(
+                    true_samples_base, y_series, curr_idx, d_value
+                )
+            
+            # Fila de resultados
             row = {
                 'Paso': t + 1,
                 'Proceso': f"ARMA_I({p},{d_value},{q})",
@@ -1043,21 +1146,30 @@ class PipelineARIMA_MultiD_DobleModalidad:
                 'Distribución': dist,
                 'Varianza': var,
                 'Modalidad': modalidad_str,
-                'Valor_Observado': full_series[curr_idx]  # Ground Truth en niveles
+                'Valor_Observado': y_series[curr_idx]
             }
             
+            # Evaluar TODOS los modelos
             for name, model in models.items():
                 try:
-                    if "Bootstrap" in name: pred = model.fit_predict(h_to_model)
-                    else: pred = model.fit_predict(pd.DataFrame({'valor': h_to_model}))
+                    if "Bootstrap" in name:
+                        pred = model.fit_predict(h_to_model)
+                    else:
+                        pred = model.fit_predict(pd.DataFrame({'valor': h_to_model}))
                     
                     pred_array = np.asarray(pred).flatten()
                     
+                    # Integrar predicciones si es necesario (IGUAL que Pipeline140)
                     if usar_diferenciacion:
-                        pred_array = full_series[curr_idx - 1] + pred_array
+                        # pred_array son incrementos ΔY_{t+1}
+                        # Y_{t+1} = Y_t + ΔY_{t+1}
+                        pred_array = y_series[curr_idx - 1] + pred_array
                     
+                    # Calcular ECRPS
                     row[name] = ecrps(pred_array, true_samples)
-                except:
+                except Exception as e:
+                    if self.verbose:
+                        print(f"Error en {name}: {e}")
                     row[name] = np.nan
             
             results_rows.append(row)
@@ -1065,51 +1177,396 @@ class PipelineARIMA_MultiD_DobleModalidad:
         return results_rows
 
     def _run_scenario_wrapper(self, args):
+        """Wrapper para procesamiento paralelo."""
         arma_cfg, d_val, dist, var, seed = args
-        from simulacion import ARMASimulation
-        simulator_arma = ARMASimulation(phi=arma_cfg['phi'], theta=arma_cfg['theta'], 
-                                       noise_dist=dist, sigma=np.sqrt(var), seed=seed)
         
         total_n = self.N_TRAIN_INITIAL + self.N_TEST_STEPS
-        arma_series, arma_errors = simulator_arma.simulate(n=total_n, burn_in=50)
         
-        y_series = arma_series.copy()
-        for _ in range(d_val):
-            y_series = np.cumsum(y_series)
-            
-        res_a = self._run_single_modalidad(arma_cfg, d_val, dist, var, seed, y_series, arma_errors, 
-                                          self.N_TRAIN_INITIAL, False, simulator_arma)
+        # Simular ARIMA manualmente (como Pipeline140)
+        y_series, series_base, errors, simulator = self._simulate_arima_manual(
+            arma_cfg, d_val, dist, var, seed, total_n
+        )
         
-        res_b = self._run_single_modalidad(arma_cfg, d_val, dist, var, seed + 1, y_series, arma_errors, 
-                                          self.N_TRAIN_INITIAL, True, simulator_arma)
+        # Ejecutar ambas modalidades
+        res_sin_diff = self._run_single_modalidad(
+            arma_cfg, d_val, dist, var, seed,
+            y_series, series_base, errors,
+            self.N_TRAIN_INITIAL, False, simulator
+        )
+        
+        res_con_diff = self._run_single_modalidad(
+            arma_cfg, d_val, dist, var, seed + 1,
+            y_series, series_base, errors,
+            self.N_TRAIN_INITIAL, True, simulator
+        )
         
         clear_all_sessions()
-        return res_a + res_b
+        return res_sin_diff + res_con_diff
 
-    def run_all(self, excel_filename: str = "RESULTADOS_MULTID_ECRPS.xlsx", batch_size: int = 10):
+    def run_all(self, excel_filename: str = "RESULTADOS_MULTID_ECRPS_CORREGIDO.xlsx", 
+                batch_size: int = 10, n_jobs: int = 3):
+        """
+        Ejecuta todas las simulaciones con la misma interfaz que la versión original.
+        """
         print("="*80)
-        print("🚀 PIPELINE MULTI-D: GENERANDO FORMATO ARIMA_I(p,d,q)")
+        print("🚀 PIPELINE MULTI-D CORREGIDO: ARIMA_I(p,d,q) - TODOS LOS MODELOS")
         print("="*80)
         
+        # Generar tareas
         tasks = []
         s_id = 0
         for d in self.D_VALUES:
             for cfg in self.ARMA_CONFIGS:
                 for dist in self.DISTRIBUTIONS:
                     for var in self.VARIANCES:
-                        tasks.append((cfg, d, dist, var, self.seed + s_id))
+                        tasks.append((cfg.copy(), d, dist, var, self.seed + s_id))
                         s_id += 1
         
+        print(f"📊 Total de escenarios: {len(tasks)}")
+        print(f"   - Valores de d: {self.D_VALUES}")
+        print(f"   - ARMA configs: {len(self.ARMA_CONFIGS)}")
+        print(f"   - Distribuciones: {len(self.DISTRIBUTIONS)}")
+        print(f"   - Varianzas: {len(self.VARIANCES)}")
+        print(f"   - Modalidades por escenario: 2 (SIN_DIFF, CON_DIFF)")
+        print(f"   - Modelos: TODOS (9 modelos)")
+        print(f"   - Simulador base: ARIMASimulation (consistente con Pipeline140)")
+        print(f"   - Total filas esperadas: {len(tasks) * 2 * self.N_TEST_STEPS}")
+        
+        # Procesamiento por lotes
         all_results = []
-        for i in range(0, len(tasks), batch_size):
-            batch = tasks[i:i+batch_size]
-            print(f"📦 Lote {i//batch_size + 1}...")
-            results = Parallel(n_jobs=3, backend='loky')(delayed(self._run_scenario_wrapper)(t) for t in batch)
-            for r in results: all_results.extend(r)
-            pd.DataFrame(all_results).to_excel(excel_filename, index=False)
+        num_batches = (len(tasks) + batch_size - 1) // batch_size
+        
+        for i in range(num_batches):
+            start_idx = i * batch_size
+            end_idx = min((i + 1) * batch_size, len(tasks))
+            batch = tasks[start_idx:end_idx]
             
+            print(f"📦 Procesando lote {i+1}/{num_batches}...")
+            
+            results = Parallel(n_jobs=n_jobs, backend='loky')(
+                delayed(self._run_scenario_wrapper)(t) for t in batch
+            )
+            
+            for r in results: 
+                all_results.extend(r)
+            
+            # Guardar progreso
+            pd.DataFrame(all_results).to_excel(excel_filename, index=False)
+            print(f"   ✅ {len(all_results)} filas guardadas")
+            
+            clear_all_sessions()
+            gc.collect()
+        
+        print(f"✅ Simulación completa: {excel_filename}")
         return pd.DataFrame(all_results)
 
+class PipelineARIMA_MultiD_SieveOnly:
+    """
+    Pipeline especializado SOLO para Sieve Bootstrap con múltiples órdenes de integración.
+    
+    BASADO DIRECTAMENTE EN: Pipeline140SinSesgos_ARIMA_ConDiferenciacion
+    
+    Diferencias clave vs PipelineARIMA_MultiD_DobleModalidad:
+    1. Usa ARIMASimulation (no ARIMAMultiDSimulation) para d=1
+    2. Implementa integración manual para d>1 (como lo hace Pipeline140)
+    3. Misma lógica de densidades predictivas
+    4. Solo evalúa Sieve Bootstrap
+    
+    OBJETIVO: Resultados consistentes con Pipeline140 cuando d=1
+    """
+    
+    N_TEST_STEPS = 12
+    N_VALIDATION_FOR_OPT = 40
+    N_TRAIN_INITIAL = 200
+
+    ARMA_CONFIGS = [
+        {'nombre': 'RW', 'phi': [], 'theta': []},
+        {'nombre': 'AR(1)', 'phi': [0.6], 'theta': []},
+        {'nombre': 'AR(2)', 'phi': [0.5, -0.2], 'theta': []},
+        {'nombre': 'MA(1)', 'phi': [], 'theta': [0.5]},
+        {'nombre': 'MA(2)', 'phi': [], 'theta': [0.4, 0.25]},
+        {'nombre': 'ARMA(1,1)', 'phi': [0.7], 'theta': [-0.3]},
+        {'nombre': 'ARMA(2,2)', 'phi': [0.6, 0.2], 'theta': [0.4, -0.1]}
+    ]
+    
+    DISTRIBUTIONS = ['normal', 'uniform', 'exponential', 't-student', 'mixture']
+    VARIANCES = [0.2, 0.5, 1.0, 3.0]
+    D_VALUES = [1, 2, 3, 4, 5, 7, 10]
+    
+    def __init__(self, n_boot: int = 1000, seed: int = 42, verbose: bool = False):
+        self.n_boot = n_boot
+        self.seed = seed
+        self.verbose = verbose
+        self.rng = np.random.default_rng(seed)
+
+    def _setup_sieve_model(self, seed: int):
+        """Solo crea el modelo Sieve Bootstrap (igual que Pipeline140)."""
+        return SieveBootstrapModel(n_boot=self.n_boot, random_state=seed)
+
+    def _simulate_arima_manual(self, arma_config: dict, d_value: int, 
+                              dist: str, var: float, seed: int, n: int):
+        """
+        Simula ARIMA EXACTAMENTE como Pipeline140SinSesgos_ARIMA_ConDiferenciacion.
+        
+        Proceso:
+        1. Simula W_t ~ ARMA(p,q) usando ARIMASimulation
+        2. Integra manualmente d veces: Y_t = S^d(W_t)
+        
+        IMPORTANTE: Para d=1, esto es IDÉNTICO a ARIMASimulation directamente.
+        """
+        from simulacion import ARIMASimulation
+        
+        # Simular usando ARIMASimulation (siempre con d=1 internamente)
+        simulator = ARIMASimulation(
+            phi=arma_config['phi'],
+            theta=arma_config['theta'],
+            noise_dist=dist,
+            sigma=np.sqrt(var),
+            seed=seed
+        )
+        
+        # Para ARIMASimulation, la serie ya viene con 1 integración
+        # Si d=1, usamos directamente. Si d>1, integramos (d-1) veces adicionales
+        series_base, errors = simulator.simulate(n=n, burn_in=100)
+        
+        # Si d=1, ya está integrada correctamente
+        if d_value == 1:
+            y_series = series_base.copy()
+        else:
+            # Para d>1, integrar (d-1) veces adicionales
+            y_series = series_base.copy()
+            for _ in range(d_value - 1):
+                y_series = np.cumsum(y_series)
+        
+        return y_series, series_base, errors, simulator
+
+    def _get_true_density_from_simulator(self, simulator, series_history: np.ndarray,
+                                        errors_history: np.ndarray, 
+                                        n_samples: int = 1000) -> np.ndarray:
+        """
+        Obtiene densidad verdadera usando EXACTAMENTE el método de ARIMASimulation.
+        
+        IDÉNTICO a Pipeline140SinSesgos_ARIMA_ConDiferenciacion.
+        """
+        return simulator.get_true_next_step_samples(
+            series_history, errors_history, n_samples=n_samples
+        )
+
+    def _integrate_d_times_for_prediction(self, w_next_samples: np.ndarray,
+                                         y_series: np.ndarray, 
+                                         current_idx: int,
+                                         d_value: int) -> np.ndarray:
+        """
+        Integra predicciones desde espacio ARMA(d=1) a ARIMA(d>1).
+        
+        BASADO EN: TransformadorDiferenciacionIntegracion del código original
+        
+        Para d=1: Y_{t+1} = Y_t + W_{t+1}
+        Para d>1: Usar fórmula recursiva
+        """
+        if d_value == 1:
+            # Caso simple: Y_{t+1} = Y_t + ΔY_t donde ΔY_t = W_{t+1}
+            return y_series[current_idx - 1] + w_next_samples
+        else:
+            # Para d>1, necesitamos aplicar integración múltiple
+            # Guardamos los últimos d valores de Y
+            y_last_values = []
+            temp_y = y_series[:current_idx].copy()
+            
+            for level in range(d_value):
+                y_last_values.append(temp_y[-1])
+                if level < d_value - 1:
+                    temp_y = np.diff(temp_y)
+            
+            # Integrar desde W_{t+1} hasta Y_{t+1}
+            y_next_samples = w_next_samples.copy()
+            for level in range(d_value - 1, -1, -1):
+                y_next_samples = y_last_values[level] + y_next_samples
+            
+            return y_next_samples
+
+    def _run_single_modalidad(self, arma_config: dict, d_value: int,
+                             dist: str, var: float, scenario_seed: int,
+                             y_series: np.ndarray, series_base: np.ndarray,
+                             errors: np.ndarray, test_start_idx: int,
+                             usar_diferenciacion: bool, simulator) -> list:
+        """
+        Ejecuta una modalidad EXACTAMENTE como Pipeline140SinSesgos_ARIMA_ConDiferenciacion.
+        
+        MODALIDADES:
+        - SIN_DIFF: Modelos ven Y_t (serie integrada de orden d)
+        - CON_DIFF: Modelos ven ∇Y_t (serie diferenciada 1 vez)
+        """
+        modalidad_str = "CON_DIFF" if usar_diferenciacion else "SIN_DIFF"
+        
+        # Preparar serie según modalidad (IGUAL que Pipeline140)
+        if usar_diferenciacion:
+            # Los modelos ven incrementos ΔY_t
+            series_to_models = np.diff(y_series, prepend=y_series[0])
+        else:
+            # Los modelos ven niveles Y_t
+            series_to_models = y_series.copy()
+        
+        train_calib_data = series_to_models[:test_start_idx]
+        
+        # Crear SOLO Sieve Bootstrap
+        model = self._setup_sieve_model(scenario_seed)
+        
+        # Optimización simple (Pipeline140 usa TimeBalancedOptimizer pero para Sieve 
+        # podemos usar defaults por velocidad)
+        if hasattr(model, 'freeze_hyperparameters'):
+            model.freeze_hyperparameters(train_calib_data)
+
+        # Testing rolling window
+        results_rows = []
+        p = len(arma_config['phi'])
+        q = len(arma_config['theta'])
+
+        for t in range(self.N_TEST_STEPS):
+            curr_idx = test_start_idx + t
+            h_series_levels = y_series[:curr_idx]
+            h_to_model = series_to_models[:curr_idx]
+            
+            # DENSIDAD VERDADERA: Usar el simulador base (ARIMASimulation)
+            # Esto da la densidad de Y_{t+1} donde Y tiene 1 integración
+            # Si d=1, es directa. Si d>1, necesitamos integrar
+            
+            if d_value == 1:
+                # Para d=1, usar directamente get_true_next_step_samples
+                true_samples_base = self._get_true_density_from_simulator(
+                    simulator, series_base[:curr_idx], errors[:curr_idx]
+                )
+                true_samples = true_samples_base
+            else:
+                # Para d>1, obtener densidad base y luego integrar
+                true_samples_base = self._get_true_density_from_simulator(
+                    simulator, series_base[:curr_idx], errors[:curr_idx]
+                )
+                # Integrar las muestras (d-1) veces adicionales
+                true_samples = self._integrate_d_times_for_prediction(
+                    true_samples_base, y_series, curr_idx, d_value
+                )
+            
+            # Fila de resultados
+            row = {
+                'Paso': t + 1,
+                'Proceso': f"ARMA_I({p},{d_value},{q})",
+                'p': p,
+                'd': d_value,
+                'q': q,
+                'ARMA_base': arma_config['nombre'],
+                'Distribución': dist,
+                'Varianza': var,
+                'Modalidad': modalidad_str,
+                'Valor_Observado': y_series[curr_idx]
+            }
+            
+            # Evaluar Sieve Bootstrap
+            try:
+                pred = model.fit_predict(h_to_model)
+                pred_array = np.asarray(pred).flatten()
+                
+                # Integrar predicciones si es necesario (IGUAL que Pipeline140)
+                if usar_diferenciacion:
+                    # pred_array son incrementos ΔY_{t+1}
+                    # Y_{t+1} = Y_t + ΔY_{t+1}
+                    pred_array = y_series[curr_idx - 1] + pred_array
+                
+                # Calcular ECRPS
+                row['Sieve Bootstrap'] = ecrps(pred_array, true_samples)
+            except Exception as e:
+                if self.verbose:
+                    print(f"Error en Sieve Bootstrap: {e}")
+                row['Sieve Bootstrap'] = np.nan
+            
+            results_rows.append(row)
+
+        return results_rows
+
+    def _run_scenario_wrapper(self, args):
+        """Wrapper para procesamiento paralelo."""
+        arma_cfg, d_val, dist, var, seed = args
+        
+        total_n = self.N_TRAIN_INITIAL + self.N_TEST_STEPS
+        
+        # Simular ARIMA manualmente (como Pipeline140)
+        y_series, series_base, errors, simulator = self._simulate_arima_manual(
+            arma_cfg, d_val, dist, var, seed, total_n
+        )
+        
+        # Ejecutar ambas modalidades
+        res_sin_diff = self._run_single_modalidad(
+            arma_cfg, d_val, dist, var, seed,
+            y_series, series_base, errors,
+            self.N_TRAIN_INITIAL, False, simulator
+        )
+        
+        res_con_diff = self._run_single_modalidad(
+            arma_cfg, d_val, dist, var, seed + 1,
+            y_series, series_base, errors,
+            self.N_TRAIN_INITIAL, True, simulator
+        )
+        
+        clear_all_sessions()
+        return res_sin_diff + res_con_diff
+
+    def run_all(self, excel_filename: str = "RESULTADOS_SIEVE_MULTID_CONSISTENTE.xlsx", 
+                batch_size: int = 20, n_jobs: int = 4):
+        """
+        Ejecuta todas las simulaciones de forma CONSISTENTE con Pipeline140.
+        """
+        print("="*80)
+        print("🚀 PIPELINE SIEVE BOOTSTRAP - CONSISTENTE CON PIPELINE140")
+        print("="*80)
+        
+        # Generar tareas
+        tasks = []
+        s_id = 0
+        for d in self.D_VALUES:
+            for cfg in self.ARMA_CONFIGS:
+                for dist in self.DISTRIBUTIONS:
+                    for var in self.VARIANCES:
+                        tasks.append((cfg.copy(), d, dist, var, self.seed + s_id))
+                        s_id += 1
+        
+        print(f"📊 Total de escenarios: {len(tasks)}")
+        print(f"   - Valores de d: {self.D_VALUES}")
+        print(f"   - ARMA configs: {len(self.ARMA_CONFIGS)}")
+        print(f"   - Distribuciones: {len(self.DISTRIBUTIONS)}")
+        print(f"   - Varianzas: {len(self.VARIANCES)}")
+        print(f"   - Modalidades: 2 (SIN_DIFF, CON_DIFF)")
+        print(f"   - Modelo: SIEVE BOOTSTRAP")
+        print(f"   - Simulador base: ARIMASimulation (consistente con Pipeline140)")
+        print(f"   - Total filas esperadas: {len(tasks) * 2 * self.N_TEST_STEPS}")
+        
+        # Procesamiento por lotes
+        all_results = []
+        num_batches = (len(tasks) + batch_size - 1) // batch_size
+        
+        for i in range(num_batches):
+            start_idx = i * batch_size
+            end_idx = min((i + 1) * batch_size, len(tasks))
+            batch = tasks[start_idx:end_idx]
+            
+            print(f"📦 Procesando lote {i+1}/{num_batches}...")
+            
+            results = Parallel(n_jobs=n_jobs, backend='loky')(
+                delayed(self._run_scenario_wrapper)(t) for t in batch
+            )
+            
+            for r in results: 
+                all_results.extend(r)
+            
+            # Guardar progreso
+            pd.DataFrame(all_results).to_excel(excel_filename, index=False)
+            print(f"   ✅ {len(all_results)} filas guardadas")
+            
+            clear_all_sessions()
+            gc.collect()
+        
+        print(f"✅ Simulación completa: {excel_filename}")
+        return pd.DataFrame(all_results)
+    
 # ============================================================================
 # ¿La cantidad de datos afecta a la calidad de las densidades predictivas?
 # ============================================================================
