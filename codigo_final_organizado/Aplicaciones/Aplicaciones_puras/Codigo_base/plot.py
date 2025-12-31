@@ -1,4 +1,3 @@
-
 import matplotlib.pyplot as plt
 from matplotlib.offsetbox import AnchoredText
 import numpy as np
@@ -100,7 +99,6 @@ def generate_validation_report(predictions_dict, output_folder, output_prefix, m
                 reliability_data.append({'Modelo': m, 'Nominal': q, 'Empirical': cov})
 
     ax_rel.set_title("Reliability Curves")
-    # CAMBIO: Leyenda arriba a la izquierda
     ax_rel.legend(loc='upper left')
     plt.savefig(os.path.join(output_folder, f"{output_prefix}_stat_Reliability.png"))
     plt.close()
@@ -118,7 +116,6 @@ def plot_type_a_vertical_stack(group_name, models_to_plot, predictions_dict, df_
     steps = sorted(predictions_dict.keys())[:24] 
     n_steps = len(steps)
     
-    # Altura dinámica: 2.5 pulgadas por paso -> 24 * 2.5 = 60 pulgadas de alto
     fig, axes = plt.subplots(nrows=n_steps, ncols=1, figsize=(10, 2.5 * n_steps), constrained_layout=True)
     
     if n_steps == 1: axes = [axes]
@@ -135,7 +132,6 @@ def plot_type_a_vertical_stack(group_name, models_to_plot, predictions_dict, df_
         crps_row = df_results.loc[df_results['Paso'] == step_num].iloc[0]
         legend_labels = []
 
-        # Determinar límites X comunes para este paso y estos modelos
         vals_step = [true_val]
         for m in models_to_plot:
             if m in preds_dict:
@@ -168,12 +164,10 @@ def plot_type_a_vertical_stack(group_name, models_to_plot, predictions_dict, df_
 
         ax.axvline(true_val, color='black', linestyle='--', linewidth=2, label='Real')
         
-        # Título a la derecha para no chocar con la leyenda izquierda
         ax.set_title(f"Step {step_num} | Real: {true_val:.2f}", fontsize=12, fontweight='bold', loc='right')
         ax.set_ylabel("Densidad")
         ax.grid(True, alpha=0.3)
         
-        # CAMBIO: Leyenda (colores) movida a 'upper left'
         full_txt = "CRPS:\n" + "\n".join(legend_labels)
         at = AnchoredText(full_txt, prop=dict(size=9), frameon=True, loc='upper left')
         at.patch.set_alpha(0.8)
@@ -242,16 +236,14 @@ def plot_type_b_step_comparison(target_step_idx, predictions_dict, df_results,
         
         ax.axvline(true_val, color='black', linestyle='--', linewidth=2)
         
-        # Título (Nombre Modelo) movido a la derecha para balancear con el texto izquierdo
         ax.set_title(m, loc='right', fontsize=11, fontweight='bold', color=color)
         
-        # CAMBIO: Texto CRPS movido a la izquierda (x=0.01)
         ax.text(0.01, 0.8, crps_txt, transform=ax.transAxes, ha='left',
                 bbox=dict(facecolor='white', alpha=0.8, edgecolor='#ccc'))
         
         ax.set_xlim(xlims)
         ax.grid(True, alpha=0.3)
-        ax.set_yticks([]) # Quitar eje Y para limpieza
+        ax.set_yticks([])
 
     filename = os.path.join(output_folder, f"{output_prefix}_TypeB_Step{target_step_idx:02d}_AllModels.png")
     plt.savefig(filename, bbox_inches='tight')
@@ -260,25 +252,84 @@ def plot_type_b_step_comparison(target_step_idx, predictions_dict, df_results,
 # ==============================================================================
 # 4. MÓDULO DE ANÁLISIS ESTADÍSTICO (DIEBOLD-MARIANO & RANKING)
 # ==============================================================================
-def diebold_mariano_test(errors1, errors2):
-    """Test DM básico para vectores de errores."""
-    d = np.array(errors1) - np.array(errors2)
-    n = len(d)
-    if n < 2: return np.nan, np.nan
-    mean_d = np.mean(d)
-    var_d = np.var(d, ddof=1) / n
-    if var_d <= 0: return 0.0, 1.0
-    dm_stat = mean_d / np.sqrt(var_d)
-    # P-value two-sided
-    p_value = 2 * (1 - stats.norm.cdf(abs(dm_stat)))
-    return dm_stat, p_value
-
-def run_advanced_statistics(df_results, output_folder):
+def modified_diebold_mariano_test(errors1, errors2, h=1):
     """
-    Implementa el análisis estadístico solicitado:
+    Test Diebold-Mariano modificado con corrección Harvey-Leybourne-Newbold (1997)
+    
+    Parameters:
+    -----------
+    errors1, errors2 : array-like
+        Errores de pronóstico (ECRPS) de los dos modelos
+    h : int
+        Horizonte de pronóstico (forecast horizon)
+    
+    Returns:
+    --------
+    hln_dm_stat : float
+        Estadístico DM corregido (HLN-DM)
+    p_value : float
+        P-valor usando distribución t-Student con T-1 grados de libertad
+    dm_stat : float
+        Estadístico DM original (sin corrección)
+    """
+    # Calcular diferencial de pérdida
+    d = errors1 - errors2
+    d_bar = np.mean(d)
+    T = len(d)
+    
+    if T < 2:
+        return np.nan, np.nan, np.nan
+    
+    # Calcular autocovarianzas
+    def gamma_d(k):
+        if k == 0:
+            return np.var(d, ddof=1)
+        else:
+            return np.mean((d[k:] - d_bar) * (d[:-k] - d_bar))
+    
+    # Estimar la varianza de largo plazo usando Newey-West
+    # Para h-step-ahead forecasts, incluimos hasta h-1 lags
+    gamma_0 = gamma_d(0)
+    gamma_sum = gamma_0
+    
+    if h > 1:
+        for k in range(1, h):
+            gamma_k = gamma_d(k)
+            gamma_sum += 2 * gamma_k
+    
+    var_d = gamma_sum / T
+    
+    if var_d <= 0:
+        return 0, 1.0, 0
+    
+    # Estadístico DM original
+    dm_stat = d_bar / np.sqrt(var_d)
+    
+    # Corrección Harvey-Leybourne-Newbold (1997)
+    correction_factor = np.sqrt((T + 1 - 2*h + h*(h-1)) / T)
+    hln_dm_stat = correction_factor * dm_stat
+    
+    # P-valor usando t-Student con T-1 grados de libertad
+    df = T - 1
+    p_value = 2 * (1 - stats.t.cdf(abs(hln_dm_stat), df))
+    
+    return hln_dm_stat, p_value, dm_stat
+
+def run_advanced_statistics(df_results, output_folder, h=1):
+    """
+    Implementa el análisis estadístico con DM modificado (HLN):
     1. Heatmap de comparaciones DM.
     2. Ranking basado en victorias significativas.
     3. Boxplot de distribución de CRPS.
+    
+    Parameters:
+    -----------
+    df_results : pd.DataFrame
+        DataFrame con resultados de CRPS por modelo
+    output_folder : str
+        Carpeta de salida
+    h : int
+        Horizonte de pronóstico (1 para one-step-ahead)
     """
     analysis_dir = os.path.join(output_folder, "Analisis")
     if not os.path.exists(analysis_dir):
@@ -291,11 +342,12 @@ def run_advanced_statistics(df_results, output_folder):
     modelos = [c for c in df_results.columns if c not in cols_meta]
     
     # ---------------------------------------------------------
-    # A. Matriz Diebold-Mariano y Ranking
+    # A. Matriz Diebold-Mariano Modificada (HLN) y Ranking
     # ---------------------------------------------------------
     n_models = len(modelos)
     matriz_dm = np.zeros((n_models, n_models))
     matriz_pvals = np.ones((n_models, n_models))
+    matriz_dm_original = np.zeros((n_models, n_models))
     
     # Ajuste Bonferroni simple
     n_comparisons = (n_models * (n_models - 1)) / 2
@@ -313,23 +365,34 @@ def run_advanced_statistics(df_results, output_folder):
                 continue
             
             # Usamos CRPS como métrica de error (se quiere minimizar)
-            # DM test: H0: error_m1 = error_m2
-            e1 = df_results[m1].values
-            e2 = df_results[m2].values
+            e1 = df_results[m1].dropna().values
+            e2 = df_results[m2].dropna().values
             
-            # Diebold-Mariano sobre CRPS (Loss Function = CRPS)
-            dm_stat, p_val = diebold_mariano_test(e1, e2) # d = e1 - e2
+            # Asegurar misma longitud
+            min_len = min(len(e1), len(e2))
+            e1 = e1[:min_len]
+            e2 = e2[:min_len]
+            
+            if len(e1) < 2:
+                continue
+            
+            # Test Diebold-Mariano modificado (HLN)
+            hln_stat, p_val, dm_original = modified_diebold_mariano_test(e1, e2, h=h)
+            
+            if np.isnan(hln_stat):
+                continue
             
             matriz_pvals[i, j] = p_val
+            matriz_dm_original[i, j] = dm_original
             
             if p_val < alpha_bonf:
-                if dm_stat < 0: 
+                if hln_stat < 0: 
                     # Mean(d) < 0 => Mean(e1) < Mean(e2) => m1 es mejor
-                    matriz_dm[i, j] = 1 # Victoria fila
+                    matriz_dm[i, j] = 1  # Victoria fila
                     wins += 1
                 else:
                     # m1 es peor
-                    matriz_dm[i, j] = -1 # Derrota fila
+                    matriz_dm[i, j] = -1  # Derrota fila
                     losses += 1
             else:
                 ties += 1
@@ -341,26 +404,51 @@ def run_advanced_statistics(df_results, output_folder):
             'Derrotas': losses,
             'Empates': ties,
             'Score_Neto': score,
-            'Win_Rate': wins / (n_models - 1)
+            'Win_Rate': wins / (n_models - 1) if n_models > 1 else 0,
+            'CRPS_Mean': df_results[m1].mean(),
+            'CRPS_Median': df_results[m1].median()
         })
 
-    # Guardar Heatmap
-    fig, ax = plt.subplots(figsize=(10, 8))
+    # Guardar Heatmap HLN-DM
+    fig, ax = plt.subplots(figsize=(12, 10))
     sns.heatmap(matriz_dm, annot=True, fmt='.0f', cmap='RdYlGn', center=0,
                 xticklabels=modelos, yticklabels=modelos, 
                 cbar_kws={'label': '1=Fila Gana, -1=Fila Pierde'}, ax=ax)
-    ax.set_title(f"Matriz de Superioridad Significativa (DM Test, N={len(df_results)})", fontsize=12)
+    ax.set_title(f"Matriz de Superioridad Significativa (HLN-DM Test, N={len(df_results)}, α={alpha_bonf:.4f})", 
+                 fontsize=12)
     plt.tight_layout()
-    plt.savefig(os.path.join(analysis_dir, "DM_Superiority_Matrix.png"))
+    plt.savefig(os.path.join(analysis_dir, "HLN_DM_Superiority_Matrix.png"), dpi=300)
+    plt.close()
+
+    # Guardar Heatmap de P-valores
+    fig, ax = plt.subplots(figsize=(12, 10))
+    sns.heatmap(matriz_pvals, annot=True, fmt='.3f', cmap='RdYlGn_r', 
+                xticklabels=modelos, yticklabels=modelos,
+                cbar_kws={'label': 'P-valor'}, ax=ax, vmin=0, vmax=0.1)
+    ax.set_title(f"Matriz de P-valores (HLN-DM Test)", fontsize=12)
+    plt.tight_layout()
+    plt.savefig(os.path.join(analysis_dir, "HLN_DM_Pvalues_Matrix.png"), dpi=300)
     plt.close()
 
     # Guardar Excel Ranking
     df_rank = pd.DataFrame(ranking_data).sort_values('Score_Neto', ascending=False)
     df_rank.insert(0, 'Rank', range(1, len(df_rank) + 1))
     
-    excel_path = os.path.join(analysis_dir, "Ranking_Estadistico_DM.xlsx")
-    df_rank.to_excel(excel_path, index=False)
-    print(f"   ✓ Ranking DM guardado: {excel_path}")
+    excel_path = os.path.join(analysis_dir, "Ranking_Estadistico_HLN_DM.xlsx")
+    
+    with pd.ExcelWriter(excel_path, engine='openpyxl') as writer:
+        df_rank.to_excel(writer, sheet_name='Ranking', index=False)
+        
+        # Guardar matrices completas
+        pd.DataFrame(matriz_dm, index=modelos, columns=modelos).to_excel(
+            writer, sheet_name='Matriz_Superioridad')
+        pd.DataFrame(matriz_pvals, index=modelos, columns=modelos).to_excel(
+            writer, sheet_name='Matriz_Pvalores')
+        pd.DataFrame(matriz_dm_original, index=modelos, columns=modelos).to_excel(
+            writer, sheet_name='Matriz_DM_Original')
+    
+    print(f"   ✓ Ranking HLN-DM guardado: {excel_path}")
+    print(f"   ✓ Bonferroni α = {alpha_bonf:.6f} ({n_comparisons:.0f} comparaciones)")
 
     # ---------------------------------------------------------
     # B. Boxplot de Distribución de CRPS (Variabilidad)
@@ -375,7 +463,7 @@ def run_advanced_statistics(df_results, output_folder):
     plt.title("Distribución de CRPS por Modelo (Ordenado por Mediana)")
     plt.xlabel("CRPS Value")
     plt.tight_layout()
-    plt.savefig(os.path.join(analysis_dir, "CRPS_Distribution_Boxplot.png"))
+    plt.savefig(os.path.join(analysis_dir, "CRPS_Distribution_Boxplot.png"), dpi=300)
     plt.close()
 
     # ---------------------------------------------------------
@@ -389,18 +477,26 @@ def run_advanced_statistics(df_results, output_folder):
     plt.title("Evolución del CRPS Promedio Acumulado")
     plt.xlabel("Pasos de Predicción")
     plt.ylabel("CRPS Promedio Acumulado")
-    # CAMBIO: Leyenda arriba a la izquierda (dentro del gráfico)
     plt.legend(loc='upper left')
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
-    plt.savefig(os.path.join(analysis_dir, "CRPS_Cumulative_Evolution.png"))
+    plt.savefig(os.path.join(analysis_dir, "CRPS_Cumulative_Evolution.png"), dpi=300)
     plt.close()
+
+    print(f"   ✓ Análisis completo guardado en '{analysis_dir}'")
 
 
 # ==============================================================================
 # 5. ORQUESTADOR PRINCIPAL
 # ==============================================================================
-def visualize_predictions(pipeline, series_index=0, output_prefix="dataset", output_folder="Resultados"):
+def visualize_predictions(pipeline, series_index=0, output_prefix="dataset", 
+                         output_folder="Resultados", forecast_horizon=1):
+    """
+    Parameters:
+    -----------
+    forecast_horizon : int
+        Horizonte de pronóstico para el test DM (h). Default=1 para one-step-ahead.
+    """
     print(f"\n🎨 Iniciando visualización avanzada para serie {series_index}...")
 
     if not os.path.exists(output_folder):
@@ -474,11 +570,11 @@ def visualize_predictions(pipeline, series_index=0, output_prefix="dataset", out
             output_prefix=output_prefix
         )
 
-    # 4. Análisis Estadístico Avanzado (Carpeta 'Analisis')
-    run_advanced_statistics(df_results, output_folder)
+    # 4. Análisis Estadístico Avanzado con HLN-DM (Carpeta 'Analisis')
+    run_advanced_statistics(df_results, output_folder, h=forecast_horizon)
 
     print(f"\n✨ Visualización completada.")
     print(f"   - Tipo A: 12 imágenes (24 subplots verticales).")
     print(f"   - Tipo B: 4 imágenes.")
     print(f"   - Diagnóstico: PIT/Reliability.")
-    print(f"   - Análisis: Carpeta 'Analisis' con Rankings y Heatmaps.")
+    print(f"   - Análisis: Carpeta 'Analisis' con Rankings y Heatmaps (HLN-DM).")
