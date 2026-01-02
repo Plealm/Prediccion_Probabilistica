@@ -1,0 +1,244 @@
+\documentclass[12pt,spanish,openany,letterpaper,pagesize]{scrbook}
+
+% ============================================
+% PARCHE PARA ERROR DE HOOKS (AÑADIR PRIMERO)
+% ============================================
+\RequirePackage{scrlfile}
+\PreventPackageFromLoading{babel}
+\RequirePackage[spanish,es-tabla]{babel}
+% ============================================
+
+% --- RESTO DEL PREÁMBULO ---
+\usepackage[utf8]{inputenc}
+\usepackage{csquotes}
+% --- CODIFICACIÓN Y LENGUAJE ---
+\usepackage[utf8]{inputenc}
+\usepackage[spanish, es-tabla]{babel}
+\usepackage{csquotes}
+
+% --- MATEMÁTICAS ---
+\usepackage{amsmath, amssymb, amscd, mathtools, bbm}
+\usepackage{nccmath}
+\usepackage{physics}
+\usepackage{siunitx}
+
+% --- GRÁFICOS ---
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{patterns,shapes}
+\usepackage{pgfgantt}
+
+% --- TABLAS ---
+\usepackage{booktabs, threeparttable, multirow, floatrow}
+\usepackage{caption}
+
+% --- LAYOUT ---
+\usepackage{ragged2e}
+\usepackage{setspace}
+
+% Configuración de geometría ANTES de scrlayer-scrpage
+\usepackage[
+    letterpaper,
+    top=2.5cm,
+    bottom=2.5cm,
+    left=3cm,
+    right=2.5cm,
+    headheight=18pt,  % Aumentado para evitar warning
+    includehead
+]{geometry}
+
+% --- ENCABEZADOS (después de geometry) ---
+\usepackage[automark]{scrlayer-scrpage}
+
+% --- BIBLIOGRAFÍA ---
+\usepackage[style=authoryear, backend=biber, sorting=nyt]{biblatex}
+\addbibresource{biblio.bib}
+
+% --- HYPERREF (ÚLTIMO) ---
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue,
+    bookmarksdepth=4,
+    pdfauthor={Pedro José Leal Mesa},
+    pdftitle={Pronóstico Probabilístico Basado en Predicción Conformal}
+}
+
+% --- CONFIGURACIONES PERSONALIZADAS ---
+\setlength{\parindent}{0cm}
+\setlength{\parskip}{1.5ex}
+\renewcommand{\baselinestretch}{1.2}
+
+% Numeración personalizada
+\renewcommand{\theequation}{\thechapter-\arabic{equation}}
+\renewcommand{\thefigure}{\textbf{\thechapter-\arabic{figure}}}
+\renewcommand{\thetable}{\textbf{\thechapter-\arabic{table}}}
+
+% Configuración de encabezados
+\clearpairofpagestyles
+\ihead{\rightmark}
+\ohead{\pagemark}
+\pagestyle{scrheadings}
+
+\begin{document}
+
+% ==========================================
+% PRELIMINARES
+% ==========================================
+\frontmatter
+
+% ==========================================
+% PORTADA
+% ==========================================
+\begin{titlepage}
+\thispagestyle{empty}
+\centering
+
+    \includegraphics[width=5cm]{logo_unal.png}
+    
+    \vspace{1.5cm}
+    
+    {\huge\bfseries Pronóstico Probabilístico Basado en Predicción Conformal para Series Temporales: Comparación con Bootstrapping y DeepAR\par}
+    
+    \vspace{3cm}
+    
+    {\Large\bfseries Pedro José Leal Mesa\par}
+    
+    \vfill
+    
+    Universidad Nacional de Colombia\\
+    Facultad de Ciencias, Departamento de Estadística\\
+    Bogotá D.C., Colombia\\
+    2026
+    
+\end{titlepage}
+
+\cleardoublepage
+
+% ==========================================
+% PÁGINA DE GRADO
+% ==========================================
+\begin{titlepage}
+\thispagestyle{empty}
+\centering
+    
+    {\huge\bfseries Pronóstico Probabilístico Basado en Predicción Conformal para Series Temporales: Comparación con Bootstrapping y DeepAR\par}
+    
+    \vspace{2cm}
+    
+    {\Large\bfseries Pedro José Leal Mesa\par}
+    
+    \vspace{2cm}
+    
+    Tesis presentada como requisito parcial para optar al título de:\\[0.3cm]
+    {\bfseries Magíster en Ciencias - Estadística\par}
+    
+    \vspace{2cm}
+
+    
+    Director:\\
+    Ph.D. Mario E. Arrieta-Prieto
+    
+    \vspace{2cm}
+    
+    Línea de Investigación:\\
+    Análisis de Series de Tiempo y Predicción Conformal
+    
+    \vfill
+    
+    Universidad Nacional de Colombia\\
+    Facultad de Ciencias, Departamento de Estadística\\
+    Bogotá D.C., Colombia\\
+    2026
+    
+\end{titlepage}
+
+\cleardoublepage
+
+% ==========================================
+% DEDICATORIA
+% ==========================================
+\thispagestyle{empty}
+\chapter*{Dedicatoria}
+
+\vspace*{3cm}
+
+\textbf{A mi papá Antonio Leal, a mis compañeros y a mi director por su guía y apoyo constante en este proceso de formación.}
+
+\vspace{4cm}
+
+\begin{flushright}
+\begin{minipage}{8cm}
+    \small\itshape
+    ``Essentially, all models are wrong, but some are useful.''
+    
+    \medskip
+    \normalfont --- \textbf{George E. P. Box}
+\end{minipage}
+\end{flushright}
+
+\cleardoublepage
+
+% ==========================================
+% AGRADECIMIENTOS
+% ==========================================
+\chapter*{Agradecimientos}
+\addcontentsline{toc}{chapter}{Agradecimientos}
+
+Al Ph.D. Mario E. Arrieta-Prieto, director de esta tesis, por su invaluable orientación y paciencia. Quiero agradecerle especialmente por haberme incentivado a salir de mi zona de confort y presentar los resultados preliminares de este trabajo en el escenario internacional.
+
+\bigskip
+
+Un agradecimiento profundo y especial por la oportunidad de participar en el \textbf{45th International Symposium on Forecasting} en China. Esta experiencia marcó un hito en mi carrera profesional y fue posible gracias a un esfuerzo colectivo que jamás olvidaré: a la Universidad Nacional de Colombia por brindarme los fondos institucionales, y muy especialmente a mis compañeros, amigos, conocidos y familiares, quienes con un cariño inmenso organizaron y participaron en una rifa para completar el dinero necesario para este viaje. Su solidaridad fue el motor que me llevó al otro lado del mundo.
+
+\bigskip
+
+A mis compañeros de la Maestría en Estadística, con quienes compartí este camino académico, por las discusiones técnicas y el apoyo moral en los momentos de mayor reto.
+
+\bigskip
+
+A mi padre, Antonio Leal, por ser mi apoyo incondicional y por creer en este proyecto desde el primer día. Todo este esfuerzo es también suyo.
+
+\bigskip
+
+\begin{flushright}
+\textbf{Con gratitud,\\Pedro José Leal Mesa}
+\end{flushright}
+
+\cleardoublepage
+
+% ==========================================
+% ÍNDICES
+% ==========================================
+\tableofcontents
+\cleardoublepage
+
+\listoffigures
+\cleardoublepage
+
+\listoftables
+\cleardoublepage
+
+% ==========================================
+% CONTENIDO PRINCIPAL
+% ==========================================
+\mainmatter
+
+\include{Capitulos/Cap1}
+
+% Capítulos futuros:
+% \include{Capitulos/Cap2}
+% \include{Capitulos/Cap3}
+% \include{Capitulos/Cap4}
+% \include{Capitulos/Cap5}
+% \include{Capitulos/Cap6}
+
+% ==========================================
+% BIBLIOGRAFÍA
+% ==========================================
+\backmatter
+\printbibliography[title={Bibliografía}, heading=bibintoc]
+
+\end{document}

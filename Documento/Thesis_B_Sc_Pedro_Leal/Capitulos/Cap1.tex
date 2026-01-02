@@ -1,0 +1,349 @@
+\chapter{Conceptos Básicos para Modelos de quarkonia} \label{cap:1}
+
+Este capítulo describe la cinemática con la cual se define la ecuación de Schrödinger a solucionar, la deducción del potencial de Cornell
+desde primeros principios y como se realiza todo este proceso desde la mecánica
+cuántica no relativista.
+\\
+
+En principio, los estados ligados en una teoría de campos relativista se estudian con el formalismo de Bethe-Salpeter, pero es importante considerar las escalas características de los quark ligados que se profundizarán, con una constante de estructura de la QCD  \(\Lambda_{QCD} \approx \SI{0.2}{\giga\electronvolt}\)\cite{phdthesis}, el quark charm tiene una masa \(m_c \approx \SI{1.27}{\giga\electronvolt}\) y en el caso del quark bottom \(m_b \approx \SI{4.18}{\giga\electronvolt}\)\cite{PDG} . Por lo tanto, se puede analizar estos procesos desde una teoría \textit{no relativista} y así mismo ser tratado desde
+la solución de la ecuación de Schrödinger.
+
+\section{Estados espectroscópicos}
+
+Los estados espectroscópicos son los posibles estados cuánticos en los que
+se puede encontrar un sistema cuántico, en este caso el quarkonia, como
+el charmonium y el Bottomonium son fermiones de spin \(\frac{1}{2}\) los
+posibles valores que puede tomar su spin conjunto \(S = S_1 + S_2\) se
+denota como,
+
+\begin{align*}
+    0 = \Big|\frac{1}{2} - \frac{1}{2}\Big| \leq S \leq \Big|\frac{1}{2} + \frac{1}{2}\Big| =1
+\end{align*}
+
+Otro número cuántico fundamental es el momento angular orbital L que puede 
+tomar diferentes valores siempre y cuando el sistema posea ese estado,
+
+
+
+\begin{table}[H]
+\begin{tabular}{cllcl}
+\multirow{2}{*}{L =} & 0 & 1 & 2 & ... \\
+                   & S & P & D & ...
+\end{tabular}
+\end{table}
+
+Con estos dos números cuanticos se encuentra las relaciones para el intercambio
+de carga y la paridad,
+\begin{align*}
+    C  &= (-1)^{L + S}\\
+    P &= (-1)^(L + 1)
+\end{align*}
+
+Conociendo los valores esperados de la carga y paridad para el estado de interés se puede
+expresar como,
+
+\begin{align*}
+    J^{PC}
+\end{align*}
+
+Donde J es el momento angular total. La notación que se usará en el desarrollo de este trabajo
+es diferente constando de los números cuánticos,
+
+\begin{align*}
+    n^{2S + 1}L_J
+\end{align*}
+
+Algunos de los estados quarkonicos más representativos con su nomenclatura
+espectroscópica,
+\begin{table}[H]
+\begin{tabular}{@{}ccc@{}}
+\toprule
+                & \(n^{2S + 1}L_J\) & $J^{PC}$ \\ \midrule
+$\eta_c(1S)$    & $1^1S_1$          & $0^{-+}$ \\
+$\eta_c(2S)$    & $2^1S_1$          & $0^{-+}$ \\
+$J/\psi(1S)$    & $1^3S_1$          & $1^{--}$ \\
+$\psi(2S)$      & $2^3S_1$          & $1^{--}$ \\
+$\chi_{c0}(1P)$ & $1^3P_0$          & $0^{++}$ \\
+$\chi_{c1}(1P)$ & $1^3P_1$          & $1^{++}$ \\
+$\chi_{c2}(1P)$ & $1^3P_2$          & $2^{++}$ \\ \bottomrule
+\end{tabular}
+\caption{Representación de estados del charmonium en notación \(n^{2S + 1}L_J\) y $J^{PC}$}
+\label{table: notacion}
+\end{table}
+
+La anterior tabla \ref{table: notacion} demuestra los estados del charmonium,
+pero de igual manera existen los mismos estados para el Bottomonium, por lo que 
+se cambia la c por b.
+
+\section{Definición de la cinemática}
+
+Teniendo presente que la ecuación de Schrödinger es
+
+\begin{align*}
+    H \psi = E\psi
+\end{align*}
+Para este caso, donde se encuentra un sistema de dos partículas ligadas 
+de masas \(m_1\), \(m_2\) que interactúan por un potencial  \(V_0\),
+su hamiltoniano se define 
+
+\begin{align*}
+    H = \frac{\Vec{p_1}^2}{2m_1} + \frac{\Vec{p_2}^2}{2m_2} + V_0(|\Vec{r_1} - \Vec{r_2}|)
+\end{align*}
+
+Por medio de transformaciones, se puede definir el problema desde el centro de
+masa, quedando la ecuación de Schrödinger como
+
+\begin{align}
+    \left[-\frac{\nabla^2}{m_Q} + V_0(r)\right] \psi(r)= E\psi(r) \label{eq: schro}
+\end{align}
+
+Donde \(m_Q\) es la masa del quark en cuestión y \(V_0\) es un potencial genérico.
+
+\section{Límite no relativista}
+
+Con el límite no relativista la complejidad de este proceso se reduce
+drásticamente, teniendo presente que el límite no relativista también se puede denotar como \(\mathbf{p \to 0}\), la expresiones relativistas se simplifican, en el caso de la energía,
+
+\begin{align}
+    E = \sqrt{p^2 + m^2} \to E = m,
+\end{align}
+
+los espinores de Dirac que describen fermiones de masa m,  cuadri-momentum p y spin \(\sigma\), también encuentran cambios,
+
+\begin{align*}
+    u(p, \sigma) = \sqrt{\left(\frac{E + m}{2 m}\right)}
+    \begin{pmatrix}
+    1 \\ \frac{\mathbf{\sigma \cdot p}}{E + m}
+    \end{pmatrix} \chi_\sigma, \\
+    v(p, \sigma) = \sqrt{\left(\frac{E + m}{2 m}\right)}
+    \begin{pmatrix}
+    \frac{\mathbf{\sigma \cdot p}}{E + m}\\ 1
+    \end{pmatrix} \chi_\sigma^c,
+\end{align*}
+Pero con el límite la expresión anterior queda reducida a,
+\begin{align}
+    u(\sigma) = \begin{pmatrix}
+    \chi_\sigma \\ 0
+    \end{pmatrix},\qquad
+    v(\sigma) = \begin{pmatrix}
+    0 \\\chi_\sigma^c 
+    \end{pmatrix}.\label{eq: operadores}
+\end{align}
+
+La normalización espinorial que se optará a usar en el presente análisis es:
+
+
+\begin{align*}
+    u^\dagger(p, \sigma)u(p, \tau) = v^\dagger(p, \sigma)v(p, \tau) = \frac{E}{m}\delta_{\sigma, \tau}
+\end{align*}
+
+que en el caso no relativista, se reescribe como,
+
+\begin{align}
+     u^\dagger(\sigma)u(\tau) = \chi_\sigma^\dagger \chi_\tau = \delta_{\sigma, \tau} \label{eq: norm}
+\end{align}
+
+Por medio de la anteriores relaciones se procederá a realizar los futuros cálculos
+sobre las amplitudes de los procesos de interés.
+
+\section{Potencial estático en QCD}
+
+El potencial estático para la QCD se deriva de las posibles interacciones que se encuentran a nivel árbol para el proceso 
+\begin{align}
+    q_i(p_1, \sigma_1)\overline{q_j}(p_2, \sigma_2) \to q_k(q_1, \tau_1) \overline{q_l}(q_2, \tau_2)
+\end{align}
+
+tal que , los índices denotan los grados de libertad del color. El lagrangiano
+que representa el acoplamiento con una fuerza \(g_s\) de un quark q, con el campo espinorial de Dirac \(q_i(x)\), en el campo gluónico \(G_a^\mu\)\cite{hiperfina},
+
+\begin{align}
+    \mathcal{L} = g_s \overline{q}_i (x)\gamma_\mu \frac{\lambda^a}{2} q_j(x) G_a^\mu(x)
+\end{align}
+
+Donde \(\frac{\lambda^a}{2}\) son las matrices de Gell-Mann que poseen la relación \(T^a = \frac{\lambda^a}{2}\), siendo \(T^a\)
+los generadores del grupo SU(3). Es importante notar como
+únicamente dos diagramas de Feynman contribuyen al orden más bajo en los procesos perturbativos, los cuales serán analizados 
+en las siguientes subsecciones.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Intercambio Gluónico}
+El primer proceso posee un diagrama de Feynman a analizar que  denota el intercambio gluónico entre un quark \(q_i(p_1, \sigma_1)\) y  un anti-quark \(\overline{q}_j(p_2, \sigma_2)\) representado en 
+\begingroup
+\begin{figure}[H]
+\begin{center}
+    \feynmandiagram [scale=2,transform shape][horizontal=a to b] {
+i1 [particle=\(q_{i}\)] -- [fermion] a -- [fermion] i2 [particle=\(q_{k}\)],
+a -- [gluon, momentum'=\(k\)] b,
+f1 [particle=\(\overline{q}_l\)] -- [fermion] b -- [fermion] f2 [particle=\(\overline{q}_j\)],
+};
+\end{center}
+\caption{Intercambio Gluónico.}
+\label{fig: gluónico}
+\end{figure}
+\endgroup
+
+Usando las leyes de Feynamn descritas en \ref{AnexoA} se puede encontrar que su contribución es:
+
+\begin{align}
+    \mathcal{M}_{gluon} &= -\frac{1}{k^2} \left[\overline{u}(q_1, \tau_1)
+    g_s \gamma^\mu \frac{\lambda_{ki}^a}{2} u(p_1, \sigma_1)\right]
+    \left[\overline{v}(q_2, \tau_2)
+    g_s \gamma^\nu \frac{\lambda_{jl}^a}{2} v(p_2, \sigma_2)\right] \label{eq: amplitud}\\
+    &= -\frac{g_s^2}{k^2} \frac{\lambda_{ki}^a}{2} \frac{\lambda_{jl}^a}{2}
+    \overline{u}(q_1, \tau_1)\gamma^\mu u(p_1, \sigma_1)\overline{v}(q_2, \tau_2)\gamma^\nu v(p_2, \sigma_2)\nonumber
+\end{align}
+Definiendo el parámetro \(\kappa\):
+
+\begin{align}
+    k^2 = (p_1 - q_1)^2 = (E_{p_1} - E_{q_1})^2 - \kappa^2 \label{eq: kappa}
+\end{align}
+Agregando las contribuciones del color para las funciones de onda de los mesones.
+
+\begin{align}
+   \mathcal{M}_{gluon} &= -\frac{g_s^2}{\kappa^2} \frac{\lambda_{ki}^a}{2} \frac{\lambda_{jl}^a}{2}
+    \frac{1}{\sqrt{3}}\delta_{ij}\frac{1}{\sqrt{3}}\delta_{kl}
+    \overline{u}(q_1, \tau_1)\gamma^\mu u(p_1, \sigma_1)\overline{v}(q_2, \tau_2)\gamma^\nu v(p_2, \sigma_2)
+\end{align}
+
+Donde clarificando la notación de 
+Einstein y usando las propiedades de las
+matrices de Gell-mann
+
+\begin{align*}
+    &\sum_{a=1}^8\frac{\lambda_{ki}^a}{2} \frac{\lambda_{jl}^a}{2}\quad\cdot\quad
+    \sum_{i,j=1}^3\frac{1}{\sqrt{3}}\delta_{ij}\sum_{k,l=1}^3\frac{1}{\sqrt{3}}\delta_{kl}\\
+    &= \frac{1}{12} \sum_{a=1}^8\sum_{i,k=1}^3 \lambda_{ki}^a \lambda_{ik}^a\\
+    &=\frac{1}{12}\sum_{a=1}^8 Tr[(\lambda^a)^2]\\
+    &= \frac{4}{3}
+\end{align*}
+
+Por lo que la amplitud se puede escribir:
+\begin{align*}
+    \mathcal{M}_{gluon} = -\frac{4}{3}\frac{g_s^2}{k^2}
+     \overline{u}(q_1, \tau_1)\gamma^\mu u(p_1, \sigma_1)\overline{v}(q_2, \tau_2)\gamma^\nu v(p_2, \sigma_2)
+\end{align*}
+
+Que tomando el límite no relativista (\(p \to 0\))
+ se usa la normalización encontrada \ref{eq: norm} y 
+ tomando \(\kappa\) en cambio de k \ref{eq: kappa}, se obtiene la expresión
+
+\begin{align}
+    \boxed{\mathcal{M}_{gluon} = -\frac{4}{3}\frac{g_s^2}{\kappa^2}
+     \delta_{\tau_1, \sigma_1}\delta_{\tau_2, \sigma_2}}
+\end{align}
+
+Encontrando la contribución dada por el proceso de quark-antiquark \ref{fig: gluónico}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Aniquilación par}
+El segundo diagrama de Feynman a estudiar denota la contribución en el canal 
+t del proceso quark-antiquark, también conocido como proceso de aniquilación par.
+\begingroup
+\begin{figure}[H]
+\begin{center}
+\feynmandiagram [scale=2,transform shape][vertical'=a to b] {
+i1 [particle=\(\overline{q}_l\)]
+-- [fermion] a
+-- [fermion] f1 [particle=\(q_k\)],
+b -- [gluon, momentum'=P] a,
+i2 [particle=\(q_i\)]
+-- [fermion] b
+-- [fermion] f2 [particle=\(\overline{q}_j\)],
+};
+\end{center}
+\caption{Aniquilación par quark anti-quark.}
+\label{fig: aniquilacion}
+\end{figure}
+\endgroup
+
+Usando las leyes de Feynman sobre el diagrama \ref{fig: aniquilacion} se encuentra
+
+\begin{align*}
+    \mathcal{M}_{ani} = \frac{g_s^2}{P^2}\frac{1}{\sqrt{3}}\delta_{ij}
+    \frac{1}{\sqrt{3}}\delta_{kl}\frac{\lambda_{ij}^a}{2}\frac{\lambda_{kl}^a}{2}
+    \overline{u}(q_1, \tau_1)\gamma^\nu v(q_2, \tau_2)\overline{v}(q_2, \tau_2)\gamma^\mu u(p_1, \sigma_1)
+\end{align*}
+
+Analizando nuevamente las contribuciones del color
+\begin{align}
+    \boxed{\frac{1}{\sqrt{3}}\sum_{ij=1}^3 \delta_{ij}\frac{\lambda_{ij}^a}{2}
+    = \frac{1}{2\sqrt{3}}Tr[\lambda^a] = 0 }
+\end{align}
+
+Por lo que la contribución de este diagrama se anula, dejando únicamente 
+la amplitud para el intercambio gluónico.
+
+\subsection{Deducción del potencial de Cornell}
+La amplitud para el intercambio gluónico.
+
+\begin{align}
+    T_{fi} = \frac{1}{(2\pi)^6}\mathcal{M}_{gluon} = -\frac{1}{(2\pi)^6}
+    \frac{4}{3}\frac{g_s^2}{\kappa^2} \delta_{\tau_1, \sigma_1}\delta_{\tau_2, \sigma_2}
+\end{align}
+
+Conociendo la amplitud de Scattering, es necesario tomar la transformada de Fourier
+
+\begin{align}
+    V_{Col}(x) &= (2\pi)^3 \int_{-\infty}^{\infty} d^3\kappa e^{-i \mathbf{\kappa \cdot x}}T_{fi}(\kappa)\nonumber\\
+    &= - \frac{4}{3} \frac{g_s^2}{(2\pi)^3}\int_{-\infty}^{\infty} d^3\kappa e^{-i \mathbf{\kappa \cdot x}}\frac{1}{\kappa^2}
+\end{align}
+
+Sea el Ansatz
+
+\begin{align*}
+    \frac{1}{(2\pi)^3}\int_{-\infty}^{\infty} d^3\kappa e^{-i \mathbf{\kappa \cdot x}}\frac{1}{\kappa^2} = \frac{A}{r}
+\end{align*}
+
+Tomando Laplaciano a ambas partes, por la sección izquierda
+\begin{align*}
+    \frac{1}{(2\pi)^3}\mathbf{\nabla^2}
+\int_{-\infty}^{\infty} d^3\kappa e^{-i \mathbf{\kappa \cdot x}}\frac{1}{\kappa^2}
+= -\frac{1}{(2\pi)^3}
+\int_{-\infty}^{\infty} d^3\kappa e^{-i \mathbf{\kappa \cdot x}} = - \delta^3(x)
+\end{align*}
+
+En la sección derecha
+\begin{align*}
+    \mathbf{\nabla^2} \frac{A}{r} = -4\pi A \delta^3(x)
+\end{align*}
+Por lo tanto, el factor A debe ser proporcional a
+
+\begin{align}
+    A = \frac{1}{4\pi}
+\end{align}
+
+Concluyendo que el potencial en su parte perturbativa toma la forma:
+
+\begin{align}
+    \boxed{
+    V_{Col}(r) = -\frac{4}{3}\frac{g_s^2}{4\pi r} = -\frac{4}{3}\frac{\alpha_s}{r}
+    }
+\end{align}
+
+Donde \(\alpha_s\) es la constante de interacción fuerte. Este potencial tipo Coulomb contribuye a distancias cortas, para considerar grandes distancias donde
+el confinamiento es clave se supone,
+\begin{align*}
+    V_{conf}(r) = \sigma r^n \qquad n>0.
+\end{align*}
+
+Teniendo presente el espectro mesónico se deduce que \(n \approx 1\), por lo tanto
+\begin{align}
+    V_{conf}(r) = \sigma r ,
+\end{align}
+
+Finalmente se encuentra el potencial de Cornell \cite{cornell},
+
+\begin{align}
+    \boxed{V_{Cornell}(r) = -\frac{4}{3}\frac{\alpha_s}{r} + \sigma r}
+\end{align}
+
+El potencial depende directamente de los parámetros 
+\(\alpha_s\) y \(\sigma\), que determinan el espectro quarkonico, mostrando un comportamiento como se observa ne la figura\ref{fig: PotCorn}
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.75]{Imagenes/potencial.pdf}
+    \caption{Potencial de Cornell}
+    \label{fig: PotCorn}
+\end{figure}
+
+La anterior gráfica describe los términos más importantes dependiendo
+los valores de r, para r pequeños el potencial tipo Coulomb es dominante, 
+mientras que para r grandes lo es el potencial lineal de confinamiento.

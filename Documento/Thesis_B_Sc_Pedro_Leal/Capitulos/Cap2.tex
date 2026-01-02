@@ -1,0 +1,235 @@
+\chapter{Ecuación de Schrödinger} \label{cap:2}
+Con el potencial de Cornell definido en el anterior capítulo, se puede definir adecuadamente la ecuación de Schrödinger a solucionar, tal que, en este capítulo se solucionará por límites la formulación del problema, encontrando expresiones para la energía y función de onda con \(l = 0\).
+\section{Solución de la ecuación de Schrödinger}
+
+La ecuación de Schrödinger reemplazando el potencial genérico\(V_0\) \ref{eq: schro} con el potencial de Cornell, se obtiene la siguiente ecuación diferencial
+\begin{align}
+      \left[- \frac{\nabla^2}{m_Q} + V_{\text{Cornell}}\right]\psi(r, \theta, \phi) = E\psi(r, \theta, \phi)
+\end{align}
+
+En coordenadas esféricas se puede reescribir como,
+\begin{align*}
+  -\frac{1}{m_Q}\left[\frac{1}{r^2}\frac{\partial}{\partial r}
+  \left(r^2 \frac{\partial\psi}{\partial r}\right) +
+  \frac{1}{r^2 sin \theta} \frac{\partial}{\partial \theta}
+  \left(sin \theta \frac{\partial\psi}{\partial \theta}\right)
+  + \frac{1}{r^2 sin^2 \theta}\frac{\partial^2\psi}{\partial \phi^2}\right]
+  + V_{\text{Cornell}}\psi = E \psi
+\end{align*}
+
+Como es un potencial central, se pueden separar las contribuciones radiales de las angulares, siendo posible usar separación de variables
+
+\begin{align*}
+  \psi(r, \theta, \psi) = R_{nl}(r)Y_{lm}(\theta, \phi)
+\end{align*}
+
+La solución de la parte angular es conocida, pero para la ecuación radial se usa la sustitución \(u=rR\), donde u se llama la función radial reducida, encontrando la misma forma de la ecuación de Schrödinger
+\begin{align}
+    -\frac{1}{m_Q}\frac{d^2u}{dr^2} + u\left[ V_{\text{Cornell}} + \frac{l(l+1)}{m_Qr^2}\right] =  u E
+\end{align}
+La cual igualando a 0,
+\begin{align}
+    \frac{d^2u}{dr^2} + u \left[E + \frac{4\alpha_s}{3r} - \sigma r - \frac{l(l+1)}{m_Q r^2}\right] m_Q = 0 \label{eq: EDO}
+\end{align}
+
+Esta última expresión \ref{eq: EDO}, permite denotar la dependencia de cada término con respecto a la variable r.
+\subsection{r \to 0}
+Suponiendo que r es muy pequeño se observa que los términos que más contribuyen son la parte de Coulomb del potencial y el factor con l, encontrando la ecuación diferencial
+\begin{align}
+      \frac{d^2 u}{dr^2} - u\frac{l(l+1)}{m_Q r^2}m_Q = 0
+\end{align}
+Esta formulación posee una solución conocida,
+
+\begin{align}
+   u(r \to 0) = r^{l+1}\label{eq: solradicero}
+\end{align}
+\subsection{r \to \infty}
+Por otra parte, tomando r muy grandes, los términos más significativos son la parte lineal del potencial y  la energía.
+\begin{align}
+    \frac{d^2 u }{dr^2} = u[\sigma r - E]m_Q \label{eq: radialinf}
+\end{align}
+Esta ecuación diferencial se puede reducir tomando la sustitución \( w = \frac{(\sigma r - E)m_Q}{(m_Q \sigma)^{2/3}}\),
+\begin{align*}
+    \frac{d^2 u}{dw^2} &= u w
+\end{align*}
+Teniendo presente la definición de la función de Airy \(Ai(x)\) es la solución
+de la ecuación diferencial
+
+\begin{align*}
+  \frac{d^2 y}{dx^2} = xy \qquad y = A\cdot Ai(x)+ B\cdot Bi(x)
+\end{align*}
+Esta ecuación posee dos soluciones linealmente independientes, de las cuales \(Ai(x)\)
+es solución para \(y \to 0\) y \(x \to \infty\), por lo que solo se tomará en cuenta
+esta solución. Entonces,
+
+\begin{align}
+  u(r \to \infty) \propto Ai\left(\frac{(\sigma r - E)m_Q}{(m_Q \sigma)^{2/3}}\right)\label{eq: solradiinf}
+\end{align}
+
+Esta deducción se aplica únicamente cuando \(l = 0\), por medio de la anterior
+expresión se cuantizar la energía del sistema.
+
+\subsection{Energía}
+Despejando la energía de la solución asintótica a infinito de la función de onda \ref{eq: solradiinf}, se obtiene  que es \cite{base},
+
+\begin{align}
+    E = -\left(\frac{\sigma^2}{m_Q}\right)^\frac{1}{3}a_n \qquad (l = 0)
+\end{align}
+
+Donde \(a_n\) es el n-ésimo cero de la función de Airy (\(Ai(a_n) = 0\)). Es importante notar como esta energía es correcta cuando (l = 0), por lo que no se pueden describir
+estados con momento angular orbital superiores. 
+
+\subsection{Función de onda}
+Teniendo presente las soluciones \ref{eq: solradiinf} y \ref{eq: solradicero},
+se encuentra una función de onda,
+
+\begin{align}
+    u_{nl}= r^{l + 1}Ai(a_n + r(m_Q\sigma)^\frac{1}{3})\label{eq: solradial}
+\end{align}
+
+Para el caso \(l = 0\), la contribución dada por \ref{eq: solradicero} (\(r^{l + 1}\))
+no es predominante, siendo la función de Airy la que determina principalmente la función de onda, por lo que se puede expresar,
+
+\begin{align*}
+    u_{nl}= Ai(a_n + r(m_Q\sigma)^\frac{1}{3}) \qquad (l = 0)
+\end{align*}
+
+
+\section{Minimización de $\chi^2$ para estados S}
+Tomando la definición de la energía descrita anteriormente se define la masa como,
+\begin{align}
+    M = 2m_Q + E = 2m_Q -\left(\frac{\sigma^2}{m_Q}\right)^\frac{1}{3}a_n \label{eq: masa}
+\end{align}
+
+Se define la función \(\chi^2\), tal que,
+
+\begin{align}
+    \chi^2 = \sum_i^n \left(\frac{(M_{exp}^i - M_{teo}^i)^2}{\Delta M^i}\right)
+\end{align}
+
+Donde \(M_{exp}^i\) es el valor experimental del estado espectroscopio i,
+\(\Delta M^i\) la incertidumbre experimental del estado i y \(M_{teo}^i\) en este caso es
+el valor del estado con la masa encontrada parametrizada para el estado i 
+\ref{eq: masa}.  Como la masa del estado depende únicamente de la masa del quark 
+\(m_q\) y el número cuántico n, serán estos lo parámetros que se miminizarán, dado
+que \(\alpha_s\) no se toma en cuenta en ninguna de las soluciones asintóticas y por tanto, no se encuentra una contribución directa a la energía.
+
+
+
+\subsection{Charmonium}
+Se tomaron los valores experimentales de los estados 1S, 2S del
+PDG \cite{PDG}, para los estados 3S y 4S se tomaron los datos 
+de \cite{data}. 
+
+
+\begin{table}[H]
+\resizebox{17cm}{!}{
+\begin{tabular}{@{}cccccccc@{}}
+\toprule
+\textbf{} & Este trabajo[Gev] & Promedio[Gev]& BSE-CIA\cite{BSE-CIA} [Gev]& Expt  \cite{PDG} [Gev]& Pot. Model\cite{Pot}[Gev] & Lattice QCD \cite{lattice}[Gev]& \cite{data} [Gev] \\ \midrule
+$M_{\eta_c}(1s)$     & 3.04$\pm$0.16 &3.0404$\pm$0.0002& 2.9509  & 2.9839$\pm$0.0004 & 2.980  & 3.292       & 2.981 \\
+$M_{\eta_c}(2s)$     & 3.62$\pm$0.28 &3.6618$\pm$0.0006& 3.7352  & 3.6375$\pm$0.0011 & 3.600 & 4.240       & 3.635 \\
+$M_{\eta_c}(3s)$     & 4.1$\pm$0.4   &4.0140$\pm$0.0007& 4.4486  &               & 4.060     &             & 3.989 \\
+$M_{\eta_c}(4s)$     & 4.5$\pm$0.5   &4.4110$\pm$0.0005& 5.1048  &               & 4.554     &             & 4.401 \\ \bottomrule
+\end{tabular}
+\caption{Resultados de las masa del charmonium para los estados S comparados con diferentes valores teóricos y experimentales.}
+\label{table: 1}
+}
+\end{table}
+
+Los resultados presentados en la tabla \ref{table: 1} fueron 
+obtenidos realizando la minimización mostrada en la figura \ref{fig: chi1}, donde el mínimo de \(\chi^2 =  7.3343\)
+valor que es mucho mayor a uno, esto es explicable por 
+la baja incertidumbre que poseen los valores experimentales, por lo tanto,
+para asegurar el cálculo de las incertidumbres se reescalan las mismas
+por la raíz cuadrada de este mínimo.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.9]{Imagenes/chi2Charmonium.pdf}
+    \caption{Minimización del \(\chi^2\) del Charmonium para el 
+    estado S.}
+    \label{fig: chi1}
+\end{figure}
+
+y encontrando unos valores de los parámetros 
+\begin{equation}
+\boxed{
+\begin{array}{rcl}
+ \sigma &= \SI{0.201\pm0.062}{\giga\electronvolt\squared\per\femto\meter}\\
+    m_c &= \SI{1.138\pm0.011}{\giga\electronvolt}
+\end{array}
+}
+\end{equation}
+
+La masa del quark charm es bastante cercano al valor dado por el PDG\cite{PDG} \(\SI{1.27\pm 0.02}{\giga\electronvolt}\). Existen diferentes formas de calcular
+la constante de acople \(\alpha_s\), entre ellas está la libertad asintótica en 'naive dimensional regularization'\cite{Maltoni} a NLO,
+
+\begin{align}
+    \alpha_s(\mu) = \frac{4\pi}{\beta_0 ln\left(\frac{\mu^2}{\Lambda_{QCD}^2}\right)}\left[1 - \frac{\beta_1 ln\left[ln\left(\frac{\mu^2}{\Lambda_{QCD}^2}\right)\right]}{\beta_0^2ln\left(\frac{\mu^2}{\Lambda_{QCD}^2}\right)}\right] \label{eq: libertad}
+\end{align}
+
+Donde, 
+\begin{align*}
+    \beta_0 = 11 - \frac{2}{3}n_f \qquad \beta_1 102 - \frac{38}{3}nf
+\end{align*}
+
+Con \(n_f=5\) el número de colores en el estado singlete.Por medio de la expresión
+\ref{eq: libertad} se puede encontrar \(\alpha_s\) dependiendo de la masa del quark,  para el charmonium,
+
+\begin{align}
+    \boxed{\alpha_s(m_c) = 0.4011(23)}
+\end{align}
+
+\subsection{Bottomonium}
+De igual manera los primeros estados fueron tomados los datos del Particle data group \cite{PDG} y los estados 3S y 4S de \cite{data},
+
+
+\begin{table}[H]
+\resizebox{17cm}{!}{
+\begin{tabular}{@{}cccccccc@{}}
+\toprule
+\textbf{} & Este trabajo[GeV]  & Promedio[GeV]  & BSE-CIA\cite{BSE-CIA}[GeV] & Expt  \cite{PDG} [GeV]& Pot. Model\cite{Pot} [GeV]& Lattice QCD \cite{lattice}[GeV]& \cite{data} [GeV] \\ \midrule
+$M_{\eta_b}(1s)$     & 9.450$\pm$0.030  &9.4295$\pm$0.0010          &9.0005    & 9.3987$\pm$0.002 & 9.390    &  7.377       &  9.398 \\
+$M_{\eta_b}(2s)$     & 9.96$\pm$0.04    &10.0111$\pm$0.0020         &9.7215    & 9.999$\pm$0.004 & 9.947      &  8.202       & 9.990 \\
+$M_{\eta_b}(3s)$     & 10.38$\pm$0.06   &10.3421$\pm$0.0006         & 10.4201  &               &  10.291  &             &  10.329 \\
+$M_{\eta_b}(4s)$     & 10.74$\pm$0.07   &10.576$\pm$0.006         & 11.0968  &               &          &             & 10.573 \\ \bottomrule
+\end{tabular}
+\caption{Resultados de las masa del Bottomonium para los estados S comparados con diferentes valores teóricos y experimentales.}
+\label{table: 2}
+}
+\end{table}
+
+Por medio de la minimización mostrada en la figura \ref{fig: chi2}
+se encontraron los valores de \ref{table: 2}, donde se refleja que 
+el mínimo de la función es de \(\chi^2 = 7.21393\), este valor es usado 
+como se explicó anteriormente para el cálculo de incertidumbres.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.9]{Imagenes/chi2Bottonium.pdf}
+    \caption{Minimización del \(\chi^2\) del Bottomonium para el 
+    estado S.}
+    \label{fig: chi2}
+\end{figure}
+
+y encontrando unos valores de los parámetros 
+\begin{equation}
+\boxed{
+\begin{array}{rcl}
+ \sigma &= \SI{0.329\pm0.016}{\giga\electronvolt\squared\per\femto\meter}\\
+    m_b &= \SI{4.385\pm0.011}{\giga\electronvolt}
+\end{array}
+}
+\end{equation}
+
+La masa del quark bottom dado por PDG se encuentra dentro de la incertidumbre \(\SI{4.18\pm0.04}{\giga\electronvolt}\)\cite{PDG}. Análogamente, usando la libertad asintótica para determinar la constante de interacción de la QCD para la masa
+del Bottom, se obtiene,
+
+\begin{align}
+    \boxed{\alpha_s(m_b) = 0.22611(17)}
+\end{align}
+
+Que al compararse con el valor encontrado con el Charm, se encuentra el comportamiento
+esperado, donde a mayor masa del quark menor será \(\alpha_s\) para que se cumpla 
+la libertad asintótica.

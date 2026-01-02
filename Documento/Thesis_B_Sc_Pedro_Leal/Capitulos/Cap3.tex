@@ -1,0 +1,279 @@
+\chapter{Correcciones espinoriales} \label{cap:3}
+En este último capítulo se presentarán las correcciones hiperfinas a este proceso, agregando la contribución spin-spin por medio de teoría de perturbaciones y minimizando nuevamente la función de la energía con respecto a las parámetros \(\alpha\),  \(\sigma\) y \(Q\) en los estados S, donde el intervalo de la energía base es coherente. Finalmente, se realiza el mismo proceso para las correcciones Spin-orbita  y Tensorial siendo una aproximación para estados \(l >0\) y encontrando los mismos parámetros anteriormente mencionados.
+
+\section{Correcciones hiperfinas}
+Las correcciones a usar deducidas en el Anexo \ref{AnexoCorrec} son:
+\begin{align}
+    V_{SS}^{Vectorial}(r) &= \frac{8 \alpha_s}{9m^2_Qr^2}(S_1 \cdot S_2)\delta(r)\nonumber\\
+    V_{LS}(r)^{Vectorial} &= \frac{2 \alpha_s}{m^2_Qr^3}(L \cdot S) \label{eq: correc}\\
+    V_{LS}(r)^{Escalar} &= -\frac{\sigma}{2m^2_Qr}(L \cdot S)\nonumber\\
+    V_{T}(r)^{Vectorial} &=\frac{\alpha_s}{3m^2_Qr^2}S_{12}\nonumber
+\end{align}
+
+Con \(S = S_1 +S_2\), L es el operador momentum angular y \(S_{12}\) es el operador para la contribución tensorial. Los valores esperados de los operadores 
+presentados, son
+
+\begin{align*}
+    \langle S_1 \cdot S_2 \rangle& = \frac{1}{2}s(s+1) - \frac{3}{4}\\
+    \langle L \cdot S \rangle& =\frac{1}{2}[j(j+1) - l(l+1) - s(s+1)]\\
+    \langle S_{12} \rangle& = \frac{2[2\langle S^2 \rangle\langle{L^2}\rangle - 3\langle{L \cdot S}\rangle -6\langle{L \cdot S}\rangle^2]}{(2l + 3)(2l + 1)}
+\end{align*}
+
+Donde \(j = l + s\), J es el operador angular total, s y l son los correspondientes números cuanticos del estado espectroscópico \(Q\overline{Q}\).
+
+\section{Teoría de perturbaciones}
+Las correcciones definidas se agregan a la energía base por medio de la teoría de perturbaciones\cite{libro},
+
+\begin{align}
+    E^1_n = \langle \psi_n^0|H'| \psi^0_n\rangle
+\end{align}
+
+Donde \(H'\) es el potencial correctivo, \(\psi^0_n\)
+es la función de onda \ref{eq: solradial}, que se usará para \(l > 0\), encontrando de manera 
+genérica la integral,
+
+\begin{align}
+    \int_0^\infty z^{m} [A_i(a + z b)]^2 dz \label{eq: integral}
+\end{align}
+
+Tomando \(l = 1\), la potencia m tomará los siguientes valores,
+\begin{align*}
+    \begin{array}{lccc}
+         V_{SS}^{\text{Vectorial}} &  {2l = m} & m = 2\\
+         \\V_{LS}^{\text{Vectorial}} =  V_{T}^{Vectorial} &  {2l - 1 = m}& m = 1\\
+         \\ V_{LS}^{\text{Escalar}} &{2l + 1 = m} & m = 3
+    \end{array}
+\end{align*}
+
+En el caso de \(l = 0\), la única corrección que se puede realizar es
+del spin-spin, por lo que usando \ref{eq: solradial} se obtendría 
+\(m = -2\), pero la solución de la integral está definida para \(\Re(m)>-1\),
+por lo que se toma la expresión para \(l = 1\) y se obtendría \(m = 0\).\\
+
+
+Esta integral se obtiene paso a paso en el apéndice \ref{AnexoB}, pero sus resultados son:
+
+\begin{align}
+    \int_0^\infty
+    z^n[Ai(a + z b)]^2 dz = \sum_{k=0}^n\frac{W_3[a, b, n] k! (n - k)!}{n! a^{n-k}b^k} - \sum_{k=0}^{n-1}\int_0^\infty
+    z^k[Ai(a + z b)]^2 dz \label{eq: integral_1}
+\end{align}
+
+En el caso de la corrección spin-spin \ref{eq: correc} se toma la 
+delta de Dirac como la gaussiana \(\delta(r) = \left(\frac{Q}{\sqrt{\pi}}\right)^3 e^{-Q^3r^2}\)\cite{delta}, permitiendo encontrar su integral usando series de Taylor y tomando \ref{eq: integral_1} como \(W_4(m + 2m',a,b)\),
+\begin{align}
+    \int_0^\infty z^m[Ai(a + zb)]^2\left(\frac{Q}{\sqrt{\pi}}\right)^3 e^{-Q^3z^2}dz = \sum^5_{m' = 0} \left(\frac{Q^{3(1+ m')}}{\pi^\frac{3}{2}m'!}\right)W_4(m + 2m',a,b)
+\end{align}
+
+Los valores numéricos encontrados se encuentran en el apéndice \ref{Anexonum}.
+
+
+\section{Ajuste con las correcciones Spin-Spin}
+Agregando las contribuciones dadas por la corrección spin-spin
+se puede diferencias los estados \(\eta_c (1^1S_1)\) donde su
+momento angular orbital es \(l = 0\) con un spin \(S = 0\) y estados S
+con spin \(S = 1\) \(j/\psi(1^3S_1)\). Asumiendo los valores de las 
+masas según el PDG \cite{PDG}, se realiza el ajuste para encontrar 
+los parámetros \(\alpha\) constante de acople y coeficiente del termino $\frac{1}{r}$ en el potencial, \(\sigma\) coeficiente del termino
+lineal del potencial y Q parámetro de la gaussiana usada para expresar
+la delta de Dirac. La masa a miminizar es
+
+\begin{align}
+    M^1 = M + E^1_{\text{spin-spin}}.
+\end{align}
+
+\subsection{Charmonium}
+Para el Charm se asigna la masa \(\SI{1.27\pm 0.02}{\giga\electronvolt}\), con está se encuentra el ajuste
+
+\begin{table}[H]
+\resizebox{13cm}{!}{
+\begin{tabular}{@{}ccccccc@{}}
+\toprule
+\textbf{} & Este trabajo[GeV]    &           Expt  \cite{PDG} [GeV]   &  Lattice QCD \cite{lattice}[GeV]& \cite{data} [GeV] \\ \midrule
+$M_{\eta_c}(1s)$      &3.17$\pm$0.13    & 2.9839$\pm$0.0004 & 3.2924(9)   & 2.981 \\
+$M_{\eta_c}(2s)$      &3.39$\pm$0.18    & 3.6375$\pm$0.0011 & 4.24(6)       &3.635       \\
+$M_{\eta_c}(3s)$      &3.59$\pm$0.22     &                   &                     &3.989  \\
+$M_{\eta_c}(4s)$      &3.77$\pm$0.26    &                   &                     & 4.401 \\ 
+$M_{j/\psi}(1s)$   &3.17$\pm$0.13       & 3.096900$\pm$0.006& 3.4452(16)     & 3.096  \\ 
+$M_{\psi}(2s)$   &3.39$\pm$0.18         & 3.68610$\pm$0.06  & 4.35(7)     & 3.685  \\ 
+$M_{\psi}(3s)$   &3.59$\pm$0.22       & 4.039$\pm$0.001   &                     &4.039 \\
+$M_{\psi}(4s)$   &3.77$\pm$0.26         & 4.421$\pm$ 0.0004  &                    & 4.427 \\\bottomrule
+\end{tabular}
+\caption{Resultados de las masa del Charmonium para los estados S con diferenciación de spin.}
+\label{table: charm_spin}
+}
+\end{table}
+
+Los valores encontrados en la tabla \ref{table: charm_spin} poseen diferencias entre los estados con y sin spin de ordenes \(1 \times 10^{-8}[GeV]\) que con sus respectivas incertidumbres no es notorio. Los valores de masa fueron dados usando los siguientes parámetros encontrados por medio de una minimización \(\chi^2 = 4337.4\)
+\begin{equation}
+\boxed{
+\begin{array}{rcl}
+ \sigma &= \SI{0.068\pm0.022}{\giga\electronvolt\per\femto\meter}\\
+ \alpha_s &= 0.4987(8) \\
+ Q &= 0.010(6)
+\end{array}
+}
+\end{equation}
+
+\subsection{Bottomonium}
+De igual manera el bottom posee una masa \(m_b=\SI{4.18\pm 0.04}{\giga\electronvolt}\), usando esta masa se pueden encontrar los siguientes valores
+
+\begin{table}[H]
+\resizebox{13cm}{!}{
+\begin{tabular}{@{}ccccccc@{}}
+\toprule
+\textbf{} & Este trabajo [GeV]   &           Expt  \cite{PDG}  [GeV]  &  Lattice QCD \cite{lattice}[GeV]& \cite{data}  [GeV]\\ \midrule
+$M_{\eta_b}(1s)$      &9.54$\pm$0.04    & 9.3987$\pm$0.0020    & 7.3776(8)   & 9.398 \\
+$M_{\eta_b}(2s)$      &9.96$\pm$0.05    & 9.999$\pm$0.004      & 8.202(5)       &9.990       \\
+$M_{\eta_b}(3s)$      &10.32$\pm$0.07   &                      &                     &10.329  \\
+$M_{\eta_b}(4s)$      &10.66$\pm$0.08   &                      &                     & 10.573 \\ 
+$M_{\Upsilon}(1s)$   &9.54$\pm$0.04     & 9.46030$\pm$0.00026  & 7.4100(9)     & 9.460  \\ 
+$M_{\Upsilon}(2s)$   &9.96$\pm$0.05     & 10.02326$\pm$0.00031 & 8.209(5)     & 10.023  \\ 
+$M_{\Upsilon}(3s)$   &10.32$\pm$0.07    & 10.3552$\pm$0.0005   &                     &10.355 \\
+$M_{\Upsilon}(4s)$   &10.66$\pm$0.08    & 10.5794$\pm$ 0.0012  &                    & 10.586 \\\bottomrule
+\end{tabular}
+\caption{Resultados de las masa del Bottomonium para los estados S con diferenciación de spin.}
+\label{table: bottom_spin}
+}
+\end{table}
+
+Los valores encontrados en la tabla \ref{table: bottom_spin} poseen diferencias entre los estados con y sin spin de ordenes \(1 \times 10^{-7}\) que con sus respectivas incertidumbres no es notorio. Los valores de masa fueron dados usando los siguientes parámetros encontrados por medio de una minimización \(\chi^2 = 54.1\)
+\begin{equation}
+\boxed{
+\begin{array}{rcl}
+ \sigma &= \SI{0.31\pm0.02}{\giga\electronvolt\per\femto\meter}\\
+ \alpha_s &= 0.140(5) \\
+ Q &= 0.10(2)
+\end{array}
+}
+\end{equation}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Ajuste para estados \(l> 0\)}
+Se agregan los estados
+\(\chi_{c0}(1^3P_0), \chi_{c1}(1^3P_1)\) y 
+\(\chi_{c2}(1^3P_2)\).  En este caso \(M\) encuentra dependencia de
+los tres parámetros y se realiza el ajuste  de todos los tres al tiempo,
+encontrando una nueva masa:
+
+\begin{align}
+    M^1 = M + E^1_{\text{spin-spin}}+ E^1_{\text{spin-orbita}}+ E^1_{\text{tensorial}}
+\end{align}
+
+Cabe aclara que se encuentran dos condiciones muy importantes a tener en cuenta,
+a la hora de tomar estados \(l>0\):
+\begin{enumerate}
+    \item Cualquier estado que sea \(l > 0\), pero \(S = 0\), poseerá
+    la misma función que el estado \(\eta_c\) que le corresponda según
+    su número cuántico n.
+    
+    \item Al expandir forzosamente este modelo a \(l >0 \) se está
+    realizando una segunda aproximación, suponiendo una aproximación
+    fuerte, \textbf{la energía base que no depende de l, supondremos que
+    en primera aproximación puede describir estados mayores a l} y 
+    posteriormente agregando está contribución l
+    por medio de teoría de perturbaciones.
+    
+\end{enumerate}
+\subsection{Charmonium}
+Para la definición de la función \(\chi^2\) se utilizaron los datos descritos
+en el capítulo \ref{cap:2}, los valores de los estados \(1P\) fueron tomados el PDG \cite{PDG}, obteniendo los resultados,
+
+\begin{table}[H]
+\resizebox{13cm}{!}{
+\begin{tabular}{@{}ccccccc@{}}
+\toprule
+\textbf{} & Este trabajo  [GeV]  &  Expt  \cite{PDG}[GeV] &  Lattice QCD \cite{lattice}     [GeV]       & \cite{data}[GeV]  \\ \midrule
+$M_{\eta_c}(1s)$      &4.21$\pm$0.35             & 2.9839$\pm$0.0004      & 3.2924(9)    & 2981 \\
+$M_{\eta_c}(2s)$      &4.3$\pm$1.8               & 3.6375$\pm$0.0011      & 4.24(6)      & 3.635 \\
+$M_{J/\psi}(1s)$      &4.22$\pm$0.34             & 3.096900$\pm$0.000006  & 3.4452(16)   & 3.096 \\
+$M_{\psi}(2s)$        &4.97$\pm$0.14             & 3.68610$\pm$0.00006    & 4.35(7)      & 3.685 \\ 
+$M_{\chi_{c0}}(1P)$   &2.7$\pm$1.1               & 3.41471$\pm$ 0.0003    & 4.079(12)    & 3.413 \\ 
+$M_{\chi_{c1}}(1P)$   &3.2$\pm$1.2               & 3.51067$\pm$ 0.00005   & 4.052(89)    & 3.511  \\ 
+$M_{\chi_{c2}}(1P)$   &5.2$\pm$0.7               & 3.55617$\pm$0.00007    & 4.272(15)    & 3.555 \\ \bottomrule
+\end{tabular}
+\caption{Resultados de las masa del Charmonium para los estados $\eta_c(1S)$, $\eta_c(2S)$, $\eta_c(3S)$, $\eta_c(4S)$, $\chi_{c0}$, $\chi_{c1}$ y $\chi_{c2}$ comparados con diferentes valores teóricos y experimentales.}
+\label{table: 3}
+}
+\end{table}
+
+Normalizando la incertidumbre encontrada por la raíz del valor del \(\chi^2 = 275040.1\)
+en su mínimo, se encontraron los estados descritos en la tabla \ref{table: 3}.
+
+La minimización, permite encontrar los parámetros,
+
+\begin{equation}
+\boxed{
+\begin{array}{rcl}
+ \sigma &= \SI{0.29\pm0.01}{\giga\electronvolt\per\femto\meter}\\
+ \alpha_s &= 0.457(11)\\
+ Q &= 0.468(24)
+\end{array}
+}
+\end{equation}
+\subsection{Bottomonium}
+
+Tomando los datos para los estados P de \cite{PDG} y la masa \(\SI{4.18\pm0.04}{\giga\electronvolt}\)\cite{PDG}, se realiza nuevamente un ajuste, tal que, 
+\begin{table}[H]
+\resizebox{13cm}{!}{
+\begin{tabular}{@{}ccccccc@{}}
+\toprule
+\textbf{}           & Este trabajo  [GeV]  & Expt  \cite{PDG}     [GeV]   &  Lattice QCD \cite{lattice}[GeV]& \cite{data} [GeV] \\ \midrule
+$M_{\eta_b}(1s)$      & 9.76$\pm$0.04    & 9.3987$\pm$0.002     & 7.3776(8)   & 9.398 \\
+$M_{\eta_b}(2s)$      &9.80$\pm$0.09     & 9.999$\pm$0.004      & 8.202(5)    & 9.990 \\
+$M_{\Upsilon}(1s)$      &9.76$\pm$0.04   & 9.46030$\pm$0.00026  & 7.4100(9)   & 9.460 \\
+$M_{\Upsilon}(2s)$      &9.81$\pm$0.05   & 10.02326$\pm$0.00031 & 8.209(5)    & 10.023 \\ 
+$M_{\chi_{b0}}(1P)$   &7.8$\pm$2.1       &  9.85944$\pm$ 0.0005 & 8.220(8)     & 9.859 \\ 
+$M_{\chi_{b1}}(1P)$   &8.7$\pm$1.1       &  9.89278$\pm$ 0.0004 & 8.243(8)     & 9.892  \\ 
+$M_{\chi_{b2}}(1P)$   &10.8$\pm$1.0      &  9.91221$\pm$0.0004  & 8.274(9)     & 9.912 \\ \bottomrule
+\end{tabular}
+\caption{Resultados de las masas del Bottomonium con las mismas características que con el Charmonium \ref{table: 3}.}
+\label{table: 4}
+}
+\end{table}
+
+
+la anterior minimización da como resultado los parámetros,
+
+\begin{equation}
+\boxed{
+\begin{array}{rcl}
+ \sigma &= \SI{0.0163\pm0.0068}{\giga\electronvolt\per\femto\meter}\\
+ \alpha_s &= 0.197(1) \\
+ Q &= 0.188(3)
+\end{array}
+}
+\end{equation}
+
+\section{Conclusión}
+
+El modelos utilizado posee grandes limitaciones, observando que
+solo puede ser aplicable satisfactoriamente en estados con \( l = 0\) (S). También se observa como al introducir las correcciones Spin-Spin no se encuentra
+una variación apreciable de la masa encontrada para los estados \(1^1S_1\) y
+\(1^3S_1\) sino correcciones de ordenes \(1 \times 10^{-7}\) con los parámetros
+hallados por medio de la minimización, esto puede ser explicable ya que
+en la deducción de la integral también se realizan ciertas aproximaciones como la
+serie de Taylor hasta un \(n = 5\) y el binomio de Newton.
+
+\section{Futuras contribuciones}
+
+Para mejorar los resultados presentados en este trabajo, es necesario resolver
+la ecuación de Schrödinger, tal que permita cuantizar la energía para diferentes
+niveles de \(l\), este proceso puede ser logrado usando un polinomio que 
+describa el comportamiento entre las soluciones asintóticas encontrando
+de esta manera una dependencia de la energía en función del momentum angular 
+orbital.
+
+La integración realizada para la teoría de perturbaciones carece de rigor
+matemático, lo que al realizar análisis más profundos sobre esta
+se pueden encontrar nuevas condiciones o términos correctivos. Por lo que se 
+observa un nuevo camino usando integración numérica, reemplazando los parámetros
+encontrados en cada caso y usando la expresión normalizada de teoría de perturbaciones
+
+\begin{align*}
+    E^1_{nl} = \frac{\langle \psi_{nl}| H^1|\psi_{nl}\rangle}
+    {\langle \psi_{nl}|\psi_{nl}\rangle}
+\end{align*}
+
+se puede llegar a un resultado sin hacer uso de las expresiones aproximadas de la
+integral, esperando mejorar los datos.
