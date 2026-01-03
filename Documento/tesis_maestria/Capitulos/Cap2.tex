@@ -1,0 +1,374 @@
+% !TeX root = ../main.tex
+\chapter{Marco Teórico}
+\label{cap:marco_teorico}
+
+En este capítulo se presentan los fundamentos teóricos que sustentan el desarrollo de esta investigación. Se inicia con una introducción al pronóstico probabilístico y su importancia en el análisis de series temporales, seguido de una discusión detallada sobre las métricas utilizadas para evaluar el desempeño predictivo. Posteriormente, se desarrollan los conceptos fundamentales de la predicción conformal y sus adaptaciones para series de tiempo.
+
+\section{Pronóstico Probabilístico}
+\label{sec:pronostico_probabilistico}
+
+El pronóstico probabilístico representa un cambio de paradigma fundamental en la predicción estadística, pasando de estimaciones puntuales a distribuciones de probabilidad completas sobre cantidades futuras de interés. A diferencia de las predicciones puntuales tradicionales, que proporcionan únicamente un valor esperado o una estimación central, el pronóstico probabilístico cuantifica la incertidumbre asociada a la predicción mediante la especificación de una distribución predictiva completa.
+
+\subsection{Definición y Objetivos}
+
+Formalmente, sea $Y_{t+h}$ una variable aleatoria que representa el valor de una serie temporal en el tiempo $t+h$, donde $h>0$ denota el horizonte de predicción. Un pronóstico probabilístico es una distribución de probabilidad $F_{t+h|t}$ que caracteriza la incertidumbre sobre $Y_{t+h}$ dado el conjunto de información disponible hasta el tiempo $t$, denotado por $\mathcal{F}_t$.
+
+Gneiting y Raftery explican que el objetivo fundamental del pronóstico probabilístico es maximizar la nitidez de las distribuciones predictivas sujeto a calibración. Estos dos conceptos son fundamentales para entender la calidad de un pronóstico probabilístico:
+
+\begin{itemize}
+\item \textbf{Calibración:} Se refiere a la consistencia estadística entre las distribuciones predictivas y las observaciones. Una predicción está calibrada si las realizaciones son estadísticamente indistinguibles de muestras aleatorias de las distribuciones predictivas.
+
+\item \textbf{Nitidez:} Se refiere a la concentración de las distribuciones predictivas y es una propiedad exclusiva de los pronósticos. Cuanto más concentradas sean las distribuciones predictivas, mejor, siempre que se mantenga la calibración.
+\end{itemize}
+
+La Figura~\ref{fig:tipos_prediccion} ilustra la diferencia entre una predicción puntual, un intervalo de predicción y una distribución predictiva completa.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{./Imagenes/Cap2_prediccion.png}
+\caption{Tipos de predicciones y su relación con la incertidumbre.}
+\label{fig:tipos_prediccion}
+\end{figure}
+
+\subsection{Ventajas del Pronóstico Probabilístico}
+
+El pronóstico probabilístico ofrece múltiples ventajas sobre las predicciones puntuales tradicionales que justifican su adopción creciente en diversas aplicaciones:
+
+\begin{enumerate}
+\item \textbf{Cuantificación Completa de Incertidumbre:} A diferencia de las predicciones puntuales, que proporcionan únicamente un valor esperado, el pronóstico probabilístico caracteriza la incertidumbre de manera exhaustiva mediante distribuciones de probabilidad. Esto permite a los tomadores de decisiones evaluar tanto la magnitud esperada de un evento como la variabilidad asociada, facilitando una comprensión más profunda de los riesgos y oportunidades.
+
+\item \textbf{Soporte para Decisiones Óptimas:} En contextos donde las decisiones deben tomarse bajo incertidumbre, como la gestión de inventarios, la planificación de recursos energéticos, o la asignación de capital, las distribuciones predictivas completas son esenciales. Permiten la optimización de funciones de utilidad esperada y la implementación de estrategias que consideren explícitamente el trade-off entre riesgo y recompensa.
+
+\item \textbf{Evaluación de Eventos Extremos:} Las predicciones puntuales son inherentemente limitadas para caracterizar eventos raros o de cola. El pronóstico probabilístico, en cambio, permite estimar probabilidades de ocurrencia de eventos extremos, información crucial para la gestión de riesgos financieros, la planificación de infraestructura ante eventos climáticos severos, y la evaluación de escenarios de baja probabilidad pero alto impacto.
+
+\item \textbf{Agregación Temporal y Espacial Consistente:} Las distribuciones predictivas pueden agregarse de manera coherente a través de diferentes horizontes temporales o unidades espaciales. Por ejemplo, es posible derivar pronósticos mensuales a partir de pronósticos diarios manteniendo la consistencia probabilística, o agregar pronósticos locales en pronósticos regionales preservando las propiedades estadísticas apropiadas.
+
+\item \textbf{Flexibilidad en la Comunicación de Incertidumbre:} Las distribuciones predictivas permiten múltiples formas de comunicación adaptadas a diferentes audiencias y necesidades: intervalos de predicción con diferentes niveles de confianza, probabilidades de excedencia de umbrales críticos, percentiles específicos, o visualizaciones completas de la distribución mediante gráficos de densidad o fan charts.
+
+\item \textbf{Base para Post-procesamiento y Combinación:} Los pronósticos probabilísticos proporcionan la base natural para técnicas avanzadas de mejoramiento predictivo, como la combinación bayesiana de modelos, el post-procesamiento estadístico de ensembles numéricos, o la integración de múltiples fuentes de información mediante métodos de agregación de distribuciones.
+\end{enumerate}
+
+Estas ventajas han motivado la transición hacia pronósticos probabilísticos en campos tan diversos como meteorología, finanzas, energía, epidemiología y gestión de cadenas de suministro, donde la cuantificación rigurosa de la incertidumbre es fundamental para la toma de decisiones efectiva.
+
+\subsection{Representación de Distribuciones Predictivas}
+
+Las distribuciones predictivas pueden representarse de diversas formas, dependiendo del contexto y los requisitos de la aplicación:
+
+\begin{itemize}
+\item \textbf{Función de Distribución Acumulada (FDA):} $F_{t+h|t}(y) = P(Y_{t+h} \leq y | \mathcal{F}_t)$
+
+\item \textbf{Función de Densidad de Probabilidad:} $f_{t+h|t}(y)$ cuando existe
+
+\item \textbf{Cuantiles:} $q_\alpha = F^{-1}_{t+h|t}(\alpha)$ para $\alpha \in (0,1)$
+
+\item \textbf{Intervalos de Predicción:} $[q_{\alpha/2}, q_{1-\alpha/2}]$ con cobertura nominal $(1-\alpha) \times 100\%$
+
+\item \textbf{Conjuntos de Predicción:} Regiones de confianza más generales en espacios multidimensionales
+\end{itemize}
+
+En el contexto de series temporales, es particularmente importante considerar la dependencia temporal al construir distribuciones predictivas multivariadas para múltiples horizontes de predicción simultáneamente.
+
+\section{Métricas para Evaluación de Pronósticos Probabilísticos}
+\label{sec:metricas_evaluacion}
+
+La evaluación rigurosa del desempeño predictivo es fundamental para comparar metodologías de pronóstico y guiar mejoras en los modelos. En el contexto de pronósticos probabilísticos, las métricas de evaluación deben considerar tanto la calibración como la nitidez de las distribuciones predictivas.
+
+\subsection{Reglas de Puntuación Propias}
+\label{subsec:scoring_rules}
+
+Una \textit{regla de puntuación} (scoring rule) es una función $S: \mathcal{F} \times \mathbb{R} \to \mathbb{R} \cup \{\infty\}$ que asigna una penalización numérica $S(F,y)$ a cada par formado por una distribución predictiva $F$ y una observación realizada $y$. En nuestra notación, valores más bajos de la puntuación indican mejor desempeño predictivo.
+
+\subsubsection{Propriety y Strict Propriety}
+
+La \textit{propriety} es una característica fundamental que debe satisfacer toda métrica de evaluación de pronósticos probabilísticos para garantizar que incentive predicciones honestas y bien calibradas.
+
+\textbf{Definición (Regla de Puntuación Proper):} Una regla de puntuación $S$ es \textit{proper} relativa a una clase $\mathcal{F}$ de distribuciones de probabilidad si
+\begin{equation}
+\mathbb{E}_G[S(G, Y)] \leq \mathbb{E}_G[S(F, Y)]
+\label{eq:proper_scoring}
+\end{equation}
+para todas las distribuciones $F, G \in \mathcal{F}$, donde $Y \sim G$. Es decir, la puntuación esperada se minimiza cuando el pronóstico emitido es la verdadera distribución generadora de los datos.
+
+\textbf{Definición (Regla de Puntuación Strictly Proper):} La regla de puntuación $S$ es \textit{strictly proper} si la desigualdad en \eqref{eq:proper_scoring} se cumple con igualdad únicamente cuando $F = G$.
+
+La importancia de la \textit{propriety} radica en que establece un principio de alineación de incentivos: si un pronosticador desea minimizar su puntuación esperada, su mejor estrategia es reportar sinceramente su verdadera distribución predictiva, sin distorsiones ni manipulaciones. Las reglas \textit{improper} pueden incentivar al pronosticador a reportar una distribución diferente de su verdadera creencia, lo que conduce a evaluaciones sesgadas y conclusiones erróneas sobre el desempeño relativo de diferentes métodos.
+
+La \textit{strict propriety} es una condición más fuerte que garantiza que la verdadera distribución es el único minimizador de la puntuación esperada. Esta característica adicional es deseable porque proporciona un criterio único y bien definido para identificar la mejor predicción posible, facilita la identificación de diferencias entre métodos de pronóstico, y ofrece mayor poder discriminatorio en comparaciones empíricas.
+
+\subsection{Continuous Ranked Probability Score (CRPS)}
+\label{subsec:crps}
+
+El \textit{Continuous Ranked Probability Score} (CRPS) es una de las reglas de puntuación estrictamente propias más utilizadas para evaluar pronósticos probabilísticos de variables continuas. Su popularidad se debe a su sólida fundamentación teórica, su interpretabilidad intuitiva, y su capacidad para evaluar simultáneamente calibración y nitidez.
+
+\subsubsection{Definiciones y Representaciones}
+
+El CRPS admite varias representaciones matemáticas equivalentes, cada una con sus propias ventajas conceptuales y computacionales.
+
+\textbf{Representación integral:} La definición original del CRPS está dada por:
+\begin{equation}
+\text{CRPS}(F, y) = \int_{-\infty}^{\infty} \left(F(x) - \mathbbm{1}\{y \leq x\}\right)^2 dx
+\label{eq:crps_integral}
+\end{equation}
+donde $F$ es la función de distribución acumulada (FDA) de la distribución predictiva, $y$ es la observación realizada, y $\mathbbm{1}\{\cdot\}$ denota la función indicadora. Esta representación muestra que el CRPS mide el área entre la FDA predictiva y la FDA de la observación.
+
+\textbf{Representación basada en esperanzas:} Una forma alternativa, más conveniente para cálculos, está dada por:
+\begin{equation}
+\text{CRPS}(F, y) = \mathbb{E}_F|X - y| - \frac{1}{2}\mathbb{E}_F|X - X'|
+\label{eq:crps_expectation}
+\end{equation}
+donde $X$ y $X'$ son variables aleatorias independientes con distribución $F$. Esta representación revela una interpretación intuitiva del CRPS: el primer término mide la distancia esperada entre la predicción y la observación, mientras que el segundo término penaliza la dispersión de la distribución predictiva.
+
+Es importante notar que el CRPS es una métrica diseñada para comparar una distribución predictiva completa $F$ contra un punto observado $y$. Esta es una distinción fundamental respecto al ECRPS, que se discutirá posteriormente.
+
+\subsubsection{Propiedades del CRPS}
+
+El CRPS posee varias propiedades deseables que explican su amplia adopción en la literatura de pronósticos:
+
+\begin{enumerate}
+\item \textbf{Strictly proper:} El CRPS es \textit{strictly proper} relativo a la clase de todas las distribuciones de probabilidad en $\mathbb{R}$ con primer momento finito. Esto garantiza que la puntuación esperada se minimiza únicamente cuando el pronóstico emitido coincide con la verdadera distribución generadora.
+
+\item \textbf{Unidades consistentes:} El CRPS se expresa en las mismas unidades que la variable pronosticada, lo que facilita su interpretación práctica.
+
+\item \textbf{Reducción al error absoluto:} Cuando $F$ es una distribución degenerada (predicción puntual), el CRPS se reduce al error absoluto:
+\begin{equation}
+    \text{CRPS}(\delta_x, y) = |x - y|
+\end{equation}
+donde $\delta_x$ denota la medida de Dirac concentrada en $x$. Esta propiedad permite comparar directamente pronósticos puntuales y probabilísticos bajo un marco unificado.
+
+\item \textbf{Sensibilidad dual:} El CRPS evalúa simultáneamente dos aspectos críticos del desempeño predictivo: calibración, mediante el término que penaliza desviaciones entre predicción y observación, y nitidez, mediante el término que premia distribuciones predictivas concentradas.
+\end{enumerate}
+
+\subsection{Expected Continuous Ranked Probability Score (ECRPS)}
+\label{subsec:ecrps}
+
+En aplicaciones prácticas de evaluación de pronósticos, típicamente disponemos de una secuencia de $n$ pares pronóstico-observación: $(F_1, y_1), (F_2, y_2), \ldots, (F_n, y_n)$, donde cada $F_i$ representa una distribución predictiva y cada $y_i$ es la observación correspondiente. El desempeño predictivo global se cuantifica mediante el \textit{Expected Continuous Ranked Probability Score} (ECRPS), definido como la media aritmética de los CRPS individuales:
+
+\begin{equation}
+\text{ECRPS} = \frac{1}{n}\sum_{i=1}^n \text{CRPS}(F_i, y_i)
+\label{eq:ecrps}
+\end{equation}
+
+El ECRPS hereda todas las propiedades deseables del CRPS (\textit{strict propriety}, unidades interpretables, sensibilidad dual a calibración y nitidez) y proporciona un resumen numérico único del desempeño predictivo sobre todo el conjunto de evaluación.
+
+A diferencia del CRPS, que compara una distribución contra un punto observado, el ECRPS puede interpretarse como una métrica para comparar dos distribuciones cuando consideramos la distribución empírica de las observaciones. Si tenemos dos métodos de pronóstico que producen secuencias de distribuciones $(F_1, \ldots, F_n)$ y $(G_1, \ldots, G_n)$ respectivamente, sus ECRPS correspondientes nos permiten comparar el desempeño predictivo global de ambos métodos considerando toda la secuencia de pronósticos y observaciones.
+
+\section{Predicción Conformal por Intervalos: El Enfoque IIE}
+\label{sec:prediccion_conformal_intervalos_IIE}
+
+La predicción conformal clásica, introducida por Vovk et al. \cite{Vovk2005}, se fundamenta en la capacidad de generar conjuntos de predicción $\Gamma^\epsilon$ que garantizan una cobertura de confianza exacta para cualquier nivel de significancia $\epsilon \in (0,1)$. A diferencia de los métodos estadísticos tradicionales que dependen de la asintótica (grandes muestras), la predicción conformal es válida para muestras finitas, siempre que se cumpla el supuesto de intercambiabilidad de los datos.
+
+\subsection{El Concepto de No-Conformidad}
+
+El núcleo de esta metodología es la \textit{medida de no-conformidad} (NCM, por sus siglas en inglés). Una NCM es una función $A(B, z)$ que cuantifica el grado de "extrañeza" de un ejemplo $z$ en relación con un multiconjunto (o \textit{bag}) de ejemplos $B$. En el contexto de regresión, donde $z = (x, y)$, la medida de no-conformidad más común es el error absoluto de predicción, definido como:
+\begin{equation}
+    \alpha_i = |y_i - \hat{y}_i|
+\end{equation}
+donde $\hat{y}_i$ es la estimación producida por un algoritmo de aprendizaje subyacente (denominado \textit{underlying algorithm}). Es importante subrayar que la predicción conformal es agnóstica al modelo: puede envolver desde una regresión lineal simple hasta redes neuronales profundas, transformando sus predicciones puntuales en intervalos con validez estadística.
+
+\subsection{Protocolo de Construcción de Intervalos}
+
+Para construir un intervalo de predicción para un nuevo objeto $x_n$ basado en un conjunto de entrenamiento $z_1, \dots, z_{n-1}$, el método IIE (Inducida por Errores) sigue un proceso de prueba de hipótesis inversa. Para cada valor potencial $y \in \mathbb{R}$:
+
+\begin{enumerate}
+    \item \textbf{Aumentación del Conjunto:} Se asume hipotéticamente que la verdadera etiqueta de $x_n$ es $y$, formando el conjunto aumentado $z_1, z_2, \dots, z_{n-1}, z_n$, donde $z_n = (x_n, y)$.
+    \item \textbf{Cálculo de Puntajes:} Se calculan los puntajes de no-conformidad $\alpha_1, \dots, \alpha_n$ para todos los elementos, incluyendo el ejemplo hipotético. 
+    \item \textbf{Derivación del p-valor:} Se calcula la proporción de ejemplos que son "al menos tan extraños" como el nuevo ejemplo $z_n$:
+    \begin{equation}
+        p(y) = \frac{|\{i = 1, \dots, n : \alpha_i \geq \alpha_n\}|}{n}
+        \label{eq:p_valor_clasico}
+    \end{equation}
+    \item \textbf{Inversión de la Región de Aceptación:} El intervalo de predicción $\Gamma^{1-\epsilon}$ se define como el conjunto de todos los valores $y$ que no pueden ser rechazados al nivel de significancia $\epsilon$:
+    \begin{equation}
+        \Gamma^\epsilon(x_1, y_1, \dots, x_{n-1}, y_{n-1}, x_n) = \{y \in \mathbb{R} : p(y) > \epsilon\}
+    \end{equation}
+\end{enumerate}
+
+Este procedimiento garantiza que $P(y_n \notin \Gamma^\epsilon) \leq \epsilon$. Si los puntajes $\alpha_i$ tienen una distribución continua (sin empates), la probabilidad de error es exactamente $\epsilon$ \cite{Vovk2005}.
+
+\section{Robustez ante la No-Intercambiabilidad: Aproximación de Barber}
+\label{sec:barber_robustness_detail}
+
+Uno de los desafíos críticos en el análisis de series temporales es que el supuesto de intercambiabilidad rara vez se sostiene. Fenómenos como la autocorrelación, la heterocedasticidad y la deriva de parámetros (drift) invalidan la asunción de que el pasado y el futuro son estadísticamente idénticos. Barber et al. \cite{Barber2023} proponen una extensión fundamental para estos escenarios.
+
+\subsection{El Gap de Cobertura y Variación Total}
+
+Barber et al. formalizan la degradación de la validez conformal mediante el uso de la \textit{Distancia de Variación Total} ($d_{TV}$). Si la distribución de los datos cambia en el tiempo, existe una brecha de cobertura (\textit{coverage gap}). El teorema principal de Barber establece que la pérdida de cobertura está acotada por la suma de las distancias entre la distribución de los datos de entrenamiento y la distribución del dato de prueba:
+\begin{equation}
+    \text{Error de Cobertura} \leq \epsilon + \sum_{i=1}^{n} w_i d_{TV}(Z_i, Z_{n+1})
+\end{equation}
+
+\subsection{Cuantiles Pesados y Decaimiento Temporal}
+
+Para contrarrestar este efecto en series de tiempo, Barber et al. introducen los \textit{Weighted Conformal Predictors}. En lugar de asignar un peso uniforme de $1/n$ a cada residuo histórico, se asignan pesos $w_i$ que reflejan la relevancia del dato. En series no estacionarias, los datos más recientes son mejores predictores del futuro.
+
+Se define comúnmente un decaimiento geométrico para los pesos:
+\begin{equation}
+    w_i = \rho^{n-i}, \quad \rho \in (0, 1)
+\end{equation}
+donde un $\rho$ cercano a 1 asume una estabilidad lenta, mientras que un $\rho$ menor reacciona rápidamente a cambios estructurales. El p-valor pesado se calcula como una suma ponderada de funciones indicadoras:
+\begin{equation}
+    p^y = \frac{\sum_{i=1}^{n-1} w_i \mathbbm{1}_{\alpha_i \geq \alpha_n} + w_n}{\sum_{j=1}^n w_j}
+\end{equation}
+Este enfoque permite que la predicción conformal sea "adaptativa", manteniendo la cobertura cercana al nivel nominal incluso cuando la serie temporal experimenta cambios súbitos en su media o varianza \cite{Barber2023}.
+
+\section{Sistemas de Predicción Conformal (CPS): De Intervalos a Densidades}
+\label{sec:cps_densidades_LSPM}
+
+El Capítulo 7 de la obra de Vovk \cite{Vovk2005} marca la transición de la predicción de conjuntos a la predicción de distribuciones completas. Un \textit{Sistema de Predicción Conformal} (CPS) no entrega un rango, sino una \textit{Distribución Predictiva Aleatorizada} (RPD), denotada como $\Pi_n(y, \tau)$, que representa la probabilidad de que la verdadera etiqueta sea menor o igual a $y$.
+
+\subsection{Formalización de la RPD y el Suavizado ($\tau$)}
+
+Para asegurar que la distribución resultante sea continua y cumpla con las propiedades de una FDA (Función de Distribución Acumulada), se introduce una variable de suavizado $\tau \sim U(0,1)$. La función $\Pi$ se define como:
+\begin{equation}
+\Pi_n(y, \tau) := \frac{|\{i : \alpha_i < \alpha_n^y\}| + \tau |\{i : \alpha_i = \alpha_n^y\}|}{n}
+\end{equation}
+Es vital notar que aquí $\alpha_i$ son puntajes de \textit{conformidad} (no de no-conformidad). Un ejemplo común en regresión es $\alpha_i = y_i - \hat{y}_i$. El uso de la variable $\tau$ garantiza la \textit{calibración fuerte en probabilidad}: los valores de la RPD evaluados en la verdadera etiqueta son independientes y uniformes en $[0,1]$, permitiendo una cuantificación exacta de la incertidumbre en cualquier punto de la distribución \cite{Vovk2017wp}.
+
+\subsection{La Máquina de Predicción de Mínimos Cuadrados (LSPM)}
+
+La \textit{Least Squares Prediction Machine} (LSPM) es la aplicación primordial de los CPS al ámbito de la regresión. La LSPM utiliza la estructura de la regresión lineal para optimizar la eficiencia de la distribución predictiva.
+
+\subsubsection{Variantes de la LSPM}
+Vovk distingue tres formas de calcular los residuos dentro de una LSPM:
+\begin{enumerate}
+    \item \textbf{LSPM Ordinaria:} Los puntajes son simplemente los residuos de entrenamiento. Sin embargo, este enfoque tiende a ser demasiado optimista (sobreajuste), ya que el modelo ya ha "visto" los datos de entrenamiento.
+    \item \textbf{LSPM Eliminada (Deleted):} Utiliza un esquema de validación cruzada interna (\textit{leave-one-out}). Para cada dato $i$, se entrena un modelo omitiendo ese dato específico, asegurando que el residuo sea una medida honesta de la capacidad de generalización.
+    \item \textbf{LSPM Estudiantizada:} Es la variante más robusta y matemáticamente rigurosa. Ajusta cada residuo por su apalancamiento (\textit{leverage}), $h_i$, proveniente de la diagonal de la matriz \textit{hat}:
+    \begin{equation}
+        \alpha_i := \frac{y_i - \hat{y}_i}{\sigma \sqrt{1 - h_i}}
+    \end{equation}
+\end{enumerate}
+
+
+\section{Sistemas de Predicción Conformal de Mondrian (MCPS)}
+\label{sec:mcps_profundo}
+
+A pesar de las sólidas garantías de validez marginal que ofrecen los Sistemas de Predicción Conformal (CPS) descritos en la sección~\ref{sec:cps_densidades_LSPM}, estos presentan una limitación teórica y práctica fundamental: la garantía de error es un promedio sobre todo el espacio de datos. Esto implica que el sistema puede ser extremadamente preciso en ciertas regiones del espacio de características y, simultáneamente, cometer errores sistemáticos en otras, siempre que el error global no supere el nivel $\epsilon$. Los \textit{Sistemas de Predicción Conformal de Mondrian} (MCPS, por sus siglas en inglés) introducen el concepto de \textit{validez condicional por categorías}, permitiendo que la calibración se mantenga exacta dentro de subconjuntos específicos de los datos \cite{Vovk2005}.
+
+\subsection{Origen y Motivación: Validez Marginal vs. Condicional}
+
+El término "Mondrian" hace referencia al pintor neerlandés Piet Mondrian, cuyas obras se caracterizan por particiones del lienzo en rectángulos de colores puros. De manera análoga, un sistema Mondriano particiona el espacio de ejemplos $Z$ en categorías mutuamente excluyentes. 
+
+La necesidad de este enfoque surge cuando existen grupos de datos con dificultades predictivas heterogéneas. Por ejemplo, en una serie temporal de demanda eléctrica, predecir el consumo en un día festivo es intrínsecamente más difícil que en un día laboral. Un CPS global podría subestimar masivamente la incertidumbre en los días festivos, compensándola con una sobreestimación en los días laborales. El enfoque de Mondrian garantiza que la probabilidad de error sea exactamente $\epsilon$ tanto para los días laborales como para los festivos, de forma independiente \cite{Vovk2017wp}.
+
+\subsection{La Taxonomía de Mondrian ($\kappa$)}
+
+La base matemática de un MCPS es la \textit{taxonomía}. Una taxonomía es una función medible $\kappa: \mathbb{N} \times (\mathbf{X} \times \mathbf{Y}) \to K$, donde $K$ es un conjunto numerable de categorías. Para cada par de ejemplo $(x_i, y_i)$ y su posición en la secuencia $i$, la taxonomía asigna una categoría $\kappa_i$.
+
+Existen tres tipos principales de taxonomías aplicables a series temporales:
+\begin{enumerate}
+    \item \textbf{Taxonomías de Objetos:} Dependen solo de las características $x_i$ (ej. agrupar por niveles de volatilidad observada).
+    \item \textbf{Taxonomías de Etiquetas:} Dependen de la respuesta $y_i$. Esto da lugar a los \textit{Label-Conditional Conformal Predictors}, vitales cuando el impacto de un error depende de la magnitud del valor (ej. errores en valores extremos son más costosos).
+    \item \textbf{Taxonomías Temporales:} Dependen del índice $i$. Este es el puente con el trabajo de Barber et al. \cite{Barber2023}, donde la categoría de Mondrian puede ser una "ventana deslizante" de los datos más recientes para adaptarse a la no-intercambiabilidad.
+\end{enumerate}
+
+\subsection{Integración del Algoritmo MCPS}
+
+La integración de la lógica de Mondrian en un Sistema de Predicción Conformal se realiza modificando el cálculo del p-valor o de la RPD (Distribución Predictiva Aleatorizada). En lugar de comparar el puntaje del nuevo ejemplo $\alpha_n$ con todos los puntajes históricos, solo se compara con aquellos que pertenecen a su misma categoría.
+
+Sea $\sigma = \{z_1, \dots, z_{n-1}\}$ el conjunto de entrenamiento y $z_n = (x_n, y)$ el ejemplo de prueba con etiqueta hipotética $y$. El proceso para generar la RPD de Mondrian $\Pi_{M}$ es el siguiente:
+
+\begin{enumerate}
+    \item Se identifica la categoría del nuevo ejemplo: $k = \kappa(n, (x_n, y))$.
+    \item Se filtran los índices de los ejemplos de entrenamiento que pertenecen a dicha categoría:
+    \begin{equation}
+        S_k = \{i \in \{1, \dots, n-1\} : \kappa(i, z_i) = k\}
+    \end{equation}
+    \item Se calculan los puntajes de conformidad $\alpha_i$ solo para $i \in S_k \cup \{n\}$.
+    \item La RPD de Mondrian se define como:
+    \begin{equation}
+    \Pi_{M}(y, \tau) := \frac{|\{i \in S_k : \alpha_i < \alpha_n^y\}| + \tau |\{i \in S_k \cup \{n\} : \alpha_i = \alpha_n^y\}|}{|S_k| + 1}
+    \label{eq:mondrian_rpd}
+    \end{equation}
+\end{enumerate}
+
+El denominador $|S_k| + 1$ es clave: representa el tamaño de la "muestra local". Si una categoría tiene pocos ejemplos, la distribución predictiva será naturalmente más dispersa (reflejando mayor incertidumbre), mientras que categorías ricas en datos producirán densidades más nítidas \cite{Vovk2005}.
+
+\subsection{MCPS aplicado a la Máquina de Predicción de Mínimos Cuadrados (LSPM)}
+
+Cuando se integra Mondrian con la LSPM (sección~\ref{sec:cps_densidades_LSPM}), obtenemos un sistema capaz de generar densidades de probabilidad que se ajustan localmente. En este esquema, aunque el modelo de regresión puntual $\hat{y}$ puede entrenarse con todos los datos para aprovechar la eficiencia global, el \textit{ajuste de la escala de error} se realiza mediante Mondrian.
+
+Si utilizamos residuos estudiantizados, la integración se define como:
+\begin{equation}
+    \alpha_i = \frac{y_i - \hat{y}_i}{\hat{\sigma} \sqrt{1 - h_i}}, \quad \forall i \in S_{\kappa_n}
+\end{equation}
+Esto permite que el sistema detecte que en ciertos regímenes (categorías), el modelo de mínimos cuadrados tiende a fallar más que en otros. El MCPS "estira" o "encoge" la distribución predictiva de la LSPM basándose únicamente en la evidencia histórica de esa categoría específica.
+
+\subsection{Garantías de Validez Condicional y Robustez}
+
+El resultado fundamental de los MCPS, demostrado por Vovk et al. \cite{Vovk2005}, es que para cada categoría $k \in K$:
+\begin{equation}
+    P(y_n \notin \Gamma^\epsilon | \kappa_n = k) \leq \epsilon
+\end{equation}
+Esta validez condicional es mucho más fuerte que la marginal. En el contexto de Barber et al. \cite{Barber2023}, los MCPS ofrecen una defensa contra la no-intercambiabilidad si la taxonomía está bien diseñada para capturar la estructura de la deriva. Al segmentar los datos, el MCPS limita la propagación del "ruido" de ejemplos antiguos e irrelevantes hacia las predicciones actuales, asegurando que la densidad predictiva sea no solo estadísticamente válida, sino también contextualmente precisa para la toma de decisiones óptimas en cada estado del sistema.
+
+\section{Sustento Teórico: Análisis de la Consistencia Universal de Vovk}
+\label{sec:sustento_teorico_vovk}
+
+Para consolidar el marco teórico de esta investigación, es imperativo discutir el sustento matemático que garantiza que los Sistemas de Predicción Conformal (CPS) no solo son válidos en muestras finitas, sino también óptimos a medida que el volumen de datos aumenta. Este respaldo proviene de la demostración de la \textit{consistencia universal} de Vovk \cite{Vovk2019}, formalizada en el Teorema 31 de su obra reciente.
+
+\subsection{Definición de Consistencia Universal}
+
+En el contexto de los CPS, la validez (propiedad R2) asegura que el sistema está calibrado independientemente de la distribución de los datos. Sin embargo, la validez por sí sola no garantiza que la distribución predictiva $\Pi_n$ sea una buena aproximación a la verdadera distribución condicional de las etiquetas $P(y|x)$.
+
+Vovk define un sistema predictivo como \textit{universalmente consistente} si, para cualquier medida de probabilidad $P$ (bajo el modelo IID) y para cualquier función continua acotada $f$, se cumple que:
+\begin{equation}
+    \int f d\Pi_n - \mathbb{E}_P(f | x_{n+1}) \to 0 \quad \text{en probabilidad cuando } n \to \infty
+\end{equation}
+Esta propiedad implica que, asintóticamente, el CPS "encuentra" la verdadera distribución de probabilidad generadora de los datos, eliminando la incertidumbre epistémica conforme el tamaño de la muestra $n$ tiende al infinito \cite{Vovk2019}.
+
+\subsection{Mecanismo de la Demostración: El Enfoque de Histograma}
+
+La prueba de Vovk sobre la existencia de un CPS universal se apoya en la construcción de un \textit{Histogram Conformal Predictive System}. El argumento se divide en dos pilares fundamentales que vinculan la teoría de martingalas con la ley de los grandes números:
+
+\begin{enumerate}
+    \item \textbf{Teorema de Convergencia de Martingalas de Lévy:} Vovk utiliza particiones anidadas del espacio de objetos $X$ (celdas de histograma que se encogen conforme $n$ crece). Según el teorema de Lévy, la esperanza condicional de la función sobre una celda que se reduce tiende al valor puntual de la esperanza condicional en el objeto de prueba $x_{n+1}$ \cite{Vovk2019}.
+    
+    \item \textbf{Ley de los Grandes Números (LGN):} Mientras las celdas se encogen para ganar resolución, el número de ejemplos dentro de cada celda debe tender a infinito ($nh_n \to \infty$, donde $h_n$ es el ancho de la celda). Esto permite que la frecuencia empírica de las etiquetas dentro de la categoría de Mondrian converja a la esperanza real en esa región del espacio \cite{Vovk2019}.
+\end{enumerate}
+
+\subsection{La Distancia de Lévy y la Convergencia Débil}
+
+Un punto crítico de la demostración es el uso de la noción de Belyaev sobre secuencias de distribuciones que se aproximan débilmente. Vovk demuestra que bajo un CPS universal, la \textit{Distancia de Lévy} entre la distribución predictiva conformal y la verdadera distribución condicional converge a cero en probabilidad \cite{Vovk2019}. 
+
+Este resultado es el que otorga rigor a la aplicación de CPS en problemas de alta criticidad, como el pronóstico de carga eléctrica o la gestión de riesgos financieros. Indica que el analista no tiene que elegir entre un modelo "seguro" (conformal) y un modelo "preciso" (bayesiando/paramétrico); el CPS universal ofrece ambas ventajas simultáneamente:
+\begin{itemize}
+    \item \textbf{A corto plazo:} Garantiza cobertura exacta mediante calibración fuerte.
+    \item \textbf{A largo plazo:} Garantiza convergencia a la distribución real de los datos sin requerir asunciones paramétricas.
+\end{itemize}
+
+\subsection{Implicaciones para el LSPM y la Eficiencia}
+
+Aunque el modelo de mínimos cuadrados (LSPM) estudiado en la sección~\ref{sec:cps_densidades_LSPM} es eficiente bajo ruido gaussiano, Vovk advierte que no es universalmente consistente si la relación real entre $X$ y $Y$ no es lineal \cite{Vovk2005}. Por ello, el desarrollo de CPS basados en kernels o en métodos de vecinos cercanos (como se discute en el capítulo 4 de su obra) es lo que permite alcanzar la consistencia universal en espacios de características complejos. Esta conclusión justifica el uso de arquitecturas no lineales conformizadas en la presente tesis, ya que heredan la solidez de la prueba de consistencia de Vovk.
+
+
+\section{Análisis Crítico sobre la Extensión a Series de Tiempo Ergódicas y Estacionarias}
+\label{sec:discusion_extension_ergodica}
+
+Tras haber establecido la consistencia universal de los Sistemas de Predicción Conformal (CPS) en entornos de datos intercambiables, surge una interrogante fundamental para esta investigación: ¿es posible garantizar estas propiedades en el dominio de las series temporales? Dado que la dependencia temporal es la característica intrínseca de estos procesos, el supuesto de intercambiabilidad se debilita. En esta sección, se presenta una discusión teórica sobre la posibilidad de extender la consistencia universal hacia procesos estocásticos ergódicos, basándose en la relajación de los supuestos clásicos y la adopción de herramientas de estimación no paramétrica local.
+
+\subsection{Hacia la superación del paradigma IID: El rol del Mixing}
+
+La extensión de la teoría de Vovk a datos dependientes requiere sustituir la intercambiabilidad por condiciones de \textit{mixing} (mezcla fuerte). La idea central analizada es que, si bien las observaciones consecutivas están correlacionadas, esta dependencia debe desvanecerse a medida que la distancia temporal aumenta. 
+
+Se considera que un sistema predictivo puede alcanzar la consistencia universal en series de tiempo si el proceso cumple con los siguientes supuestos de regularidad:
+\begin{itemize}
+    \item \textbf{Estacionariedad Estricta y Ergodicidad:} Se asume que las leyes probabilísticas que gobiernan la serie son constantes en el tiempo (estacionariedad) y que una sola realización de la serie es suficiente para inferir las propiedades estadísticas de todo el proceso (ergodicidad). Matemáticamente, esto permite que los promedios temporales converjan a los promedios del ensamble, un pilar para cualquier forma de aprendizaje asintótico.
+    \item \textbf{Condición de $\alpha$-mixing (Mezcla Fuerte):} Este supuesto es el más profundo de la discusión. Expresa cuantitativamente que la dependencia entre el pasado ($Z_1, \dots, Z_t$) y el futuro lejano ($Z_{t+k}, \dots$) converge a cero cuando $k \to \infty$. Si el decaimiento de esta correlación es lo suficientemente rápido (típicamente una tasa algebraica o exponencial), el sistema puede "olvidar" estados pasados irrelevantes y concentrarse en la dinámica actual.
+    \item \textbf{Continuidad de Lipschitz en la Estructura de Residuos:} Se asume que la función de distribución acumulada de los residuos, $G(s|x)$, no presenta saltos abruptos ante pequeños cambios en las covariables, lo que permite que el suavizado por kernel sea efectivo.
+\end{itemize}
+
+\subsection{Mecanismos de Localización: Ventanas Móviles y Kernels}
+
+La discusión se centra en un cambio de arquitectura del transductor conformal. En el caso IID, todos los residuos históricos tienen el mismo peso. En la extensión a series de tiempo, se propone un enfoque de \textit{Conformalización Local}. Este mecanismo opera bajo dos dimensiones de adaptación:
+
+\begin{enumerate}
+    \item \textbf{Adaptación Temporal mediante Ventana Creciente ($L_n$):} Se analiza el uso de una ventana de observación que selecciona solo los $L_n$ ejemplos más recientes. Para asegurar la consistencia, el tamaño de esta ventana debe tender a infinito, pero a una tasa menor que el tamaño total de la muestra ($L_n = o(n)$), permitiendo que el sistema se adapte a posibles derivas lentas en la distribución.
+    \item \textbf{Adaptación Espacial mediante Kernels ($h_n$):} Dentro de la ventana temporal, los residuos $S_i = |Y_i - \mu(X_i)|$ se ponderan mediante una función kernel $K(\cdot)$ con un ancho de banda $h_n$. Esto garantiza que la distribución predictiva resultante sea "objeto-condicional", es decir, que refleje la incertidumbre específica del contexto actual de la serie (heterocedasticidad local).
+\end{enumerate}
+
+\subsection{Estatus Teórico de la Extensión en la Presente Investigación}
+
+Es imperativo aclarar que, si bien el análisis de sesgo y varianza para estimadores de kernel en procesos \textit{mixing} sugiere que la distribución predictiva conformal converge débilmente en probabilidad a la verdadera distribución condicional, en el contexto de este trabajo, dicha conclusión se maneja como un \textbf{marco de discusión analítica}. 
+
+La complejidad de una demostración formal exhaustiva para el caso general de series de tiempo que requeriría el uso de teoremas límite centrales para campos aleatorios dependientes y un control riguroso de las colas de la distribución excede el alcance probatorio de este capítulo. No obstante, esta discusión proporciona el sustento lógico necesario para aplicar estos sistemas en los experimentos prácticos que siguen. Se establece así un puente teórico: la validez asintótica del sistema no se presenta como una certeza matemática absoluta en este documento, sino como una ruta altamente probable y teóricamente justificada bajo condiciones de estabilidad estocástica, lo que dota de rigor a la arquitectura de cuantificación de incertidumbre empleada en la tesis.

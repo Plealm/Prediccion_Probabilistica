@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.1.2)  2 JAN 2026 18:10
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.1.2)  3 JAN 2026 17:39
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -140,14 +140,14 @@ Package tocbasic Info: omitting babel extension for `lot'
 \c@table=\count284
 Class scrbook Info: Redefining `\numberline' on input line 7418.
 \bibindent=\dimen148
-)
-LaTeX Info: Package 'babel.sty' has been disabled.
-            Load request ignored on input line 10.
- (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/base\inputenc.sty
+) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/base\inputenc.sty
 Package: inputenc 2024/02/08 v1.3d Input encoding file
 \inpenc@prehook=\toks18
 \inpenc@posthook=\toks19
-) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/csquotes\csquotes.sty
+)
+LaTeX Info: Package 'babel.sty' has been disabled.
+            Load request ignored on input line 12.
+ (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/csquotes\csquotes.sty
 Package: csquotes 2024-04-04 v5.2o context-sensitive quotations (JAW)
  (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/etoolbox\etoolbox.sty
 Package: etoolbox 2025/10/02 v2.5m e-TeX tools for LaTeX (JAW)
@@ -167,10 +167,7 @@ Package csquotes Info: Trying to load configuration file 'csquotes.cfg'...
 Package csquotes Info: ... configuration file loaded successfully.
  (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/csquotes\csquotes.cfg
 File: csquotes.cfg 
-))
-LaTeX Info: Package 'babel.sty' has been disabled.
-            Load request ignored on input line 17.
- (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsmath.sty
+)) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsmath.sty
 Package: amsmath 2025/07/09 v2.17z AMS math features
 \@mathmargin=\skip66
 
@@ -1080,10 +1077,10 @@ Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 28
 )
 \Hy@SectionHShift=\skip127
 )
-Package hyperref Info: Option `colorlinks' set `true' on input line 67.
+Package hyperref Info: Option `colorlinks' set `true' on input line 62.
 Package csquotes Info: Checking for multilingual support...
 Package csquotes Info: ... none found.
-Package translations Info: No language package found. I am going to use `english' as default language. on input line 85.
+Package translations Info: No language package found. I am going to use `english' as default language. on input line 80.
 Class scrbook Info: loading recommended package `bookmark'.
 (scrbook)           Using `bookmark' together with `hyperref' is recommended,
 (scrbook)           because of handling of possible bookmark level gaps.
@@ -1091,43 +1088,43 @@ Class scrbook Info: loading recommended package `bookmark'.
 (scrbook)           `bookmarkpackage=false' before \begin{document} and
 (scrbook)           you can avoid this message adding:
 (scrbook)             \usepackage{bookmark}
-(scrbook)           before \begin{document} on input line 85.
+(scrbook)           before \begin{document} on input line 80.
  (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/bookmark\bookmark.sty
 Package: bookmark 2023-12-10 v1.31 PDF bookmarks (HO)
  (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/bookmark\bkm-pdftex.def
 File: bkm-pdftex.def 2023-12-10 v1.31 bookmark driver for pdfTeX and luaTeX (HO)
 \BKM@id=\count525
-)) (main.aux (Capitulos/Cap1.aux))
+)) (main.aux (Capitulos/Cap1.aux) (Capitulos/Cap2.aux))
 \openout1 = `main.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 85.
-LaTeX Font Info:    ... okay on input line 85.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 85.
-LaTeX Font Info:    ... okay on input line 85.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 85.
-LaTeX Font Info:    ... okay on input line 85.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 85.
-LaTeX Font Info:    ... okay on input line 85.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 85.
-LaTeX Font Info:    ... okay on input line 85.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 85.
-LaTeX Font Info:    ... okay on input line 85.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 85.
-LaTeX Font Info:    ... okay on input line 85.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 85.
-LaTeX Font Info:    ... okay on input line 85.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 85.
-LaTeX Font Info:    ... okay on input line 85.
-Package scrbase Info: activating english \partname on input line 85.
-Package scrbase Info: activating english \chaptername on input line 85.
-Package scrbase Info: activating english \appendixname on input line 85.
-Package scrbase Info: activating english \figurename on input line 85.
-Package scrbase Info: activating english \tablename on input line 85.
-Package scrbase Info: activating english \contentsname on input line 85.
-Package scrbase Info: activating english \listfigurename on input line 85.
-Package scrbase Info: activating english \listtablename on input line 85.
-Package scrbase Info: activating english \bibname on input line 85.
-Package scrbase Info: activating english \indexname on input line 85.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 80.
+LaTeX Font Info:    ... okay on input line 80.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 80.
+LaTeX Font Info:    ... okay on input line 80.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 80.
+LaTeX Font Info:    ... okay on input line 80.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 80.
+LaTeX Font Info:    ... okay on input line 80.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 80.
+LaTeX Font Info:    ... okay on input line 80.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 80.
+LaTeX Font Info:    ... okay on input line 80.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 80.
+LaTeX Font Info:    ... okay on input line 80.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 80.
+LaTeX Font Info:    ... okay on input line 80.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 80.
+LaTeX Font Info:    ... okay on input line 80.
+Package scrbase Info: activating english \partname on input line 80.
+Package scrbase Info: activating english \chaptername on input line 80.
+Package scrbase Info: activating english \appendixname on input line 80.
+Package scrbase Info: activating english \figurename on input line 80.
+Package scrbase Info: activating english \tablename on input line 80.
+Package scrbase Info: activating english \contentsname on input line 80.
+Package scrbase Info: activating english \listfigurename on input line 80.
+Package scrbase Info: activating english \listtablename on input line 80.
+Package scrbase Info: activating english \bibname on input line 80.
+Package scrbase Info: activating english \indexname on input line 80.
 
 
 Package siunitx Warning: Detected the "physics" package:
@@ -1143,7 +1140,7 @@ Package siunitx Warning: Detected the "physics" package:
 (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/translations/dicts\translations-basic-dictionary-english.trsl
 File: translations-basic-dictionary-english.trsl (english translation file `translations-basic-dictionary')
 )
-Package translations Info: loading dictionary `translations-basic-dictionary' for `english'. on input line 85.
+Package translations Info: loading dictionary `translations-basic-dictionary' for `english'. on input line 80.
  (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
 \scratchcounter=\count526
@@ -1214,13 +1211,13 @@ Package biblatex Info: Automatic encoding selection.
 Package biblatex Info: Trying to load bibliographic data...
 Package biblatex Info: ... file 'main.bbl' found.
  (main.bbl)
-Package biblatex Info: Reference section=0 on input line 85.
-Package biblatex Info: Reference segment=0 on input line 85.
-Package hyperref Info: Link coloring ON on input line 85.
-<logo_unal.png, id=6, 346.29375pt x 146.5475pt>
-File: logo_unal.png Graphic file (type png)
-<use logo_unal.png>
-Package pdftex.def Info: logo_unal.png  used on input line 99.
+Package biblatex Info: Reference section=0 on input line 80.
+Package biblatex Info: Reference segment=0 on input line 80.
+Package hyperref Info: Link coloring ON on input line 80.
+<Imagenes/logo_unal.png, id=6, 346.29375pt x 146.5475pt>
+File: Imagenes/logo_unal.png Graphic file (type png)
+<use Imagenes/logo_unal.png>
+Package pdftex.def Info: Imagenes/logo_unal.png  used on input line 94.
 (pdftex.def)             Requested size: 142.26378pt x 60.2056pt.
  [1
 
@@ -1228,7 +1225,7 @@ Package pdftex.def Info: logo_unal.png  used on input line 99.
 
 
 
-{C:/Users/pleal/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map} <./logo_unal.png (PNG copy)>] [2
+{C:/Users/pleal/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map} <./Imagenes/logo_unal.png (PNG copy)>] [2
 
 
 ] [3
@@ -1238,11 +1235,11 @@ Package pdftex.def Info: logo_unal.png  used on input line 99.
 
 
 ]
-LaTeX Font Info:    Trying to load font information for U+msa on input line 179.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 174.
  (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 179.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 174.
  (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) [5
@@ -1255,20 +1252,19 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ] [8
 
 
-] (main.toc)
+] (main.toc [9
+
+])
 \tf@toc=\write5
 \openout5 = `main.toc'.
 
- [9
-
-] [10
-
-
-] (main.lof)
+ [10] (main.lof)
 \tf@lof=\write6
 \openout6 = `main.lof'.
 
  [11
+
+
 
 ] [12
 
@@ -1287,57 +1283,120 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 
  (Capitulos/Cap1.tex
 chapter 1.
-
-LaTeX Warning: Citation 'Salinas2020' on page 1 undefined on input line 13.
-
 [1
 
 
 
 
-]
-
-LaTeX Warning: Citation 'Salinas2020' on page 2 undefined on input line 27.
-
-[2] [3]
+] [2] [3]
 Overfull \hbox (3.16205pt too wide) in paragraph at lines 55--56
 []\OT1/cmr/m/n/12 Comparar el de-sempe~no del mod-elo prop-uesto frente a mod-e-los de ref-er-en-cia (\OT1/cmr/m/it/12 DeepAR
  []
 
 [4]) [5]
+\openout2 = `Capitulos/Cap2.aux'.
 
-LaTeX Warning: Empty bibliography on input line 242.
+ (Capitulos/Cap2.tex
+chapter 2.
 
-(main.aux (Capitulos/Cap1.aux))
+Overfull \hbox (9.28336pt too wide) in paragraph at lines 10--11
+\OT1/cmr/m/n/12 El pron^^Sostico prob-a-bil^^S^^Pstico rep-re-senta un cam-bio de paradigma fun-da-men-tal en la predicci^^Son
+ []
+
+[6
+
+
+
+
+]
+<./Imagenes/Cap2_prediccion.png, id=206, 785.18344pt x 467.49657pt>
+File: ./Imagenes/Cap2_prediccion.png Graphic file (type png)
+<use ./Imagenes/Cap2_prediccion.png>
+Package pdftex.def Info: ./Imagenes/Cap2_prediccion.png  used on input line 28.
+(pdftex.def)             Requested size: 434.91321pt x 258.95006pt.
+ [7 <./Imagenes/Cap2_prediccion.png>]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [8]
+Overfull \hbox (9.67502pt too wide) in paragraph at lines 74--75
+\OT1/cmr/m/n/12 La eval-u-aci^^Son rig-urosa del de-sempe~no pre-dic-tivo es fun-da-men-tal para com-parar metodolog^^S^^Pas
+ []
+
+[9]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [10]
+LaTeX Font Info:    Trying to load font information for U+bbm on input line 109.
+ (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/bbm\ubbm.fd
+File: ubbm.fd 1999/03/15 V 1.2 Font definition for bbm font - TH
+)
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [11]
+Overfull \hbox (7.7886pt too wide) in paragraph at lines 132--133
+[]\OT1/cmr/bx/n/12 Reducci^^Son al er-ror ab-so-luto: \OT1/cmr/m/n/12 Cuando $\OML/cmm/m/it/12 F$ \OT1/cmr/m/n/12 es una dis-tribuci^^Son de-gen-er-ada (predicci^^Son
+ []
+
+[12] [13] [14]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [15]
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 219.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\tau' on input line 219.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 219.
+
+[16] [17]
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 254.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\kappa' on input line 254.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 254.
+
+[18]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [19] [20] [21] [22] [23]) [24]
+chapter without number
+[25
+
+
+
+
+] [26] (main.aux (Capitulos/Cap1.aux) (Capitulos/Cap2.aux))
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2025-12-24>
  ***********
-
-
-LaTeX Warning: There were undefined references.
-
-
-Package biblatex Warning: Please (re)run Biber on the file:
-(biblatex)                main
-(biblatex)                and rerun LaTeX afterwards.
-
 Package logreq Info: Writing requests to 'main.run.xml'.
 \openout1 = `main.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 44154 strings out of 467871
- 956902 string characters out of 5418377
- 1915259 words of memory out of 5000000
- 72417 multiletter control sequences out of 15000+600000
- 637358 words of font info for 74 fonts, out of 8000000 for 9000
+ 44579 strings out of 467871
+ 966344 string characters out of 5418377
+ 1926214 words of memory out of 5000000
+ 72697 multiletter control sequences out of 15000+600000
+ 641838 words of font info for 95 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 108i,20n,107p,11301b,1169s stack positions out of 10000i,1000n,20000p,200000b,200000s
- <C:\Users\pleal\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm1200.pk><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsl12.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmssbx10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti12.pfb>
-Output written on main.pdf (19 pages, 170325 bytes).
+ 108i,21n,107p,11301b,2199s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ <C:\Users\pleal\AppData\Local\MiKTeX\fonts/pk/ljfour/public/bbm/dpi600\bbm12.pk> <C:\Users\pleal\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm1200.pk><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmcsc10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi6.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsl12.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmssbx10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti12.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmtt12.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
+Output written on main.pdf (40 pages, 577359 bytes).
 PDF statistics:
- 195 PDF objects out of 1000 (max. 8388607)
- 36 named destinations out of 1000 (max. 500000)
- 90 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 675 PDF objects out of 1000 (max. 8388607)
+ 162 named destinations out of 1000 (max. 500000)
+ 399 words of extra memory for PDF output out of 10000 (max. 10000000)
 

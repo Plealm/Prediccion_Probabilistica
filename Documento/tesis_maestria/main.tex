@@ -5,15 +5,10 @@
 % ============================================
 \RequirePackage{scrlfile}
 \PreventPackageFromLoading{babel}
-\RequirePackage[spanish,es-tabla]{babel}
-% ============================================
 
-% --- RESTO DEL PREÁMBULO ---
-\usepackage[utf8]{inputenc}
-\usepackage{csquotes}
 % --- CODIFICACIÓN Y LENGUAJE ---
 \usepackage[utf8]{inputenc}
-\usepackage[spanish, es-tabla]{babel}
+\usepackage[spanish,es-tabla]{babel}
 \usepackage{csquotes}
 
 % --- MATEMÁTICAS ---
@@ -43,7 +38,7 @@
     bottom=2.5cm,
     left=3cm,
     right=2.5cm,
-    headheight=18pt,  % Aumentado para evitar warning
+    headheight=18pt,
     includehead
 ]{geometry}
 
@@ -96,7 +91,7 @@
 \thispagestyle{empty}
 \centering
 
-    \includegraphics[width=5cm]{logo_unal.png}
+    \includegraphics[width=5cm]{Imagenes/logo_unal.png}
     
     \vspace{1.5cm}
     
@@ -227,18 +222,22 @@ A mi padre, Antonio Leal, por ser mi apoyo incondicional y por creer en este pro
 \mainmatter
 
 \include{Capitulos/Cap1}
-
-% Capítulos futuros:
-% \include{Capitulos/Cap2}
+\include{Capitulos/Cap2}
 % \include{Capitulos/Cap3}
 % \include{Capitulos/Cap4}
 % \include{Capitulos/Cap5}
 % \include{Capitulos/Cap6}
 
+
+
 % ==========================================
 % BIBLIOGRAFÍA
 % ==========================================
 \backmatter
+
+% Incluir TODAS las referencias (incluso sin citar)
+\nocite{*}
+
 \printbibliography[title={Bibliografía}, heading=bibintoc]
 
 \end{document}

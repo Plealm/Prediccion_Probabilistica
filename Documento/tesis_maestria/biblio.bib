@@ -3,9 +3,9 @@
 @inproceedings{Arrieta2017,
   author    = {Arrieta Prieto, Mario Enrique},
   title     = {Evaluation of the Sieve Bootstrap's performance in comparison with the classic approach for forecasting purposes in time series analysis},
-  booktitle = {XXVII Simposio Internacional de Estad{\'\i}stica / 5th International Workshop on Applied Statistics},
+  booktitle = {XXVII Simposio Internacional de Estad{'\i}stica / 5th International Workshop on Applied Statistics},
   year      = {2017},
-  address   = {Medell{\'\i}n, Colombia},
+  address   = {Medell{'\i}n, Colombia},
   note      = {Poster Presentation}
 }
 
@@ -26,21 +26,21 @@
   number      = {20},
   type        = {Working paper},
   url         = {http://alrw.net/articles/CPDK.pdf},
-  note        = {Working Paper 20. Accessed on \today} % Or a specific date
+  note        = {Working Paper 20. Accessed on \today}
 }
 
 @misc{Barber2023,
-  author       = {Barber, Rina Foygel and Cand{\`e}s, Emmanuel J. and Ramdas, Aaditya and Tibshirani, Ryan J.},
+  author       = {Barber, Rina Foygel and Cand{`e}s, Emmanuel J. and Ramdas, Aaditya and Tibshirani, Ryan J.},
   title        = {Conformal Prediction Beyond Exchangeability},
   year         = {2023},
   howpublished = {arXiv preprint arXiv:2202.13415v5},
   eprint       = {2202.13415},
   archiveprefix= {arXiv},
   primaryclass = {stat.ME},
-  note         = {Version 5. Accessed on \today} % Or a specific date
+  note         = {Version 5. Accessed on \today}
 }
 
-@article{Gneiting2007,
+@article{GneitingRaftery2007,
   author  = {Gneiting, Tilmann and Raftery, Adrian E.},
   title   = {Strictly Proper Scoring Rules, Prediction, and Estimation},
   journal = {Journal of the American Statistical Association},
@@ -49,6 +49,17 @@
   number  = {477},
   pages   = {359--378},
   doi     = {10.1198/016214506000001437}
+}
+
+@article{GneitingBalabdaoui2007,
+  author = {Gneiting, Tilmann and Balabdaoui, Fadoua and Raftery, Adrian E.},
+  title = {Probabilistic Forecasts, Calibration and Sharpness},
+  journal = {Journal of the Royal Statistical Society: Series B (Statistical Methodology)},
+  volume = {69},
+  number = {2},
+  pages = {243--268},
+  year = {2007},
+  doi = {10.1111/j.1467-9868.2007.00587.x}
 }
 
 @article{Salinas2020,
@@ -94,10 +105,6 @@
   type        = {Technical report}
 }
 
-% Buhlmann1997Sieve es la referencia más citada para el Sieve Bootstrap,
-% aunque el tech report de 1995 es el trabajo original.
-% El paper de Hardle et al. 2003 cita Buhlmann, P. (1997). Sieve Bootstrap for Time Series, Bernoulli, 3, 123-148.
-% Ajusta esta entrada si es necesario o si prefieres citar el artículo de Bernoulli.
 @article{Buhlmann1997Sieve,
   author    = {Bühlmann, Peter},
   title     = {Sieve Bootstrap for Time Series},
@@ -109,20 +116,17 @@
   doi       = {10.2307/3318610}
 }
 
-@article{Alonso2000Sieve,
+@article{Alonso2002Sieve,
   author    = {Alonso, A. and Peña, D. and Romo, J.},
   title     = {Forecasting Time Series With Sieve Bootstrap},
-  % Como mencioné antes, Arrieta2017 lo cita como "Statistics and Econometrics Series 1".
-  % He encontrado una versión más formal:
   journal   = {Journal of Statistical Planning and Inference},
   volume    = {108},
   number    = {1-2},
   pages     = {185--206},
-  year      = {2002}, % Nota el cambio de año respecto a la cita de Arrieta
+  year      = {2002},
   doi       = {10.1016/S0378-3758(02)00269-2}
-  % Si prefieres la cita original de la serie de working papers, puedes usar la anterior.
-  % Esta parece ser la publicación formal en revista.
 }
+
 @article{Kunsch1989,
   author  = {Künsch, Hans R.},
   title   = {The Jackknife and the Bootstrap for General Stationary Observations},
@@ -145,21 +149,63 @@
   doi     = {10.1080/01621459.1994.10476870}
 }
 
-
-@article{Gneiting2014probabilistic,
-  title={Probabilistic forecasting},
-  author={Gneiting, Tilmann and Katzfuss, Matthias},
-  journal={Annual Review of Statistics and Its Application},
-  volume={1},
-  pages={125--151},
-  year={2014},
-  publisher={Annual Reviews}
+@article{Gneiting2014,
+  author = {Gneiting, Tilmann and Katzfuss, Matthias},
+  title = {Probabilistic Forecasting},
+  journal = {Annual Review of Statistics and Its Application},
+  volume = {1},
+  pages = {125--151},
+  year = {2014},
+  doi = {10.1146/annurev-statistics-062713-085831}
 }
 
-@techreport{Thorarinsdottir2017Verification,
-  title={Verification: assessment of calibration and accuracy},
-  author={Thorarinsdottir, Thordis L. and Schuhen, Nina},
-  institution={Norwegian Computing Center},
-  year={2017},
-  note={SAMBA/17/17}
+@article{Thorarinsdottir2017,
+  author = {Thorarinsdottir, Thordis L. and Schuhen, Nina},
+  title = {Verification: Assessment of Calibration and Accuracy},
+  journal = {Norwegian Computing Center},
+  type = {Note},
+  number = {SAMBA/17/17},
+  year = {2017},
+  month = {October}
+}
+
+@inproceedings{Vovk2019,
+  author    = {Vovk, Vladimir},
+  title     = {Universally consistent conformal predictive distributions},
+  booktitle = {Proceedings of the Eighth Workshop on Conformal and Probabilistic Prediction and Applications (COPA 2019)},
+  series    = {Proceedings of Machine Learning Research},
+  volume    = {105},
+  pages     = {105--122},
+  year      = {2019},
+  publisher = {PMLR},
+  url       = {http://proceedings.mlr.press/v105/vovk19a.html}
+}
+
+@article{Belyaev2000,
+  author  = {Belyaev, Yuri and Sj{\"o}stedt-de Luna, Sara},
+  title   = {Weakly approaching sequences of random distributions},
+  journal = {Journal of Applied Probability},
+  volume  = {37},
+  number  = {3},
+  pages   = {807--822},
+  year    = {2000},
+  publisher = {Cambridge University Press}
+}
+
+@book{Levy1937,
+  author    = {L{\'e}vy, Paul},
+  title     = {Th{\'e}orie de l'addition des variables al{\'e}atoires},
+  publisher = {Gauthier-Villars},
+  address   = {Paris},
+  year      = {1937}
+}
+
+@article{Bradley2005,
+  author  = {Bradley, Richard C.},
+  title   = {Basic Properties of Strong Mixing Conditions. A Survey and Some Open Questions},
+  journal = {Probability Surveys},
+  volume  = {2},
+  pages   = {107--144},
+  year    = {2005},
+  doi     = {10.1214/154957805100000104}
 }
