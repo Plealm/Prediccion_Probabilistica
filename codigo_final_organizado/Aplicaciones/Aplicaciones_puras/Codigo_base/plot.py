@@ -254,7 +254,10 @@ def plot_type_b_step_comparison(target_step_idx, predictions_dict, df_results,
 # ==============================================================================
 def modified_diebold_mariano_test(errors1, errors2, h=1):
     """
-    Test Diebold-Mariano modificado con corrección Harvey-Leybourne-Newbold (1997)
+    Test Diebold-Mariano con fixed-smoothing asymptotics (Coroneo & Iacone, 2020)
+    
+    Usa Fixed-m asymptotics (kernel Daniell) que es más robusto en muestras pequeñas
+    y mantiene buen desempeño en muestras grandes.
     
     Parameters:
     -----------
@@ -266,11 +269,11 @@ def modified_diebold_mariano_test(errors1, errors2, h=1):
     Returns:
     --------
     hln_dm_stat : float
-        Estadístico DM corregido (HLN-DM)
+        Estadístico con fixed-m asymptotics
     p_value : float
-        P-valor usando distribución t-Student con T-1 grados de libertad
+        P-valor usando distribución t-Student con 2m grados de libertad
     dm_stat : float
-        Estadístico DM original (sin corrección)
+        Estadístico DM original (para referencia)
     """
     # Calcular diferencial de pérdida
     d = errors1 - errors2
@@ -280,37 +283,40 @@ def modified_diebold_mariano_test(errors1, errors2, h=1):
     if T < 2:
         return np.nan, np.nan, np.nan
     
-    # Calcular autocovarianzas
-    def gamma_d(k):
-        if k == 0:
-            return np.var(d, ddof=1)
-        else:
-            return np.mean((d[k:] - d_bar) * (d[:-k] - d_bar))
+    # Desviaciones de la media
+    u = d - d_bar
     
-    # Estimar la varianza de largo plazo usando Newey-West
-    # Para h-step-ahead forecasts, incluimos hasta h-1 lags
-    gamma_0 = gamma_d(0)
-    gamma_sum = gamma_0
+    # Fixed-m: bandwidth recomendado en el paper
+    m = max(1, int(np.floor(T**(1/3))))
     
-    if h > 1:
-        for k in range(1, h):
-            gamma_k = gamma_d(k)
-            gamma_sum += 2 * gamma_k
+    # Calcular periodograma
+    from scipy.fft import fft
     
-    var_d = gamma_sum / T
+    # FFT de las desviaciones
+    fft_u = fft(u)
+    periodogram = np.abs(fft_u)**2 / (2 * np.pi * T)
     
-    if var_d <= 0:
-        return 0, 1.0, 0
+    # WPE con kernel de Daniell: promedio de primeros m periodogramas
+    # (excluyendo frecuencia 0)
+    if m >= len(periodogram) - 1:
+        m = len(periodogram) - 2
     
-    # Estadístico DM original
-    dm_stat = d_bar / np.sqrt(var_d)
+    sigma_hat_sq = 2 * np.pi * np.mean(periodogram[1:m+1])
     
-    # Corrección Harvey-Leybourne-Newbold (1997)
-    correction_factor = np.sqrt((T + 1 - 2*h + h*(h-1)) / T)
-    hln_dm_stat = correction_factor * dm_stat
+    if sigma_hat_sq <= 0:
+        # Fallback: usar varianza simple
+        sigma_hat_sq = np.var(d, ddof=1) / T
+        if sigma_hat_sq <= 0:
+            return 0, 1.0, 0
     
-    # P-valor usando t-Student con T-1 grados de libertad
-    df = T - 1
+    # Estadístico DM
+    dm_stat = np.sqrt(T) * d_bar / np.sqrt(sigma_hat_sq)
+    
+    # Fixed-m asymptotics: límite es t-Student con 2m grados de libertad
+    df = 2 * m
+    hln_dm_stat = dm_stat
+    
+    # P-valor usando t-Student
     p_value = 2 * (1 - stats.t.cdf(abs(hln_dm_stat), df))
     
     return hln_dm_stat, p_value, dm_stat

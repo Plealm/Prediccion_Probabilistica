@@ -1,4 +1,4 @@
-\contentsline {chapter}{Agradecimientos}{vii}{chapter*.2}%
+\contentsline {chapter}{Agradecimientos}{v}{chapter*.2}%
 \contentsline {chapter}{\numberline {1}Introducción y Objetivos}{1}{chapter.1}%
 \contentsline {section}{\numberline {1.1}Introducción}{1}{section.1.1}%
 \contentsline {section}{\numberline {1.2}Planteamiento del problema}{2}{section.1.2}%
@@ -6,43 +6,48 @@
 \contentsline {section}{\numberline {1.4}Objetivos}{4}{section.1.4}%
 \contentsline {subsection}{\numberline {1.4.1}Objetivo General}{4}{subsection.1.4.1}%
 \contentsline {subsection}{\numberline {1.4.2}Objetivos Específicos}{4}{subsection.1.4.2}%
-\contentsline {section}{\numberline {1.5}Estructura de la tesis}{4}{section.1.5}%
+\contentsline {section}{\numberline {1.5}Estructura de la tesis}{5}{section.1.5}%
 \contentsline {chapter}{\numberline {2}Marco Teórico}{6}{chapter.2}%
 \contentsline {section}{\numberline {2.1}Pronóstico Probabilístico}{6}{section.2.1}%
 \contentsline {subsection}{\numberline {2.1.1}Definición y Objetivos}{6}{subsection.2.1.1}%
 \contentsline {subsection}{\numberline {2.1.2}Ventajas del Pronóstico Probabilístico}{7}{subsection.2.1.2}%
-\contentsline {subsection}{\numberline {2.1.3}Representación de Distribuciones Predictivas}{9}{subsection.2.1.3}%
 \contentsline {section}{\numberline {2.2}Métricas para Evaluación de Pronósticos Probabilísticos}{9}{section.2.2}%
 \contentsline {subsection}{\numberline {2.2.1}Reglas de Puntuación Propias}{9}{subsection.2.2.1}%
-\contentsline {subsubsection}{\nonumberline Propriety y Strict Propriety}{10}{subsubsection*.7}%
-\contentsline {subsection}{\numberline {2.2.2}Continuous Ranked Probability Score (CRPS)}{11}{subsection.2.2.2}%
-\contentsline {subsubsection}{\nonumberline Definiciones y Representaciones}{11}{subsubsection*.8}%
-\contentsline {subsubsection}{\nonumberline Propiedades del CRPS}{12}{subsubsection*.9}%
+\contentsline {subsubsection}{\nonumberline Propriety y Strict Propriety}{9}{subsubsection*.7}%
+\contentsline {subsection}{\numberline {2.2.2}Continuous Ranked Probability Score (CRPS)}{10}{subsection.2.2.2}%
+\contentsline {subsubsection}{\nonumberline Definiciones y Representaciones}{10}{subsubsection*.8}%
+\contentsline {subsubsection}{\nonumberline Propiedades del CRPS}{11}{subsubsection*.9}%
 \contentsline {subsection}{\numberline {2.2.3}Expected Continuous Ranked Probability Score (ECRPS)}{12}{subsection.2.2.3}%
-\contentsline {section}{\numberline {2.3}Predicción Conformal por Intervalos: El Enfoque IIE}{13}{section.2.3}%
-\contentsline {subsection}{\numberline {2.3.1}El Concepto de No-Conformidad}{13}{subsection.2.3.1}%
-\contentsline {subsection}{\numberline {2.3.2}Protocolo de Construcción de Intervalos}{14}{subsection.2.3.2}%
-\contentsline {section}{\numberline {2.4}Robustez ante la No-Intercambiabilidad: Aproximación de Barber}{14}{section.2.4}%
-\contentsline {subsection}{\numberline {2.4.1}El Gap de Cobertura y Variación Total}{15}{subsection.2.4.1}%
-\contentsline {subsection}{\numberline {2.4.2}Cuantiles Pesados y Decaimiento Temporal}{15}{subsection.2.4.2}%
-\contentsline {section}{\numberline {2.5}Sistemas de Predicción Conformal (CPS): De Intervalos a Densidades}{16}{section.2.5}%
-\contentsline {subsection}{\numberline {2.5.1}Formalización de la RPD y el Suavizado ($\tau $)}{16}{subsection.2.5.1}%
-\contentsline {subsection}{\numberline {2.5.2}La Máquina de Predicción de Mínimos Cuadrados (LSPM)}{16}{subsection.2.5.2}%
-\contentsline {subsubsection}{\nonumberline Variantes de la LSPM}{16}{subsubsection*.10}%
-\contentsline {section}{\numberline {2.6}Sistemas de Predicción Conformal de Mondrian (MCPS)}{17}{section.2.6}%
-\contentsline {subsection}{\numberline {2.6.1}Origen y Motivación: Validez Marginal vs. Condicional}{17}{subsection.2.6.1}%
-\contentsline {subsection}{\numberline {2.6.2}La Taxonomía de Mondrian ($\kappa $)}{18}{subsection.2.6.2}%
-\contentsline {subsection}{\numberline {2.6.3}Integración del Algoritmo MCPS}{18}{subsection.2.6.3}%
-\contentsline {subsection}{\numberline {2.6.4}MCPS aplicado a la Máquina de Predicción de Mínimos Cuadrados (LSPM)}{19}{subsection.2.6.4}%
-\contentsline {subsection}{\numberline {2.6.5}Garantías de Validez Condicional y Robustez}{20}{subsection.2.6.5}%
-\contentsline {section}{\numberline {2.7}Sustento Teórico: Análisis de la Consistencia Universal de Vovk}{20}{section.2.7}%
-\contentsline {subsection}{\numberline {2.7.1}Definición de Consistencia Universal}{20}{subsection.2.7.1}%
-\contentsline {subsection}{\numberline {2.7.2}Mecanismo de la Demostración: El Enfoque de Histograma}{21}{subsection.2.7.2}%
-\contentsline {subsection}{\numberline {2.7.3}La Distancia de Lévy y la Convergencia Débil}{21}{subsection.2.7.3}%
-\contentsline {subsection}{\numberline {2.7.4}Implicaciones para el LSPM y la Eficiencia}{22}{subsection.2.7.4}%
-\contentsline {section}{\numberline {2.8}Análisis Crítico sobre la Extensión a Series de Tiempo Ergódicas y Estacionarias}{22}{section.2.8}%
-\contentsline {subsection}{\numberline {2.8.1}Hacia la superación del paradigma IID: El rol del Mixing}{22}{subsection.2.8.1}%
-\contentsline {subsection}{\numberline {2.8.2}Mecanismos de Localización: Ventanas Móviles y Kernels}{23}{subsection.2.8.2}%
-\contentsline {subsection}{\numberline {2.8.3}Estatus Teórico de la Extensión en la Presente Investigación}{24}{subsection.2.8.3}%
-\contentsline {chapter}{\nonumberline Bibliografía}{25}{chapter*.11}%
+\contentsline {section}{\numberline {2.3}Test de Diebold-Mariano para Comparación de Precisión Predictiva}{12}{section.2.3}%
+\contentsline {subsection}{\numberline {2.3.1}Formulación del Test}{13}{subsection.2.3.1}%
+\contentsline {subsection}{\numberline {2.3.2}Distribución Asintótica y Estimación de la Varianza}{13}{subsection.2.3.2}%
+\contentsline {subsection}{\numberline {2.3.3}Modificaciones para Muestras Pequeñas}{15}{subsection.2.3.3}%
+\contentsline {subsection}{\numberline {2.3.4}Enfoque de Asintótica de Suavizado Fijo}{16}{subsection.2.3.4}%
+\contentsline {subsection}{\numberline {2.3.5}Consideraciones sobre la Generación de Pronósticos}{17}{subsection.2.3.5}%
+\contentsline {section}{\numberline {2.4}Predicción Conformal por Intervalos: El Enfoque IIE}{18}{section.2.4}%
+\contentsline {subsection}{\numberline {2.4.1}El Concepto de No-Conformidad}{18}{subsection.2.4.1}%
+\contentsline {subsection}{\numberline {2.4.2}Protocolo de Construcción de Intervalos}{19}{subsection.2.4.2}%
+\contentsline {section}{\numberline {2.5}Robustez ante la No-Intercambiabilidad: Aproximación de Barber}{19}{section.2.5}%
+\contentsline {subsection}{\numberline {2.5.1}El Gap de Cobertura y Variación Total}{20}{subsection.2.5.1}%
+\contentsline {subsection}{\numberline {2.5.2}Cuantiles Pesados y Decaimiento Temporal}{20}{subsection.2.5.2}%
+\contentsline {section}{\numberline {2.6}Sistemas de Predicción Conformal (CPS): De Intervalos a Densidades}{21}{section.2.6}%
+\contentsline {subsection}{\numberline {2.6.1}Formalización de la RPD y el Suavizado ($\tau $)}{21}{subsection.2.6.1}%
+\contentsline {subsection}{\numberline {2.6.2}La Máquina de Predicción de Mínimos Cuadrados (LSPM)}{21}{subsection.2.6.2}%
+\contentsline {subsubsection}{\nonumberline Variantes de la LSPM}{21}{subsubsection*.10}%
+\contentsline {section}{\numberline {2.7}Sistemas de Predicción Conformal de Mondrian (MCPS)}{22}{section.2.7}%
+\contentsline {subsection}{\numberline {2.7.1}Origen y Motivación: Validez Marginal vs. Condicional}{22}{subsection.2.7.1}%
+\contentsline {subsection}{\numberline {2.7.2}La Taxonomía de Mondrian ($\kappa $)}{23}{subsection.2.7.2}%
+\contentsline {subsection}{\numberline {2.7.3}Integración del Algoritmo MCPS}{23}{subsection.2.7.3}%
+\contentsline {subsection}{\numberline {2.7.4}MCPS aplicado a la Máquina de Predicción de Mínimos Cuadrados (LSPM)}{24}{subsection.2.7.4}%
+\contentsline {subsection}{\numberline {2.7.5}Garantías de Validez Condicional y Robustez}{25}{subsection.2.7.5}%
+\contentsline {section}{\numberline {2.8}Sustento Teórico: Análisis de la Consistencia Universal de Vovk}{25}{section.2.8}%
+\contentsline {subsection}{\numberline {2.8.1}Definición de Consistencia Universal}{25}{subsection.2.8.1}%
+\contentsline {subsection}{\numberline {2.8.2}Mecanismo de la Demostración: El Enfoque de Histograma}{26}{subsection.2.8.2}%
+\contentsline {subsection}{\numberline {2.8.3}La Distancia de Lévy y la Convergencia Débil}{26}{subsection.2.8.3}%
+\contentsline {subsection}{\numberline {2.8.4}Implicaciones para el LSPM y la Eficiencia}{27}{subsection.2.8.4}%
+\contentsline {section}{\numberline {2.9}Análisis Crítico sobre la Extensión a Series de Tiempo Ergódicas y Estacionarias}{27}{section.2.9}%
+\contentsline {subsection}{\numberline {2.9.1}Hacia la superación del paradigma IID: El rol del Mixing}{27}{subsection.2.9.1}%
+\contentsline {subsection}{\numberline {2.9.2}Mecanismos de Localización: Ventanas Móviles y Kernels}{28}{subsection.2.9.2}%
+\contentsline {subsection}{\numberline {2.9.3}Estatus Teórico de la Extensión en la Presente Investigación}{29}{subsection.2.9.3}%
+\contentsline {chapter}{\nonumberline Bibliografía}{30}{chapter*.11}%
 \providecommand \tocbasic@end@toc@file {}\tocbasic@end@toc@file 

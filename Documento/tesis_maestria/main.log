@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.1.2)  3 JAN 2026 17:39
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.1.2)  4 JAN 2026 17:38
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1231,51 +1231,37 @@ Package pdftex.def Info: Imagenes/logo_unal.png  used on input line 94.
 ] [3
 
 
-] [4
-
-
 ]
-LaTeX Font Info:    Trying to load font information for U+msa on input line 174.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 173.
  (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 174.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 173.
  (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-) [5
+) [4
 
-] [6
+] [5
 
-
-] [7
-
-] [8
-
-
-] (main.toc [9
+] (main.toc [6
 
 ])
 \tf@toc=\write5
 \openout5 = `main.toc'.
 
- [10] (main.lof)
+ [7] (main.lof)
 \tf@lof=\write6
 \openout6 = `main.lof'.
 
- [11
-
-
-
-] [12
-
+ [8
 
 ] (main.lot)
 \tf@lot=\write7
 \openout7 = `main.lot'.
 
- [13
+ [9
 
-] [14
+] [10
 
 
 ]
@@ -1286,11 +1272,9 @@ chapter 1.
 [1
 
 
-
-
 ] [2] [3]
-Overfull \hbox (3.16205pt too wide) in paragraph at lines 55--56
-[]\OT1/cmr/m/n/12 Comparar el de-sempe~no del mod-elo prop-uesto frente a mod-e-los de ref-er-en-cia (\OT1/cmr/m/it/12 DeepAR
+Overfull \hbox (13.2411pt too wide) in paragraph at lines 31--32
+[]\OT1/cmr/m/n/12 La com-paraci^^Son sis-tem^^Satica con m^^Setodos est^^Sandar (Boot-strap-ping), es-tado del arte (\OT1/cmr/m/it/12 DeepAR\OT1/cmr/m/n/12 )
  []
 
 [4]) [5]
@@ -1309,7 +1293,7 @@ Overfull \hbox (9.28336pt too wide) in paragraph at lines 10--11
 
 
 ]
-<./Imagenes/Cap2_prediccion.png, id=206, 785.18344pt x 467.49657pt>
+<./Imagenes/Cap2_prediccion.png, id=201, 785.18344pt x 467.49657pt>
 File: ./Imagenes/Cap2_prediccion.png Graphic file (type png)
 <use ./Imagenes/Cap2_prediccion.png>
 Package pdftex.def Info: ./Imagenes/Cap2_prediccion.png  used on input line 28.
@@ -1318,65 +1302,76 @@ Package pdftex.def Info: ./Imagenes/Cap2_prediccion.png  used on input line 28.
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [8]
-Overfull \hbox (9.67502pt too wide) in paragraph at lines 74--75
+Overfull \hbox (9.67502pt too wide) in paragraph at lines 56--57
 \OT1/cmr/m/n/12 La eval-u-aci^^Son rig-urosa del de-sempe~no pre-dic-tivo es fun-da-men-tal para com-parar metodolog^^S^^Pas
  []
 
 [9]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [10]
-LaTeX Font Info:    Trying to load font information for U+bbm on input line 109.
+LaTeX Font Info:    Trying to load font information for U+bbm on input line 91.
  (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/bbm\ubbm.fd
 File: ubbm.fd 1999/03/15 V 1.2 Font definition for bbm font - TH
-)
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [11]
-Overfull \hbox (7.7886pt too wide) in paragraph at lines 132--133
+) [10]
+Overfull \hbox (7.7886pt too wide) in paragraph at lines 114--115
 []\OT1/cmr/bx/n/12 Reducci^^Son al er-ror ab-so-luto: \OT1/cmr/m/n/12 Cuando $\OML/cmm/m/it/12 F$ \OT1/cmr/m/n/12 es una dis-tribuci^^Son de-gen-er-ada (predicci^^Son
  []
 
-[12] [13] [14]
+[11]
+Underfull \vbox (badness 6332) has occurred while \output is active []
+
+ [12]
+Underfull \vbox (badness 1215) has occurred while \output is active []
+
+ [13]
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [15]
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 219.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\tau' on input line 219.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 219.
+ [14] [15]
+Overfull \hbox (4.01242pt too wide) in paragraph at lines 229--230
+\OT1/cmr/m/n/12 Mariano en mues-tras peque~nas es el en-foque de \OT1/cmr/m/it/12 asint^^Sotica de suavizado fijo \OT1/cmr/m/n/12 (fixed-smoothing
+ []
 
 [16] [17]
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 254.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\kappa' on input line 254.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 254.
-
-[18]
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [19] [20] [21] [22] [23]) [24]
+ [18] [19]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [20]
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 323.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\tau' on input line 323.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 323.
+
+[21] [22]
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 358.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\kappa' on input line 358.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 358.
+
+[23]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [24] [25] [26] [27] [28]) [29]
 chapter without number
-[25
+[30
 
 
 
 
-] [26] (main.aux (Capitulos/Cap1.aux) (Capitulos/Cap2.aux))
+] [31] (main.aux (Capitulos/Cap1.aux) (Capitulos/Cap2.aux))
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2025-12-24>
@@ -1386,17 +1381,17 @@ Package logreq Info: Writing requests to 'main.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 44579 strings out of 467871
- 966344 string characters out of 5418377
- 1926214 words of memory out of 5000000
- 72697 multiletter control sequences out of 15000+600000
+ 44574 strings out of 467871
+ 965218 string characters out of 5418377
+ 1926699 words of memory out of 5000000
+ 72684 multiletter control sequences out of 15000+600000
  641838 words of font info for 95 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 108i,21n,107p,11301b,2199s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 108i,21n,107p,11301b,2197s stack positions out of 10000i,1000n,20000p,200000b,200000s
  <C:\Users\pleal\AppData\Local\MiKTeX\fonts/pk/ljfour/public/bbm/dpi600\bbm12.pk> <C:\Users\pleal\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm1200.pk><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmcsc10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi6.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsl12.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmssbx10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti12.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmtt12.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on main.pdf (40 pages, 577359 bytes).
+Output written on main.pdf (41 pages, 602218 bytes).
 PDF statistics:
- 675 PDF objects out of 1000 (max. 8388607)
- 162 named destinations out of 1000 (max. 500000)
- 399 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 712 PDF objects out of 1000 (max. 8388607)
+ 170 named destinations out of 1000 (max. 500000)
+ 439 words of extra memory for PDF output out of 10000 (max. 10000000)
 

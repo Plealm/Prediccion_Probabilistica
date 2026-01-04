@@ -680,6 +680,43 @@ def main_full_2800():
     return df_final
 
 
+def main_full_2800_d6():
+    """
+    Ejecución completa: 2,800 filas (1,400 escenarios × 2 modalidades).
+    - d = 1, 2, ..., 10
+    - 7 configuraciones ARMA
+    - 5 distribuciones
+    - 4 varianzas
+    - 2 modalidades (SIN_DIFF + CON_DIFF)
+    """
+    start_time = time.time()
+    
+    print("="*80)
+    print("INICIANDO SIMULACIÓN COMPLETA: 2,800 FILAS")
+    print("="*80)
+    
+    from pipeline import PipelineARIMA_MultiD_DobleModalidad_6
+    
+    pipeline = PipelineARIMA_MultiD_DobleModalidad_6(
+        n_boot=1000,
+        seed=42,
+        verbose=False
+    )
+    
+    df_final = pipeline.run_all(
+        excel_filename="resultados_ARIMA_d6_DOBLE_MODALIDAD_COMPLETO.xlsx",
+        batch_size=20
+    )
+    
+    # Análisis exhaustivo
+    analisis_completo_doble_modalidad(df_final)
+    
+    elapsed = time.time() - start_time
+    print(f"\n⏱  Tiempo total: {elapsed:.1f}s ({elapsed/3600:.2f} horas)")
+    
+    return df_final
+
+
 def main_test_reducido_doble():
     """
     Test reducido: 2 valores de d, 2 ARMA, 1 distribución, 1 varianza, 2 modalidades.

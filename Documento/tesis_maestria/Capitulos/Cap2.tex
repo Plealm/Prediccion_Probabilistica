@@ -50,24 +50,6 @@ El pronóstico probabilístico ofrece múltiples ventajas sobre las predicciones
 
 Estas ventajas han motivado la transición hacia pronósticos probabilísticos en campos tan diversos como meteorología, finanzas, energía, epidemiología y gestión de cadenas de suministro, donde la cuantificación rigurosa de la incertidumbre es fundamental para la toma de decisiones efectiva.
 
-\subsection{Representación de Distribuciones Predictivas}
-
-Las distribuciones predictivas pueden representarse de diversas formas, dependiendo del contexto y los requisitos de la aplicación:
-
-\begin{itemize}
-\item \textbf{Función de Distribución Acumulada (FDA):} $F_{t+h|t}(y) = P(Y_{t+h} \leq y | \mathcal{F}_t)$
-
-\item \textbf{Función de Densidad de Probabilidad:} $f_{t+h|t}(y)$ cuando existe
-
-\item \textbf{Cuantiles:} $q_\alpha = F^{-1}_{t+h|t}(\alpha)$ para $\alpha \in (0,1)$
-
-\item \textbf{Intervalos de Predicción:} $[q_{\alpha/2}, q_{1-\alpha/2}]$ con cobertura nominal $(1-\alpha) \times 100\%$
-
-\item \textbf{Conjuntos de Predicción:} Regiones de confianza más generales en espacios multidimensionales
-\end{itemize}
-
-En el contexto de series temporales, es particularmente importante considerar la dependencia temporal al construir distribuciones predictivas multivariadas para múltiples horizontes de predicción simultáneamente.
-
 \section{Métricas para Evaluación de Pronósticos Probabilísticos}
 \label{sec:metricas_evaluacion}
 
@@ -151,6 +133,128 @@ En aplicaciones prácticas de evaluación de pronósticos, típicamente disponem
 El ECRPS hereda todas las propiedades deseables del CRPS (\textit{strict propriety}, unidades interpretables, sensibilidad dual a calibración y nitidez) y proporciona un resumen numérico único del desempeño predictivo sobre todo el conjunto de evaluación.
 
 A diferencia del CRPS, que compara una distribución contra un punto observado, el ECRPS puede interpretarse como una métrica para comparar dos distribuciones cuando consideramos la distribución empírica de las observaciones. Si tenemos dos métodos de pronóstico que producen secuencias de distribuciones $(F_1, \ldots, F_n)$ y $(G_1, \ldots, G_n)$ respectivamente, sus ECRPS correspondientes nos permiten comparar el desempeño predictivo global de ambos métodos considerando toda la secuencia de pronósticos y observaciones.
+
+\section{Test de Diebold-Mariano para Comparación de Precisión Predictiva}
+\label{sec:test_diebold_mariano}
+
+La evaluación comparativa de distintas metodologías de pronóstico requiere herramientas estadísticas rigurosas que permitan determinar si las diferencias observadas en el desempeño predictivo son estadísticamente significativas o simplemente producto del azar. El test de Diebold-Mariano \parencite{DieboldMariano1995} constituye uno de los procedimientos más ampliamente utilizados para este propósito, ofreciendo un marco general y flexible para contrastar la hipótesis nula de igual precisión predictiva entre dos métodos de pronóstico competidores.
+
+\subsection{Formulación del Test}
+
+Sean $\hat{y}_{t+h}^{(1)}$ y $\hat{y}_{t+h}^{(2)}$ dos pronósticos $h$ pasos adelante para una variable $y_{t+h}$, producidos por dos metodologías diferentes. Los errores de pronóstico correspondientes son:
+\begin{equation}
+e_{t+h}^{(i)} = y_{t+h} - \hat{y}_{t+h}^{(i)}, \quad i = 1, 2
+\end{equation}
+
+El test de Diebold-Mariano se basa en una función de pérdida $L(\cdot)$ que cuantifica el costo asociado con cada error de pronóstico. Para un horizonte temporal de evaluación que abarca $n$ observaciones, se define el diferencial de pérdida en el tiempo $t$ como:
+\begin{equation}
+d_t = L(e_t^{(1)}) - L(e_t^{(2)}), \quad t = 1, \ldots, n
+\label{eq:loss_differential}
+\end{equation}
+
+La función de pérdida más comúnmente empleada es la pérdida cuadrática, $L(e) = e^2$, que corresponde al criterio de error cuadrático medio (MSE). Sin embargo, el marco de Diebold-Mariano es suficientemente general para acomodar cualquier función de pérdida, incluyendo pérdida absoluta, pérdida linex, o funciones asimétricas que penalicen diferencialmente sobreestimaciones y subestimaciones \parencite{DieboldMariano1995}.
+
+La hipótesis nula de igual precisión predictiva se formula como:
+\begin{equation}
+H_0: \mathbb{E}[d_t] = 0
+\label{eq:dm_null}
+\end{equation}
+
+Esta hipótesis establece que la pérdida esperada es idéntica para ambos métodos de pronóstico. El estadístico de prueba se construye a partir de la media muestral del diferencial de pérdida:
+\begin{equation}
+\bar{d} = \frac{1}{n}\sum_{t=1}^n d_t
+\end{equation}
+
+\subsection{Distribución Asintótica y Estimación de la Varianza}
+
+Bajo condiciones de regularidad que incluyen la estacionariedad débil y la existencia de momentos de orden finito, Diebold y Mariano demuestran que:
+\begin{equation}
+\sqrt{n}\,\bar{d} \xrightarrow{d} N(0, 2\pi f_d(0))
+\end{equation}
+donde $f_d(0)$ denota la densidad espectral de la serie $d_t$ evaluada en frecuencia cero, la cual equivale a la varianza de largo plazo:
+\begin{equation}
+\sigma^2 = \text{Var}(\sqrt{n}\,\bar{d}) = \gamma_0 + 2\sum_{k=1}^\infty \gamma_k
+\label{eq:long_run_variance}
+\end{equation}
+siendo $\gamma_k = \text{Cov}(d_t, d_{t-k})$ la autocovarianza de orden $k$.
+
+Un aspecto fundamental del test de Diebold-Mariano es que permite explícitamente la presencia de autocorrelación en el diferencial de pérdida $d_t$. Esta característica es especialmente relevante en el contexto de pronósticos a múltiples pasos adelante ($h > 1$), donde los errores de pronóstico exhiben típicamente estructura de autocorrelación hasta el orden $(h-1)$ \parencite{DieboldMariano1995}. Esta estructura surge porque pronósticos óptimos $h$ pasos adelante generan errores que siguen un proceso de media móvil MA$(h-1)$.
+
+En la práctica, la varianza de largo plazo $\sigma^2$ debe ser estimada. Diebold y Mariano proponen utilizar un estimador basado en autocovarianzas ponderadas por kernel:
+\begin{equation}
+\hat{\sigma}^2 = \hat{\gamma}_0 + 2\sum_{k=1}^{M} k\left(\frac{k}{M}\right)\hat{\gamma}_k
+\label{eq:kernel_variance_estimator}
+\end{equation}
+donde $\hat{\gamma}_k = n^{-1}\sum_{t=k+1}^n (d_t - \bar{d})(d_{t-k} - \bar{d})$ son las autocovarianzas muestrales, $k(\cdot)$ es una función kernel (por ejemplo, kernel de Bartlett o Parzen), y $M$ es el parámetro de ancho de banda o truncamiento que controla el número de autocovarianzas incluidas en la estimación.
+
+Para el caso específico donde se conoce que el diferencial de pérdida sigue un proceso MA$(h-1)$, Diebold y Mariano sugieren simplificar el estimador utilizando $M = h-1$ con kernel rectangular:
+\begin{equation}
+\hat{\sigma}^2_{DM} = \hat{\gamma}_0 + 2\sum_{k=1}^{h-1} \hat{\gamma}_k
+\label{eq:dm_variance_simple}
+\end{equation}
+
+El estadístico de prueba resultante es:
+\begin{equation}
+DM = \frac{\sqrt{n}\,\bar{d}}{\hat{\sigma}}
+\label{eq:dm_statistic}
+\end{equation}
+
+Bajo la hipótesis nula, este estadístico converge en distribución a una normal estándar: $DM \xrightarrow{d} N(0,1)$. Para un test bilateral al nivel de significancia $\alpha$, se rechaza $H_0$ si $|DM| > z_{\alpha/2}$, donde $z_{\alpha/2}$ denota el cuantil $(1-\alpha/2)$ de la distribución normal estándar.
+
+\subsection{Modificaciones para Muestras Pequeñas}
+
+A pesar de la solidez teórica del test de Diebold-Mariano bajo asintótica estándar, diversos estudios han documentado distorsiones de tamaño en muestras finitas, particularmente cuando el número de observaciones de pronóstico es limitado. Harvey et al. \parencite{Harvey1997} demostraron mediante simulaciones Monte Carlo que el test original tiende a sobrerrechazar la hipótesis nula (es decir, presenta un tamaño empírico superior al nominal), especialmente para horizontes de pronóstico largos y muestras pequeñas.
+
+Para abordar estas limitaciones, Harvey et al. proponen una corrección del estadístico que mejora sustancialmente el desempeño en muestras finitas. La modificación se fundamenta en el uso de un estimador aproximadamente insesgado de la varianza de $\bar{d}$. Partiendo de la expresión exacta:
+\begin{equation}
+\text{Var}(\bar{d}) = n^{-1}\left[\gamma_0 + 2n^{-1}\sum_{k=1}^{h-1}(n-k)\gamma_k\right]
+\end{equation}
+y calculando el valor esperado del estimador empleado en \eqref{eq:dm_variance_simple}, se obtiene que:
+\begin{equation}
+\mathbb{E}[\hat{\sigma}^2_{DM}] \approx \left[\frac{n+1-2h+n^{-1}h(h-1)}{n}\right]\text{Var}(\bar{d})
+\end{equation}
+
+Esta relación sugiere el estadístico modificado:
+\begin{equation}
+DM^* = \left[\frac{n+1-2h+n^{-1}h(h-1)}{n}\right]^{1/2} DM
+\label{eq:dm_modified}
+\end{equation}
+
+Adicionalmente, Harvey et al. recomiendan comparar $DM^*$ con valores críticos de la distribución $t$ de Student con $(n-1)$ grados de libertad, en lugar de la distribución normal estándar. Esta segunda modificación reconoce implícitamente la incertidumbre adicional asociada con la estimación de la varianza en muestras finitas.
+
+Los resultados de simulación reportados por Harvey et al. \parencite{Harvey1997} indican que el test modificado presenta un tamaño empírico considerablemente más cercano al nominal, especialmente para $n \leq 50$ y horizontes de pronóstico $h \geq 2$. Aunque el test modificado exhibe una ligera pérdida de potencia en comparación con el test original cuando ambos están correctamente calibrados, esta reducción es marginal y ampliamente compensada por la ganancia en confiabilidad inferencial.
+
+\subsection{Enfoque de Asintótica de Suavizado Fijo}
+
+Una alternativa más reciente para abordar las distorsiones de tamaño del test de Diebold-Mariano en muestras pequeñas es el enfoque de \textit{asintótica de suavizado fijo} (fixed-smoothing asymptotics), desarrollado por Coroneo e Iacone \parencite{CoroneoIacone2020}. Este marco teórico reconoce que en aplicaciones prácticas de evaluación de pronósticos, el tamaño muestral $n$ es frecuentemente limitado, haciendo que la aproximación asintótica estándar (que requiere $M/n \to 0$) sea inadecuada.
+
+La idea fundamental es mantener constante la razón entre el parámetro de ancho de banda y el tamaño muestral conforme $n$ aumenta. Formalmente, bajo la \textit{asintótica fixed-b}, se asume que $M/n \to b$ para algún $b \in (0,1]$ fijo. Bajo este régimen asintótico alternativo, el estimador de varianza \eqref{eq:kernel_variance_estimator} ya no es consistente para $\sigma^2$. Sin embargo, Kiefer y Vogelsang (2005) demostraron que el estadístico resultante converge a una distribución no estándar que depende de $b$ y del kernel empleado.
+
+Para el kernel de Bartlett, la distribución límite puede caracterizarse explícitamente, y sus cuantiles pueden aproximarse mediante fórmulas polinomiales. Específicamente, para un test bilateral al 5\% de significancia, el valor crítico $c_\alpha(b)$ satisface:
+\begin{equation}
+c_\alpha(b) \approx \alpha_0 + \alpha_1 b + \alpha_2 b^2 + \alpha_3 b^3
+\end{equation}
+donde los coeficientes $\{\alpha_i\}$ han sido tabulados por Kiefer y Vogelsang.
+
+Coroneo e Iacone \parencite{CoroneoIacone2020} extienden este marco al contexto específico de evaluación de pronósticos, demostrando mediante simulaciones Monte Carlo que los tests basados en asintótica de suavizado fijo exhiben un tamaño empírico notablemente más preciso que el test de Diebold-Mariano estándar, incluso para muestras tan pequeñas como $n=40$. Los autores proponen utilizar anchos de banda $M = \lfloor n^{1/2} \rfloor$ para el estimador con kernel de Bartlett, encontrando que esta elección ofrece un equilibrio favorable entre tamaño y potencia del test.
+
+Una segunda variante dentro del paradigma de suavizado fijo es la \textit{asintótica fixed-m}, que emplea un estimador de varianza basado en el periodograma suavizado con kernel de Daniell:
+\begin{equation}
+\hat{\sigma}^2_{DAN} = \frac{2\pi}{m}\sum_{j=1}^m I(\lambda_j)
+\end{equation}
+donde $I(\lambda_j)$ denota el periodograma de $d_t$ evaluado en la frecuencia de Fourier $\lambda_j = 2\pi j/n$, y $m$ es un parámetro de truncamiento mantenido fijo conforme $n \to \infty$. Bajo condiciones de regularidad, el estadístico resultante converge a una distribución $t$ con $2m$ grados de libertad \parencite{CoroneoIacone2020}.
+
+Estos desarrollos recientes en asintótica de suavizado fijo representan una contribución metodológica significativa, particularmente relevante para contextos donde el número de observaciones de pronóstico disponibles es inherentemente limitado, como ocurre frecuentemente en aplicaciones macroeconómicas, financieras y de pronóstico de demanda energética.
+
+\subsection{Consideraciones sobre la Generación de Pronósticos}
+
+Un aspecto metodológico crucial del test de Diebold-Mariano es su tratamiento de los pronósticos como objetos dados o primitivos, sin considerar explícitamente el proceso de estimación de los modelos subyacentes. Esta perspectiva contrasta con marcos alternativos, como el de West (1996) y Clark y McCracken (2001), que desarrollan teoría asintótica específica para pronósticos derivados de modelos paramétricos estimados.
+
+Cuando los pronósticos provienen de modelos con parámetros estimados, la incertidumbre asociada con la estimación puede afectar la distribución del estadístico de prueba. West \parencite{West1996} demostró que, bajo ciertas condiciones, esta incertidumbre de estimación es asintóticamente despreciable si el tamaño de la muestra de entrenamiento $R$ crece mucho más rápido que el tamaño de la muestra de evaluación $P$ (específicamente, si $P/R \to 0$).
+
+Alternativamente, Giacomini y White \parencite{GiacominiWhite2006} proponen un marco donde la incertidumbre de estimación no desaparece asintóticamente (fijando $R < \infty$). Bajo este régimen, el test de Diebold-Mariano permanece válido, pero ahora evalúa el desempeño relativo de \textit{métodos de pronóstico} (incluyendo el procedimiento de estimación) en lugar de \textit{modelos de pronóstico} poblacionales. Este marco es particularmente apropiado cuando el objetivo es comparar estrategias de pronóstico que podrían implementarse en práctica, reconociendo que los modelos deben ser reestimados periódicamente con ventanas de datos finitas.
+
+Para los propósitos de esta investigación, adoptamos la perspectiva de Giacomini y White, interpretando el test de Diebold-Mariano como una herramienta para evaluar el desempeño predictivo de métodos completos de pronóstico, incluyendo tanto la especificación del modelo como el procedimiento de estimación y actualización de parámetros.
 
 \section{Predicción Conformal por Intervalos: El Enfoque IIE}
 \label{sec:prediccion_conformal_intervalos_IIE}
