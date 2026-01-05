@@ -1,0 +1,96 @@
+% !TeX root = ../main.tex
+\chapter{Metodología de Simulación}
+\label{cap:metodologia_simulacion}
+
+\section{Introducción}
+\label{sec:intro_metodologia}
+
+En este capítulo se describe el diseño experimental utilizado para evaluar el desempeño de los métodos de pronóstico probabilístico bajo diferentes condiciones de generación de datos. El objetivo central de la simulación es comparar la capacidad de los modelos para capturar la incertidumbre en entornos con distintas propiedades estadísticas. 
+
+Siguiendo la lógica de validación cruzada para series de tiempo \parencite{Hyndman2021FPP3}, cada serie generada se divide en un conjunto de entrenamiento (90\% de los datos) y un conjunto de prueba o \textit{back-testing} (10\% restante). Este diseño permite evaluar no solo la precisión puntual, sino también la validez y nitidez de los intervalos de predicción generados en horizontes de tiempo fuera de la muestra.
+
+\section{Diseño de la Simulación}
+\label{sec:diseno_simulacion}
+
+Para garantizar una evaluación exhaustiva, se han definido tres escenarios que representan los desafíos más comunes en el análisis de series temporales. 
+
+\subsection{Definición de Escenarios}
+Los escenarios seleccionados son:
+\begin{enumerate}
+    \item \textbf{Escenario I (Lineal Estacionario):} Basado en modelos ARMA, sirve como línea base para evaluar el desempeño en condiciones ideales de estabilidad.
+    \item \textbf{Escenario II (Lineal No Estacionario):} Basado en modelos ARIMA, introduce raíces unitarias para observar el comportamiento de los modelos ante tendencias estocásticas.
+    \item \textbf{Escenario III (No Lineal Estacionario):} Basado en modelos SETAR, introduce cambios de régimen para evaluar la adaptabilidad ante comportamientos asimétricos.
+\end{enumerate}
+
+\subsection{Justificación de la Selección}
+La elección de estos tres escenarios permite aislar el efecto de la no-estacionalidad y la no-linealidad por separado. No se incluye un escenario \textbf{no lineal no estacionario} debido a la complejidad inherente en la identificación de estabilidad para este tipo de procesos. Como señalan \textcite{ChenSemmler2023}, la estabilidad en modelos con cambios de régimen ya es un desafío teórico considerable; combinarlo con no estacionalidad (raíces unitarias) suele derivar en procesos explosivos donde la inferencia estadística y la comparación de intervalos pierden robustez, dificultando la interpretación de las métricas de evaluación.
+
+\subsection{Variables y Dimensiones}
+Para cada escenario, se generan 500 series independientes de longitud $T=200$. En cada serie se consideran:
+\begin{itemize}
+    \item La variable dependiente $Y_t$.
+    \item Un término de error $\epsilon_t \sim N(0, \sigma^2)$, variando $\sigma^2$ para evaluar sensibilidad al ruido.
+    \item Para modelos SETAR, una variable de umbral retardada $Y_{t-d}$.
+\end{itemize}
+
+\section{Procesos Generadores de Datos (DGP)}
+\label{sec:procesos_generadores}
+
+\subsection{Modelos ARMA (Escenario I)}
+\label{subsec:metod_arma}
+Un proceso ARMA($p,q$) se define mediante la ecuación:
+\begin{equation}
+    Y_t = c + \sum_{i=1}^p \phi_i Y_{t-i} + \epsilon_t + \sum_{j=1}^q \theta_j \epsilon_{t-j}
+\end{equation}
+donde $\phi$ son los parámetros autoregresivos y $\theta$ los de media móvil \parencite{Hyndman2021FPP3}.
+
+\textbf{Estacionariedad:} Para que el proceso sea estacionario, las raíces del polinomio característico $\Phi(L) = 1 - \phi_1 L - \dots - \phi_p L^p$ deben caer fuera del círculo unitario. En nuestras simulaciones, se han seleccionado parámetros que garantizan esta condición, siguiendo los rangos propuestos por \textcite{Arrieta2017}.
+
+\begin{table}[htbp]
+\centering
+\caption{Parámetros seleccionados para el Escenario I (ARMA).}
+\label{tab:params_arma}
+\begin{tabular}{lccc}
+\hline
+\textbf{Modelo} & \textbf{Parámetros AR ($\phi$)} & \textbf{Parámetros MA ($\theta$)} & \textbf{$\sigma^2$} \\ \hline
+AR(1) & 0.8 & - & \{0.5, 1.0\} \\
+MA(1) & - & 0.6 & \{0.5, 1.0\} \\
+ARMA(1,1) & 0.7 & 0.4 & \{1.0\} \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Modelos ARIMA (Escenario II)}
+\label{subsec:metod_arima}
+Para el escenario no estacionario, se utiliza un proceso ARIMA($p,d,q$), donde la serie se diferencia $d$ veces para alcanzar la estacionalidad:
+\begin{equation}
+    \phi(L)(1-L)^d Y_t = c + \theta(L)\epsilon_t
+\end{equation}
+En este trabajo se utiliza $d=1$, lo que implica que el proceso original contiene una raíz unitaria y su varianza crece linealmente con el tiempo, desafiando a los modelos de pronóstico que asumen estabilidad \parencite{Hyndman2021FPP3}.
+
+\subsection{Modelos SETAR (Escenario III)}
+\label{subsec:metod_setar}
+El modelo \textit{Self-Exciting Threshold Autoregressive} (SETAR) permite modelar no linealidad mediante regímenes definidos por un valor umbral $\gamma$. Siguiendo a \textcite{ChenSemmler2023}, un SETAR con dos regímenes se expresa como:
+\begin{equation}
+    Y_t = \begin{cases} 
+      c_1 + \sum_{i=1}^p \phi_{i,1} Y_{t-i} + \epsilon_t & \text{si } Y_{t-d} \leq \gamma \\
+      c_2 + \sum_{i=1}^p \phi_{i,2} Y_{t-i} + \epsilon_t & \text{si } Y_{t-d} > \gamma 
+   \end{cases}
+\end{equation}
+
+\textbf{Estabilidad:} A diferencia de los modelos lineales, la estacionariedad en SETAR no solo depende de que cada régimen sea localmente estable. \textcite{ChenSemmler2023} demuestran que la estabilidad global depende del \textit{Radio Espectral Conjunto} (Joint Spectral Radius) de las matrices de los regímenes. Para la simulación, se han configurado parámetros que aseguran que el sistema no sea explosivo a largo plazo (ver Tabla~\ref{tab:params_setar}).
+
+\begin{table}[htbp]
+\centering
+\caption{Configuración del modelo SETAR (Escenario III).}
+\label{tab:params_setar}
+\begin{tabular}{lll}
+\hline
+\textbf{Elemento} & \textbf{Régimen 1 ($Y_{t-1} \leq 0$)} & \textbf{Régimen 2 ($Y_{t-1} > 0$)} \\ \hline
+Constante ($c$) & 0.5 & -0.2 \\
+Coeficiente AR ($\phi_1$) & 0.7 & -0.5 \\
+Umbral ($\gamma$) & \multicolumn{2}{c}{0} \\
+Retraso ($d$) & \multicolumn{2}{c}{1} \\ \hline
+\end{tabular}
+\end{table}
+
+Estos procesos generadores permitirán contrastar si las métricas de evaluación presentadas en el Capítulo 2 son sensibles a la estructura subyacente de los datos.

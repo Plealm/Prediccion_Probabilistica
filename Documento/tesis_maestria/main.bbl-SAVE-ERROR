@@ -190,6 +190,46 @@
       \verb 10.1111/j.1468-0262.2006.00718.x
       \endverb
     \endentry
+    \entry{GneitingRaftery2007}{article}{}{}
+      \name{author}{2}{}{%
+        {{un=0,uniquepart=base,hash=cf94799d213c0ab2fd2012473da7440b}{%
+           family={Gneiting},
+           familyi={G\bibinitperiod},
+           given={Tilmann},
+           giveni={T\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=205b9f60128ee13642fa79b6f1330d63}{%
+           family={Raftery},
+           familyi={R\bibinitperiod},
+           given={Adrian\bibnamedelima E.},
+           giveni={A\bibinitperiod\bibinitdelim E\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{e1cf3b58d0c2bb5af66e55c7f264277d}
+      \strng{fullhash}{e1cf3b58d0c2bb5af66e55c7f264277d}
+      \strng{fullhashraw}{e1cf3b58d0c2bb5af66e55c7f264277d}
+      \strng{bibnamehash}{e1cf3b58d0c2bb5af66e55c7f264277d}
+      \strng{authorbibnamehash}{e1cf3b58d0c2bb5af66e55c7f264277d}
+      \strng{authornamehash}{e1cf3b58d0c2bb5af66e55c7f264277d}
+      \strng{authorfullhash}{e1cf3b58d0c2bb5af66e55c7f264277d}
+      \strng{authorfullhashraw}{e1cf3b58d0c2bb5af66e55c7f264277d}
+      \field{sortinit}{G}
+      \field{sortinithash}{32d67eca0634bf53703493fb1090a2e8}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Journal of the American Statistical Association}
+      \field{number}{477}
+      \field{title}{Strictly Proper Scoring Rules, Prediction, and Estimation}
+      \field{volume}{102}
+      \field{year}{2007}
+      \field{pages}{359\bibrangedash 378}
+      \range{pages}{20}
+      \verb{doi}
+      \verb 10.1198/016214506000001437
+      \endverb
+    \endentry
     \entry{Harvey1997}{article}{}{}
       \name{author}{3}{}{%
         {{un=0,uniquepart=base,hash=4f63956032539faf2fc63521a396bb52}{%
@@ -234,6 +274,43 @@
       \range{pages}{11}
       \verb{doi}
       \verb 10.1016/S0169-2070(96)00719-4
+      \endverb
+    \endentry
+    \entry{Lahiri2003}{book}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=4d19545d06925d168241f869723ce8c6}{%
+           family={Lahiri},
+           familyi={L\bibinitperiod},
+           given={S.\bibnamedelimi N.},
+           giveni={S\bibinitperiod\bibinitdelim N\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{location}{1}{%
+        {New York}%
+      }
+      \list{publisher}{1}{%
+        {Springer}%
+      }
+      \strng{namehash}{4d19545d06925d168241f869723ce8c6}
+      \strng{fullhash}{4d19545d06925d168241f869723ce8c6}
+      \strng{fullhashraw}{4d19545d06925d168241f869723ce8c6}
+      \strng{bibnamehash}{4d19545d06925d168241f869723ce8c6}
+      \strng{authorbibnamehash}{4d19545d06925d168241f869723ce8c6}
+      \strng{authornamehash}{4d19545d06925d168241f869723ce8c6}
+      \strng{authorfullhash}{4d19545d06925d168241f869723ce8c6}
+      \strng{authorfullhashraw}{4d19545d06925d168241f869723ce8c6}
+      \field{sortinit}{L}
+      \field{sortinithash}{7c47d417cecb1f4bd38d1825c427a61a}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{isbn}{978-1-4419-1848-2}
+      \field{series}{Springer Series in Statistics}
+      \field{title}{Resampling Methods for Dependent Data}
+      \field{year}{2003}
+      \verb{doi}
+      \verb 10.1007/978-1-4757-3803-2
       \endverb
     \endentry
     \entry{Salinas2020}{article}{}{}
