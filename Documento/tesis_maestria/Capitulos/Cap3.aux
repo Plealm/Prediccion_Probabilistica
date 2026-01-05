@@ -1,46 +1,256 @@
 \relax 
 \providecommand\hyper@newdestlabel[2]{}
-\@writefile{toc}{\contentsline {chapter}{\numberline {3}Metodología de Simulación}{29}{chapter.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {chapter}{\numberline {3}Diseño de la Simulación}{29}{chapter.3}\protected@file@percent }
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
-\newlabel{cap:metodologia_simulacion}{{3}{29}{Metodología de Simulación}{chapter.3}{}}
+\newlabel{cap:diseño_simulacion}{{3}{29}{Diseño de la Simulación}{chapter.3}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {3.1}Introducción}{29}{section.3.1}\protected@file@percent }
-\newlabel{sec:intro_metodologia}{{3.1}{29}{Introducción}{section.3.1}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {3.2}Diseño de la Simulación}{29}{section.3.2}\protected@file@percent }
-\newlabel{sec:diseno_simulacion}{{3.2}{29}{Diseño de la Simulación}{section.3.2}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.1}Definición de Escenarios}{29}{subsection.3.2.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.2}Justificación de la Selección}{30}{subsection.3.2.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.3}Variables y Dimensiones}{30}{subsection.3.2.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {3.3}Procesos Generadores de Datos (DGP)}{30}{section.3.3}\protected@file@percent }
-\newlabel{sec:procesos_generadores}{{3.3}{30}{Procesos Generadores de Datos (DGP)}{section.3.3}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.1}Modelos ARMA (Escenario I)}{30}{subsection.3.3.1}\protected@file@percent }
-\newlabel{subsec:metod_arma}{{3.3.1}{30}{Modelos ARMA (Escenario I)}{subsection.3.3.1}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {\textbf  {3-1}}{\ignorespaces Parámetros seleccionados para el Escenario I (ARMA).}}{31}{table.caption.12}\protected@file@percent }
-\newlabel{tab:params_arma}{{\textbf  {3-1}}{31}{Parámetros seleccionados para el Escenario I (ARMA)}{table.caption.12}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.2}Modelos ARIMA (Escenario II)}{31}{subsection.3.3.2}\protected@file@percent }
-\newlabel{subsec:metod_arima}{{3.3.2}{31}{Modelos ARIMA (Escenario II)}{subsection.3.3.2}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.3}Modelos SETAR (Escenario III)}{31}{subsection.3.3.3}\protected@file@percent }
-\newlabel{subsec:metod_setar}{{3.3.3}{31}{Modelos SETAR (Escenario III)}{subsection.3.3.3}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {\textbf  {3-2}}{\ignorespaces Configuración del modelo SETAR (Escenario III).}}{32}{table.caption.13}\protected@file@percent }
-\newlabel{tab:params_setar}{{\textbf  {3-2}}{32}{Configuración del modelo SETAR (Escenario III)}{table.caption.13}{}}
+\newlabel{sec:intro_simulacion}{{3.1}{29}{Introducción}{section.3.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.2}Diseño de la Simulación}{30}{section.3.2}\protected@file@percent }
+\newlabel{sec:diseño_experimental}{{3.2}{30}{Diseño de la Simulación}{section.3.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.1}Selección de Escenarios de Evaluación}{30}{subsection.3.2.1}\protected@file@percent }
+\newlabel{subsec:escenarios}{{3.2.1}{30}{Selección de Escenarios de Evaluación}{subsection.3.2.1}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Escenario 1: Lineal Estacionario (ARMA)}{30}{subsubsection*.12}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Escenario 2: Lineal No Estacionario (ARIMA)}{30}{subsubsection*.13}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Escenario 3: No Lineal Estacionario (SETAR)}{31}{subsubsection*.14}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Ausencia del Escenario No Lineal No Estacionario}{31}{subsubsection*.15}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.2}Estructura del Diseño Factorial}{32}{subsection.3.2.2}\protected@file@percent }
+\newlabel{subsec:diseño_factorial}{{3.2.2}{32}{Estructura del Diseño Factorial}{subsection.3.2.2}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Dimensión 1: Configuraciones Paramétricas del Proceso}{32}{subsubsection*.16}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Dimensión 2: Distribuciones del Término de Error}{32}{subsubsection*.17}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Dimensión 3: Niveles de Varianza del Error}{33}{subsubsection*.18}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Combinatoria Total}{33}{subsubsection*.19}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.3}Protocolo de Simulación y Partición de Datos}{33}{subsection.3.2.3}\protected@file@percent }
+\newlabel{subsec:protocolo_simulacion}{{3.2.3}{33}{Protocolo de Simulación y Partición de Datos}{subsection.3.2.3}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.3}Procesos Generadores de Datos}{35}{section.3.3}\protected@file@percent }
+\newlabel{sec:procesos_generadores}{{3.3}{35}{Procesos Generadores de Datos}{section.3.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.1}Procesos ARMA: Escenario Lineal Estacionario}{35}{subsection.3.3.1}\protected@file@percent }
+\newlabel{subsec:arma}{{3.3.1}{35}{Procesos ARMA: Escenario Lineal Estacionario}{subsection.3.3.1}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Definición y Representación}{35}{subsubsection*.20}\protected@file@percent }
+\newlabel{eq:arma_general}{{3-3}{35}{Definición y Representación}{equation.3.3}{}}
+\newlabel{eq:arma_lag_operator}{{3-4}{35}{Definición y Representación}{equation.3.4}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Condiciones de Estacionariedad e Invertibilidad}{35}{subsubsection*.21}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Distribución Predictiva Verdadera}{36}{subsubsection*.22}\protected@file@percent }
+\newlabel{eq:arma_conditional_mean}{{3-5}{36}{Distribución Predictiva Verdadera}{equation.3.5}{}}
+\newlabel{eq:arma_conditional_variance}{{3-6}{36}{Distribución Predictiva Verdadera}{equation.3.6}{}}
+\newlabel{eq:arma_predictive_distribution}{{3-7}{36}{Distribución Predictiva Verdadera}{equation.3.7}{}}
+\newlabel{eq:arma_monte_carlo_samples}{{3-8}{37}{Distribución Predictiva Verdadera}{equation.3.8}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Configuraciones Paramétricas Evaluadas}{37}{subsubsection*.23}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {\textbf  {3-1}}{\ignorespaces Configuraciones paramétricas para procesos ARMA.}}{37}{table.caption.24}\protected@file@percent }
+\newlabel{tab:arma_configs}{{\textbf  {3-1}}{37}{Configuraciones paramétricas para procesos ARMA}{table.caption.24}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.2}Procesos ARIMA: Escenario Lineal No Estacionario}{38}{subsection.3.3.2}\protected@file@percent }
+\newlabel{subsec:arima}{{3.3.2}{38}{Procesos ARIMA: Escenario Lineal No Estacionario}{subsection.3.3.2}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Definición y Operador de Diferenciación}{38}{subsubsection*.25}\protected@file@percent }
+\newlabel{eq:arima_general}{{3-9}{38}{Definición y Operador de Diferenciación}{equation.3.9}{}}
+\newlabel{eq:arima_original_scale}{{3-10}{38}{Definición y Operador de Diferenciación}{equation.3.10}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Propiedades de Estacionariedad}{38}{subsubsection*.26}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Distribución Predictiva Verdadera}{38}{subsubsection*.27}\protected@file@percent }
+\newlabel{eq:arima_diff_conditional_mean}{{3-13}{39}{Distribución Predictiva Verdadera}{equation.3.13}{}}
+\newlabel{eq:arima_integration}{{3-14}{39}{Distribución Predictiva Verdadera}{equation.3.14}{}}
+\newlabel{eq:arima_predictive_distribution}{{3-15}{39}{Distribución Predictiva Verdadera}{equation.3.15}{}}
+\newlabel{eq:arima_diff_samples}{{3-16}{39}{Distribución Predictiva Verdadera}{equation.3.16}{}}
+\newlabel{eq:arima_level_samples}{{3-17}{39}{Distribución Predictiva Verdadera}{equation.3.17}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Configuraciones Paramétricas Evaluadas}{40}{subsubsection*.28}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {\textbf  {3-2}}{\ignorespaces Configuraciones paramétricas para procesos ARIMA.}}{40}{table.caption.29}\protected@file@percent }
+\newlabel{tab:arima_configs}{{\textbf  {3-2}}{40}{Configuraciones paramétricas para procesos ARIMA}{table.caption.29}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.3}Procesos SETAR: Escenario No Lineal Estacionario}{40}{subsection.3.3.3}\protected@file@percent }
+\newlabel{subsec:setar}{{3.3.3}{40}{Procesos SETAR: Escenario No Lineal Estacionario}{subsection.3.3.3}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Definición y Mecanismo de Cambio de Régimen}{40}{subsubsection*.30}\protected@file@percent }
+\newlabel{eq:setar_general}{{3-18}{40}{Definición y Mecanismo de Cambio de Régimen}{equation.3.18}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Estacionariedad en Procesos SETAR}{41}{subsubsection*.31}\protected@file@percent }
+\newlabel{subsec:setar_stationarity}{{3.3.3}{41}{Estacionariedad en Procesos SETAR}{subsubsection*.31}{}}
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Caso SETAR(2; 1, 1):}{41}{paragraph*.32}\protected@file@percent }
+\newlabel{eq:setar11_stationarity}{{3-19}{41}{Caso SETAR(2; 1, 1):}{equation.3.19}{}}
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Caso General SETAR(2; $p_1$, $p_2$):}{41}{paragraph*.33}\protected@file@percent }
+\newlabel{eq:setar_sufficient_condition}{{3-20}{41}{Caso General SETAR(2; $p_1$, $p_2$):}{equation.3.20}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Distribución Predictiva Verdadera}{42}{subsubsection*.34}\protected@file@percent }
+\newlabel{eq:setar_regime_determination}{{3-23}{42}{Distribución Predictiva Verdadera}{equation.3.23}{}}
+\newlabel{eq:setar_conditional_mean}{{3-24}{42}{Distribución Predictiva Verdadera}{equation.3.24}{}}
+\newlabel{eq:setar_conditional_variance}{{3-25}{43}{Distribución Predictiva Verdadera}{equation.3.25}{}}
+\newlabel{eq:setar_predictive_distribution}{{3-26}{43}{Distribución Predictiva Verdadera}{equation.3.26}{}}
+\newlabel{eq:setar_monte_carlo_samples}{{3-27}{43}{Distribución Predictiva Verdadera}{equation.3.27}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Configuraciones Paramétricas Evaluadas}{43}{subsubsection*.35}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {\textbf  {3-3}}{\ignorespaces Configuraciones paramétricas para procesos SETAR.}}{44}{table.caption.36}\protected@file@percent }
+\newlabel{tab:setar_configs}{{\textbf  {3-3}}{44}{Configuraciones paramétricas para procesos SETAR}{table.caption.36}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.4}Modelos predictivos}{44}{section.3.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4.1}Circular Block Bootstrap (CBB)}{44}{subsection.3.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Propuesta Teórica}{44}{subsubsection*.37}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline De la Teoría a la Práctica}{45}{subsubsection*.38}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Parámetros e Hiperparámetros en la Implementación}{45}{subsubsection*.39}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4.2}Sieve Bootstrap (SB)}{46}{subsection.3.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Propuesta Teórica}{46}{subsubsection*.40}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline De la Teoría a la Práctica}{47}{subsubsection*.41}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Parámetros e Hiperparámetros en la Implementación}{47}{subsubsection*.42}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4.3}Least Squares Prediction Machine (LSPM)}{48}{subsection.3.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Propuesta Teórica}{48}{subsubsection*.43}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline De la Teoría a la Práctica}{49}{subsubsection*.44}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Parámetros e Hiperparámetros en la Implementación}{50}{subsubsection*.45}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4.4}Least Squares Prediction Machine with Weighted Residuals (LSPMW)}{51}{subsection.3.4.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Propuesta Teórica}{51}{subsubsection*.46}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline De la Teoría a la Práctica}{52}{subsubsection*.47}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Parámetros e Hiperparámetros en la Implementación}{52}{subsubsection*.48}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4.5}Mondrian Conformal Predictive System (MCPS)}{53}{subsection.3.4.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Propuesta Teórica}{53}{subsubsection*.49}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Fundamento Teórico: Particionamiento Mondrian}{53}{paragraph*.50}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Cálculo Localizado de Scores Conformales}{54}{paragraph*.51}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Construcción de la Distribución Predictiva}{54}{paragraph*.52}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Garantías de Cobertura Local}{55}{paragraph*.53}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline De la Teoría a la Práctica}{56}{subsubsection*.54}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Adaptación 1: Construcción Dinámica de Features Autorregresivos}{56}{paragraph*.55}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Adaptación 2: Estrategia de Binning Adaptativo}{57}{paragraph*.56}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Adaptación 3: Representación Discreta de la Distribución Predictiva}{58}{paragraph*.57}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Adaptación 4: Asignación de Bins para Puntos de Prueba}{59}{paragraph*.58}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Diferencias Notables Respecto a la Teoría Original}{60}{subsubsection*.59}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {\textbf  {3-4}}{\ignorespaces Comparación entre MCPS Teórico y MCPS para Series Temporales}}{60}{table.caption.60}\protected@file@percent }
+\newlabel{tab:mcps_comparison}{{\textbf  {3-4}}{60}{Comparación entre MCPS Teórico y MCPS para Series Temporales}{table.caption.60}{}}
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Innovación Metodológica: MCPS Autorregresivo}{60}{paragraph*.61}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Parámetros e Hiperparámetros en la Implementación}{61}{subsubsection*.62}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Hiperparámetros Primarios}{61}{paragraph*.63}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Parámetros del Modelo Base}{62}{paragraph*.64}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Interpretación Práctica de los Hiperparámetros}{63}{paragraph*.65}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4.6}Adaptive Volatility Mondrian Conformal Predictive System (AV-MCPS)}{64}{subsection.3.4.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Propuesta Teórica}{64}{subsubsection*.66}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Motivación: Límites del Particionamiento Unidimensional}{64}{paragraph*.67}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Fundamento Teórico: Particionamiento Bidimensional}{65}{paragraph*.68}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Intuición del Particionamiento Bidimensional}{65}{paragraph*.69}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Cálculo Localizado de Scores Conformales}{66}{paragraph*.70}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Garantías Teóricas de Cobertura}{67}{paragraph*.71}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Trade-off: Resolución vs. Tamaño de Muestra}{67}{paragraph*.72}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline De la Teoría a la Práctica}{68}{subsubsection*.73}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Adaptación 1: Estimación Rolling de Volatilidad}{68}{paragraph*.74}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Adaptación 2: Construcción de Bins mediante Cuantiles Robustos}{69}{paragraph*.75}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Adaptación 3: Representación Directa de Calibration Scores}{69}{paragraph*.76}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Adaptación 4: Protocolo de Congelamiento Bidimensional}{70}{paragraph*.77}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Diferencias Respecto al MCPS Estándar}{70}{subsubsection*.78}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {\textbf  {3-5}}{\ignorespaces Comparación entre MCPS y AV-MCPS}}{71}{table.caption.79}\protected@file@percent }
+\newlabel{tab:avmcps_vs_mcps}{{\textbf  {3-5}}{71}{Comparación entre MCPS y AV-MCPS}{table.caption.79}{}}
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Innovación Metodológica: Estratificación Volatilidad-Predicción}{72}{paragraph*.80}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Parámetros e Hiperparámetros en la Implementación}{72}{subsubsection*.81}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Hiperparámetros Primarios}{72}{paragraph*.82}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Parámetros del Modelo Base}{73}{paragraph*.83}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Interpretación Práctica de la Configuración Bidimensional}{74}{paragraph*.84}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Recomendaciones de Configuración}{74}{paragraph*.85}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4.7}DeepAR: Probabilistic Forecasting with Autoregressive Recurrent Networks}{74}{subsection.3.4.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Propuesta Teórica}{74}{subsubsection*.86}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Fundamento Arquitectónico: Redes LSTM Autorregresivas}{75}{paragraph*.87}\protected@file@percent }
+\newlabel{eq:deepar_factorization}{{3-74}{75}{Fundamento Arquitectónico: Redes LSTM Autorregresivas}{equation.3.74}{}}
+\newlabel{eq:deepar_recurrence}{{3-76}{75}{Fundamento Arquitectónico: Redes LSTM Autorregresivas}{equation.3.76}{}}
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Naturaleza Autorregresiva del Modelo}{76}{paragraph*.88}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Función de Verosimilitud y Modelado de la Incertidumbre}{76}{paragraph*.89}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Entrenamiento mediante Máxima Verosimilitud}{77}{paragraph*.90}\protected@file@percent }
+\newlabel{eq:deepar_likelihood}{{3-80}{77}{Entrenamiento mediante Máxima Verosimilitud}{equation.3.80}{}}
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Manejo de Escalas Heterogéneas: El Problema de la Ley de Potencias}{77}{paragraph*.91}\protected@file@percent }
+\newlabel{eq:deepar_scale_factor}{{3-84}{79}{Manejo de Escalas Heterogéneas: El Problema de la Ley de Potencias}{equation.3.84}{}}
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Generación de Múltiples Trayectorias y Pronóstico Probabilístico}{79}{paragraph*.92}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Aprendizaje de Patrones Complejos desde los Datos}{80}{paragraph*.93}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline De la Teoría a la Práctica}{81}{subsubsection*.94}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Adaptación 1: Simplificación de Covariables}{81}{paragraph*.95}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Adaptación 2: Construcción de Ventanas de Entrenamiento}{81}{paragraph*.96}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Adaptación 3: Normalización mediante Z-Score}{82}{paragraph*.97}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Adaptación 4: Early Stopping con Partición Interna}{83}{paragraph*.98}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Adaptación 5: Protocolo de Congelamiento para Rolling Forecast}{84}{paragraph*.99}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Diferencias Respecto a la Implementación Original de Amazon}{85}{subsubsection*.100}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {\textbf  {3-6}}{\ignorespaces Comparación entre DeepAR Original y DeepAR Adaptado}}{85}{table.caption.101}\protected@file@percent }
+\newlabel{tab:deepar_comparison}{{\textbf  {3-6}}{85}{Comparación entre DeepAR Original y DeepAR Adaptado}{table.caption.101}{}}
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Limitaciones de la Adaptación y Desviaciones Teóricas}{85}{paragraph*.102}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Parámetros e Hiperparámetros en la Implementación}{86}{subsubsection*.103}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Hiperparámetros Arquitectónicos}{86}{paragraph*.104}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Hiperparámetros de Optimización}{87}{paragraph*.105}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Parámetros de Predicción}{88}{paragraph*.106}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Proceso de Selección de Hiperparámetros}{89}{paragraph*.107}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Configuración Típica Resultante}{89}{paragraph*.108}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4.8}Autoregressive Exponentially-weighted Polynomial Distribution (AREPD)}{90}{subsection.3.4.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Propuesta Teórica}{90}{subsubsection*.109}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Motivación: Limitaciones de la Linealidad en Modelos Conformales}{90}{paragraph*.110}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Fundamento Matemático: Regresión Ridge Ponderada con Expansión Polinomial}{91}{paragraph*.111}\protected@file@percent }
+\newlabel{eq:arepd_design_matrix}{{3-95}{91}{Fundamento Matemático: Regresión Ridge Ponderada con Expansión Polinomial}{equation.3.95}{}}
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Ponderación Exponencial Temporal}{91}{paragraph*.112}\protected@file@percent }
+\newlabel{eq:arepd_weights}{{3-97}{91}{Ponderación Exponencial Temporal}{equation.3.97}{}}
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Estimación mediante Regresión Ridge}{92}{paragraph*.113}\protected@file@percent }
+\newlabel{eq:arepd_objective}{{3-100}{92}{Estimación mediante Regresión Ridge}{equation.3.100}{}}
+\newlabel{eq:arepd_solution}{{3-101}{93}{Estimación mediante Regresión Ridge}{equation.3.101}{}}
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Generación de Distribuciones Predictivas}{93}{paragraph*.114}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Propiedades Teóricas y Garantías de Cobertura}{94}{paragraph*.115}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Comparación Conceptual con Métodos Relacionados}{94}{paragraph*.116}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {\textbf  {3-7}}{\ignorespaces Comparación conceptual de AREPD con métodos relacionados}}{95}{table.caption.117}\protected@file@percent }
+\newlabel{tab:arepd_conceptual}{{\textbf  {3-7}}{95}{Comparación conceptual de AREPD con métodos relacionados}{table.caption.117}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline De la Teoría a la Práctica}{95}{subsubsection*.118}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Adaptación 1: Normalización Z-Score Pre-Expansión}{95}{paragraph*.119}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Adaptación 2: Construcción Eficiente de la Matriz de Diseño}{96}{paragraph*.120}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Adaptación 3: Uso de scikit-learn Ridge con Sample Weights}{97}{paragraph*.121}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Adaptación 4: Protocolo de Congelamiento Consistente}{97}{paragraph*.122}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Adaptación 5: Manejo de Casos Degenerados}{98}{paragraph*.123}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Parámetros e Hiperparámetros en la Implementación}{98}{subsubsection*.124}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Hiperparámetros Estructurales}{98}{paragraph*.125}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Hiperparámetros de Ponderación y Regularización}{99}{paragraph*.126}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Configuración Típica Resultante}{100}{paragraph*.127}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Proceso de Selección de Hiperparámetros}{101}{paragraph*.128}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Consideraciones sobre Interpretabilidad}{101}{paragraph*.129}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Posicionamiento Metodológico y Limitaciones}{101}{subsubsection*.130}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Ventajas Potenciales de AREPD}{101}{paragraph*.131}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Limitaciones Fundamentales}{102}{paragraph*.132}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Casos de Uso Recomendados}{103}{paragraph*.133}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Innovación Metodológica}{103}{paragraph*.134}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4.9}Ensemble Conformalized Quantile Regression con LSTM (EnCQR-LSTM)}{104}{subsection.3.4.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Fundamento Teórico}{104}{subsubsection*.135}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Motivación: Limitaciones de Métodos Puros}{104}{paragraph*.136}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Arquitectura de Ensamble y Partición de Datos}{105}{paragraph*.137}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Regresión Cuantílica mediante Pinball Loss}{105}{paragraph*.138}\protected@file@percent }
+\newlabel{eq:encqr_pinball}{{3-116}{106}{Regresión Cuantílica mediante Pinball Loss}{equation.3.116}{}}
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Predicción Leave-One-Out del Ensamble}{106}{paragraph*.139}\protected@file@percent }
+\newlabel{eq:encqr_loo}{{3-118}{106}{Predicción Leave-One-Out del Ensamble}{equation.3.118}{}}
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Scores de Conformidad Asimétricos}{106}{paragraph*.140}\protected@file@percent }
+\newlabel{eq:encqr_scores}{{3-119}{106}{Scores de Conformidad Asimétricos}{equation.3.119}{}}
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Conformalización de Intervalos de Predicción}{107}{paragraph*.141}\protected@file@percent }
+\newlabel{eq:encqr_interval}{{3-121}{107}{Conformalización de Intervalos de Predicción}{equation.3.121}{}}
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Adaptación Temporal mediante Ventana Deslizante}{108}{paragraph*.142}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Propiedades Teóricas}{108}{paragraph*.143}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Arquitectura LSTM para Regresión Cuantílica}{108}{subsubsection*.144}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Estructura de Red Neuronal Recurrente}{108}{paragraph*.145}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Mecanismo de Estados LSTM}{109}{paragraph*.146}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Normalización y Regularización}{109}{paragraph*.147}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Generación de Distribuciones Predictivas}{110}{subsubsection*.148}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Ajuste de Distribución Skew-Normal}{110}{paragraph*.149}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Estimación de Parámetros}{111}{paragraph*.150}\protected@file@percent }
+\newlabel{eq:encqr_skewnorm_fit}{{3-129}{111}{Estimación de Parámetros}{equation.3.129}{}}
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Inicialización Robusta}{111}{paragraph*.151}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Muestreo de la Distribución Predictiva}{111}{paragraph*.152}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Parámetros e Hiperparámetros}{112}{subsubsection*.153}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Hiperparámetros de Arquitectura LSTM}{112}{paragraph*.154}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Hiperparámetros de Entrenamiento}{113}{paragraph*.155}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Hiperparámetros de Ensamble y Conformalización}{113}{paragraph*.156}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Regularización}{114}{paragraph*.157}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Hiperparámetros de Cuantiles}{115}{paragraph*.158}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Configuración Típica y Número de Parámetros}{115}{paragraph*.159}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Protocolo de Congelamiento y Evaluación}{116}{subsubsection*.160}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Fase de Entrenamiento y Calibración}{116}{paragraph*.161}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Evaluación Rolling Window}{116}{paragraph*.162}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Posicionamiento Metodológico}{118}{subsubsection*.163}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Comparación con Métodos Relacionados}{118}{paragraph*.164}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {\textbf  {3-8}}{\ignorespaces Comparación conceptual de EnCQR-LSTM con métodos relacionados}}{118}{table.caption.165}\protected@file@percent }
+\newlabel{tab:encqr_comparison}{{\textbf  {3-8}}{118}{Comparación conceptual de EnCQR-LSTM con métodos relacionados}{table.caption.165}{}}
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Ventajas Distintivas}{118}{paragraph*.166}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Limitaciones Fundamentales}{119}{paragraph*.167}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Casos de Uso Recomendados}{121}{paragraph*.168}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\nonumberline Contribución Metodológica en el Contexto del Estudio}{122}{paragraph*.169}\protected@file@percent }
 \@setckpt{Capitulos/Cap3}{
-\setcounter{page}{33}
-\setcounter{equation}{3}
-\setcounter{enumi}{3}
-\setcounter{enumii}{0}
+\setcounter{page}{123}
+\setcounter{equation}{139}
+\setcounter{enumi}{4}
+\setcounter{enumii}{3}
 \setcounter{enumiii}{0}
 \setcounter{enumiv}{0}
 \setcounter{footnote}{0}
 \setcounter{mpfootnote}{0}
 \setcounter{part}{0}
 \setcounter{chapter}{3}
-\setcounter{section}{3}
-\setcounter{subsection}{3}
+\setcounter{section}{4}
+\setcounter{subsection}{9}
 \setcounter{subsubsection}{0}
 \setcounter{paragraph}{0}
 \setcounter{subparagraph}{0}
 \setcounter{figure}{0}
-\setcounter{table}{2}
+\setcounter{table}{8}
 \setcounter{parentequation}{0}
 \setcounter{float@type}{4}
 \setcounter{FBl@b}{0}
@@ -58,7 +268,7 @@
 \setcounter{citetotal}{0}
 \setcounter{multicitecount}{0}
 \setcounter{multicitetotal}{0}
-\setcounter{instcount}{73}
+\setcounter{instcount}{143}
 \setcounter{maxnames}{3}
 \setcounter{minnames}{1}
 \setcounter{maxitems}{3}
@@ -164,7 +374,7 @@
 \setcounter{bbx:relatedcount}{0}
 \setcounter{bbx:relatedtotal}{0}
 \setcounter{section@level}{0}
-\setcounter{Item}{30}
+\setcounter{Item}{136}
 \setcounter{Hfootnote}{0}
 \setcounter{bookmark@seq@number}{0}
 }

@@ -1,7 +1,13 @@
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {\textbf {3-1}}{\ignorespaces Parámetros seleccionados para el Escenario I (ARMA).}}{31}{table.caption.12}%
-\contentsline {table}{\numberline {\textbf {3-2}}{\ignorespaces Configuración del modelo SETAR (Escenario III).}}{32}{table.caption.13}%
+\contentsline {table}{\numberline {\textbf {3-1}}{\ignorespaces Configuraciones paramétricas para procesos ARMA.}}{37}{table.caption.24}%
+\contentsline {table}{\numberline {\textbf {3-2}}{\ignorespaces Configuraciones paramétricas para procesos ARIMA.}}{40}{table.caption.29}%
+\contentsline {table}{\numberline {\textbf {3-3}}{\ignorespaces Configuraciones paramétricas para procesos SETAR.}}{44}{table.caption.36}%
+\contentsline {table}{\numberline {\textbf {3-4}}{\ignorespaces Comparación entre MCPS Teórico y MCPS para Series Temporales}}{60}{table.caption.60}%
+\contentsline {table}{\numberline {\textbf {3-5}}{\ignorespaces Comparación entre MCPS y AV-MCPS}}{71}{table.caption.79}%
+\contentsline {table}{\numberline {\textbf {3-6}}{\ignorespaces Comparación entre DeepAR Original y DeepAR Adaptado}}{85}{table.caption.101}%
+\contentsline {table}{\numberline {\textbf {3-7}}{\ignorespaces Comparación conceptual de AREPD con métodos relacionados}}{95}{table.caption.117}%
+\contentsline {table}{\numberline {\textbf {3-8}}{\ignorespaces Comparación conceptual de EnCQR-LSTM con métodos relacionados}}{118}{table.caption.165}%
 \addvspace {10\p@ }
 \providecommand \tocbasic@end@toc@file {}\tocbasic@end@toc@file 
