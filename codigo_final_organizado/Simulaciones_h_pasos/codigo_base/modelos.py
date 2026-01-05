@@ -930,7 +930,7 @@ class DeepARModel:
 # =============================================================================
 
 class MondrianCPSModel:
-    """Mondrian CPS CORREGIDO: Una vez congelado, NUNCA re-entrena."""
+    """Mondrian CPS CORREGIDO: Devuelve calibration scores directamente como LSPM."""
     
     def __init__(self, n_lags: int = 10, n_bins: int = 10, test_size: float = 0.25,
                  random_state: int = 42, verbose: bool = False, optimize: bool = True):
@@ -960,7 +960,7 @@ class MondrianCPSModel:
         self.best_params = {}
         self._is_optimized = False
         self._fitted_artifacts = None
-        self._is_frozen = False  # NUEVO
+        self._is_frozen = False
     
     def _create_lag_matrix(self, series: np.ndarray):
         X, y = [], []
@@ -968,14 +968,6 @@ class MondrianCPSModel:
             X.append(series[i:(i + self.n_lags)])
             y.append(series[i + self.n_lags])
         return np.array(X), np.array(y)
-    
-    def _create_samples_from_scores(self, scores: np.ndarray, n_samples: int = 1000):
-        if len(scores) == 0:
-            return np.zeros(n_samples)
-        
-        base_samples = self.rng.choice(scores, size=n_samples, replace=True)
-        noise = self.rng.normal(0, np.std(scores) * 0.1, n_samples)
-        return base_samples + noise
     
     def freeze_hyperparameters(self, train_data: np.ndarray):
         """CRÍTICO: Entrena XGBoost UNA VEZ y congela TODO."""
@@ -1031,19 +1023,23 @@ class MondrianCPSModel:
             self._is_frozen = False
     
     def fit_predict(self, df) -> np.ndarray:
-        """CORREGIDO: Si está congelado, SOLO predice."""
+        """
+        CORREGIDO: Devuelve calibration scores directamente (como LSPM).
+        NO hace bootstrap ni agrega ruido artificial.
+        """
         try:
             series = df['valor'].values if isinstance(df, pd.DataFrame) else np.asarray(df)
             
-            # VERIFICACIÓN CRÍTICA
+            # VERIFICACIÓN CRÍTICA: Si está congelado, usar modelo pre-entrenado
             if self._is_frozen:
                 if self._fitted_artifacts is None:
-                    return np.full(1000, np.mean(series))
+                    return np.full(100, np.mean(series[-min(8, len(series)):]))
                 
                 if self._fitted_artifacts.get('is_fallback', False):
-                    return np.full(1000, self._fitted_artifacts['fallback_mean'])
+                    fallback = self._fitted_artifacts['fallback_mean']
+                    return np.full(100, fallback)
                 
-                # Solo predecir con modelo congelado
+                # ===== PREDICCIÓN CON MODELO CONGELADO =====
                 x_test = series[-self.n_lags:].reshape(1, -1)
                 point_pred = self.base_model.predict(x_test)[0]
                 
@@ -1051,41 +1047,57 @@ class MondrianCPSModel:
                 y_calib = self._fitted_artifacts['y_calib']
                 bin_edges = self._fitted_artifacts['bin_edges']
                 
+                # ===== MONDRIAN BINNING (LOCAL CALIBRATION) =====
                 try:
-                    if bin_edges is not None:
+                    if bin_edges is not None and len(bin_edges) > 1:
+                        # Asignar predicciones de calibración a bins
                         bin_idx = np.digitize(calib_preds, bins=bin_edges) - 1
                         bin_idx = np.clip(bin_idx, 0, len(bin_edges) - 2)
                         
+                        # Determinar bin del test point
                         test_bin = np.clip(np.digitize(point_pred, bins=bin_edges) - 1, 
                                           0, len(bin_edges) - 2)
+                        
+                        # Filtrar solo scores del mismo bin (MONDRIAN)
                         local_mask = (bin_idx == test_bin)
                         
+                        # Si el bin está muy vacío, usar todos los datos
                         if np.sum(local_mask) < 5:
                             local_mask = np.ones(len(calib_preds), dtype=bool)
                     else:
+                        # Sin binning válido, usar todos los datos (SCPS regular)
                         local_mask = np.ones(len(calib_preds), dtype=bool)
-                except:
+                except Exception as e:
+                    if self.verbose:
+                        print(f"    Binning falló: {e}, usando SCPS global")
                     local_mask = np.ones(len(calib_preds), dtype=bool)
                 
+                # ===== CALIBRATION SCORES (CONFORMAL PREDICTION) =====
                 local_y = y_calib[local_mask]
                 local_preds = calib_preds[local_mask]
+                
+                # Formula del paper: C_j = h(x_test) + (y_j - h(x_j))
                 calibration_scores = point_pred + (local_y - local_preds)
                 
-                return self._create_samples_from_scores(calibration_scores, 1000)
+                # FIX CRÍTICO: Devolver scores directamente (como LSPM)
+                if len(calibration_scores) == 0:
+                    return np.full(100, point_pred)
+                
+                return calibration_scores  # ← SIN BOOTSTRAP, SIN RUIDO
             
-            # CÓDIGO ANTIGUO: Solo para primer paso
+            # ===== CÓDIGO PARA PRIMER PASO (no congelado) =====
             if self.best_params:
                 self.n_lags = self.best_params.get('n_lags', self.n_lags)
                 self.n_bins = self.best_params.get('n_bins', self.n_bins)
             
             if len(series) < self.n_lags * 2:
-                return np.full(1000, np.mean(series))
+                return np.full(100, np.mean(series[-min(8, len(series)):]))
             
             X, y = self._create_lag_matrix(series)
             n_calib = max(10, int(len(X) * self.test_size))
             
             if n_calib >= len(X):
-                return np.full(1000, np.mean(series))
+                return np.full(100, np.mean(series[-min(8, len(series)):]))
             
             X_train, X_calib = X[:-n_calib], X[-n_calib:]
             y_train, y_calib = y[:-n_calib], y[-n_calib:]
@@ -1096,14 +1108,19 @@ class MondrianCPSModel:
             x_test = series[-self.n_lags:].reshape(1, -1)
             point_pred = self.base_model.predict(x_test)[0]
             
+            # Formula conformal: scores = predicción_test + errores_calibración
             calibration_scores = point_pred + (y_calib - calib_preds)
             
-            return self._create_samples_from_scores(calibration_scores, 1000)
+            if len(calibration_scores) == 0:
+                return np.full(100, point_pred)
+            
+            return calibration_scores  # ← Devolver directamente
             
         except Exception as e:
             if self.verbose:
                 print(f"    MCPS error: {e}")
-            return np.full(1000, np.nanmean(df) if hasattr(df, '__len__') else 0)
+            fallback = np.nanmean(series[-min(8, len(series)):]) if len(series) > 0 else 0
+            return np.full(100, fallback)
 
 
 # =============================================================================
@@ -1112,7 +1129,8 @@ class MondrianCPSModel:
 
 class AdaptiveVolatilityMondrianCPS:
     """
-    AV-MCPS CORREGIDO: Congela modelo, bins Y volatilidad de referencia.
+    AV-MCPS CORREGIDO: Devuelve calibration scores directamente (como LSPM).
+    Congela modelo, bins Y volatilidad de referencia.
     """
     
     def __init__(self, n_lags: int = 15, n_pred_bins: int = 8, n_vol_bins: int = 4,
@@ -1146,6 +1164,7 @@ class AdaptiveVolatilityMondrianCPS:
         self.best_params = {}
         self._is_optimized = False
         self._fitted_artifacts = None
+        self._is_frozen = False  # ← AGREGAR
     
     def _create_lag_matrix(self, series: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         X, y = [], []
@@ -1155,132 +1174,239 @@ class AdaptiveVolatilityMondrianCPS:
         return np.array(X), np.array(y)
     
     def _calculate_volatility(self, series: np.ndarray) -> np.ndarray:
+        """Calcula volatilidad rolling para calibración o predicción."""
         volatility = pd.Series(series).rolling(
             window=self.volatility_window, min_periods=1
         ).std().bfill().values
         return volatility[self.n_lags - 1: -1] if len(volatility) > self.n_lags else volatility
     
-    def _create_samples_from_scores(self, scores: np.ndarray, n_samples: int = 1000) -> np.ndarray:
-        if len(scores) == 0:
-            return np.zeros(n_samples)
+    def freeze_hyperparameters(self, train_data: np.ndarray):
+        """CRÍTICO: Entrena XGBoost UNA VEZ y congela bins de predicción Y volatilidad."""
+        values = train_data.flatten() if hasattr(train_data, 'flatten') else np.asarray(train_data)
         
-        base_samples = self.rng.choice(scores, size=n_samples, replace=True)
-        noise = self.rng.normal(0, np.std(scores) * 0.1, n_samples)
-        return base_samples + noise
+        if self.best_params:
+            self.n_lags = self.best_params.get('n_lags', self.n_lags)
+            self.n_pred_bins = self.best_params.get('n_pred_bins', self.n_pred_bins)
+            self.n_vol_bins = self.best_params.get('n_vol_bins', self.n_vol_bins)
+            self.volatility_window = self.best_params.get('volatility_window', self.volatility_window)
+        
+        try:
+            if len(values) < max(self.n_lags * 2, self.volatility_window):
+                self._is_frozen = False
+                return
+            
+            X, y = self._create_lag_matrix(values)
+            vol_features = self._calculate_volatility(values)
+            
+            n_calib = max(10, int(len(X) * self.test_size))
+            
+            if n_calib >= len(X):
+                self._fitted_artifacts = {
+                    'fallback_mean': np.mean(values),
+                    'is_fallback': True
+                }
+                self._is_frozen = True
+                return
+            
+            X_train, X_calib = X[:-n_calib], X[-n_calib:]
+            y_train, y_calib = y[:-n_calib], y[-n_calib:]
+            
+            # Calcular volatilidad de calibración
+            if len(vol_features) >= n_calib:
+                vol_calib = vol_features[-n_calib:]
+            else:
+                vol_calib = np.full(n_calib, np.std(values))
+            
+            # ENTRENAR MODELO UNA SOLA VEZ
+            self.base_model.fit(X_train, y_train)
+            calib_preds = self.base_model.predict(X_calib)
+            
+            # Crear bins para predicción y volatilidad
+            pred_edges, vol_edges = None, None
+            try:
+                _, pred_edges = pd.qcut(calib_preds, self.n_pred_bins, retbins=True, duplicates='drop')
+                _, vol_edges = pd.qcut(vol_calib, self.n_vol_bins, retbins=True, duplicates='drop')
+            except Exception as e:
+                if self.verbose:
+                    print(f"    Warning: No se pudieron crear bins: {e}")
+            
+            self._fitted_artifacts = {
+                'calib_preds': calib_preds,
+                'y_calib': y_calib,
+                'vol_calib': vol_calib,
+                'pred_edges': pred_edges,
+                'vol_edges': vol_edges,
+                'is_fallback': False
+            }
+            self._is_frozen = True
+            
+            if self.verbose:
+                print(f"  AV-MCPS congelado: n_lags={self.n_lags}, "
+                      f"pred_bins={self.n_pred_bins}, vol_bins={self.n_vol_bins}")
+                
+        except Exception as e:
+            if self.verbose:
+                print(f"  Error congelando AV-MCPS: {e}")
+            self._is_frozen = False
     
     def fit_predict(self, df) -> np.ndarray:
-        """CORREGIDO: Usa modelo y bins congelados."""
+        """
+        CORREGIDO: Devuelve calibration scores directamente (como LSPM).
+        NO hace bootstrap ni agrega ruido artificial.
+        """
         try:
             series = df['valor'].values if isinstance(df, pd.DataFrame) else np.asarray(df)
             
+            # ===== VERIFICACIÓN CRÍTICA: Usar modelo congelado =====
+            if self._is_frozen:
+                if self._fitted_artifacts is None:
+                    return np.full(100, np.mean(series[-min(8, len(series)):]))
+                
+                if self._fitted_artifacts.get('is_fallback', False):
+                    fallback = self._fitted_artifacts['fallback_mean']
+                    return np.full(100, fallback)
+                
+                # ===== PREDICCIÓN CON MODELO CONGELADO =====
+                x_test = series[-self.n_lags:].reshape(1, -1)
+                test_vol = np.std(series[-self.volatility_window:])
+                
+                point_pred = self.base_model.predict(x_test)[0]
+                
+                calib_preds = self._fitted_artifacts['calib_preds']
+                y_calib = self._fitted_artifacts['y_calib']
+                vol_calib = self._fitted_artifacts['vol_calib']
+                pred_edges = self._fitted_artifacts['pred_edges']
+                vol_edges = self._fitted_artifacts['vol_edges']
+                
+                # ===== ADAPTIVE VOLATILITY MONDRIAN BINNING =====
+                try:
+                    if pred_edges is not None and vol_edges is not None:
+                        # Asignar calibration data a bins 2D (predicción × volatilidad)
+                        pred_idx = np.clip(
+                            np.digitize(calib_preds, pred_edges[:-1]) - 1, 
+                            0, len(pred_edges) - 2
+                        )
+                        vol_idx = np.clip(
+                            np.digitize(vol_calib, vol_edges[:-1]) - 1, 
+                            0, len(vol_edges) - 2
+                        )
+                        
+                        # Determinar bin del test point
+                        test_pred_bin = np.clip(
+                            np.digitize(point_pred, pred_edges[:-1]) - 1, 
+                            0, len(pred_edges) - 2
+                        )
+                        test_vol_bin = np.clip(
+                            np.digitize(test_vol, vol_edges[:-1]) - 1, 
+                            0, len(vol_edges) - 2
+                        )
+                        
+                        # Filtro 1: Mismo bin de predicción Y volatilidad (más restrictivo)
+                        local_mask = (pred_idx == test_pred_bin) & (vol_idx == test_vol_bin)
+                        
+                        # Fallback 1: Si muy pocos datos, solo usar bin de predicción
+                        if np.sum(local_mask) < 5:
+                            local_mask = (pred_idx == test_pred_bin)
+                            if self.verbose:
+                                print(f"    Fallback: usando solo pred_bin={test_pred_bin}")
+                            
+                            # Fallback 2: Si aún muy pocos, usar todos los datos
+                            if np.sum(local_mask) < 5:
+                                local_mask = np.ones(len(calib_preds), dtype=bool)
+                                if self.verbose:
+                                    print(f"    Fallback: usando todos los datos")
+                    else:
+                        # Sin bins válidos, usar SCPS regular
+                        local_mask = np.ones(len(calib_preds), dtype=bool)
+                        if self.verbose:
+                            print(f"    Sin bins válidos, usando SCPS global")
+                            
+                except Exception as e:
+                    if self.verbose:
+                        print(f"    Binning falló: {e}, usando SCPS global")
+                    local_mask = np.ones(len(calib_preds), dtype=bool)
+                
+                # ===== CALIBRATION SCORES (CONFORMAL PREDICTION) =====
+                local_y = y_calib[local_mask]
+                local_preds = calib_preds[local_mask]
+                
+                # Formula del paper: C_j = h(x_test) + (y_j - h(x_j))
+                calibration_scores = point_pred + (local_y - local_preds)
+                
+                # FIX CRÍTICO: Devolver scores directamente (como LSPM)
+                if len(calibration_scores) == 0:
+                    return np.full(100, point_pred)
+                
+                return calibration_scores  # ← SIN BOOTSTRAP, SIN RUIDO
+            
+            # ===== CÓDIGO PARA PRIMER PASO (no congelado) =====
             if self.best_params:
                 self.n_lags = self.best_params.get('n_lags', self.n_lags)
                 self.n_pred_bins = self.best_params.get('n_pred_bins', self.n_pred_bins)
                 self.n_vol_bins = self.best_params.get('n_vol_bins', self.n_vol_bins)
                 self.volatility_window = self.best_params.get('volatility_window', self.volatility_window)
             
-            # FASE 1: ENTRENAMIENTO (Solo primera vez)
-            if self._fitted_artifacts is None:
-                if len(series) < max(self.n_lags * 2, self.volatility_window):
-                    return np.full(1000, np.mean(series))
-                
-                X, y = self._create_lag_matrix(series)
-                vol_features = self._calculate_volatility(series)
-                
-                n_calib = max(10, int(len(X) * self.test_size))
-                
-                if n_calib >= len(X):
-                     self._fitted_artifacts = {'is_fallback': True, 'mean': np.mean(series)}
-                     return np.full(1000, np.mean(series))
-                
-                X_train, X_calib = X[:-n_calib], X[-n_calib:]
-                y_train, y_calib = y[:-n_calib], y[-n_calib:]
-                
-                if len(vol_features) >= n_calib:
-                    vol_calib = vol_features[-n_calib:]
-                else:
-                    vol_calib = np.full(n_calib, np.std(series))
-                
-                self.base_model.fit(X_train, y_train)
-                calib_preds = self.base_model.predict(X_calib)
-                
-                pred_edges, vol_edges = None, None
-                try:
-                    _, pred_edges = pd.qcut(calib_preds, self.n_pred_bins, retbins=True, duplicates='drop')
-                    _, vol_edges = pd.qcut(vol_calib, self.n_vol_bins, retbins=True, duplicates='drop')
-                except:
-                    pass
-                
-                self._fitted_artifacts = {
-                    'calib_preds': calib_preds,
-                    'y_calib': y_calib,
-                    'vol_calib': vol_calib,
-                    'pred_edges': pred_edges,
-                    'vol_edges': vol_edges,
-                    'is_fallback': False
-                }
+            if len(series) < max(self.n_lags * 2, self.volatility_window):
+                return np.full(100, np.mean(series[-min(8, len(series)):]))
             
-            # FASE 2: PREDICCIÓN
-            if self._fitted_artifacts.get('is_fallback', False):
-                return np.full(1000, self._fitted_artifacts['mean'])
-
+            X, y = self._create_lag_matrix(series)
+            vol_features = self._calculate_volatility(series)
+            
+            n_calib = max(10, int(len(X) * self.test_size))
+            
+            if n_calib >= len(X):
+                return np.full(100, np.mean(series[-min(8, len(series)):]))
+            
+            X_train, X_calib = X[:-n_calib], X[-n_calib:]
+            y_train, y_calib = y[:-n_calib], y[-n_calib:]
+            
+            if len(vol_features) >= n_calib:
+                vol_calib = vol_features[-n_calib:]
+            else:
+                vol_calib = np.full(n_calib, np.std(series))
+            
+            self.base_model.fit(X_train, y_train)
+            calib_preds = self.base_model.predict(X_calib)
+            
             x_test = series[-self.n_lags:].reshape(1, -1)
-            test_vol = np.std(series[-self.volatility_window:])
-            
             point_pred = self.base_model.predict(x_test)[0]
             
-            calib_preds = self._fitted_artifacts['calib_preds']
-            y_calib = self._fitted_artifacts['y_calib']
-            vol_calib = self._fitted_artifacts['vol_calib']
-            pred_edges = self._fitted_artifacts['pred_edges']
-            vol_edges = self._fitted_artifacts['vol_edges']
+            # Formula conformal: scores = predicción_test + errores_calibración
+            calibration_scores = point_pred + (y_calib - calib_preds)
             
-            try:
-                if pred_edges is not None and vol_edges is not None:
-                    pred_idx = np.clip(np.digitize(calib_preds, pred_edges[:-1]) - 1, 0, len(pred_edges) - 2)
-                    vol_idx = np.clip(np.digitize(vol_calib, vol_edges[:-1]) - 1, 0, len(vol_edges) - 2)
-                    
-                    test_pred_bin = np.clip(np.digitize(point_pred, pred_edges[:-1]) - 1, 0, len(pred_edges) - 2)
-                    test_vol_bin = np.clip(np.digitize(test_vol, vol_edges[:-1]) - 1, 0, len(vol_edges) - 2)
-                    
-                    local_mask = (pred_idx == test_pred_bin) & (vol_idx == test_vol_bin)
-                    
-                    if np.sum(local_mask) < 5:
-                        local_mask = (pred_idx == test_pred_bin)
-                        if np.sum(local_mask) < 5:
-                            local_mask = np.ones(len(calib_preds), dtype=bool)
-                else:
-                    local_mask = np.ones(len(calib_preds), dtype=bool)
-            except:
-                local_mask = np.ones(len(calib_preds), dtype=bool)
+            if len(calibration_scores) == 0:
+                return np.full(100, point_pred)
             
-            local_y = y_calib[local_mask]
-            local_preds = calib_preds[local_mask]
-            calibration_scores = point_pred + (local_y - local_preds)
-            
-            return self._create_samples_from_scores(calibration_scores, 1000)
+            return calibration_scores  # ← Devolver directamente
             
         except Exception as e:
             if self.verbose:
                 print(f"    AV-MCPS error: {e}")
-            return np.full(1000, np.nanmean(df) if hasattr(df, '__len__') else 0)
+            fallback = np.nanmean(series[-min(8, len(series)):]) if len(series) > 0 else 0
+            return np.full(100, fallback)
 
 # =============================================================================
 # EnCQR-LSTM - Ensemble Conformalized Quantile Regression with LSTM
 # =============================================================================
+
 import numpy as np
 import pandas as pd
 from scipy import stats
-from metricas import crps
-
+from scipy.optimize import minimize
 
 class EnCQR_LSTM_Model:
-    """EnCQR-LSTM con KDE: Genera distribuciones probabilísticas completas."""
+    """
+    EnCQR-LSTM: Implementación corregida siguiendo el paper 
+    'Ensemble Conformalized Quantile Regression for Probabilistic Time Series Forecasting'.
+    
+    CORRECCIÓN: En lugar de interpolar cuantiles (que causa bimodalidad), 
+    ajustamos una distribución paramétrica a los cuantiles conformalizados.
+    """
    
     def __init__(self, n_lags: int = 20, B: int = 3, units: int = 32, n_layers: int = 2,
                  lr: float = 0.005, batch_size: int = 16, epochs: int = 20,
                  num_samples: int = 1000, random_state: int = 42, verbose: bool = False,
-                 optimize: bool = True, alpha: float = 0.05, kde_bandwidth: str = 'scott'):
+                 optimize: bool = True, alpha: float = 0.05):
        
         try:
             import tensorflow as tf
@@ -1306,26 +1432,21 @@ class EnCQR_LSTM_Model:
         self.verbose = verbose
         self.optimize = optimize
         self.alpha = alpha
-        self.kde_bandwidth = kde_bandwidth  # 'scott', 'silverman', o float
        
         self.scaler = self.MinMaxScaler()
-        self.best_params = {}
-        self._is_optimized = False
         self.rng = np.random.default_rng(random_state)
        
-        # 11 cuantiles para construir la distribución
-        self.quantiles = np.array([0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95])
+        # Cuantiles clave para capturar la forma de la distribución
+        self.quantiles = np.array([0.01, 0.05, 0.10, 0.25, 0.50, 0.75, 0.90, 0.95, 0.99])
         
-        # Estado congelado
         self._trained_ensemble = None
-        self._frozen_scaler = None
         self._is_frozen = False
        
         self.tf.random.set_seed(random_state)
         np.random.seed(random_state)
    
     def _pin_loss(self, y_true, y_pred):
-        """Pinball loss agregado sobre todos los cuantiles."""
+        """Pinball loss para múltiples cuantiles."""
         error = y_true - y_pred
         return self.tf.reduce_mean(
             self.tf.maximum(self.quantiles * error, (self.quantiles - 1) * error),
@@ -1333,332 +1454,190 @@ class EnCQR_LSTM_Model:
         )
    
     def _build_lstm(self):
-        """Construye LSTM que predice TODOS los cuantiles simultáneamente."""
         x_in = self.layers.Input(shape=(self.n_lags, 1))
         x = x_in
-        for _ in range(self.n_layers - 1):
+        for i in range(self.n_layers - 1):
             x = self.layers.LSTM(self.units, return_sequences=True)(x)
+            x = self.layers.Dropout(0.1)(x)
         x = self.layers.LSTM(self.units, return_sequences=False)(x)
-        x = self.layers.Dense(len(self.quantiles))(x)  # 11 salidas
+        x = self.layers.Dense(len(self.quantiles))(x)
+        
         model = self.Model(inputs=x_in, outputs=x)
-        model.compile(
-            optimizer=self.optimizers.Adam(learning_rate=self.lr), 
-            loss=self._pin_loss
-        )
+        model.compile(optimizer=self.optimizers.Adam(learning_rate=self.lr), loss=self._pin_loss)
         return model
    
-    def _create_sequences(self, data: np.ndarray):
-        X, y = [], []
-        for i in range(len(data) - self.n_lags):
-            X.append(data[i:(i + self.n_lags)])
-            y.append(data[i + self.n_lags])
-        return np.array(X), np.array(y)
-   
     def _prepare_data(self, series: np.ndarray, scaler=None):
-        """Prepara batches para ensemble leave-one-out."""
+        """Divide los datos en B subconjuntos DISJUNTOS (Lógica EnCQR)."""
         if scaler is not None:
             series_scaled = scaler.transform(series.reshape(-1, 1))
         else:
             series_scaled = self.scaler.fit_transform(series.reshape(-1, 1))
         
-        X, y = self._create_sequences(series_scaled)
+        X, y = [], []
+        for i in range(len(series_scaled) - self.n_lags):
+            X.append(series_scaled[i:(i + self.n_lags)])
+            y.append(series_scaled[i + self.n_lags])
+        X, y = np.array(X), np.array(y)
+        
         n_samples = X.shape[0]
-       
-        if n_samples < self.B * 5:
-            raise ValueError(f"Insuficientes muestras ({n_samples}) para {self.B} batches")
-       
-        batch_size = n_samples // self.B
+        batch_size_loo = n_samples // self.B
         batches = []
-       
         for b in range(self.B):
-            start = b * batch_size
-            end = (b + 1) * batch_size if b < self.B - 1 else n_samples
+            start = b * batch_size_loo
+            end = (b + 1) * batch_size_loo if b < self.B - 1 else n_samples
             batches.append({'X': X[start:end], 'y': y[start:end]})
-       
         return batches
-   
+
+    def _fit_skew_normal(self, quantile_values: np.ndarray) -> dict:
+        """
+        CORRECCIÓN PRINCIPAL: Ajusta una distribución Skew-Normal a los cuantiles.
+        
+        La Skew-Normal es ideal porque:
+        1. Puede ser simétrica (cuando skew=0) o asimétrica
+        2. Tiene 3 parámetros: location (μ), scale (σ), skew (α)
+        3. Se reduce a Normal cuando skew=0
+        4. Garantiza unimodalidad
+        
+        Teoría: Minimizamos la distancia entre los cuantiles empíricos 
+        conformalizados y los cuantiles teóricos de la Skew-Normal.
+        """
+        def objective(params):
+            loc, scale, skew = params
+            if scale <= 0:
+                return 1e10
+            
+            # Cuantiles teóricos de la distribución
+            theoretical_quantiles = stats.skewnorm.ppf(self.quantiles, skew, loc=loc, scale=scale)
+            
+            # Minimizar error cuadrático medio
+            return np.sum((quantile_values - theoretical_quantiles) ** 2)
+        
+        # Inicialización robusta
+        q_median = quantile_values[len(quantile_values) // 2]
+        q_iqr = quantile_values[-2] - quantile_values[1]  # Rango intercuartil aproximado
+        
+        initial_params = [
+            q_median,           # location
+            q_iqr / 1.35,       # scale (IQR ≈ 1.35σ para Normal)
+            0.0                 # skew (empezar simétrico)
+        ]
+        
+        # Optimización con restricciones
+        bounds = [
+            (quantile_values.min() - q_iqr, quantile_values.max() + q_iqr),  # loc
+            (q_iqr / 10, q_iqr * 3),                                          # scale > 0
+            (-5, 5)                                                            # skew
+        ]
+        
+        result = minimize(objective, initial_params, method='L-BFGS-B', bounds=bounds)
+        
+        if not result.success:
+            # Fallback a distribución Normal
+            return {
+                'loc': q_median,
+                'scale': q_iqr / 1.35,
+                'skew': 0.0
+            }
+        
+        return {
+            'loc': result.x[0],
+            'scale': result.x[1],
+            'skew': result.x[2]
+        }
+
+    def _quantiles_to_distribution(self, conf_q: np.ndarray) -> np.ndarray:
+        """
+        Genera muestras de la distribución ajustada a los cuantiles conformalizados.
+        
+        Este método respeta la teoría del paper:
+        - Los cuantiles conformalizados (Eq. 12) definen los límites del intervalo
+        - Ajustamos una distribución paramétrica que respeta estos límites
+        - Muestreamos de esa distribución para obtener la distribución predictiva
+        """
+        # Asegurar monotonicidad
+        conf_q_sorted = np.sort(conf_q)
+        
+        # Ajustar distribución Skew-Normal
+        params = self._fit_skew_normal(conf_q_sorted)
+        
+        # Generar muestras de la distribución ajustada
+        samples = stats.skewnorm.rvs(
+            params['skew'],
+            loc=params['loc'],
+            scale=params['scale'],
+            size=self.num_samples,
+            random_state=self.random_state
+        )
+        
+        return samples
+
+    def _get_ensemble_loo_scores(self, batches):
+        """Calcula scores de conformidad asimétricos usando Leave-One-Out (Eq. 11)."""
+        ensemble_models = []
+        loo_preds = [[] for _ in range(self.B)]
+        
+        for b in range(self.B):
+            model = self._build_lstm()
+            model.fit(batches[b]['X'], batches[b]['y'], epochs=self.epochs, 
+                      batch_size=self.batch_size, verbose=0, shuffle=False)
+            ensemble_models.append(model)
+            
+            # Predicciones LOO
+            for i in range(self.B):
+                if i != b:
+                    loo_preds[i].append(model.predict(batches[i]['X'], verbose=0))
+        
+        # Calcular scores asimétricos (Eq. 11)
+        scores_list = [[] for _ in range(len(self.quantiles))]
+        for i in range(self.B):
+            if loo_preds[i]:
+                avg_pred = np.mean(loo_preds[i], axis=0)
+                y_true = batches[i]['y'].reshape(-1, 1)
+                
+                for q_idx, tau in enumerate(self.quantiles):
+                    q_val = avg_pred[:, q_idx].reshape(-1, 1)
+                    if tau <= 0.5:
+                        score = q_val - y_true
+                    else:
+                        score = y_true - q_val
+                    scores_list[q_idx].extend(score.flatten())
+        
+        return ensemble_models, [np.array(s) for s in scores_list]
+
+    def fit_predict(self, df) -> np.ndarray:
+        series = df['valor'].values if isinstance(df, pd.DataFrame) else np.asarray(df)
+        
+        if not self._is_frozen:
+            batches = self._prepare_data(series)
+            models, scores = self._get_ensemble_loo_scores(batches)
+            self._trained_ensemble = {'models': models, 'scores': scores, 'scaler': self.scaler}
+            self._is_frozen = True
+
+        # Predicción
+        scaler = self._trained_ensemble['scaler']
+        last_window = scaler.transform(series[-self.n_lags:].reshape(-1, 1)).reshape(1, self.n_lags, 1)
+        
+        # 1. Agregación de modelos
+        preds = np.array([m.predict(last_window, verbose=0)[0] for m in self._trained_ensemble['models']])
+        agg_q = np.mean(preds, axis=0)
+        
+        # 2. Conformalización (Eq. 12)
+        conf_q = np.zeros_like(agg_q)
+        for q_idx, tau in enumerate(self.quantiles):
+            omega = np.quantile(self._trained_ensemble['scores'][q_idx], 1 - self.alpha)
+            if tau <= 0.5:
+                conf_q[q_idx] = agg_q[q_idx] - omega
+            else:
+                conf_q[q_idx] = agg_q[q_idx] + omega
+        
+        # 3. Desescalar
+        conf_q_final = scaler.inverse_transform(conf_q.reshape(-1, 1)).flatten()
+        
+        # 4. Generar distribución suave y unimodal
+        return self._quantiles_to_distribution(conf_q_final)
+
     def _cleanup(self):
         self.tf.keras.backend.clear_session()
-        import gc
-        gc.collect()
-   
-    def _quantiles_to_distribution_kde(self, conf_q: np.ndarray) -> np.ndarray:
-        """
-        Convierte cuantiles predichos en distribución usando KDE.
-        
-        Estrategia:
-        1. Usa los cuantiles como puntos de soporte ponderados
-        2. Aplica KDE gaussiano con bandwidth adaptativo
-        3. Samplea de la distribución resultante
-        """
-        conf_q = np.sort(conf_q)
-        
-        # Calcular pesos basados en diferencias de niveles de cuantil
-        # Más peso en regiones con mayor densidad de probabilidad
-        quantile_diffs = np.diff(np.concatenate([[0], self.quantiles, [1]]))
-        weights_lower = quantile_diffs[:-1]
-        weights_upper = quantile_diffs[1:]
-        weights = (weights_lower + weights_upper) / 2
-        
-        # Normalizar pesos
-        weights = weights / weights.sum()
-        
-        try:
-            # KDE con pesos - Opción 1: Replicar puntos según pesos
-            replications = np.round(weights * 1000).astype(int)
-            replications = np.maximum(replications, 1)  # Mínimo 1 réplica
-            
-            expanded_points = np.repeat(conf_q, replications)
-            
-            # Crear KDE
-            kde = stats.gaussian_kde(
-                expanded_points,
-                bw_method=self.kde_bandwidth
-            )
-            
-            # Samplear de la distribución
-            samples = kde.resample(self.num_samples, seed=self.random_state)[0]
-            
-            # Clip a rango razonable (evitar extrapolaciones extremas)
-            q_min, q_max = conf_q[0], conf_q[-1]
-            q_range = q_max - q_min
-            samples = np.clip(samples, q_min - 0.1*q_range, q_max + 0.1*q_range)
-            
-            return samples
-            
-        except Exception as e:
-            if self.verbose:
-                print(f"  KDE falló ({e}), usando fallback a interpolación")
-            return self._quantiles_to_distribution_interp(conf_q)
-    
-    def _quantiles_to_distribution_interp(self, conf_q: np.ndarray) -> np.ndarray:
-        """Método de fallback: interpolación cúbica de cuantiles."""
-        from scipy.interpolate import interp1d
-        
-        conf_q = np.sort(conf_q)
-        
-        # Crear función cuantil inversa
-        quantile_fn = interp1d(
-            self.quantiles,
-            conf_q,
-            kind='cubic',
-            fill_value='extrapolate',
-            bounds_error=False
-        )
-        
-        # Samplear uniformemente de los niveles de cuantil
-        uniform_samples = self.rng.uniform(
-            self.quantiles[0],
-            self.quantiles[-1],
-            self.num_samples
-        )
-        
-        samples = quantile_fn(uniform_samples)
-        return samples
-   
-    def freeze_hyperparameters(self, train_data: np.ndarray):
-        """Entrena ensemble UNA VEZ y congela TODO."""
-        values = train_data.flatten() if hasattr(train_data, 'flatten') else np.asarray(train_data)
-        
-        if self.best_params:
-            self.n_lags = self.best_params.get('n_lags', self.n_lags)
-            self.units = self.best_params.get('units', self.units)
-            self.B = self.best_params.get('B', self.B)
-        
-        try:
-            self._cleanup()
-            
-            if len(values) <= self.n_lags + self.B * 5:
-                self._is_frozen = False
-                return
-            
-            # Ajustar y congelar scaler
-            self._frozen_scaler = self.MinMaxScaler()
-            self._frozen_scaler.fit(values.reshape(-1, 1))
-            
-            batches = self._prepare_data(values, scaler=self._frozen_scaler)
-            
-            ensemble_models = []
-            loo_preds = [[] for _ in range(self.B)]
-        
-            # ENTRENAR ENSEMBLE
-            for b in range(self.B):
-                model = self._build_lstm()
-                model.fit(
-                    batches[b]['X'], batches[b]['y'],
-                    epochs=self.epochs, batch_size=self.batch_size,
-                    verbose=0, shuffle=False
-                )
-                ensemble_models.append(model)
-                
-                # Leave-one-out predictions
-                for i in range(self.B):
-                    if i != b:
-                        preds = model.predict(batches[i]['X'], verbose=0)
-                        loo_preds[i].append(preds)
-        
-            # Calcular conformity scores
-            conformity_scores = [[] for _ in range(len(self.quantiles))]
-            for i in range(self.B):
-                if loo_preds[i]:
-                    avg_pred = np.mean(loo_preds[i], axis=0)
-                    y = batches[i]['y'].reshape(-1, 1)
-                    for q_idx, tau in enumerate(self.quantiles):
-                        q = avg_pred[:, q_idx].reshape(-1, 1)
-                        if tau <= 0.5:
-                            score = q - y
-                        else:
-                            score = y - q
-                        conformity_scores[q_idx].extend(score.flatten())
-            
-            self._trained_ensemble = {
-                'models': ensemble_models,
-                'scores': [np.array(cs) for cs in conformity_scores],
-                'scaler': self._frozen_scaler
-            }
-            self._is_frozen = True
-            
-            if self.verbose:
-                print(f"  ✓ EnCQR-LSTM congelado con KDE: n_lags={self.n_lags}, "
-                      f"B={self.B}, units={self.units}")
-                
-        except Exception as e:
-            if self.verbose:
-                print(f"  ✗ Error congelando EnCQR-LSTM: {e}")
-            self._is_frozen = False
-   
-    def fit_predict(self, df) -> np.ndarray:
-        """Predice distribución usando KDE sobre cuantiles conformalizados."""
-        try:
-            series = df['valor'].values if isinstance(df, pd.DataFrame) else np.asarray(df)
-           
-            # Si está congelado, usar ensemble existente
-            if self._is_frozen:
-                if self._trained_ensemble is None:
-                    return np.full(self.num_samples, np.mean(series))
-                
-                scores_list = self._trained_ensemble['scores']
-                if any(len(cs) == 0 for cs in scores_list):
-                    return np.full(self.num_samples, np.mean(series))
-           
-                current_scaler = self._trained_ensemble['scaler']
-                
-                last_window_scaled = current_scaler.transform(
-                    series[-self.n_lags:].reshape(-1, 1)
-                ).reshape(1, self.n_lags, 1)
-           
-                # Predicción con ensemble
-                final_preds = [
-                    model.predict(last_window_scaled, verbose=0)[0]
-                    for model in self._trained_ensemble['models']
-                ]
-                agg_q = np.mean(final_preds, axis=0)
-           
-                # Conformalización asimétrica
-                conf_q = np.zeros_like(agg_q)
-                for q_idx, tau in enumerate(self.quantiles):
-                    omega = np.quantile(scores_list[q_idx], 1 - self.alpha)
-                    if tau <= 0.5:
-                        conf_q[q_idx] = agg_q[q_idx] - omega
-                    else:
-                        conf_q[q_idx] = agg_q[q_idx] + omega
-           
-                # Desnormalizar
-                conf_q = current_scaler.inverse_transform(
-                    conf_q.reshape(-1, 1)
-                ).flatten()
-           
-                # ★★★ CONVERSIÓN A DISTRIBUCIÓN CON KDE ★★★
-                samples = self._quantiles_to_distribution_kde(conf_q)
-           
-                return samples
-            
-            # Primera ejecución (sin freeze) - código antiguo
-            if self.best_params:
-                self.n_lags = self.best_params.get('n_lags', self.n_lags)
-                self.units = self.best_params.get('units', self.units)
-                self.B = self.best_params.get('B', self.B)
-            
-            self._cleanup()
-            
-            if len(series) <= self.n_lags + self.B * 5:
-                return np.full(self.num_samples, np.mean(series))
-            
-            try:
-                batches = self._prepare_data(series, scaler=None)
-            except ValueError:
-                return np.full(self.num_samples, np.mean(series))
-            
-            ensemble_models = []
-            loo_preds = [[] for _ in range(self.B)]
-        
-            for b in range(self.B):
-                model = self._build_lstm()
-                model.fit(
-                    batches[b]['X'], batches[b]['y'],
-                    epochs=self.epochs, batch_size=self.batch_size,
-                    verbose=0, shuffle=False
-                )
-                ensemble_models.append(model)
-                
-                for i in range(self.B):
-                    if i != b:
-                        preds = model.predict(batches[i]['X'], verbose=0)
-                        loo_preds[i].append(preds)
-        
-            conformity_scores = [[] for _ in range(len(self.quantiles))]
-            for i in range(self.B):
-                if loo_preds[i]:
-                    avg_pred = np.mean(loo_preds[i], axis=0)
-                    y = batches[i]['y'].reshape(-1, 1)
-                    for q_idx, tau in enumerate(self.quantiles):
-                        q = avg_pred[:, q_idx].reshape(-1, 1)
-                        if tau <= 0.5:
-                            score = q - y
-                        else:
-                            score = y - q
-                        conformity_scores[q_idx].extend(score.flatten())
-            
-            scores_list = [np.array(cs) for cs in conformity_scores]
-            if any(len(cs) == 0 for cs in scores_list):
-                return np.full(self.num_samples, np.mean(series))
-           
-            last_window_scaled = self.scaler.transform(
-                series[-self.n_lags:].reshape(-1, 1)
-            ).reshape(1, self.n_lags, 1)
-           
-            final_preds = [
-                model.predict(last_window_scaled, verbose=0)[0]
-                for model in ensemble_models
-            ]
-            agg_q = np.mean(final_preds, axis=0)
-           
-            conf_q = np.zeros_like(agg_q)
-            for q_idx, tau in enumerate(self.quantiles):
-                omega = np.quantile(scores_list[q_idx], 1 - self.alpha)
-                if tau <= 0.5:
-                    conf_q[q_idx] = agg_q[q_idx] - omega
-                else:
-                    conf_q[q_idx] = agg_q[q_idx] + omega
-           
-            conf_q = self.scaler.inverse_transform(
-                conf_q.reshape(-1, 1)
-            ).flatten()
-           
-            # ★★★ CONVERSIÓN A DISTRIBUCIÓN CON KDE ★★★
-            samples = self._quantiles_to_distribution_kde(conf_q)
-           
-            return samples
-           
-        except Exception as e:
-            if self.verbose:
-                print(f"  EnCQR error: {e}")
-            return np.full(self.num_samples, np.nanmean(df) if hasattr(df, '__len__') else 0)
-   
-    def __del__(self):
-        self._cleanup()
-
-
 
 class TimeBalancedOptimizer:
     """
@@ -1682,7 +1661,7 @@ class TimeBalancedOptimizer:
         # --- Modelos Bootstrap (Rápidos) ---
         if model_name == 'Block Bootstrapping':
             # Probar bloques pequeños, medios y grandes
-            return [{'block_length': 5}, {'block_length': int(np.sqrt(n_train))}, {'block_length': int(n_train/5)}]
+            return [{'block_length': 5}, {'block_length': 9}, {'block_length': int(np.sqrt(n_train))}, {'block_length': int(n_train/5)}]
         
         elif model_name == 'Sieve Bootstrap':
             # Probar órdenes AR bajos y medios
