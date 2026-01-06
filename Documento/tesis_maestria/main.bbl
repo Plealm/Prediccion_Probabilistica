@@ -101,6 +101,102 @@
       \verb 2202.13415
       \endverb
     \endentry
+    \entry{Taieb2012}{article}{}{}
+      \name{author}{4}{}{%
+        {{un=0,uniquepart=base,hash=43eddde3c0f7ec0931021909de0cfd24}{%
+           family={Ben\bibnamedelima Taieb},
+           familyi={B\bibinitperiod\bibinitdelim T\bibinitperiod},
+           given={Souhaib},
+           giveni={S\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=3bb195d6ea6db0c1df418e2f92f319fc}{%
+           family={Bontempi},
+           familyi={B\bibinitperiod},
+           given={Gianluca},
+           giveni={G\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=624347660b6fb5c22176297940f06932}{%
+           family={Atiya},
+           familyi={A\bibinitperiod},
+           given={Amir\bibnamedelima F},
+           giveni={A\bibinitperiod\bibinitdelim F\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=7cf8a4d76bb1bb1d5c7b781b022c9a44}{%
+           family={Sorjamaa},
+           familyi={S\bibinitperiod},
+           given={Antti},
+           giveni={A\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {Elsevier}%
+      }
+      \strng{namehash}{a94134a9a47323f623caebc874fd31e0}
+      \strng{fullhash}{6a8516283f88da3ced1934fcd0ac84a7}
+      \strng{fullhashraw}{6a8516283f88da3ced1934fcd0ac84a7}
+      \strng{bibnamehash}{a94134a9a47323f623caebc874fd31e0}
+      \strng{authorbibnamehash}{a94134a9a47323f623caebc874fd31e0}
+      \strng{authornamehash}{a94134a9a47323f623caebc874fd31e0}
+      \strng{authorfullhash}{6a8516283f88da3ced1934fcd0ac84a7}
+      \strng{authorfullhashraw}{6a8516283f88da3ced1934fcd0ac84a7}
+      \field{sortinit}{B}
+      \field{sortinithash}{d7095fff47cda75ca2589920aae98399}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Expert Systems with Applications}
+      \field{number}{8}
+      \field{title}{A review and comparison of strategies for multi-step ahead time series forecasting}
+      \field{volume}{39}
+      \field{year}{2012}
+      \field{pages}{7067\bibrangedash 7083}
+      \range{pages}{17}
+    \endentry
+    \entry{Bontempi2013}{incollection}{}{}
+      \name{author}{3}{}{%
+        {{un=0,uniquepart=base,hash=3bb195d6ea6db0c1df418e2f92f319fc}{%
+           family={Bontempi},
+           familyi={B\bibinitperiod},
+           given={Gianluca},
+           giveni={G\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=43eddde3c0f7ec0931021909de0cfd24}{%
+           family={Ben\bibnamedelima Taieb},
+           familyi={B\bibinitperiod\bibinitdelim T\bibinitperiod},
+           given={Souhaib},
+           giveni={S\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=74627b127e845bbc73bdac13c352f913}{%
+           family={Le\bibnamedelima Borgne},
+           familyi={L\bibinitperiod\bibinitdelim B\bibinitperiod},
+           given={Yann-Aël},
+           giveni={Y\bibinithyphendelim A\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {Springer}%
+      }
+      \strng{namehash}{4a9ae8a4aa8e7e9363016f7f3b9f4d67}
+      \strng{fullhash}{4a9ae8a4aa8e7e9363016f7f3b9f4d67}
+      \strng{fullhashraw}{4a9ae8a4aa8e7e9363016f7f3b9f4d67}
+      \strng{bibnamehash}{4a9ae8a4aa8e7e9363016f7f3b9f4d67}
+      \strng{authorbibnamehash}{4a9ae8a4aa8e7e9363016f7f3b9f4d67}
+      \strng{authornamehash}{4a9ae8a4aa8e7e9363016f7f3b9f4d67}
+      \strng{authorfullhash}{4a9ae8a4aa8e7e9363016f7f3b9f4d67}
+      \strng{authorfullhashraw}{4a9ae8a4aa8e7e9363016f7f3b9f4d67}
+      \field{sortinit}{B}
+      \field{sortinithash}{d7095fff47cda75ca2589920aae98399}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Business Intelligence: Second European Summer School, eBISS 2012}
+      \field{title}{Machine learning strategies for time series forecasting}
+      \field{year}{2013}
+      \field{pages}{62\bibrangedash 77}
+      \range{pages}{16}
+    \endentry
     \entry{Bostrom2022}{inproceedings}{}{}
       \name{author}{1}{}{%
         {{un=0,uniquepart=base,hash=052bc4b0db8d1b625de206fbfe6a09e5}{%
@@ -1023,6 +1119,51 @@
       \verb{eprint}
       \verb 1704.04110
       \endverb
+    \endentry
+    \entry{Stankeviciute2021}{inproceedings}{}{}
+      \name{author}{3}{}{%
+        {{un=0,uniquepart=base,hash=8f6fea89cf69f9c781bec70f8cb583ea}{%
+           family={Stankeviciute},
+           familyi={S\bibinitperiod},
+           given={Kamile},
+           giveni={K\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=ef418106521a20335973cc6eedb3c29c}{%
+           family={Alaa},
+           familyi={A\bibinitperiod},
+           given={Ahmed\bibnamedelima M},
+           giveni={A\bibinitperiod\bibinitdelim M\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=44c5ebc1d90d166c1418c35650bdd2ef}{%
+           family={Schaar},
+           familyi={S\bibinitperiod},
+           given={Mihaela},
+           giveni={M\bibinitperiod},
+           givenun=0,
+           prefix={van\bibnamedelima der},
+           prefixi={v\bibinitperiod\bibinitdelim d\bibinitperiod},
+           prefixun=0}}%
+      }
+      \strng{namehash}{e5fc2c6a51e2da4e6d654a05de2761cf}
+      \strng{fullhash}{e5fc2c6a51e2da4e6d654a05de2761cf}
+      \strng{fullhashraw}{e5fc2c6a51e2da4e6d654a05de2761cf}
+      \strng{bibnamehash}{e5fc2c6a51e2da4e6d654a05de2761cf}
+      \strng{authorbibnamehash}{e5fc2c6a51e2da4e6d654a05de2761cf}
+      \strng{authornamehash}{e5fc2c6a51e2da4e6d654a05de2761cf}
+      \strng{authorfullhash}{e5fc2c6a51e2da4e6d654a05de2761cf}
+      \strng{authorfullhashraw}{e5fc2c6a51e2da4e6d654a05de2761cf}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Advances in Neural Information Processing Systems}
+      \field{title}{Conformal time-series forecasting}
+      \field{volume}{34}
+      \field{year}{2021}
+      \field{pages}{6292\bibrangedash 6304}
+      \range{pages}{13}
     \endentry
     \entry{Thorarinsdottir2017}{article}{}{}
       \name{author}{2}{}{%

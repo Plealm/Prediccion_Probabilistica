@@ -446,7 +446,7 @@ Finalmente, es importante destacar que todas las configuraciones detalladas en l
 % ===========================================================================
 
 \section{Modelos predictivos}
-
+\label{sec:modelos_predictivos}
 Para evaluar la capacidad de cuantificación de la incertidumbre en diversos entornos estocásticos, esta investigación emplea un conjunto heterogéneo de nueve modelos predictivos. Esta selección abarca desde métodos de remuestreo clásicos y propuestas de predicción conformal, hasta arquitecturas de aprendizaje profundo y modelos híbridos de diseño propio. El uso de esta diversidad de enfoques permite contrastar cómo las garantías teóricas de cada familia de modelos se traducen en un rendimiento práctico bajo la métrica ECRPS, especialmente cuando se enfrentan a la ruptura de los supuestos de intercambiabilidad y linealidad.
 
 \subsection{Circular Block Bootstrap (CBB)}
@@ -1953,72 +1953,274 @@ La decisión de limitar el espacio de búsqueda a solo 2 configuraciones se fund
 
 Esta estrategia de optimización restringida permite evaluar el potencial de EnCQR-LSTM manteniendo el estudio computacionalmente viable, reconociendo que representaciones más sofisticadas (búsqueda bayesiana, algoritmos genéticos) quedan fuera del alcance de esta investigación.
 
+% ============================================================================
+% SIMULACIONES COMPLEMENTARIAS
+% ============================================================================
+
+
+% ============================================================================
+% SIMULACIONES COMPLEMENTARIAS
+% ============================================================================
+
 \section{Simulaciones Complementarias}
-\label{subsec:simulaciones_complementarias}
+\label{sec:simulaciones_complementarias}
 
-Además del diseño factorial principal, se implementaron cinco conjuntos de simulaciones complementarias diseñadas para resolver dilemas metodológicos sobre el preprocesamiento, la persistencia de los datos, la arquitectura de la muestra y la propagación de la incertidumbre en horizontes lejanos.
+Además del diseño factorial principal descrito en la Sección~\ref{sec:diseño_experimental}, se implementaron cinco conjuntos de simulaciones complementarias diseñadas para resolver dilemas metodológicos específicos sobre el preprocesamiento, la persistencia de los datos, la arquitectura de la muestra y la propagación de la incertidumbre en horizontes lejanos. Estas simulaciones abordan preguntas fundamentales que no pueden responderse mediante el diseño principal debido a su estructura particular de ventana rodante a un paso.
 
+% ----------------------------------------------------------------------------
 \subsection{Simulación 1: Impacto de la Diferenciación en ARIMA ($d=1$)}
-\label{subsubsec:sim_diferenciacion}
+\label{subsec:sim1_diferenciacion}
 
-\paragraph{Motivación}
-Esta simulación evalúa si los métodos conformales capturan mejor la variabilidad cuando operan sobre la serie estacionaria ($\Delta Y_t$) o sobre los niveles integrados ($Y_t$). 
+\subsubsection{Motivación}
 
-\paragraph{Diseño Experimental}
-Se utilizan 7 configuraciones ARIMA con $d=1$ (7 procesos base $\times$ 5 distribuciones $\times$ 4 varianzas). Cada escenario se ejecuta bajo dos modalidades:
-\begin{itemize}
-    \item \textbf{SIN\_DIFF:} El modelo recibe $Y_t$ y genera una distribución predictiva para $Y_{t+1}$.
-    \item \textbf{CON\_DIFF:} El modelo recibe $\Delta Y_t$. La predicción generada $\widehat{\Delta Y}_{t+1}$ se integra mediante $\hat{Y}_{t+1} = Y_t + \widehat{\Delta Y}_{t+1}$ para calcular el ECRPS en el espacio de niveles.
-\end{itemize}
+Esta simulación evalúa una pregunta metodológica fundamental: ¿los métodos conformales capturan mejor la variabilidad cuando operan sobre la serie diferenciada estacionaria ($\Delta Y_t$) o sobre los niveles integrados ($Y_t$)? Esta cuestión es relevante porque, aunque la diferenciación elimina la no estacionariedad y simplifica el modelado, también puede introducir pérdida de información sobre el nivel de la serie y afectar la estructura de autocorrelación \parencite{Hyndman2021FPP3}.
 
-\subsection{Simulación 2: Límites de Integración y Persistencia (Multi-D)}
-\label{subsubsec:sim_multi_d}
+\subsubsection{Diseño Experimental}
 
-\paragraph{Motivación}
-Se investiga la estabilidad numérica de los métodos conformales ante órdenes de integración elevados $d \in \{1, 2, 3, 4, 5, 6, 7, 10\}$.
+Se utilizan las 7 configuraciones ARIMA$(p,1,q)$ del diseño principal (Sección~\ref{sec:procesos_generadores}), combinadas con las 5 distribuciones de ruido y 4 niveles de varianza, generando:
 
-\paragraph{Diseño Experimental}
-A partir de un proceso estacionario $W_t$, se genera $Y_t$ mediante la aplicación sucesiva del operador de integración $d$ veces. Al igual que en la Simulación 1, se comparan las modalidades \textbf{SIN\_DIFF} y \textbf{CON\_DIFF}. Se hipotetiza que para $d > 3$, el rango de los datos en niveles desestabilizará a los modelos que no utilicen diferenciación previa.
-
-\subsection{Simulación 3: Efectos del Tamaño Muestral Absoluto}
-\label{subsubsec:sim_tamano_muestral}
-
-\paragraph{Motivación}
-Caracteriza la tasa de convergencia de las distribuciones predictivas empíricas hacia la densidad teórica a medida que el volumen de datos aumenta.
-
-\paragraph{Diseño Experimental}
-Se evalúan procesos ARMA, ARIMA y SETAR bajo tres escalas:
-\begin{itemize}
-    \item \textbf{Pequeña:} $n_{\text{train}} = 100$, $n_{\text{cal}} = 20$ ($n_{\text{total}} = 120$).
-    \item \textbf{Media:} $n_{\text{train}} = 500$, $n_{\text{cal}} = 100$ ($n_{\text{total}} = 600$).
-    \item \textbf{Grande:} $n_{\text{train}} = 1000$, $n_{\text{cal}} = 200$ ($n_{\text{total}} = 1200$).
-\end{itemize}
-
-\subsection{Simulación 4: Proporciones de Calibración con Tamaño Fijo}
-\label{subsubsec:sim_proporciones}
-
-\paragraph{Motivación}
-En escenarios de datos limitados, existe un conflicto entre usar datos para mejorar el ajuste del modelo (\textit{training}) o para mejorar la precisión de los intervalos (\textit{calibration}).
-
-\paragraph{Diseño Experimental}
-Se fija un presupuesto total de $n_{\text{total}} = 240$ observaciones. Se evalúan 5 particiones de calibración: $10\%, 20\%, 30\%, 40\%$ y $50\%$ de la muestra total. El objetivo es determinar si existe una "proporción áurea" que minimice el ECRPS promedio en todas las familias de procesos.
-
-\subsection{Simulación 5: Predicción Multi-paso (Horizonte $h$)}
-\label{subsubsec:sim_multi_paso}
-
-\paragraph{Motivación}
-Evalúa cómo se degrada la calidad de la distribución predictiva cuando el modelo debe predecir de forma recursiva, alimentándose de sus propias salidas previas.
-
-\paragraph{Diseño Experimental}
-A diferencia del diseño principal (ventana rodante a un paso), aquí se proyectan $H=12$ pasos hacia adelante desde un origen fijo. Para cada uno de los 4 modelos evaluados (LSPM, DeepAR, Sieve Bootstrap, MCPS), se generan $N_{\text{traj}} = 100$ trayectorias estocásticas:
 \begin{equation}
-\hat{Y}_{t+h}^{(m)} \sim F_{\text{modelo}}(\cdot \mid Y_{1:t}, \hat{Y}_{t+1}^{(m)}, \dots, \hat{Y}_{t+h-1}^{(m)})
+N_{\text{config}} = 7 \text{ procesos} \times 5 \text{ distribuciones} \times 4 \text{ varianzas} = 140 \text{ configuraciones base}
 \end{equation}
-La distribución de estas trayectorias en cada horizonte $h$ se compara mediante ECRPS contra la distribución teórica real generada por el DGP mediante 1,000 muestras de Monte Carlo.
 
+Cada configuración se ejecuta bajo dos modalidades:
+
+\begin{enumerate}
+\item \textbf{SIN\_DIFF:} El modelo recibe la serie integrada $Y_t$ directamente y genera una distribución predictiva $\hat{F}_{Y_{t+1}}$ para el siguiente valor en niveles.
+
+\item \textbf{CON\_DIFF:} El modelo recibe la serie diferenciada $\Delta Y_t = Y_t - Y_{t-1}$. La predicción generada $\widehat{\Delta Y}_{t+1}$ se integra mediante:
+\begin{equation}
+\hat{Y}_{t+1} = Y_t + \widehat{\Delta Y}_{t+1}
+\end{equation}
+para calcular el ECRPS en el espacio de niveles, permitiendo una comparación directa con la modalidad SIN\_DIFF.
+\end{enumerate}
+
+\subsubsection{Protocolo de Evaluación}
+
+Siguiendo el esquema de la simulación principal:
+\begin{itemize}
+\item Serie simulada: $n_{\text{total}} = 252$ observaciones efectivas (200 entrenamiento + 40 calibración + 12 prueba)
+\item Esquema de ventana rodante con 12 pasos de predicción
+\item Evaluación de los 9 modelos conformales mediante ECRPS contra la distribución teórica
+\end{itemize}
+
+Esto genera:
+\begin{equation}
+N_{\text{filas}} = 140 \times 2 \text{ modalidades} \times 12 \text{ pasos} = 3{,}360 \text{ evaluaciones}
+\end{equation}
+
+% ----------------------------------------------------------------------------
+\subsection{Simulación 2: Límites de Integración y Persistencia (Multi-D)}
+\label{subsec:sim2_multi_d}
+
+\subsubsection{Motivación}
+
+Se investiga la estabilidad numérica de los métodos conformales ante órdenes de integración elevados $d \in \{1, 2, 3, 4, 5, 6, 7, 10\}$. A medida que $d$ aumenta, la serie integrada $Y_t$ exhibe una persistencia extrema y rangos de valores cada vez más amplios, lo que puede desestabilizar modelos que no utilizan diferenciación previa adecuada.
+
+\subsubsection{Diseño Experimental}
+
+A partir de las 7 configuraciones ARMA$(p,q)$ base, se genera el proceso ARIMA$(p,d,q)$ mediante:
+
+\begin{equation}
+Y_t = \sum_{j=0}^{d-1} \nabla^j W_t, \quad \text{donde } W_t \sim \text{ARMA}(p,q)
+\end{equation}
+
+Con la estructura factorial completa:
+\begin{equation}
+N_{\text{config}} = 7 \text{ ARMA} \times 8 \text{ valores de } d \times 5 \text{ distribuciones} \times 4 \text{ varianzas} = 1{,}120 \text{ configuraciones}
+\end{equation}
+
+Cada configuración se evalúa bajo las dos modalidades (SIN\_DIFF y CON\_DIFF) en 12 pasos:
+
+\begin{equation}
+N_{\text{filas}} = 1{,}120 \times 2 \times 12 = 26{,}880 \text{ evaluaciones}
+\end{equation}
+
+\subsubsection{Hipótesis}
+
+Se hipotetiza que para $d \geq 4$, el rango explosivo de $Y_t$ desestabilizará a los modelos en modalidad SIN\_DIFF, mientras que la modalidad CON\_DIFF mantendrá estabilidad numérica al operar en el espacio diferenciado acotado.
+
+% ----------------------------------------------------------------------------
+\subsection{Simulación 3: Efectos del Tamaño Muestral Absoluto}
+\label{subsec:sim3_tamano_muestral}
+
+\subsubsection{Motivación}
+
+Esta simulación caracteriza la tasa de convergencia de las distribuciones predictivas empíricas hacia la densidad teórica a medida que el volumen de datos aumenta. Permite cuantificar el trade-off entre calidad de estimación (que mejora con más datos de entrenamiento) y precisión de calibración (que mejora con más datos de calibración). A diferencia del diseño principal que mantiene fijos los tamaños $n_{\text{train}} = 200$ y $n_{\text{calib}} = 40$, aquí se explora sistemáticamente el espacio de combinaciones de tamaños absolutos.
+
+\subsubsection{Diseño Experimental}
+
+Se evalúan los tres tipos de procesos (ARMA, ARIMA, SETAR) con sus 7 configuraciones cada uno, bajo nueve combinaciones de tamaños muestrales resultantes del producto cartesiano de tres niveles de datos de entrenamiento y tres niveles de datos de calibración:
+
+\begin{table}[htbp]
+\centering
+\caption{Combinaciones de tamaños muestrales evaluadas}
+\label{tab:combinaciones_muestrales}
+\begin{tabular}{lcccc}
+\toprule
+\multirow{2}{*}{\textbf{Combinación}} & $n_{\text{train}}$ & $n_{\text{calib}}$ & $n_{\text{total}}$ & \multirow{2}{*}{\textbf{Ratio}} \\
+ & & & & \\
+\midrule
+Pequeña-Pequeña & 100 & 20 & 120 & 1:5 \\
+Pequeña-Media & 100 & 100 & 200 & 1:1 \\
+Pequeña-Grande & 100 & 200 & 300 & 1:2 \\
+\addlinespace
+Media-Pequeña & 500 & 20 & 520 & 1:25 \\
+Media-Media & 500 & 100 & 600 & 5:1 \\
+Media-Grande & 500 & 200 & 700 & 5:2 \\
+\addlinespace
+Grande-Pequeña & 1{,}000 & 20 & 1{,}020 & 50:1 \\
+Grande-Media & 1{,}000 & 100 & 1{,}100 & 10:1 \\
+Grande-Grande & 1{,}000 & 200 & 1{,}200 & 5:1 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Esta estructura permite evaluar de forma independiente el efecto marginal de incrementar $n_{\text{train}}$ (mejorando la estimación del modelo base) versus incrementar $n_{\text{calib}}$ (refinando la calibración conformal), así como sus interacciones.
+
+La estructura factorial completa genera:
+\begin{equation}
+\begin{split}
+N_{\text{config}} = & \ 3 \text{ tipos} \times 7 \text{ configs} \times 9 \text{ combinaciones} \\
+& \times 5 \text{ distribuciones} \times 4 \text{ varianzas} \\
+= & \ 3{,}780 \text{ configuraciones}
+\end{split}
+\end{equation}
+
+Con 12 pasos de evaluación por configuración:
+\begin{equation}
+N_{\text{filas}} = 3{,}780 \times 12 = 45{,}360 \text{ evaluaciones}
+\end{equation}
+
+% ----------------------------------------------------------------------------
+\subsection{Simulación 4: Proporciones de Calibración con Tamaño Fijo}
+\label{subsec:sim4_proporciones}
+
+\subsubsection{Motivación}
+
+En escenarios de datos limitados, existe un conflicto fundamental entre usar datos para mejorar el ajuste del modelo (\textit{training}) o para mejorar la precisión de los intervalos conformales (\textit{calibration}). Esta simulación busca determinar si existe una ``proporción áurea'' que minimice el ECRPS promedio.
+
+\subsubsection{Diseño Experimental}
+
+Se fija un presupuesto total de $n_{\text{total}} = 240$ observaciones y se evalúan 5 particiones:
+
+\begin{table}[htbp]
+\centering
+\caption{Proporciones de calibración evaluadas (N=240 fijo)}
+\label{tab:proporciones_calib}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Proporción} & $n_{\text{train}}$ & $n_{\text{calib}}$ & \textbf{Ratio} \\
+\midrule
+10\% & 216 & 24 & 1:9 \\
+20\% & 192 & 48 & 1:4 \\
+30\% & 168 & 72 & 3:7 \\
+40\% & 144 & 96 & 2:3 \\
+50\% & 120 & 120 & 1:1 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+La estructura factorial completa es:
+\begin{equation}
+\begin{split}
+N_{\text{config}} = & \ 3 \text{ tipos} \times 7 \text{ configs} \times 5 \text{ proporciones} \\
+& \times 5 \text{ distribuciones} \times 4 \text{ varianzas} \\
+= & \ 2{,}100 \text{ configuraciones}
+\end{split}
+\end{equation}
+
+Cada configuración genera 12 pasos + 1 fila promedio:
+\begin{equation}
+N_{\text{filas}} = 2{,}100 \times 13 = 27{,}300 \text{ filas totales}
+\end{equation}
+
+\textbf{Nota:} El documento de referencia reporta 25,200 evaluaciones, lo que sugiere que no se incluyó la fila promedio en el conteo (2,100 × 12 = 25,200).
+
+% ----------------------------------------------------------------------------
+\subsection{Simulación 5: Predicción Multi-paso (Horizonte $h$)}
+\label{subsec:sim5_multi_paso}
+
+\subsubsection{Motivación}
+
+El diseño factorial principal evalúa la predicción a un paso adelante mediante un esquema de ventana rodante, donde el modelo se actualiza con cada nueva observación antes de realizar la siguiente predicción. Sin embargo, muchas aplicaciones prácticas requieren pronósticos para múltiples períodos futuros sin acceso a observaciones intermedias \parencite{Hyndman2021FPP3}. Esta simulación evalúa cómo se degrada la calidad de la distribución predictiva cuando el modelo debe proyectar $h$ pasos hacia adelante de forma recursiva, alimentándose exclusivamente de sus propias predicciones anteriores.
+
+\subsubsection{Fundamento Metodológico: Predicción Recursiva}
+
+Existen dos estrategias principales para pronóstico multi-paso \parencite{Taieb2012}:
+
+\begin{enumerate}
+\item \textbf{Estrategia Directa:} Entrenar modelos separados para cada horizonte $h$, cada uno estimando directamente $Y_{t+h}$ desde $Y_{1:t}$. Aunque conceptualmente simple, requiere entrenar $H$ modelos independientes y no aprovecha la estructura secuencial del problema.
+
+\item \textbf{Estrategia Recursiva (Iterativa):} Utilizar un único modelo de predicción a un paso y aplicarlo recursivamente:
+\begin{equation}
+\hat{Y}_{t+h} = f(\hat{Y}_{t+h-1}, \hat{Y}_{t+h-2}, \ldots, Y_t), \quad h = 2, 3, \ldots, H
+\end{equation}
+Esta estrategia, aunque propaga errores de predicción, es más eficiente computacionalmente y refleja mejor la práctica operativa donde no hay acceso a observaciones futuras verdaderas \parencite{Bontempi2013}.
+\end{enumerate}
+
+La presente simulación implementa la estrategia recursiva, que es la más relevante para evaluar métodos conformales en horizontes extendidos. La propagación de incertidumbre en este contexto ha sido estudiada por \textcite{Gneiting2014} y \textcite{Stankeviciute2021}, quienes demuestran que la distribución predictiva en el horizonte $h$ debe considerar tanto la incertidumbre del modelo como la acumulación de errores de pasos previos.
+
+\subsubsection{Generación de Trayectorias Estocásticas}
+
+Para cada configuración y modelo, se generan $N_{\text{traj}} = 100$ trayectorias completas desde el mismo punto de origen $t$. Cada trayectoria $m$ se construye mediante muestreo recursivo de las distribuciones predictivas:
+
+\begin{equation}
+\begin{aligned}
+\hat{Y}_{t+1}^{(m)} & \sim \hat{F}_{\text{modelo}}(\cdot \mid Y_{1:t}) \\
+\hat{Y}_{t+2}^{(m)} & \sim \hat{F}_{\text{modelo}}(\cdot \mid Y_{1:t}, \hat{Y}_{t+1}^{(m)}) \\
+& \vdots \\
+\hat{Y}_{t+h}^{(m)} & \sim \hat{F}_{\text{modelo}}\left(\cdot \mid Y_{1:t}, \hat{Y}_{t+1}^{(m)}, \ldots, \hat{Y}_{t+h-1}^{(m)}\right)
+\end{aligned}
+\end{equation}
+
+donde $m = 1, \ldots, 100$ indexa las trayectorias independientes. Este procedimiento genera una distribución empírica para cada horizonte $h$, formada por las 100 realizaciones $\{\hat{Y}_{t+h}^{(1)}, \ldots, \hat{Y}_{t+h}^{(100)}\}$.
+
+\subsubsection{Diseño Experimental}
+
+Se evalúan únicamente 4 modelos representativos (LSPM, DeepAR, Sieve Bootstrap, MCPS) debido al alto costo computacional de generar 100 trayectorias completas por escenario. La selección incluye:
+
+\begin{itemize}
+\item \textbf{LSPM:} Método conformal clásico basado en cuantiles empíricos
+\item \textbf{DeepAR:} Método paramétrico de aprendizaje profundo que modela distribuciones completas
+\item \textbf{Sieve Bootstrap:} Método no paramétrico basado en remuestreo de residuos
+\item \textbf{MCPS:} Método conformal contemporáneo que particiona el espacio de calibración
+\end{itemize}
+
+Para cada tipo de proceso (ARMA, ARIMA, SETAR), la estructura factorial es:
+\begin{equation}
+N_{\text{config}} = 7 \text{ configs} \times 5 \text{ distribuciones} \times 4 \text{ varianzas} = 140 \text{ configuraciones}
+\end{equation}
+
+Con 3 tipos de procesos y 12 horizontes de predicción:
+\begin{equation}
+N_{\text{filas}} = 3 \times 140 \times 12 = 5{,}040 \text{ evaluaciones}
+\end{equation}
+
+\subsubsection{Protocolo de Evaluación}
+
+El protocolo sigue la estructura del diseño principal con las siguientes particularidades:
+
+\begin{enumerate}
+\item \textbf{Punto de origen fijo:} A diferencia de la ventana rodante, aquí todas las predicciones parten del mismo punto temporal $t = n_{\text{train}} + n_{\text{calib}}$.
+
+\item \textbf{Sin actualización intermedia:} El modelo se ajusta una sola vez con los datos disponibles hasta $t$ y no se actualiza durante la proyección de los $H=12$ pasos.
+
+\item \textbf{Evaluación por horizonte:} Para cada $h \in \{1, 2, \ldots, 12\}$, se calcula:
+\begin{equation}
+\text{ECRPS}_h = \text{ECRPS}\left(\{\hat{Y}_{t+h}^{(1)}, \ldots, \hat{Y}_{t+h}^{(100)}\}, \{Y_{t+h}^{(\text{true}, 1)}, \ldots, Y_{t+h}^{(\text{true}, 1000)}\}\right)
+\end{equation}
+
+\item \textbf{Análisis de degradación:} El experimento permite cuantificar la tasa de crecimiento de $\text{ECRPS}_h$ conforme $h$ aumenta, caracterizando la velocidad de degradación de la calidad predictiva.
+\end{enumerate}
+
+Esta simulación es particularmente relevante para aplicaciones donde las decisiones deben tomarse con base en pronósticos de mediano plazo sin posibilidad de actualización frecuente del modelo, como en planeación energética, gestión de inventarios o política monetaria \parencite{Hyndman2021FPP3}.
+
+% ----------------------------------------------------------------------------
 \subsection{Resumen de Evaluaciones Complementarias}
+\label{subsec:resumen_complementarias}
 
-La Tabla \ref{tab:resumen_complementarias} resume el alcance total de estos experimentos.
+La Tabla~\ref{tab:resumen_complementarias} consolida el alcance total de estos experimentos. El volumen combinado de estas simulaciones complementarias es comparable al del diseño factorial principal, reflejando la importancia de estos aspectos metodológicos para una evaluación comprehensiva.
 
 \begin{table}[htbp]
 \centering
@@ -2027,15 +2229,49 @@ La Tabla \ref{tab:resumen_complementarias} resume el alcance total de estos expe
 \small
 \begin{tabular}{lp{6cm}c}
 \toprule
-\textbf{Simulación} & \textbf{Factor Variado} & \textbf{Evaluaciones} \\
+\textbf{Simulación} & \textbf{Factor Variado} & \textbf{Filas} \\
 \midrule
-1. Diferenciación ($d=1$) & Modalidad (SIN\_DIFF vs CON\_DIFF) & 3,360 \\
-2. Multi-D & Orden de integración $d \in \{1 \dots 10\}$ & 26,880 \\
-3. Tamaño Muestral & Escala total ($n=120, 600, 1200$) & 4,320 \\
-4. Proporciones & Ratio $n_{\text{cal}} / n_{\text{train}}$ (Total 240 fijo) & 25,200 \\
-5. Multi-paso & Horizonte de predicción $h \in \{1 \dots 12\}$ & 4,320 \\
+1. Diferenciación ($d=1$) & 
+    Modalidad (SIN\_DIFF vs CON\_DIFF) & 
+    3{,}360 \\
+\addlinespace
+2. Multi-D & 
+    Orden de integración $d \in \{1, \ldots, 10\}$ & 
+    26{,}880 \\
+\addlinespace
+3. Tamaño Muestral & 
+    Escala total  & 
+    45{,}360$^{*}$ \\
+\addlinespace
+4. Proporciones & 
+    Ratio $n_{\text{cal}} / n_{\text{train}}$ (Total 240 fijo) & 
+    25{,}200$^{\dagger}$ \\
+\addlinespace
+5. Multi-paso & 
+    Horizonte de predicción $h \in \{1, \ldots, 12\}$ & 
+    5{,}040$^{\ddagger}$ \\
 \midrule
-\textbf{Total} & & \textbf{64,080} \\
+\textbf{Total} & & \textbf{105{,}840} \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\subsubsection{Protocolo Común a Todas las Simulaciones}
+
+Todas las simulaciones complementarias mantienen consistencia metodológica con el diseño principal descrito en la Sección~\ref{sec:diseño_experimental}:
+
+\begin{itemize}
+\item \textbf{Período de inicialización (burn-in):} 50 observaciones descartadas antes del inicio efectivo de la serie para eliminar efectos transitorios de las condiciones iniciales.
+
+\item \textbf{Métrica de evaluación:} ECRPS entre la distribución predictiva empírica del modelo y la distribución teórica verdadera del proceso generador de datos, como se define en la Sección~\ref{subsec:ecrps}.
+
+\item \textbf{Modelos evaluados:} Los 9 métodos conformales especificados en la Sección~\ref{sec:modelos_predictivos} (Block Bootstrapping, Sieve Bootstrap, LSPM, LSPMW, AREPD, MCPS, AV-MCPS, DeepAR, EnCQR-LSTM), excepto en la Simulación 5 donde por razones de eficiencia computacional se evalúan únicamente 4 modelos representativos.
+
+\item \textbf{Calibración y ajuste de hiperparámetros:} Cada modelo se optimiza siguiendo el procedimiento de dos etapas descrito en la Sección~\ref{sec:protocolo_optimizacion}. Brevemente, los hiperparámetros se seleccionan mediante validación cruzada en el conjunto de entrenamiento, y luego los parámetros conformales se calibran usando el conjunto de calibración dedicado.
+
+\item \textbf{Control de reproducibilidad:} Semillas aleatorias fijas y documentadas para cada escenario, permitiendo la replicación exacta de todos los experimentos.
+
+\item \textbf{Esquema de evaluación:} Ventana rodante (Simulaciones 1-4) o proyección desde origen fijo (Simulación 5), según la pregunta metodológica de interés.
+\end{itemize}
+
+La uniformidad en estos aspectos fundamentales garantiza que las diferencias observadas en el desempeño sean atribuibles exclusivamente a los factores experimentales bajo estudio (modalidad de diferenciación, orden de integración, tamaño muestral, proporción de calibración, u horizonte de predicción) y no a variaciones en el protocolo de evaluación.

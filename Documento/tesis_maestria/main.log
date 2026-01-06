@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.1.2)  6 JAN 2026 13:56
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.1.2)  6 JAN 2026 18:06
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1250,6 +1250,11 @@ Overfull \hbox (19.96803pt too wide) in paragraph at lines 190--190
  [][] [][][]\OT1/cmr/m/n/12 Autoregressive Exponentially-weighted Poly-no-mial Dis-tri-bu-tion (AREPD)[][] [][]  
  []
 
+
+Overfull \hbox (1.58777pt too wide) detected at line 244
+ []\OT1/cmss/bx/n/12 100
+ []
+
 )
 \tf@toc=\write5
 \openout5 = `main.toc'.
@@ -1297,7 +1302,7 @@ Overfull \hbox (9.28336pt too wide) in paragraph at lines 10--11
 
 
 ]
-<./Imagenes/Cap2_prediccion.png, id=293, 785.18344pt x 467.49657pt>
+<./Imagenes/Cap2_prediccion.png, id=297, 785.18344pt x 467.49657pt>
 File: ./Imagenes/Cap2_prediccion.png Graphic file (type png)
 <use ./Imagenes/Cap2_prediccion.png>
 Package pdftex.def Info: ./Imagenes/Cap2_prediccion.png  used on input line 28.
@@ -1376,7 +1381,7 @@ Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [20] [21]
-<./Imagenes/mondrian.png, id=466, 259.97125pt x 194.7275pt>
+<./Imagenes/mondrian.png, id=470, 259.97125pt x 194.7275pt>
 File: ./Imagenes/mondrian.png Graphic file (type png)
 <use ./Imagenes/mondrian.png>
 Package pdftex.def Info: ./Imagenes/mondrian.png  used on input line 343.
@@ -1645,47 +1650,55 @@ Overfull \hbox (9.60518pt too wide) in paragraph at lines 1825--1826
 [86] [87] [88] [89]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1961.
+(hyperref)                removing `math shift' on input line 1971.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1961.
+(hyperref)                removing `math shift' on input line 1971.
 
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [90]
-Overfull \hbox (3.55241pt too wide) in paragraph at lines 1987--1988
-[] \OT1/cmss/bx/n/12 Mo-ti-vaci^^Son[][] \OT1/cmr/m/n/12 Car-ac-ter-iza la tasa de con-ver-gen-cia de las dis-tribu-ciones pre-dic-ti-vas emp^^S^^Pricas
+[90] [91] [92]
+Overfull \hbox (9.93613pt too wide) in paragraph at lines 2049--2050
+\OT1/cmr/m/n/12 Esta sim-u-laci^^Son car-ac-ter-iza la tasa de con-ver-gen-cia de las dis-tribu-ciones pre-dic-ti-vas emp^^S^^Pricas
  []
 
-[91]
+[93]
+Underfull \vbox (badness 1867) has occurred while \output is active []
+
+ [94]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 2006.
+(hyperref)                removing `math shift' on input line 2141.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 2006.
+(hyperref)                removing `math shift' on input line 2141.
 
-
-Underfull \hbox (badness 10000) in paragraph at lines 2032--2032
+[95] [96] [97]
+Underfull \hbox (badness 10000) in paragraph at lines 2235--2235
 []|\OT1/cmr/m/n/10.95 Modalidad (SIN[]DIFF vs
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2036--2036
+Underfull \hbox (badness 10000) in paragraph at lines 2239--2239
+[]|\OT1/cmr/m/n/10.95 Orden de in-te-graci^^Son $\OML/cmm/m/it/10.95 d \OMS/cmsy/m/n/10.95 2
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2251--2251
 []|\OT1/cmr/m/n/10.95 Horizonte de predicci^^Son
  []
 
-) [92] [93]
+
+LaTeX Warning: Reference `sec:protocolo_optimizacion' on page 98 undefined on input line 2270.
+
+[98]) [99]
 chapter without number
-[94
+[100
 
 
 
 
-] [95]
+] [101]
 Overfull \hbox (6.84508pt too wide) in paragraph at lines 233--233
 [][][]\OT1/cmr/m/n/12 (2022). \OT1/cmr/m/it/12 Al-go-rith-mic Learn-ing in a Ran-dom World\OT1/cmr/m/n/12 . Sec-ond. Cham, Switzer-land: Springer.
  []
@@ -1695,27 +1708,31 @@ Overfull \hbox (7.06361pt too wide) in paragraph at lines 233--233
 \OT1/cmr/m/n/12 tri-bu-tions for Or-der Ful-fill-ment Time Fore-cast-ing". In: \OT1/cmr/m/it/12 arXiv preprint arXiv:2505.17340\OT1/cmr/m/n/12 .
  []
 
-[96] (main.aux (Capitulos/Cap1.aux) (Capitulos/Cap2.aux) (Capitulos/Cap3.aux))
+[102] [103] (main.aux (Capitulos/Cap1.aux) (Capitulos/Cap2.aux) (Capitulos/Cap3.aux))
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2025-12-24>
  ***********
+
+
+LaTeX Warning: There were undefined references.
+
 Package logreq Info: Writing requests to 'main.run.xml'.
 \openout1 = `main.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 45521 strings out of 467871
- 980069 string characters out of 5418377
- 1937716 words of memory out of 5000000
- 73172 multiletter control sequences out of 15000+600000
+ 45596 strings out of 467871
+ 981420 string characters out of 5418377
+ 1938280 words of memory out of 5000000
+ 73207 multiletter control sequences out of 15000+600000
  646765 words of font info for 113 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 108i,21n,107p,11301b,2199s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 108i,21n,107p,11301b,2198s stack positions out of 10000i,1000n,20000p,200000b,200000s
  <C:\Users\pleal\AppData\Local\MiKTeX\fonts/pk/ljfour/public/bbm/dpi600\bbm12.pk> <C:\Users\pleal\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm1200.pk><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx8.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmcsc10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi6.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmib10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cmextra/cmmib8.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsl12.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmssbx10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy6.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti12.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmtt10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmtt12.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on main.pdf (106 pages, 1088756 bytes).
+Output written on main.pdf (113 pages, 1117569 bytes).
 PDF statistics:
- 2210 PDF objects out of 2487 (max. 8388607)
- 614 named destinations out of 1000 (max. 500000)
- 1932 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 2314 PDF objects out of 2487 (max. 8388607)
+ 654 named destinations out of 1000 (max. 500000)
+ 1980 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -220,20 +220,26 @@
 \contentsline {paragraph}{\nonumberline Justificación del Espacio Reducido}{90}{paragraph*.174}%
 \contentsline {section}{\numberline {3.5}Simulaciones Complementarias}{90}{section.3.5}%
 \contentsline {subsection}{\numberline {3.5.1}Simulación 1: Impacto de la Diferenciación en ARIMA ($d=1$)}{91}{subsection.3.5.1}%
-\contentsline {paragraph}{\nonumberline Motivación}{91}{paragraph*.175}%
-\contentsline {paragraph}{\nonumberline Diseño Experimental}{91}{paragraph*.176}%
-\contentsline {subsection}{\numberline {3.5.2}Simulación 2: Límites de Integración y Persistencia (Multi-D)}{91}{subsection.3.5.2}%
-\contentsline {paragraph}{\nonumberline Motivación}{91}{paragraph*.177}%
-\contentsline {paragraph}{\nonumberline Diseño Experimental}{91}{paragraph*.178}%
-\contentsline {subsection}{\numberline {3.5.3}Simulación 3: Efectos del Tamaño Muestral Absoluto}{91}{subsection.3.5.3}%
-\contentsline {paragraph}{\nonumberline Motivación}{91}{paragraph*.179}%
-\contentsline {paragraph}{\nonumberline Diseño Experimental}{91}{paragraph*.180}%
-\contentsline {subsection}{\numberline {3.5.4}Simulación 4: Proporciones de Calibración con Tamaño Fijo}{92}{subsection.3.5.4}%
-\contentsline {paragraph}{\nonumberline Motivación}{92}{paragraph*.181}%
-\contentsline {paragraph}{\nonumberline Diseño Experimental}{92}{paragraph*.182}%
-\contentsline {subsection}{\numberline {3.5.5}Simulación 5: Predicción Multi-paso (Horizonte $h$)}{92}{subsection.3.5.5}%
-\contentsline {paragraph}{\nonumberline Motivación}{92}{paragraph*.183}%
-\contentsline {paragraph}{\nonumberline Diseño Experimental}{92}{paragraph*.184}%
-\contentsline {subsection}{\numberline {3.5.6}Resumen de Evaluaciones Complementarias}{92}{subsection.3.5.6}%
-\contentsline {chapter}{\nonumberline Bibliografía}{94}{chapter*.186}%
+\contentsline {subsubsection}{\nonumberline Motivación}{91}{subsubsection*.175}%
+\contentsline {subsubsection}{\nonumberline Diseño Experimental}{91}{subsubsection*.176}%
+\contentsline {subsubsection}{\nonumberline Protocolo de Evaluación}{91}{subsubsection*.177}%
+\contentsline {subsection}{\numberline {3.5.2}Simulación 2: Límites de Integración y Persistencia (Multi-D)}{92}{subsection.3.5.2}%
+\contentsline {subsubsection}{\nonumberline Motivación}{92}{subsubsection*.178}%
+\contentsline {subsubsection}{\nonumberline Diseño Experimental}{92}{subsubsection*.179}%
+\contentsline {subsubsection}{\nonumberline Hipótesis}{93}{subsubsection*.180}%
+\contentsline {subsection}{\numberline {3.5.3}Simulación 3: Efectos del Tamaño Muestral Absoluto}{93}{subsection.3.5.3}%
+\contentsline {subsubsection}{\nonumberline Motivación}{93}{subsubsection*.181}%
+\contentsline {subsubsection}{\nonumberline Diseño Experimental}{93}{subsubsection*.182}%
+\contentsline {subsection}{\numberline {3.5.4}Simulación 4: Proporciones de Calibración con Tamaño Fijo}{94}{subsection.3.5.4}%
+\contentsline {subsubsection}{\nonumberline Motivación}{94}{subsubsection*.184}%
+\contentsline {subsubsection}{\nonumberline Diseño Experimental}{94}{subsubsection*.185}%
+\contentsline {subsection}{\numberline {3.5.5}Simulación 5: Predicción Multi-paso (Horizonte $h$)}{95}{subsection.3.5.5}%
+\contentsline {subsubsection}{\nonumberline Motivación}{95}{subsubsection*.187}%
+\contentsline {subsubsection}{\nonumberline Fundamento Metodológico: Predicción Recursiva}{95}{subsubsection*.188}%
+\contentsline {subsubsection}{\nonumberline Generación de Trayectorias Estocásticas}{96}{subsubsection*.189}%
+\contentsline {subsubsection}{\nonumberline Diseño Experimental}{96}{subsubsection*.190}%
+\contentsline {subsubsection}{\nonumberline Protocolo de Evaluación}{97}{subsubsection*.191}%
+\contentsline {subsection}{\numberline {3.5.6}Resumen de Evaluaciones Complementarias}{98}{subsection.3.5.6}%
+\contentsline {subsubsection}{\nonumberline Protocolo Común a Todas las Simulaciones}{98}{subsubsection*.193}%
+\contentsline {chapter}{\nonumberline Bibliografía}{100}{chapter*.194}%
 \providecommand \tocbasic@end@toc@file {}\tocbasic@end@toc@file 

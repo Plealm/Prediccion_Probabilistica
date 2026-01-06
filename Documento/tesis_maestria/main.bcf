@@ -2499,6 +2499,13 @@
     <bcf:citekey order="116" intorder="1">Jensen2022</bcf:citekey>
     <bcf:citekey order="117" intorder="1">Jensen2022</bcf:citekey>
     <bcf:citekey order="118" intorder="1">Jensen2022</bcf:citekey>
+    <bcf:citekey order="119" intorder="1">Hyndman2021FPP3</bcf:citekey>
+    <bcf:citekey order="120" intorder="1">Hyndman2021FPP3</bcf:citekey>
+    <bcf:citekey order="121" intorder="1">Taieb2012</bcf:citekey>
+    <bcf:citekey order="122" intorder="1">Bontempi2013</bcf:citekey>
+    <bcf:citekey order="123" intorder="1">Gneiting2014</bcf:citekey>
+    <bcf:citekey order="124" intorder="1">Stankeviciute2021</bcf:citekey>
+    <bcf:citekey order="125" intorder="1">Hyndman2021FPP3</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="nyt">
