@@ -4,10 +4,16 @@
 \contentsline {table}{\numberline {\textbf {3-1}}{\ignorespaces Configuraciones paramétricas para procesos ARMA.}}{37}{table.caption.24}%
 \contentsline {table}{\numberline {\textbf {3-2}}{\ignorespaces Configuraciones paramétricas para procesos ARIMA.}}{40}{table.caption.29}%
 \contentsline {table}{\numberline {\textbf {3-3}}{\ignorespaces Configuraciones paramétricas para procesos SETAR.}}{44}{table.caption.36}%
-\contentsline {table}{\numberline {\textbf {3-4}}{\ignorespaces Comparación entre MCPS Teórico y MCPS para Series Temporales}}{60}{table.caption.60}%
-\contentsline {table}{\numberline {\textbf {3-5}}{\ignorespaces Comparación entre MCPS y AV-MCPS}}{71}{table.caption.79}%
-\contentsline {table}{\numberline {\textbf {3-6}}{\ignorespaces Comparación entre DeepAR Original y DeepAR Adaptado}}{85}{table.caption.101}%
-\contentsline {table}{\numberline {\textbf {3-7}}{\ignorespaces Comparación conceptual de AREPD con métodos relacionados}}{95}{table.caption.117}%
-\contentsline {table}{\numberline {\textbf {3-8}}{\ignorespaces Comparación conceptual de EnCQR-LSTM con métodos relacionados}}{118}{table.caption.165}%
+\contentsline {table}{\numberline {\textbf {3-4}}{\ignorespaces Comparativa: Teoría vs. Implementación del CBB}}{46}{table.caption.46}%
+\contentsline {table}{\numberline {\textbf {3-5}}{\ignorespaces Comparativa: Teoría vs. Implementación del Sieve Bootstrap}}{50}{table.caption.59}%
+\contentsline {table}{\numberline {\textbf {3-6}}{\ignorespaces Comparativa: Teoría vs. Implementación del LSPM}}{54}{table.caption.75}%
+\contentsline {table}{\numberline {\textbf {3-7}}{\ignorespaces Comparativa: Teoría vs. Implementación del LSPMW}}{58}{table.caption.91}%
+\contentsline {table}{\numberline {\textbf {3-8}}{\ignorespaces Comparación entre MCPS Teórico y su Implementación para Series Temporales}}{64}{table.caption.105}%
+\contentsline {table}{\numberline {\textbf {3-9}}{\ignorespaces Comparación entre MCPS Estándar y AV-MCPS}}{70}{table.caption.120}%
+\contentsline {table}{\numberline {\textbf {3-10}}{\ignorespaces Comparación entre DeepAR Original y DeepAR Adaptado}}{76}{table.caption.137}%
+\contentsline {table}{\numberline {\textbf {3-11}}{\ignorespaces Comparación Conceptual de AREPD con Métodos Relacionados}}{80}{table.caption.150}%
+\contentsline {table}{\numberline {\textbf {3-12}}{\ignorespaces Comparación entre AREPD Teórico y AREPD Implementado}}{82}{table.caption.153}%
+\contentsline {table}{\numberline {\textbf {3-13}}{\ignorespaces Comparación entre teoría y práctica en EnCQR-LSTM}}{88}{table.caption.169}%
+\contentsline {table}{\numberline {\textbf {3-14}}{\ignorespaces Resumen de la carga experimental de simulaciones complementarias}}{93}{table.caption.185}%
 \addvspace {10\p@ }
 \providecommand \tocbasic@end@toc@file {}\tocbasic@end@toc@file 

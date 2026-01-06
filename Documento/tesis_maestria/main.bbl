@@ -101,43 +101,6 @@
       \verb 2202.13415
       \endverb
     \endentry
-    \entry{Bollerslev1986}{article}{}{}
-      \name{author}{1}{}{%
-        {{un=0,uniquepart=base,hash=39f8f5a428abd62057a0152546172106}{%
-           family={Bollerslev},
-           familyi={B\bibinitperiod},
-           given={Tim},
-           giveni={T\bibinitperiod},
-           givenun=0}}%
-      }
-      \list{publisher}{1}{%
-        {Elsevier}%
-      }
-      \strng{namehash}{39f8f5a428abd62057a0152546172106}
-      \strng{fullhash}{39f8f5a428abd62057a0152546172106}
-      \strng{fullhashraw}{39f8f5a428abd62057a0152546172106}
-      \strng{bibnamehash}{39f8f5a428abd62057a0152546172106}
-      \strng{authorbibnamehash}{39f8f5a428abd62057a0152546172106}
-      \strng{authornamehash}{39f8f5a428abd62057a0152546172106}
-      \strng{authorfullhash}{39f8f5a428abd62057a0152546172106}
-      \strng{authorfullhashraw}{39f8f5a428abd62057a0152546172106}
-      \field{sortinit}{B}
-      \field{sortinithash}{d7095fff47cda75ca2589920aae98399}
-      \field{extradatescope}{labelyear}
-      \field{labeldatesource}{}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{journaltitle}{Journal of Econometrics}
-      \field{number}{3}
-      \field{title}{Generalized Autoregressive Conditional Heteroskedasticity}
-      \field{volume}{31}
-      \field{year}{1986}
-      \field{pages}{307\bibrangedash 327}
-      \range{pages}{21}
-      \verb{doi}
-      \verb 10.1016/0304-4076(86)90063-1
-      \endverb
-    \endentry
     \entry{Bostrom2022}{inproceedings}{}{}
       \name{author}{1}{}{%
         {{un=0,uniquepart=base,hash=052bc4b0db8d1b625de206fbfe6a09e5}{%
@@ -216,46 +179,6 @@
       \field{year}{2021}
       \field{pages}{24\bibrangedash 38}
       \range{pages}{15}
-    \endentry
-    \entry{Box1968}{book}{}{}
-      \name{author}{2}{}{%
-        {{un=0,uniquepart=base,hash=d30289ba50f0f7219fb405bc35b8b71c}{%
-           family={Box},
-           familyi={B\bibinitperiod},
-           given={George\bibnamedelimb E.\bibnamedelimi P.},
-           giveni={G\bibinitperiod\bibinitdelim E\bibinitperiod\bibinitdelim P\bibinitperiod},
-           givenun=0}}%
-        {{un=0,uniquepart=base,hash=47888ee6b97a184c6a17093aeb509b29}{%
-           family={Jenkins},
-           familyi={J\bibinitperiod},
-           given={Gwilym\bibnamedelima M.},
-           giveni={G\bibinitperiod\bibinitdelim M\bibinitperiod},
-           givenun=0}}%
-      }
-      \list{publisher}{1}{%
-        {Wiley}%
-      }
-      \strng{namehash}{6ffa05b065085a4d7d4d45f5e13bed2e}
-      \strng{fullhash}{6ffa05b065085a4d7d4d45f5e13bed2e}
-      \strng{fullhashraw}{6ffa05b065085a4d7d4d45f5e13bed2e}
-      \strng{bibnamehash}{6ffa05b065085a4d7d4d45f5e13bed2e}
-      \strng{authorbibnamehash}{6ffa05b065085a4d7d4d45f5e13bed2e}
-      \strng{authornamehash}{6ffa05b065085a4d7d4d45f5e13bed2e}
-      \strng{authorfullhash}{6ffa05b065085a4d7d4d45f5e13bed2e}
-      \strng{authorfullhashraw}{6ffa05b065085a4d7d4d45f5e13bed2e}
-      \field{sortinit}{B}
-      \field{sortinithash}{d7095fff47cda75ca2589920aae98399}
-      \field{extradatescope}{labelyear}
-      \field{labeldatesource}{}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{journaltitle}{Journal of the Royal Statistical Society: Series C (Applied Statistics)}
-      \field{number}{2}
-      \field{title}{Some Recent Advances in Forecasting and Control}
-      \field{volume}{17}
-      \field{year}{1968}
-      \field{pages}{91\bibrangedash 109}
-      \range{pages}{19}
     \endentry
     \entry{Buhlmann1997}{article}{}{}
       \name{author}{1}{}{%
@@ -487,43 +410,6 @@
       \range{pages}{11}
       \verb{doi}
       \verb 10.1080/07350015.1995.10524599
-      \endverb
-    \endentry
-    \entry{Engle1982}{article}{}{}
-      \name{author}{1}{}{%
-        {{un=0,uniquepart=base,hash=d491df6781389ebb4ef255c1ec0ca7ed}{%
-           family={Engle},
-           familyi={E\bibinitperiod},
-           given={Robert\bibnamedelima F.},
-           giveni={R\bibinitperiod\bibinitdelim F\bibinitperiod},
-           givenun=0}}%
-      }
-      \list{publisher}{1}{%
-        {The Econometric Society}%
-      }
-      \strng{namehash}{d491df6781389ebb4ef255c1ec0ca7ed}
-      \strng{fullhash}{d491df6781389ebb4ef255c1ec0ca7ed}
-      \strng{fullhashraw}{d491df6781389ebb4ef255c1ec0ca7ed}
-      \strng{bibnamehash}{d491df6781389ebb4ef255c1ec0ca7ed}
-      \strng{authorbibnamehash}{d491df6781389ebb4ef255c1ec0ca7ed}
-      \strng{authornamehash}{d491df6781389ebb4ef255c1ec0ca7ed}
-      \strng{authorfullhash}{d491df6781389ebb4ef255c1ec0ca7ed}
-      \strng{authorfullhashraw}{d491df6781389ebb4ef255c1ec0ca7ed}
-      \field{sortinit}{E}
-      \field{sortinithash}{8da8a182d344d5b9047633dfc0cc9131}
-      \field{extradatescope}{labelyear}
-      \field{labeldatesource}{}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{journaltitle}{Econometrica}
-      \field{number}{4}
-      \field{title}{Autoregressive Conditional Heteroscedasticity with Estimates of the Variance of United Kingdom Inflation}
-      \field{volume}{50}
-      \field{year}{1982}
-      \field{pages}{987\bibrangedash 1007}
-      \range{pages}{21}
-      \verb{doi}
-      \verb 10.2307/1912773
       \endverb
     \endentry
     \entry{GiacominiWhite2006}{article}{}{}
@@ -821,58 +707,6 @@
       \field{year}{1996}
       \field{pages}{361\bibrangedash 365}
       \range{pages}{5}
-    \endentry
-    \entry{Hyndman2008}{book}{}{}
-      \name{author}{4}{ul=2}{%
-        {{un=2,uniquepart=given,hash=2f709db8a046ae1d056e75c1f3aad31c}{%
-           family={Hyndman},
-           familyi={H\bibinitperiod},
-           given={Rob\bibnamedelima J.},
-           giveni={R\bibinitperiod\bibinitdelim J\bibinitperiod},
-           givenun=2}}%
-        {{un=0,uniquepart=base,hash=e1d517a3ae1d7b892371ef8f37f88412}{%
-           family={Koehler},
-           familyi={K\bibinitperiod},
-           given={Anne\bibnamedelima B.},
-           giveni={A\bibinitperiod\bibinitdelim B\bibinitperiod},
-           givenun=0}}%
-        {{un=0,uniquepart=base,hash=ae51c0dce0efdd1a221f2ff255ea1d83}{%
-           family={Ord},
-           familyi={O\bibinitperiod},
-           given={J.\bibnamedelimi Keith},
-           giveni={J\bibinitperiod\bibinitdelim K\bibinitperiod},
-           givenun=0}}%
-        {{un=0,uniquepart=base,hash=e2c7b0aa60e13c2d08ed61c493f59b0d}{%
-           family={Snyder},
-           familyi={S\bibinitperiod},
-           given={Ralph\bibnamedelima D.},
-           giveni={R\bibinitperiod\bibinitdelim D\bibinitperiod},
-           givenun=0}}%
-      }
-      \list{location}{1}{%
-        {Berlin}%
-      }
-      \list{publisher}{1}{%
-        {Springer}%
-      }
-      \strng{namehash}{16edf30a0cc0f71de6c28bdeea77ba24}
-      \strng{fullhash}{994617f1d6b88301e0de692e3e97afb0}
-      \strng{fullhashraw}{994617f1d6b88301e0de692e3e97afb0}
-      \strng{bibnamehash}{16edf30a0cc0f71de6c28bdeea77ba24}
-      \strng{authorbibnamehash}{16edf30a0cc0f71de6c28bdeea77ba24}
-      \strng{authornamehash}{16edf30a0cc0f71de6c28bdeea77ba24}
-      \strng{authorfullhash}{994617f1d6b88301e0de692e3e97afb0}
-      \strng{authorfullhashraw}{994617f1d6b88301e0de692e3e97afb0}
-      \field{sortinit}{H}
-      \field{sortinithash}{23a3aa7c24e56cfa16945d55545109b5}
-      \field{extradatescope}{labelyear}
-      \field{labeldatesource}{}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{isbn}{978-3-540-71918-2}
-      \field{series}{Springer Series in Statistics}
-      \field{title}{Forecasting with Exponential Smoothing: The State Space Approach}
-      \field{year}{2008}
     \endentry
     \entry{Jensen2022}{article}{}{}
       \name{author}{3}{}{%
