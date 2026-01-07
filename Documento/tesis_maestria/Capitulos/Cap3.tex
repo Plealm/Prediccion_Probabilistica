@@ -2241,15 +2241,15 @@ La Tabla~\ref{tab:resumen_complementarias} consolida el alcance total de estos e
 \addlinespace
 3. Tamaño Muestral & 
     Escala total  & 
-    45{,}360$^{*}$ \\
+    45{,}360 \\
 \addlinespace
 4. Proporciones & 
     Ratio $n_{\text{cal}} / n_{\text{train}}$ (Total 240 fijo) & 
-    25{,}200$^{\dagger}$ \\
+    25{,}200\\
 \addlinespace
 5. Multi-paso & 
     Horizonte de predicción $h \in \{1, \ldots, 12\}$ & 
-    5{,}040$^{\ddagger}$ \\
+    5{,}040 \\
 \midrule
 \textbf{Total} & & \textbf{105{,}840} \\
 \bottomrule
@@ -2267,7 +2267,7 @@ Todas las simulaciones complementarias mantienen consistencia metodológica con 
 
 \item \textbf{Modelos evaluados:} Los 9 métodos conformales especificados en la Sección~\ref{sec:modelos_predictivos} (Block Bootstrapping, Sieve Bootstrap, LSPM, LSPMW, AREPD, MCPS, AV-MCPS, DeepAR, EnCQR-LSTM), excepto en la Simulación 5 donde por razones de eficiencia computacional se evalúan únicamente 4 modelos representativos.
 
-\item \textbf{Calibración y ajuste de hiperparámetros:} Cada modelo se optimiza siguiendo el procedimiento de dos etapas descrito en la Sección~\ref{sec:protocolo_optimizacion}. Brevemente, los hiperparámetros se seleccionan mediante validación cruzada en el conjunto de entrenamiento, y luego los parámetros conformales se calibran usando el conjunto de calibración dedicado.
+\item \textbf{Calibración y ajuste de hiperparámetros:} Cada modelo se optimiza siguiendo el procedimiento mencionado anteriormente en este capitulo para cada uno de los modelos. Brevemente, los hiperparámetros se seleccionan mediante validación cruzada en el conjunto de entrenamiento, y luego los parámetros conformales se calibran usando el conjunto de calibración dedicado.
 
 \item \textbf{Control de reproducibilidad:} Semillas aleatorias fijas y documentadas para cada escenario, permitiendo la replicación exacta de todos los experimentos.
 

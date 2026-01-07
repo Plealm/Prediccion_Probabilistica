@@ -997,7 +997,91 @@ def main_test_tamanos_reducido():
 #  SIMULACION proporciones
 # ============================================================================
 # ============================================================================
+import pandas as pd
+import numpy as np
+import time
 
+
+def main_proporciones_240_completo():
+    """
+    Ejecuta el estudio completo unificado de proporciones variables (N=240)
+    para los 3 tipos de procesos (ARMA, ARIMA, SETAR).
+    """
+    start_time = time.time()
+    
+    print("\n" + "="*80)
+    print("🚀 INICIANDO PIPELINE UNIFICADO - PROPORCIONES 240 (TODOS LOS PROCESOS)")
+    print("="*80)
+    print("\nConfiguración del experimento:")
+    print("  • 3 tipos de procesos (ARMA, ARIMA, SETAR)")
+    print("  • 7 configuraciones por proceso")
+    print("  • 5 proporciones de calibración (10%, 20%, 30%, 40%, 50%)")
+    print("  • 5 distribuciones de ruido")
+    print("  • 4 niveles de varianza")
+    print("  • 12 pasos de predicción + 1 fila promedio por escenario")
+    print(f"  • TOTAL: 3 × 7 × 5 × 5 × 4 = 2,100 escenarios base")
+    print(f"  • FILAS: 2,100 × 13 = 27,300 filas\n")
+    
+    # CORRECCIÓN 1: No especificar proceso_tipo en el constructor
+    # El pipeline debe procesar TODOS los tipos de procesos
+    all_results = []
+    
+    for proceso_tipo in ['ARMA', 'ARIMA', 'SETAR']:
+        print(f"\n{'='*80}")
+        print(f"📊 PROCESANDO: {proceso_tipo}")
+        print(f"{'='*80}\n")
+        
+        # Crear pipeline específico para cada tipo de proceso
+        pipeline = Pipeline240_ProporcionesVariables(
+            n_boot=1000, 
+            seed=42, 
+            verbose=False, 
+            proceso_tipo=proceso_tipo
+        )
+        
+        # Ejecutar pipeline para este tipo de proceso
+        df_proceso = pipeline.run_all(
+            excel_filename=f"RESULTADOS_PROPORCIONES_240_{proceso_tipo}.xlsx",
+            batch_size=20,
+            max_workers=3
+        )
+        
+        # Agregar resultados
+        all_results.append(df_proceso)
+        
+        print(f"\n✅ {proceso_tipo} completado: {len(df_proceso)} filas generadas")
+    
+    # Combinar todos los resultados
+    print(f"\n{'='*80}")
+    print("🔄 COMBINANDO RESULTADOS DE TODOS LOS PROCESOS")
+    print(f"{'='*80}\n")
+    
+    df = pd.concat(all_results, ignore_index=True)
+    
+    # Guardar archivo consolidado
+    output_file = "RESULTADOS_PROPORCIONES_240_TODOS.xlsx"
+    df.to_excel(output_file, index=False)
+    print(f"💾 Archivo consolidado guardado: {output_file}")
+    
+    # Análisis
+    print(f"\n{'='*80}")
+    print("📈 INICIANDO ANÁLISIS EXHAUSTIVO")
+    print(f"{'='*80}")
+    
+    analisis_proporciones_240(df)
+    
+    elapsed = time.time() - start_time
+    print(f"\n{'='*80}")
+    print("✅ PIPELINE COMPLETADO")
+    print(f"{'='*80}")
+    print(f"⏱  Tiempo total de ejecución: {elapsed:.1f}s ({elapsed/3600:.2f} horas)")
+    print(f"📊 Filas totales generadas: {len(df)}")
+    print(f"💾 Archivo guardado: {output_file}")
+    print(f"📁 Archivos individuales:")
+    for tipo in ['ARMA', 'ARIMA', 'SETAR']:
+        print(f"   • RESULTADOS_PROPORCIONES_240_{tipo}.xlsx")
+    
+    return df
 
 def analisis_proporciones_240(df_final):
     """
@@ -1008,28 +1092,57 @@ def analisis_proporciones_240(df_final):
     print("ANÁLISIS EXHAUSTIVO - PROPORCIONES VARIABLES (N=240)")
     print("="*80)
     
+    # Validación inicial
+    if df_final is None or len(df_final) == 0:
+        print("⚠️ No hay datos suficientes para el análisis.")
+        return
+    
+    # Identificar columnas de modelos
     model_cols = ['AREPD', 'AV-MCPS', 'Block Bootstrapping', 'DeepAR', 
                   'EnCQR-LSTM', 'LSPM', 'LSPMW', 'MCPS', 'Sieve Bootstrap']
     model_cols = [c for c in model_cols if c in df_final.columns]
     
-    if len(df_final) == 0:
-        print("⚠️ No hay datos suficientes para el análisis.")
+    if len(model_cols) == 0:
+        print("⚠️ No se encontraron columnas de modelos en el DataFrame.")
+        return
+    
+    # Verificar columnas requeridas
+    required_cols = ['Paso', 'Proceso', 'Distribución', 'Varianza', 'Prop_Calib']
+    missing_cols = [col for col in required_cols if col not in df_final.columns]
+    if missing_cols:
+        print(f"⚠️ Faltan columnas requeridas: {missing_cols}")
+        print(f"   Columnas disponibles: {list(df_final.columns)}")
         return
     
     # Filtrar filas promedio
     df_avg = df_final[df_final['Paso'] == 'Promedio'].copy()
     
     if len(df_avg) == 0:
-        print("⚠️ No hay filas de promedio para analizar.")
+        print("⚠️ No hay filas de promedio ('Paso' == 'Promedio') para analizar.")
+        print(f"   Valores únicos en 'Paso': {df_final['Paso'].unique()}")
         return
     
+    # Inferir Tipo_Proceso desde la columna Proceso
+    def inferir_tipo(nombre_proceso):
+        nombre_str = str(nombre_proceso).upper()
+        if 'ARIMA' in nombre_str:
+            return 'ARIMA'
+        elif 'SETAR' in nombre_str:
+            return 'SETAR'
+        else:  # AR, MA, ARMA
+            return 'ARMA'
+    
+    df_avg['Tipo_Proceso'] = df_avg['Proceso'].apply(inferir_tipo)
+    
+    # Resumen General
     print(f"\n📊 Resumen General:")
     print(f"  • Total de filas: {len(df_final)}")
     print(f"  • Escenarios únicos: {len(df_avg)}")
     print(f"  • Tipos de proceso: {sorted(df_avg['Tipo_Proceso'].unique())}")
-    print(f"  • Proporciones: {sorted(df_avg['Prop_Calib'].unique())}")
+    print(f"  • Proporciones: {sorted(df_avg['Prop_Calib'].unique(), key=lambda x: float(x.strip('%')))}")
     print(f"  • Distribuciones: {sorted(df_avg['Distribución'].unique())}")
     print(f"  • Varianzas: {sorted(df_avg['Varianza'].unique())}")
+    print(f"  • Modelos evaluados: {len(model_cols)}")
     
     # ========================================================================
     # 1. RANKING POR TIPO DE PROCESO
@@ -1038,13 +1151,13 @@ def analisis_proporciones_240(df_final):
     print("📊 1. RANKING GLOBAL POR TIPO DE PROCESO")
     print("="*80)
     
-    for tipo in ['ARMA', 'ARIMA', 'SETAR']:
+    for tipo in sorted(df_avg['Tipo_Proceso'].unique()):
         df_tipo = df_avg[df_avg['Tipo_Proceso'] == tipo]
         if len(df_tipo) > 0:
-            print(f"\n--- {tipo} ---")
+            print(f"\n--- {tipo} (n={len(df_tipo)} escenarios) ---")
             means = df_tipo[model_cols].mean().sort_values()
-            for i, (model, val) in enumerate(means.head(5).items()):
-                print(f" {i+1}. {model:<20} {val:.6f}")
+            for i, (model, val) in enumerate(means.head(5).items(), 1):
+                print(f" {i}. {model:<20} {val:.6f}")
     
     # ========================================================================
     # 2. DESEMPEÑO POR PROPORCIÓN
@@ -1053,14 +1166,19 @@ def analisis_proporciones_240(df_final):
     print("📈 2. DESEMPEÑO PROMEDIO POR PROPORCIÓN DE CALIBRACIÓN")
     print("="*80)
     
-    for prop in sorted(df_avg['Prop_Calib'].unique(), key=lambda x: float(x.strip('%'))):
+    props_sorted = sorted(df_avg['Prop_Calib'].unique(), key=lambda x: float(x.strip('%')))
+    
+    for prop in props_sorted:
         df_prop = df_avg[df_avg['Prop_Calib'] == prop]
-        print(f"\n--- Proporción: {prop} ---")
-        print(f"    N_Train={df_prop['N_Train'].iloc[0]}, N_Calib={df_prop['N_Calib'].iloc[0]}")
-        
-        means = df_prop[model_cols].mean().sort_values()
-        for i, (model, val) in enumerate(means.head(3).items()):
-            print(f" {i+1}. {model:<20} {val:.6f}")
+        if len(df_prop) > 0:
+            print(f"\n--- Proporción: {prop} (n={len(df_prop)} escenarios) ---")
+            n_train = df_prop['N_Train'].iloc[0]
+            n_calib = df_prop['N_Calib'].iloc[0]
+            print(f"    N_Train={n_train}, N_Calib={n_calib}")
+            
+            means = df_prop[model_cols].mean().sort_values()
+            for i, (model, val) in enumerate(means.head(3).items(), 1):
+                print(f" {i}. {model:<20} {val:.6f}")
     
     # ========================================================================
     # 3. MEJOR PROPORCIÓN POR MODELO
@@ -1080,9 +1198,9 @@ def analisis_proporciones_240(df_final):
             df_tipo = df_avg[df_avg['Tipo_Proceso'] == tipo]
             for prop in df_tipo['Prop_Calib'].unique():
                 df_subset = df_tipo[df_tipo['Prop_Calib'] == prop]
-                if model in df_subset.columns:
+                if len(df_subset) > 0 and model in df_subset.columns:
                     val = df_subset[model].mean()
-                    if not pd.isna(val) and val < best_crps:
+                    if pd.notna(val) and val < best_crps:
                         best_crps = val
                         best_prop = prop
                         best_tipo = tipo
@@ -1097,9 +1215,7 @@ def analisis_proporciones_240(df_final):
     print("📊 4. TENDENCIAS: EFECTO DE AUMENTAR PROPORCIÓN DE CALIBRACIÓN")
     print("="*80)
     
-    props_sorted = sorted(df_avg['Prop_Calib'].unique(), key=lambda x: float(x.strip('%')))
-    
-    for tipo in ['ARMA', 'ARIMA', 'SETAR']:
+    for tipo in sorted(df_avg['Tipo_Proceso'].unique()):
         df_tipo = df_avg[df_avg['Tipo_Proceso'] == tipo]
         if len(df_tipo) == 0:
             continue
@@ -1108,11 +1224,14 @@ def analisis_proporciones_240(df_final):
         for model in model_cols:
             if model in df_tipo.columns:
                 scores = []
+                props_with_data = []
+                
                 for prop in props_sorted:
                     df_prop = df_tipo[df_tipo['Prop_Calib'] == prop]
                     vals = df_prop[model].dropna()
                     if len(vals) > 0:
                         scores.append(vals.mean())
+                        props_with_data.append(prop)
                 
                 if len(scores) >= 2:
                     change_pct = ((scores[-1] - scores[0]) / scores[0]) * 100
@@ -1127,11 +1246,13 @@ def analisis_proporciones_240(df_final):
     print("="*80)
     
     print("\nMejor modelo por tipo de proceso:")
-    for tipo in ['ARMA', 'ARIMA', 'SETAR']:
+    for tipo in sorted(df_avg['Tipo_Proceso'].unique()):
         df_tipo = df_avg[df_avg['Tipo_Proceso'] == tipo]
         if len(df_tipo) > 0:
             tipo_means = df_tipo[model_cols].mean()
-            print(f"  {tipo:<10}: {tipo_means.idxmin()} ({tipo_means.min():.6f})")
+            best_model = tipo_means.idxmin()
+            best_score = tipo_means.min()
+            print(f"  {tipo:<10}: {best_model:<25} (CRPS: {best_score:.6f})")
     
     # ========================================================================
     # 6. RESUMEN EJECUTIVO
@@ -1142,61 +1263,31 @@ def analisis_proporciones_240(df_final):
     
     # Mejor modelo global
     global_means = df_avg[model_cols].mean()
+    best_model = global_means.idxmin()
+    best_score = global_means.min()
+    worst_model = global_means.idxmax()
+    worst_score = global_means.max()
+    
     print(f"\n✅ MEJOR MODELO GLOBAL:")
-    print(f"   → {global_means.idxmin()}: CRPS = {global_means.min():.6f}")
+    print(f"   → {best_model}: CRPS = {best_score:.6f}")
     
     print(f"\n❌ PEOR MODELO GLOBAL:")
-    print(f"   → {global_means.idxmax()}: CRPS = {global_means.max():.6f}")
+    print(f"   → {worst_model}: CRPS = {worst_score:.6f}")
+    
+    print(f"\n📊 DIFERENCIA:")
+    print(f"   → {((worst_score - best_score) / best_score * 100):.1f}% peor desempeño")
     
     # Mejor proporción global
     prop_means = df_avg.groupby('Prop_Calib')[model_cols].mean().mean(axis=1)
+    best_prop = prop_means.idxmin()
+    best_prop_score = prop_means.min()
+    
     print(f"\n🎯 MEJOR PROPORCIÓN GLOBAL:")
-    print(f"   → {prop_means.idxmin()}: CRPS promedio = {prop_means.min():.6f}")
+    print(f"   → {best_prop}: CRPS promedio = {best_prop_score:.6f}")
     
     print("\n" + "="*80)
     print("FIN DEL ANÁLISIS")
     print("="*80)
-
-
-def main_proporciones_240_completo():
-    """
-    Ejecuta el estudio completo unificado de proporciones variables (N=240)
-    para los 3 tipos de procesos (ARMA, ARIMA, SETAR).
-    """
-    import time
-    start_time = time.time()
-    
-    print("\n" + "="*80)
-    print("🚀 INICIANDO PIPELINE UNIFICADO - PROPORCIONES 240 (TODOS LOS PROCESOS)")
-    print("="*80)
-    print("\nConfiguración del experimento:")
-    print("  • 3 tipos de procesos (ARMA, ARIMA, SETAR)")
-    print("  • 7 configuraciones por proceso")
-    print("  • 5 proporciones de calibración (10%, 20%, 30%, 40%, 50%)")
-    print("  • 5 distribuciones de ruido")
-    print("  • 4 niveles de varianza")
-    print("  • 12 pasos de predicción + 1 fila promedio por escenario")
-    print(f"  • TOTAL: 3 × 7 × 5 × 5 × 4 = 2,100 escenarios base")
-    print(f"  • FILAS: 2,100 × 13 = 27,300 filas\n")
-    
-    pipeline = Pipeline240_ProporcionesVariables(n_boot=1000, seed=42, verbose=False)
-    
-    df = pipeline.run_all(
-        excel_filename="RESULTADOS_PROPORCIONES_240_TODOS.xlsx",
-        batch_size=20,
-        max_workers=3
-    )
-    
-    # Análisis
-    analisis_proporciones_240(df)
-    
-    elapsed = time.time() - start_time
-    print(f"\n⏱ Tiempo total de ejecución: {elapsed:.1f}s ({elapsed/3600:.2f} horas)")
-    print(f"📊 Filas generadas: {len(df)}")
-    print(f"💾 Archivo guardado: RESULTADOS_PROPORCIONES_240_TODOS.xlsx")
-    
-    return df
-
 
 def main_test_proporciones_240_reducido():
     """
@@ -1216,11 +1307,23 @@ def main_test_proporciones_240_reducido():
         {'prop_tag': '10%', 'n_train': 216, 'n_calib': 24, 'prop_val': 0.10},
         {'prop_tag': '30%', 'n_train': 168, 'n_calib': 72, 'prop_val': 0.30}
     ]
-    pipeline.ARMA_CONFIGS = pipeline.ARMA_CONFIGS[:2]
-    pipeline.ARIMA_CONFIGS = pipeline.ARIMA_CONFIGS[:2]
-    pipeline.SETAR_CONFIGS = pipeline.SETAR_CONFIGS[:2]
+    
+    # Acceder al diccionario CONFIGS
+    pipeline.CONFIGS['ARMA'] = pipeline.CONFIGS['ARMA'][:2]
+    pipeline.CONFIGS['ARIMA'] = pipeline.CONFIGS['ARIMA'][:2]
+    pipeline.CONFIGS['SETAR'] = pipeline.CONFIGS['SETAR'][:2]
+    
     pipeline.DISTRIBUTIONS = ['normal']
     pipeline.VARIANCES = [1.0]
+    
+    print(f"\nConfiguración del test:")
+    print(f"  • Proporciones: {[s['prop_tag'] for s in pipeline.SIZE_COMBINATIONS]}")
+    print(f"  • ARMA configs: {len(pipeline.CONFIGS['ARMA'])}")
+    print(f"  • ARIMA configs: {len(pipeline.CONFIGS['ARIMA'])}")
+    print(f"  • SETAR configs: {len(pipeline.CONFIGS['SETAR'])}")
+    print(f"  • Distribuciones: {pipeline.DISTRIBUTIONS}")
+    print(f"  • Varianzas: {pipeline.VARIANCES}")
+    print(f"  • Escenarios esperados: 3 × 2 × 2 × 1 × 1 = 12 escenarios\n")
     
     df = pipeline.run_all(
         excel_filename="TEST_PROPORCIONES_240.xlsx",
