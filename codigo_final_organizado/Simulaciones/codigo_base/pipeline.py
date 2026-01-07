@@ -1393,11 +1393,19 @@ class Pipeline140_TamanosCrecientes:
         s_id = 0
         configs = self.CONFIGS.get(self.proceso_tipo, [])
         
-        # CORRECCIÓN: Iterar correctamente sobre TODAS las combinaciones
-        for cfg in configs:                    # 7 configuraciones
-            for size in self.SIZE_COMBINATIONS: # 5 proporciones
-                for dist in self.DISTRIBUTIONS:  # 5 distribuciones
-                    for var in self.VARIANCES:    # 4 varianzas
+        # DEBUG: Imprime información
+        print(f"\n🔍 DEBUG generate_all_scenarios():")
+        print(f"   proceso_tipo: {self.proceso_tipo}")
+        print(f"   len(configs): {len(configs)}")
+        print(f"   len(SIZE_COMBINATIONS): {len(self.SIZE_COMBINATIONS)}")
+        print(f"   len(DISTRIBUTIONS): {len(self.DISTRIBUTIONS)}")
+        print(f"   len(VARIANCES): {len(self.VARIANCES)}")
+        print(f"   Esperados: {len(configs)} × {len(self.SIZE_COMBINATIONS)} × {len(self.DISTRIBUTIONS)} × {len(self.VARIANCES)} = {len(configs) * len(self.SIZE_COMBINATIONS) * len(self.DISTRIBUTIONS) * len(self.VARIANCES)}")
+        
+        for size in self.SIZE_COMBINATIONS:
+            for cfg in configs:
+                for dist in self.DISTRIBUTIONS:
+                    for var in self.VARIANCES:
                         scenarios.append((
                             cfg.copy(), 
                             dist, 
@@ -1409,9 +1417,8 @@ class Pipeline140_TamanosCrecientes:
                         ))
                         s_id += 1
         
-        print(f"✅ Generados {len(scenarios)} escenarios para {self.proceso_tipo}")
-        print(f"   → {len(configs)} configs × {len(self.SIZE_COMBINATIONS)} props × "
-            f"{len(self.DISTRIBUTIONS)} dists × {len(self.VARIANCES)} vars")
+        print(f"   Generados realmente: {len(scenarios)}")
+        print(f"   Diferencia: {len(scenarios) - (len(configs) * len(self.SIZE_COMBINATIONS) * len(self.DISTRIBUTIONS) * len(self.VARIANCES))}")
         
         return scenarios
 
