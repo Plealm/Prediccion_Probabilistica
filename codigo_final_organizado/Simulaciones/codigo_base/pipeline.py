@@ -1391,24 +1391,28 @@ class Pipeline140_TamanosCrecientes:
     def generate_all_scenarios(self):
         scenarios = []
         s_id = 0
+        configs = self.CONFIGS.get(self.proceso_tipo, [])
         
-        # Generar escenarios para los 3 tipos de procesos
-        for proceso_tipo in ['ARMA', 'ARIMA', 'SETAR']:
-            if proceso_tipo == 'ARMA':
-                configs = self.ARMA_CONFIGS
-            elif proceso_tipo == 'ARIMA':
-                configs = self.ARIMA_CONFIGS
-            else:
-                configs = self.SETAR_CONFIGS
-            
-            for n_train in self.TRAIN_SIZES:
-                for n_calib in self.CALIB_SIZES:
-                    tag = f"Tr{n_train}_Ca{n_calib}"
-                    for cfg in configs:
-                        for dist in self.DISTRIBUTIONS:
-                            for var in self.VARIANCES:
-                                scenarios.append((cfg.copy(), proceso_tipo, dist, var, n_train, n_calib, tag, self.seed + s_id))
-                                s_id += 1
+        # CORRECCIÓN: Iterar correctamente sobre TODAS las combinaciones
+        for cfg in configs:                    # 7 configuraciones
+            for size in self.SIZE_COMBINATIONS: # 5 proporciones
+                for dist in self.DISTRIBUTIONS:  # 5 distribuciones
+                    for var in self.VARIANCES:    # 4 varianzas
+                        scenarios.append((
+                            cfg.copy(), 
+                            dist, 
+                            var, 
+                            size['n_train'], 
+                            size['n_calib'], 
+                            size['prop_tag'], 
+                            self.seed + s_id
+                        ))
+                        s_id += 1
+        
+        print(f"✅ Generados {len(scenarios)} escenarios para {self.proceso_tipo}")
+        print(f"   → {len(configs)} configs × {len(self.SIZE_COMBINATIONS)} props × "
+            f"{len(self.DISTRIBUTIONS)} dists × {len(self.VARIANCES)} vars")
+        
         return scenarios
 
     def run_all(self, excel_filename=None, batch_size=10, max_workers=3):
