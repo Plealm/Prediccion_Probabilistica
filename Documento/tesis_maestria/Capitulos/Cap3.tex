@@ -450,7 +450,7 @@ Finalmente, es importante destacar que todas las configuraciones detalladas en l
 Para evaluar la capacidad de cuantificación de la incertidumbre en diversos entornos estocásticos, esta investigación emplea un conjunto heterogéneo de nueve modelos predictivos. Esta selección abarca desde métodos de remuestreo clásicos y propuestas de predicción conformal, hasta arquitecturas de aprendizaje profundo y modelos híbridos de diseño propio. El uso de esta diversidad de enfoques permite contrastar cómo las garantías teóricas de cada familia de modelos se traducen en un rendimiento práctico bajo la métrica ECRPS, especialmente cuando se enfrentan a la ruptura de los supuestos de intercambiabilidad y linealidad.
 
 \subsection{Circular Block Bootstrap (CBB)}
-
+\label{subsec:CCB}
 \subsubsection{Explicación Teórica del Modelo}
 
 El método \textit{Circular Block Bootstrap} (CBB), introducido por \textcite{politis1992circular}, representa una evolución metodológica del remuestreo por bloques que aborda una limitación fundamental de los esquemas no circulares como el Moving Block Bootstrap (MBB). Según \textcite{Lahiri2003}, el problema radica en que las observaciones ubicadas en los extremos de la serie temporal $\{X_1, \dots, X_n\}$ aparecen con menor frecuencia en los bloques remuestreados, generando una infra-representación sistemática de los bordes y sesgo en la estimación de varianza.
@@ -528,7 +528,7 @@ Una vez identificado el valor óptimo mediante validación, este se congela y se
 
 
 \subsection{Sieve Bootstrap (SB)}
-
+\label{subsec:SB}
 \subsubsection{Explicación Teórica del Modelo}
 
 El \textit{Sieve Bootstrap}, introducido por \textcite{Buhlmann1997} y analizado en profundidad por \textcite{Lahiri2003}, representa un enfoque alternativo al remuestreo por bloques para series temporales dependientes. En lugar de preservar la dependencia mediante partición física de la serie, el método emplea una aproximación paramétrica para filtrar la estructura de autocorrelación.
@@ -640,7 +640,7 @@ Una vez identificado $p^*$ mediante validación, el método ajusta el modelo AR(
 
 
 \subsection{Least Squares Prediction Machine (LSPM)}
-
+\label{subsec:LSPM}
 \subsubsection{Explicación Teórica del Modelo}
 
 El \textit{Least Squares Prediction Machine} (LSPM), introducido por \textcite{Vovk2022}, representa una evolución de la predicción conformal que trasciende la generación de intervalos de confianza para construir distribuciones predictivas completas. A diferencia de los predictores conformales estándar, el LSPM se define como un Sistema Predictivo Conformal (CPS), cuya salida es una Función de Distribución Predictiva Conformal (CPD).
@@ -756,7 +756,7 @@ El método ejecuta una operación crítica: congela $p$ basado en el tamaño del
 
 
 \subsection{Least Squares Prediction Machine with Weighted Residuals (LSPMW)}
-
+\label{subsec:LSPMW}
 \subsubsection{Explicación Teórica del Modelo}
 
 El \textit{Least Squares Prediction Machine with Weighted Residuals} (LSPMW) constituye una extensión del LSPM diseñada para contextos donde el supuesto de intercambiabilidad se viola por deriva distributiva (\textit{distribution drift}) o no estacionaridad. Esta variante se fundamenta en los desarrollos de \textcite{Barber2023} sobre predicción conformal no intercambiable.
@@ -892,7 +892,7 @@ Durante la fase de prueba rolling, el método \texttt{fit\_predict()} usa exclus
 
 
 \subsection{Mondrian Conformal Predictive System (MCPS)}
-
+\label{subsec:MCPS}
 \subsubsection{Explicación Teórica del Modelo}
 
 El \textit{Mondrian Conformal Predictive System} (MCPS), formalizado por \textcite{Bostrom2021}, constituye una extensión localmente adaptativa del Sistema Predictivo Conformal estándar (SCPS). A diferencia del SCPS, que asume homogeneidad en la distribución de errores sobre todo el espacio de entrada, el MCPS reconoce que la incertidumbre predictiva varía significativamente según el régimen operativo del modelo. Este enfoque resulta especialmente relevante en aplicaciones reales donde, por ejemplo, predicciones en rangos bajos del modelo pueden exhibir patrones de error distintos a predicciones en rangos altos.
@@ -1084,7 +1084,7 @@ Para series típicas con $T \approx 1000$, la configuración $(p=10, B=10, \text
 
 
 \subsection{Adaptive Volatility Mondrian Conformal Predictive System (AV-MCPS)}
-
+\label{subsec:AV-MCPS}
 \subsubsection{Explicación Teórica del Modelo}
 
 El \textit{Adaptive Volatility Mondrian Conformal Predictive System} (AV-MCPS) constituye una extensión metodológica del MCPS estándar desarrollada específicamente para esta investigación, representando una de las contribuciones originales más significativas de la tesis. Mientras que el MCPS de \textcite{Ye2025} particiona el espacio de calibración únicamente según predicciones puntuales $h(x)$, el AV-MCPS introduce una \textbf{estratificación bidimensional} que incorpora explícitamente la volatilidad local como segunda dimensión de heterogeneidad.
@@ -1323,7 +1323,7 @@ Idénticos a MCPS: XGBoost con 50 árboles, profundidad 3, learning rate 0.1, ob
 
 
 \subsection{DeepAR: Probabilistic Forecasting with Autoregressive Recurrent Networks}
-
+\label{subsec:DeepAR}
 \subsubsection{Explicación Teórica del Modelo}
 
 DeepAR, introducido por \textcite{Salinas2020}, representa un cambio de paradigma en el pronóstico probabilístico de series temporales al trasladar el enfoque desde el modelado individual de cada serie hacia el \textbf{aprendizaje de un modelo global} a partir de múltiples series relacionadas mediante una arquitectura de red neuronal recurrente autorregresiva.
@@ -1522,7 +1522,7 @@ Durante toda la evaluación rolling window posterior, el método \texttt{fit\_pr
 
 
 \subsection{Autoregressive Exponentially-weighted Polynomial Distribution (AREPD)}
-
+\label{subsec:AREPD}
 \subsubsection{Explicación Teórica del Modelo}
 
 El modelo \textit{Autoregressive Exponentially-weighted Polynomial Distribution} (AREPD) representa una contribución metodológica original de esta investigación, desarrollada como una extensión híbrida que combina predicción ponderada temporalmente con expansión polinomial de características autorregresivas. A diferencia de métodos puramente conformales como LSPM que utilizan regresión lineal, AREPD introduce \textbf{transformaciones no lineales polinomiales} de las entradas autorregresivas.
@@ -1754,7 +1754,7 @@ Durante toda la evaluación rolling, \texttt{fit\_predict} verifica este flag: s
 
 
 \subsection{Ensemble Conformalized Quantile Regression (EnCQR-LSTM)}
-
+\label{subsec:EnCQR-LSTM}
 \subsubsection{Explicación Teórica del Modelo}
 
 El \textit{Ensemble Conformalized Quantile Regression} (EnCQR-LSTM) constituye una síntesis metodológica avanzada que integra tres paradigmas complementarios del aprendizaje estadístico: regresión cuantílica (QR), predicción conformal (CP) y aprendizaje en ensamble. Esta arquitectura híbrida busca heredar simultáneamente la \textbf{adaptabilidad heterocedástica} de QR y las \textbf{garantías formales de cobertura} de CP, superando las limitaciones inherentes de cada enfoque por separado.
@@ -2046,50 +2046,43 @@ Se hipotetiza que para $d \geq 4$, el rango explosivo de $Y_t$ desestabilizará 
 
 \subsubsection{Motivación}
 
-Esta simulación caracteriza la tasa de convergencia de las distribuciones predictivas empíricas hacia la densidad teórica a medida que el volumen de datos aumenta. Permite cuantificar el trade-off entre calidad de estimación (que mejora con más datos de entrenamiento) y precisión de calibración (que mejora con más datos de calibración). A diferencia del diseño principal que mantiene fijos los tamaños $n_{\text{train}} = 200$ y $n_{\text{calib}} = 40$, aquí se explora sistemáticamente el espacio de combinaciones de tamaños absolutos.
+Esta simulación caracteriza la tasa de convergencia de las distribuciones predictivas empíricas hacia la densidad teórica a medida que el volumen de datos aumenta. Permite cuantificar el trade-off entre calidad de estimación (que mejora con más datos de entrenamiento) y precisión de calibración (que mejora con más datos de calibración). A diferencia del diseño principal que mantiene fijos los tamaños $n_{\text{train}} = 200$ y $n_{\text{calib}} = 40$, aquí se explora sistemáticamente el espacio de tamaños absolutos manteniendo una proporción fija entre entrenamiento y calibración.
 
 \subsubsection{Diseño Experimental}
 
-Se evalúan los tres tipos de procesos (ARMA, ARIMA, SETAR) con sus 7 configuraciones cada uno, bajo nueve combinaciones de tamaños muestrales resultantes del producto cartesiano de tres niveles de datos de entrenamiento y tres niveles de datos de calibración:
+Se evalúan los tres tipos de procesos (ARMA, ARIMA, SETAR) con sus 7 configuraciones cada uno, bajo cinco tamaños muestrales totales manteniendo una proporción fija de aproximadamente 83\% para entrenamiento y 17\% para calibración:
 
 \begin{table}[htbp]
 \centering
-\caption{Combinaciones de tamaños muestrales evaluadas}
+\caption{Tamaños muestrales evaluados con proporción fija}
 \label{tab:combinaciones_muestrales}
 \begin{tabular}{lcccc}
 \toprule
-\multirow{2}{*}{\textbf{Combinación}} & $n_{\text{train}}$ & $n_{\text{calib}}$ & $n_{\text{total}}$ & \multirow{2}{*}{\textbf{Ratio}} \\
- & & & & \\
+\textbf{Etiqueta} & $n_{\text{train}}$ & $n_{\text{calib}}$ & $n_{\text{total}}$ & \textbf{Proporción} \\
 \midrule
-Pequeña-Pequeña & 100 & 20 & 120 & 1:5 \\
-Pequeña-Media & 100 & 100 & 200 & 1:1 \\
-Pequeña-Grande & 100 & 200 & 300 & 1:2 \\
-\addlinespace
-Media-Pequeña & 500 & 20 & 520 & 1:25 \\
-Media-Media & 500 & 100 & 600 & 5:1 \\
-Media-Grande & 500 & 200 & 700 & 5:2 \\
-\addlinespace
-Grande-Pequeña & 1{,}000 & 20 & 1{,}020 & 50:1 \\
-Grande-Media & 1{,}000 & 100 & 1{,}100 & 10:1 \\
-Grande-Grande & 1{,}000 & 200 & 1{,}200 & 5:1 \\
+N=120 & 100 & 20 & 120 & 83:17 \\
+N=240 & 199 & 41 & 240 & 83:17 \\
+N=360 & 299 & 61 & 360 & 83:17 \\
+N=600 & 498 & 102 & 600 & 83:17 \\
+N=1200 & 996 & 204 & 1{,}200 & 83:17 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Esta estructura permite evaluar de forma independiente el efecto marginal de incrementar $n_{\text{train}}$ (mejorando la estimación del modelo base) versus incrementar $n_{\text{calib}}$ (refinando la calibración conformal), así como sus interacciones.
+Esta estructura permite evaluar el efecto del incremento simultáneo de datos de entrenamiento y calibración, manteniendo constante su proporción relativa. Esto aísla el efecto puro del tamaño muestral total sobre la calidad de las distribuciones predictivas.
 
 La estructura factorial completa genera:
 \begin{equation}
 \begin{split}
-N_{\text{config}} = & \ 3 \text{ tipos} \times 7 \text{ configs} \times 9 \text{ combinaciones} \\
+N_{\text{config}} = & \ 3 \text{ tipos} \times 7 \text{ configs} \times 5 \text{ tamaños} \\
 & \times 5 \text{ distribuciones} \times 4 \text{ varianzas} \\
-= & \ 3{,}780 \text{ configuraciones}
+= & \ 2{,}100 \text{ configuraciones}
 \end{split}
 \end{equation}
 
 Con 12 pasos de evaluación por configuración:
 \begin{equation}
-N_{\text{filas}} = 3{,}780 \times 12 = 45{,}360 \text{ evaluaciones}
+N_{\text{filas}} = 2{,}100 \times 12 = 25{,}200 \text{ evaluaciones}
 \end{equation}
 
 % ----------------------------------------------------------------------------
@@ -2098,11 +2091,11 @@ N_{\text{filas}} = 3{,}780 \times 12 = 45{,}360 \text{ evaluaciones}
 
 \subsubsection{Motivación}
 
-En escenarios de datos limitados, existe un conflicto fundamental entre usar datos para mejorar el ajuste del modelo (\textit{training}) o para mejorar la precisión de los intervalos conformales (\textit{calibration}). Esta simulación busca determinar si existe una ``proporción áurea'' que minimice el ECRPS promedio.
+En escenarios de datos limitados, existe un conflicto fundamental entre usar datos para mejorar el ajuste del modelo (\textit{training}) o para mejorar la precisión de los intervalos conformales (\textit{calibration}). Esta simulación busca determinar si existe una ``proporción óptima'' que minimice el ECRPS promedio cuando el presupuesto total de datos es fijo.
 
 \subsubsection{Diseño Experimental}
 
-Se fija un presupuesto total de $n_{\text{total}} = 240$ observaciones y se evalúan 5 particiones:
+Se fija un presupuesto total de $n_{\text{total}} = 240$ observaciones y se evalúan 5 proporciones de calibración diferentes:
 
 \begin{table}[htbp]
 \centering
@@ -2112,10 +2105,10 @@ Se fija un presupuesto total de $n_{\text{total}} = 240$ observaciones y se eval
 \toprule
 \textbf{Proporción} & $n_{\text{train}}$ & $n_{\text{calib}}$ & \textbf{Ratio} \\
 \midrule
-10\% & 216 & 24 & 1:9 \\
-20\% & 192 & 48 & 1:4 \\
-30\% & 168 & 72 & 3:7 \\
-40\% & 144 & 96 & 2:3 \\
+10\% & 216 & 24 & 9:1 \\
+20\% & 192 & 48 & 4:1 \\
+30\% & 168 & 72 & 7:3 \\
+40\% & 144 & 96 & 3:2 \\
 50\% & 120 & 120 & 1:1 \\
 \bottomrule
 \end{tabular}
@@ -2130,12 +2123,10 @@ N_{\text{config}} = & \ 3 \text{ tipos} \times 7 \text{ configs} \times 5 \text{
 \end{split}
 \end{equation}
 
-Cada configuración genera 12 pasos + 1 fila promedio:
+Con 12 pasos de evaluación por configuración:
 \begin{equation}
-N_{\text{filas}} = 2{,}100 \times 13 = 27{,}300 \text{ filas totales}
+N_{\text{filas}} = 2{,}100 \times 12 = 25{,}200 \text{ evaluaciones}
 \end{equation}
-
-\textbf{Nota:} El documento de referencia reporta 25,200 evaluaciones, lo que sugiere que no se incluyó la fila promedio en el conteo (2,100 × 12 = 25,200).
 
 % ----------------------------------------------------------------------------
 \subsection{Simulación 5: Predicción Multi-paso (Horizonte $h$)}
@@ -2240,18 +2231,18 @@ La Tabla~\ref{tab:resumen_complementarias} consolida el alcance total de estos e
     26{,}880 \\
 \addlinespace
 3. Tamaño Muestral & 
-    Escala total  & 
-    45{,}360 \\
+    Tamaño total con proporción fija (83:17) & 
+    25{,}200 \\
 \addlinespace
 4. Proporciones & 
-    Ratio $n_{\text{cal}} / n_{\text{train}}$ (Total 240 fijo) & 
+    Proporción de calibración ($n_{\text{total}} = 240$ fijo) & 
     25{,}200\\
 \addlinespace
 5. Multi-paso & 
     Horizonte de predicción $h \in \{1, \ldots, 12\}$ & 
     5{,}040 \\
 \midrule
-\textbf{Total} & & \textbf{105{,}840} \\
+\textbf{Total} & & \textbf{85{,}680} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -2261,17 +2252,23 @@ La Tabla~\ref{tab:resumen_complementarias} consolida el alcance total de estos e
 Todas las simulaciones complementarias mantienen consistencia metodológica con el diseño principal descrito en la Sección~\ref{sec:diseño_experimental}:
 
 \begin{itemize}
-\item \textbf{Período de inicialización (burn-in):} 50 observaciones descartadas antes del inicio efectivo de la serie para eliminar efectos transitorios de las condiciones iniciales.
+\item \textbf{Período de inicialización (burn-in):} 100 observaciones descartadas antes del inicio efectivo de la serie para eliminar efectos transitorios de las condiciones iniciales.
 
-\item \textbf{Métrica de evaluación:} ECRPS entre la distribución predictiva empírica del modelo y la distribución teórica verdadera del proceso generador de datos, como se define en la Sección~\ref{subsec:ecrps}.
+\item \textbf{Métrica de evaluación:} ECRPS entre la distribución predictiva empírica del modelo (basada en 1,000 muestras bootstrap o generadas por el modelo) y la distribución teórica verdadera del proceso generador de datos (representada por 1,000 muestras de la densidad real), como se define en la Sección~\ref{subsec:ecrps}.
 
-\item \textbf{Modelos evaluados:} Los 9 métodos conformales especificados en la Sección~\ref{sec:modelos_predictivos} (Block Bootstrapping, Sieve Bootstrap, LSPM, LSPMW, AREPD, MCPS, AV-MCPS, DeepAR, EnCQR-LSTM), excepto en la Simulación 5 donde por razones de eficiencia computacional se evalúan únicamente 4 modelos representativos.
+\item \textbf{Modelos evaluados:} Los 9 métodos conformales especificados en la Sección~\ref{sec:modelos_predictivos} (Block Bootstrapping, Sieve Bootstrap, LSPM, LSPMW, AREPD, MCPS, AV-MCPS, DeepAR, EnCQR-LSTM), excepto en la Simulación 5 donde por razones de eficiencia computacional se evalúan únicamente 4 modelos representativos (LSPM, DeepAR, Sieve Bootstrap, MCPS).
 
-\item \textbf{Calibración y ajuste de hiperparámetros:} Cada modelo se optimiza siguiendo el procedimiento mencionado anteriormente en este capitulo para cada uno de los modelos. Brevemente, los hiperparámetros se seleccionan mediante validación cruzada en el conjunto de entrenamiento, y luego los parámetros conformales se calibran usando el conjunto de calibración dedicado.
+\item \textbf{Calibración y ajuste de hiperparámetros:} Cada modelo se optimiza siguiendo un procedimiento de dos etapas. Primero, los hiperparámetros del modelo base se seleccionan mediante validación cruzada temporal en el conjunto de entrenamiento, minimizando el ECRPS en una ventana de validación. Segundo, los parámetros conformales (como el nivel de cobertura o los pesos de calibración) se ajustan usando el conjunto de calibración dedicado. Este procedimiento se describe en detalle en la Sección~\ref{sec:optimizacion_hiperparametros}.
 
-\item \textbf{Control de reproducibilidad:} Semillas aleatorias fijas y documentadas para cada escenario, permitiendo la replicación exacta de todos los experimentos.
+\item \textbf{Control de reproducibilidad:} Semillas aleatorias fijas y documentadas para cada escenario, con incrementos determinísticos según el índice del escenario ($\text{seed} = \text{seed}_{\text{base}} + \text{id}_{\text{escenario}}$), permitiendo la replicación exacta de todos los experimentos.
 
-\item \textbf{Esquema de evaluación:} Ventana rodante (Simulaciones 1-4) o proyección desde origen fijo (Simulación 5), según la pregunta metodológica de interés.
+\item \textbf{Esquema de evaluación:} 
+\begin{itemize}
+    \item \textit{Ventana rodante} (Simulaciones 1--4): El modelo se actualiza con cada nueva observación antes de predecir el siguiente paso, generando 12 predicciones secuenciales donde el horizonte siempre es $h=1$ pero el conjunto de entrenamiento crece.
+    \item \textit{Proyección desde origen fijo} (Simulación 5): El modelo se ajusta una sola vez en $t$ y proyecta recursivamente los horizontes $h \in \{1, 2, \ldots, 12\}$ sin actualización intermedia, propagando la incertidumbre a través de predicciones iteradas.
+\end{itemize}
+
+\item \textbf{Estructura factorial completa:} Todas las simulaciones evalúan las 21 configuraciones de procesos (7 ARMA + 7 ARIMA + 7 SETAR) cruzadas con 5 distribuciones de ruido (normal, uniforme, exponencial, t-student, mezcla) y 4 niveles de varianza (0.2, 0.5, 1.0, 3.0), garantizando cobertura exhaustiva del espacio paramétrico.
 \end{itemize}
 
 La uniformidad en estos aspectos fundamentales garantiza que las diferencias observadas en el desempeño sean atribuibles exclusivamente a los factores experimentales bajo estudio (modalidad de diferenciación, orden de integración, tamaño muestral, proporción de calibración, u horizonte de predicción) y no a variaciones en el protocolo de evaluación.

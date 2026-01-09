@@ -14,8 +14,13 @@
 \contentsline {table}{\numberline {\textbf {3-11}}{\ignorespaces Comparación Conceptual de AREPD con Métodos Relacionados}}{80}{table.caption.150}%
 \contentsline {table}{\numberline {\textbf {3-12}}{\ignorespaces Comparación entre AREPD Teórico y AREPD Implementado}}{82}{table.caption.153}%
 \contentsline {table}{\numberline {\textbf {3-13}}{\ignorespaces Comparación entre teoría y práctica en EnCQR-LSTM}}{88}{table.caption.169}%
-\contentsline {table}{\numberline {\textbf {3-14}}{\ignorespaces Combinaciones de tamaños muestrales evaluadas}}{94}{table.caption.183}%
+\contentsline {table}{\numberline {\textbf {3-14}}{\ignorespaces Tamaños muestrales evaluados con proporción fija}}{93}{table.caption.183}%
 \contentsline {table}{\numberline {\textbf {3-15}}{\ignorespaces Proporciones de calibración evaluadas (N=240 fijo)}}{94}{table.caption.186}%
 \contentsline {table}{\numberline {\textbf {3-16}}{\ignorespaces Resumen de la carga experimental de simulaciones complementarias}}{98}{table.caption.192}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {\textbf {4-1}}{\ignorespaces Resumen de características identificadas en el análisis exploratorio del dataset Electricity y sus implicaciones metodológicas.}}{114}{table.caption.231}%
+\contentsline {table}{\numberline {\textbf {4-2}}{\ignorespaces Ranking de modelos según desempeño en dataset Electricity. Se reportan media y mediana del CRPS sobre 24 predicciones one-step-ahead. Valores menores indican mejor desempeño.}}{116}{table.caption.235}%
+\contentsline {table}{\numberline {\textbf {4-3}}{\ignorespaces Ranking de modelos según desempeño en dataset Traffic. Se reportan media y mediana del CRPS, además de métricas de comparación pareada. Valores menores de CRPS indican mejor desempeño.}}{126}{table.caption.247}%
+\contentsline {table}{\numberline {\textbf {4-4}}{\ignorespaces Matriz de valores p del test de Diebold-Mariano modificado para el dataset Traffic. Valores menores a 0.05 (resaltados en negrita) indican diferencias estadísticamente significativas en capacidad predictiva al nivel de confianza del 95\%.}}{128}{table.caption.250}%
 \addvspace {10\p@ }
 \providecommand \tocbasic@end@toc@file {}\tocbasic@end@toc@file 

@@ -2506,6 +2506,19 @@
     <bcf:citekey order="123" intorder="1">Gneiting2014</bcf:citekey>
     <bcf:citekey order="124" intorder="1">Stankeviciute2021</bcf:citekey>
     <bcf:citekey order="125" intorder="1">Hyndman2021FPP3</bcf:citekey>
+    <bcf:citekey order="126" intorder="1">BoxCox1964</bcf:citekey>
+    <bcf:citekey order="127" intorder="1">Guerrero1993</bcf:citekey>
+    <bcf:citekey order="128" intorder="1">DickeyFuller1979</bcf:citekey>
+    <bcf:citekey order="129" intorder="1">KPSS1992</bcf:citekey>
+    <bcf:citekey order="130" intorder="1">BDS1996</bcf:citekey>
+    <bcf:citekey order="131" intorder="1">McLeodLi1983</bcf:citekey>
+    <bcf:citekey order="132" intorder="1">Tsay1986</bcf:citekey>
+    <bcf:citekey order="133" intorder="1">Hurst1951</bcf:citekey>
+    <bcf:citekey order="134" intorder="1">JarqueBera1987</bcf:citekey>
+    <bcf:citekey order="135" intorder="1">LjungBox1978</bcf:citekey>
+    <bcf:citekey order="136" intorder="1">Welch1967</bcf:citekey>
+    <bcf:citekey order="137" intorder="1">Salinas2020</bcf:citekey>
+    <bcf:citekey order="138" intorder="1">gluonts_jmlr</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="nyt">

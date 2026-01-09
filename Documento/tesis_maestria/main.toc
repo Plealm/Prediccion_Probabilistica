@@ -241,5 +241,77 @@
 \contentsline {subsubsection}{\nonumberline Protocolo de Evaluación}{97}{subsubsection*.191}%
 \contentsline {subsection}{\numberline {3.5.6}Resumen de Evaluaciones Complementarias}{98}{subsection.3.5.6}%
 \contentsline {subsubsection}{\nonumberline Protocolo Común a Todas las Simulaciones}{98}{subsubsection*.193}%
-\contentsline {chapter}{\nonumberline Bibliografía}{100}{chapter*.194}%
+\contentsline {chapter}{\numberline {4}Aplicaciones a Series de Tiempo Reales}{100}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Metodología de Análisis Exploratorio de Datos}{101}{section.4.1}%
+\contentsline {subsection}{\numberline {4.1.1}Estructura del Protocolo de Análisis}{101}{subsection.4.1.1}%
+\contentsline {subsection}{\numberline {4.1.2}Transformación Box-Cox}{102}{subsection.4.1.2}%
+\contentsline {paragraph}{\nonumberline Estimación del parámetro óptimo:}{102}{paragraph*.194}%
+\contentsline {paragraph}{\nonumberline Criterios de aplicación:}{102}{paragraph*.195}%
+\contentsline {paragraph}{\nonumberline Interpretación:}{102}{paragraph*.196}%
+\contentsline {subsection}{\numberline {4.1.3}Eliminación de Tendencia mediante LOWESS}{103}{subsection.4.1.3}%
+\contentsline {paragraph}{\nonumberline Método LOWESS:}{103}{paragraph*.197}%
+\contentsline {paragraph}{\nonumberline Selección del parámetro $f$:}{103}{paragraph*.198}%
+\contentsline {paragraph}{\nonumberline Validación:}{103}{paragraph*.199}%
+\contentsline {subsection}{\numberline {4.1.4}Análisis de Estacionariedad}{103}{subsection.4.1.4}%
+\contentsline {paragraph}{\nonumberline Función de Autocorrelación (ACF):}{104}{paragraph*.200}%
+\contentsline {paragraph}{\nonumberline Interpretación de la ACF:}{104}{paragraph*.201}%
+\contentsline {paragraph}{\nonumberline Función de Autocorrelación Parcial (PACF):}{104}{paragraph*.202}%
+\contentsline {subsection}{\numberline {4.1.5}Tests de Estacionariedad y Linealidad}{104}{subsection.4.1.5}%
+\contentsline {subsubsection}{\nonumberline Tests de Estacionariedad}{104}{subsubsection*.203}%
+\contentsline {paragraph}{\nonumberline Test de Dickey-Fuller Aumentado (ADF):}{104}{paragraph*.204}%
+\contentsline {paragraph}{\nonumberline Test de Kwiatkowski-Phillips-Schmidt-Shin (KPSS):}{105}{paragraph*.205}%
+\contentsline {paragraph}{\nonumberline Estrategia combinada:}{105}{paragraph*.206}%
+\contentsline {subsubsection}{\nonumberline Tests de Linealidad}{105}{subsubsection*.207}%
+\contentsline {paragraph}{\nonumberline Test BDS:}{105}{paragraph*.208}%
+\contentsline {paragraph}{\nonumberline Test de McLeod-Li:}{105}{paragraph*.209}%
+\contentsline {paragraph}{\nonumberline Test de Tsay:}{106}{paragraph*.210}%
+\contentsline {paragraph}{\nonumberline Exponente de Hurst:}{106}{paragraph*.211}%
+\contentsline {subsection}{\numberline {4.1.6}Diagnóstico de Residuos}{106}{subsection.4.1.6}%
+\contentsline {paragraph}{\nonumberline Test de Jarque-Bera:}{106}{paragraph*.212}%
+\contentsline {paragraph}{\nonumberline Test de Ljung-Box:}{106}{paragraph*.213}%
+\contentsline {paragraph}{\nonumberline Gráficos de diagnóstico:}{107}{paragraph*.214}%
+\contentsline {subsection}{\numberline {4.1.7}Análisis Espectral}{107}{subsection.4.1.7}%
+\contentsline {paragraph}{\nonumberline Periodograma:}{107}{paragraph*.215}%
+\contentsline {paragraph}{\nonumberline Método de Welch:}{107}{paragraph*.216}%
+\contentsline {paragraph}{\nonumberline Implicaciones:}{107}{paragraph*.217}%
+\contentsline {subsection}{\numberline {4.1.8}Síntesis de Hallazgos y Configuración de Modelado}{108}{subsection.4.1.8}%
+\contentsline {paragraph}{\nonumberline Transformaciones necesarias:}{108}{paragraph*.218}%
+\contentsline {paragraph}{\nonumberline Justificación de complejidad del modelo:}{108}{paragraph*.219}%
+\contentsline {paragraph}{\nonumberline Configuración de hiperparámetros:}{108}{paragraph*.220}%
+\contentsline {paragraph}{\nonumberline Selección de métricas de evaluación:}{108}{paragraph*.221}%
+\contentsline {subsection}{\numberline {4.1.9}Aplicación del Protocolo}{109}{subsection.4.1.9}%
+\contentsline {section}{\numberline {4.2}Serie de Consumo Eléctrico: Dataset Electricity}{109}{section.4.2}%
+\contentsline {subsection}{\numberline {4.2.1}Descripción del Problema y Contexto}{109}{subsection.4.2.1}%
+\contentsline {subsection}{\numberline {4.2.2}Resultados del Análisis Exploratorio}{109}{subsection.4.2.2}%
+\contentsline {subsubsection}{\nonumberline Transformación de Estabilización de Varianza}{110}{subsubsection*.222}%
+\contentsline {subsubsection}{\nonumberline Eliminación de Tendencia}{110}{subsubsection*.224}%
+\contentsline {subsubsection}{\nonumberline Validación de Estacionariedad}{110}{subsubsection*.225}%
+\contentsline {subsubsection}{\nonumberline Evaluación de No Linealidad}{112}{subsubsection*.226}%
+\contentsline {subsubsection}{\nonumberline Diagnóstico de Distribución de Residuos}{112}{subsubsection*.227}%
+\contentsline {subsubsection}{\nonumberline Análisis Espectral}{113}{subsubsection*.228}%
+\contentsline {subsubsection}{\nonumberline Implicaciones para la Estrategia de Modelado}{113}{subsubsection*.229}%
+\contentsline {subsubsection}{\nonumberline Síntesis del Análisis Exploratorio}{114}{subsubsection*.230}%
+\contentsline {subsection}{\numberline {4.2.3}Configuración Experimental}{115}{subsection.4.2.3}%
+\contentsline {subsubsection}{\nonumberline Partición de Datos}{115}{subsubsection*.232}%
+\contentsline {subsubsection}{\nonumberline Horizonte de Predicción}{115}{subsubsection*.233}%
+\contentsline {subsection}{\numberline {4.2.4}Resultados}{115}{subsection.4.2.4}%
+\contentsline {subsubsection}{\nonumberline Desempeño Predictivo Global}{115}{subsubsection*.234}%
+\contentsline {subsubsection}{\nonumberline Comparación Estadística Formal}{117}{subsubsection*.237}%
+\contentsline {subsubsection}{\nonumberline Análisis de Calibración Distribucional}{118}{subsubsection*.238}%
+\contentsline {subsection}{\numberline {4.2.5}Síntesis del Estudio del Dataset Electricity}{121}{subsection.4.2.5}%
+\contentsline {subsubsection}{\nonumberline Recomendaciones para la Práctica}{121}{subsubsection*.241}%
+\contentsline {section}{\numberline {4.3}Serie de Tráfico Vial: Dataset Traffic}{122}{section.4.3}%
+\contentsline {subsection}{\numberline {4.3.1}Descripción del Problema y Contexto}{122}{subsection.4.3.1}%
+\contentsline {subsection}{\numberline {4.3.2}Resultados del Análisis Exploratorio}{122}{subsection.4.3.2}%
+\contentsline {subsubsection}{\nonumberline Transformación de Estabilización de Varianza}{123}{subsubsection*.242}%
+\contentsline {subsubsection}{\nonumberline Eliminación de Tendencia y Validación de Estacionariedad}{123}{subsubsection*.244}%
+\contentsline {subsubsection}{\nonumberline Evaluación de No Linealidad y Distribución}{123}{subsubsection*.245}%
+\contentsline {subsection}{\numberline {4.3.3}Configuración Experimental}{125}{subsection.4.3.3}%
+\contentsline {subsection}{\numberline {4.3.4}Resultados}{125}{subsection.4.3.4}%
+\contentsline {subsubsection}{\nonumberline Desempeño Predictivo Global}{125}{subsubsection*.246}%
+\contentsline {subsubsection}{\nonumberline Análisis de Significancia Estadística}{127}{subsubsection*.249}%
+\contentsline {subsubsection}{\nonumberline Análisis de Calibración Distribucional}{129}{subsubsection*.251}%
+\contentsline {subsection}{\numberline {4.3.5}Síntesis del Estudio del Dataset Traffic}{130}{subsection.4.3.5}%
+\contentsline {subsubsection}{\nonumberline Recomendaciones para la Práctica}{132}{subsubsection*.254}%
+\contentsline {chapter}{\nonumberline Bibliografía}{134}{chapter*.255}%
 \providecommand \tocbasic@end@toc@file {}\tocbasic@end@toc@file 

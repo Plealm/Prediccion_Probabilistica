@@ -163,26 +163,6 @@ def main_full_140():
         step_data = df_final[df_final['Paso_H'] == h][model_cols].mean().to_frame().T
         results_by_step[h] = step_data
     
-    PlotManager.plot_ecrps_evolution(
-        results_by_step, model_cols,
-        save_path="evolucion_ecrps_horizonte.png"
-    )
-    
-    # Resumen general
-    PlotManager.plot_results_summary(
-        df_final, model_cols,
-        step_name="Todos los escenarios",
-        save_path="resumen_global_ecrps.png"
-    )
-    
-    # Ranking heatmap
-    PlotManager.plot_ranking_heatmap(
-        df_final.groupby('Paso_H')[model_cols].mean().reset_index(drop=True),
-        model_cols,
-        title="Ranking por Horizonte de Predicción",
-        save_path="ranking_heatmap.png"
-    )
-    
     elapsed = time.time() - start_time
     print(f"\n⏱  Tiempo total: {elapsed:.1f}s ({elapsed/3600:.2f} horas)")
     
@@ -311,27 +291,7 @@ def main_full_140_arima():
     for h in range(1, 13):
         step_data = df_final[df_final['Paso_H'] == h][model_cols].mean().to_frame().T
         results_by_step[h] = step_data
-    
-    PlotManager.plot_ecrps_evolution(
-        results_by_step, model_cols,
-        save_path="evolucion_ecrps_horizonte_arima.png"
-    )
-    
-    # Resumen general
-    PlotManager.plot_results_summary(
-        df_final, model_cols,
-        step_name="Todos los escenarios ARIMA",
-        save_path="resumen_global_ecrps_arima.png"
-    )
-    
-    # Ranking heatmap
-    PlotManager.plot_ranking_heatmap(
-        df_final.groupby('Paso_H')[model_cols].mean().reset_index(drop=True),
-        model_cols,
-        title="Ranking por Horizonte de Predicción (ARIMA)",
-        save_path="ranking_heatmap_arima.png"
-    )
-    
+
     elapsed = time.time() - start_time
     print(f"\n⏱  Tiempo total: {elapsed:.1f}s ({elapsed/3600:.2f} horas)")
     
@@ -464,25 +424,6 @@ def main_full_140_setar():
         step_data = df_final[df_final['Paso_H'] == h][model_cols].mean().to_frame().T
         results_by_step[h] = step_data
     
-    PlotManager.plot_ecrps_evolution(
-        results_by_step, model_cols,
-        save_path="evolucion_ecrps_horizonte_setar.png"
-    )
-    
-    # Resumen general
-    PlotManager.plot_results_summary(
-        df_final, model_cols,
-        step_name="Todos los escenarios SETAR",
-        save_path="resumen_global_ecrps_setar.png"
-    )
-    
-    # Ranking heatmap
-    PlotManager.plot_ranking_heatmap(
-        df_final.groupby('Paso_H')[model_cols].mean().reset_index(drop=True),
-        model_cols,
-        title="Ranking por Horizonte de Predicción (SETAR)",
-        save_path="ranking_heatmap_setar.png"
-    )
     
     elapsed = time.time() - start_time
     print(f"\n⏱  Tiempo total: {elapsed:.1f}s ({elapsed/3600:.2f} horas)")

@@ -1271,8 +1271,25 @@ import gc
 from joblib import Parallel, delayed
 
 class Pipeline140_TamanosCrecientes:
-    N_TEST_STEPS = 12 
+    """
+    ✅ PIPELINE CORREGIDO - Tamaños Crecientes
     
+    CORRECCIÓN APLICADA:
+    - Ahora mantiene proporción FIJA 83%/17% en OPTIMIZACIÓN
+    - Pero usa TODO el histórico (train+calib) para freeze_hyperparameters
+    - Esto garantiza que tamaños diferentes tomen tiempos diferentes
+    
+    ESTRUCTURA:
+    - Proporción fija: 83% train / 17% calib (SOLO para optimización)
+    - 5 tamaños totales diferentes
+    - 12 pasos de predicción (fijos)
+    - 3 tipos de procesos: ARMA (7 configs), ARIMA (7 configs), SETAR (7 configs)
+    - 5 distribuciones × 4 varianzas
+    """
+    
+    N_TEST_STEPS = 12  # Siempre 12 pasos de predicción
+    
+    # 21 Configuraciones (7 ARMA + 7 ARIMA + 7 SETAR)
     ARMA_CONFIGS = [
         {'nombre': 'AR(1)', 'phi': [0.9], 'theta': []},
         {'nombre': 'AR(2)', 'phi': [0.5, -0.3], 'theta': []},
@@ -1294,184 +1311,348 @@ class Pipeline140_TamanosCrecientes:
     ]
     
     SETAR_CONFIGS = [
-        {'nombre': 'SETAR-1', 'phi_regime1': [0.6], 'phi_regime2': [-0.5], 'threshold': 0.0, 'delay': 1, 'description': 'SETAR(2;1,1) d=1, r=0'},
-        {'nombre': 'SETAR-2', 'phi_regime1': [0.7], 'phi_regime2': [-0.7], 'threshold': 0.0, 'delay': 2, 'description': 'SETAR(2;1,1) d=2, r=0'},
-        {'nombre': 'SETAR-3', 'phi_regime1': [0.5, -0.2], 'phi_regime2': [-0.3, 0.1], 'threshold': 0.5, 'delay': 1, 'description': 'SETAR(2;2,2) d=1, r=0.5'},
-        {'nombre': 'SETAR-4', 'phi_regime1': [0.8, -0.15], 'phi_regime2': [-0.6, 0.2], 'threshold': 1.0, 'delay': 2, 'description': 'SETAR(2;2,2) d=2, r=1.0'},
-        {'nombre': 'SETAR-5', 'phi_regime1': [0.4, -0.1, 0.05], 'phi_regime2': [-0.3, 0.1, -0.05], 'threshold': 0.0, 'delay': 1, 'description': 'SETAR(2;3,3) d=1, r=0'},
-        {'nombre': 'SETAR-6', 'phi_regime1': [0.5, -0.3, 0.1], 'phi_regime2': [-0.4, 0.2, -0.05], 'threshold': 0.5, 'delay': 2, 'description': 'SETAR(2;3,3) d=2, r=0.5'},
-        {'nombre': 'SETAR-7', 'phi_regime1': [0.3, 0.1], 'phi_regime2': [-0.2, -0.1], 'threshold': 0.8, 'delay': 3, 'description': 'SETAR(2;2,2) d=3, r=0.8'}
+        {'nombre': 'SETAR-1', 'phi_regime1': [0.6], 'phi_regime2': [-0.5], 'threshold': 0.0, 'delay': 1},
+        {'nombre': 'SETAR-2', 'phi_regime1': [0.7], 'phi_regime2': [-0.7], 'threshold': 0.0, 'delay': 2},
+        {'nombre': 'SETAR-3', 'phi_regime1': [0.5, -0.2], 'phi_regime2': [-0.3, 0.1], 'threshold': 0.5, 'delay': 1},
+        {'nombre': 'SETAR-4', 'phi_regime1': [0.8, -0.15], 'phi_regime2': [-0.6, 0.2], 'threshold': 1.0, 'delay': 2},
+        {'nombre': 'SETAR-5', 'phi_regime1': [0.4, -0.1, 0.05], 'phi_regime2': [-0.3, 0.1, -0.05], 'threshold': 0.0, 'delay': 1},
+        {'nombre': 'SETAR-6', 'phi_regime1': [0.5, -0.3, 0.1], 'phi_regime2': [-0.4, 0.2, -0.05], 'threshold': 0.5, 'delay': 2},
+        {'nombre': 'SETAR-7', 'phi_regime1': [0.3, 0.1], 'phi_regime2': [-0.2, -0.1], 'threshold': 0.8, 'delay': 3}
     ]
     
     DISTRIBUTIONS = ['normal', 'uniform', 'exponential', 't-student', 'mixture']
     VARIANCES = [0.2, 0.5, 1.0, 3.0]
+    
+    # ✅ 5 Tamaños con proporción fija 83% / 17%
+    SIZE_COMBINATIONS = [
+        {'tag': 'N=120', 'n_total': 120, 'n_train': 100, 'n_calib': 20},
+        {'tag': 'N=240', 'n_total': 240, 'n_train': 199, 'n_calib': 41},
+        {'tag': 'N=360', 'n_total': 360, 'n_train': 299, 'n_calib': 61},
+        {'tag': 'N=600', 'n_total': 600, 'n_train': 498, 'n_calib': 102},
+        {'tag': 'N=1200', 'n_total': 1200, 'n_train': 996, 'n_calib': 204}
+    ]
 
-    def __init__(self, n_boot: int = 1000, seed: int = 42, verbose: bool = False):
+    def __init__(self, n_boot: int = 1000, seed: int = 42, verbose: bool = False, proceso_tipo: str = 'ARMA'):
         self.n_boot = n_boot
         self.seed = seed
         self.verbose = verbose
+        self.proceso_tipo = proceso_tipo.upper()
         self.rng = np.random.default_rng(seed)
-        self.TRAIN_SIZES = [100, 500, 1000]
-        self.CALIB_SIZES = [20, 100, 200]
 
     def _setup_models(self, seed: int):
+        """Configuración de modelos"""
         return {
             'Block Bootstrapping': CircularBlockBootstrapModel(n_boot=self.n_boot, random_state=seed),
             'Sieve Bootstrap': SieveBootstrapModel(n_boot=self.n_boot, random_state=seed),
             'LSPM': LSPM(random_state=seed),
             'LSPMW': LSPMW(rho=0.95, random_state=seed),
-            'AREPD': AREPD(n_lags=5, rho=0.9, random_state=seed),
+            'AREPD': AREPD(n_lags=5, rho=0.93, random_state=seed),
             'MCPS': MondrianCPSModel(n_lags=10, random_state=seed),
-            'AV-MCPS': AdaptiveVolatilityMondrianCPS(n_lags=15, random_state=seed),
-            'DeepAR': DeepARModel(hidden_size=15, n_lags=5, epochs=25, num_samples=self.n_boot, random_state=seed),
-            'EnCQR-LSTM': EnCQR_LSTM_Model(n_lags=20, B=3, units=24, epochs=15, num_samples=self.n_boot, random_state=seed)
+            'AV-MCPS': AdaptiveVolatilityMondrianCPS(n_lags=12, random_state=seed),
+            'DeepAR': DeepARModel(hidden_size=20, n_lags=10, epochs=25, num_samples=self.n_boot, random_state=seed),
+            'EnCQR-LSTM': EnCQR_LSTM_Model(n_lags=15, B=3, units=24, epochs=20, num_samples=self.n_boot, random_state=seed)
         }
 
-    def _create_simulator(self, config: dict, proceso_tipo: str, dist: str, var: float, seed: int):
-        sigma = np.sqrt(var)
-        if proceso_tipo == 'ARMA':
-            return ARMASimulation(phi=config['phi'], theta=config['theta'], noise_dist=dist, sigma=sigma, seed=seed)
-        elif proceso_tipo == 'ARIMA':
-            return ARIMASimulation(phi=config['phi'], theta=config['theta'], noise_dist=dist, sigma=sigma, seed=seed)
-        else:  # SETAR
-            return SETARSimulation(phi_regime1=config['phi_regime1'], phi_regime2=config['phi_regime2'], 
-                                   threshold=config['threshold'], delay=config['delay'], noise_dist=dist, sigma=sigma, seed=seed)
+    def _get_configs_for_process_type(self):
+        """Obtiene las configuraciones según el tipo de proceso"""
+        if self.proceso_tipo == 'ARMA':
+            return self.ARMA_CONFIGS
+        elif self.proceso_tipo == 'ARIMA':
+            return self.ARIMA_CONFIGS
+        elif self.proceso_tipo == 'SETAR':
+            return self.SETAR_CONFIGS
+        else:
+            raise ValueError(f"Tipo de proceso desconocido: {self.proceso_tipo}")
 
-    def run_single_scenario(self, config, proceso_tipo, dist, var, n_train, n_calib, size_tag, scenario_seed):
-        simulator = self._create_simulator(config, proceso_tipo, dist, var, scenario_seed)
-        total_len = n_train + n_calib + self.N_TEST_STEPS
+    def _create_simulator(self, config: dict, dist: str, var: float, seed: int):
+        """Crea simulador según tipo de proceso"""
+        sigma = np.sqrt(var)
+        
+        if self.proceso_tipo == 'ARMA':
+            return ARMASimulation(
+                phi=config['phi'], 
+                theta=config['theta'],
+                noise_dist=dist, 
+                sigma=sigma, 
+                seed=seed
+            )
+        elif self.proceso_tipo == 'ARIMA':
+            return ARIMASimulation(
+                phi=config['phi'], 
+                theta=config['theta'],
+                noise_dist=dist, 
+                sigma=sigma, 
+                seed=seed
+            )
+        else:  # SETAR
+            return SETARSimulation(
+                phi_regime1=config['phi_regime1'],
+                phi_regime2=config['phi_regime2'],
+                threshold=config['threshold'],
+                delay=config['delay'],
+                noise_dist=dist,
+                sigma=sigma,
+                seed=seed
+            )
+
+    def run_single_scenario(self, config: dict, dist: str, var: float, 
+                           n_train: int, n_calib: int, size_tag: str, 
+                           scenario_seed: int) -> List[Dict]:
+        """
+        ✅ CORREGIDO: Ahora usa consistentemente los datos
+        
+        CAMBIOS:
+        1. Optimización usa solo n_train para entrenar
+        2. freeze_hyperparameters() usa TODO (train+calib)
+        3. Esto hace que tamaños diferentes tomen tiempos diferentes
+        """
+        
+        n_total = n_train + n_calib
+        
+        # 1. Simulación
+        simulator = self._create_simulator(config, dist, var, scenario_seed)
+        total_len = n_total + self.N_TEST_STEPS
         series, errors = simulator.simulate(n=total_len, burn_in=100)
         
+        # ✅ CORRECCIÓN: Usar solo n_train para optimización
         train_data = series[:n_train]
-        val_data = series[n_train : n_train + n_calib]
+        val_data = series[n_train:n_total]  # Solo n_calib datos
         
+        if self.verbose:
+            print(f"   📊 Train: {len(train_data)}, Calib: {len(val_data)}, Test steps: {self.N_TEST_STEPS}")
+        
+        # 2. Optimización de hiperparámetros (usa train_data y val_data)
         models = self._setup_models(scenario_seed)
         optimizer = TimeBalancedOptimizer(random_state=scenario_seed, verbose=self.verbose)
         best_params = optimizer.optimize_all_models(models, train_data, val_data)
         
-        train_val_full = series[:n_train + n_calib]
+        # 3. Aplicar mejores hiperparámetros y congelar con TODOS los datos
+        train_val_full = series[:n_total]  # ✅ ESTO crece con el tamaño
+        
         for name, model in models.items():
             if name in best_params:
                 for k, v in best_params[name].items():
-                    if hasattr(model, k): setattr(model, k, v)
+                    if hasattr(model, k): 
+                        setattr(model, k, v)
+            
+            # ✅ CLAVE: freeze_hyperparameters() usa TODO el histórico
+            # Esto hace que N=1200 tome más tiempo que N=120
             if hasattr(model, 'freeze_hyperparameters'):
                 model.freeze_hyperparameters(train_val_full)
 
+        # 4. Testing Rolling Window
         results_rows = []
+
         for t in range(self.N_TEST_STEPS):
-            idx = n_train + n_calib + t
+            idx = n_total + t
             h_series = series[:idx]
             h_errors = errors[:idx]
+            
+            # Densidad teórica
             true_samples = simulator.get_true_next_step_samples(h_series, h_errors, n_samples=1000)
             
+            # Fila de resultados
             row = {
-                'Paso': t + 1, 
-                'Tipo_Proceso': proceso_tipo,
-                'Proceso': config['nombre'], 
+                'Paso': t + 1,
+                'Tipo_Proceso': self.proceso_tipo,
+                'Proceso': config['nombre'],
                 'Distribución': dist,
-                'Varianza': var, 
-                'N_Train': n_train, 
-                'N_Calib': n_calib, 
-                'N_Total': n_train + n_calib, 
+                'Varianza': var,
+                'N_Train': n_train,
+                'N_Calib': n_calib,
+                'N_Total': n_total,  # ✅ Ahora calculado correctamente
                 'Size': size_tag
             }
             
+            # ✅ Usar fit_predict()
             for name, model in models.items():
                 try:
-                    pred = model.fit_predict(h_series) if "Bootstrap" in name else model.fit_predict(pd.DataFrame({'valor': h_series}))
-                    row[name] = ecrps(np.asarray(pred).flatten(), true_samples)
-                except:
+                    if "Bootstrap" in name:
+                        pred = model.fit_predict(h_series)
+                    else:
+                        pred = model.fit_predict(pd.DataFrame({'valor': h_series}))
+                    
+                    pred_array = np.asarray(pred).flatten()
+                    row[name] = ecrps(pred_array, true_samples)
+                    
+                except Exception as e:
+                    if self.verbose:
+                        print(f"⚠️ Error {name} en paso {t+1}: {e}")
                     row[name] = np.nan
+            
             results_rows.append(row)
+
+        clear_all_sessions()
         return results_rows
 
-    def _run_scenario_wrapper(self, args):
+    def _run_scenario_wrapper(self, args: Tuple) -> List[Dict]:
+        """Wrapper para paralelización"""
         return self.run_single_scenario(*args)
 
-    def generate_all_scenarios(self):
+    def generate_all_scenarios(self) -> List[Tuple]:
+        """
+        ✅ Genera escenarios para UN tipo de proceso
+        """
         scenarios = []
+        configs = self._get_configs_for_process_type()
+        
+        # Debug info
+        if self.verbose or True:
+            print(f"\n🔍 Generando escenarios para {self.proceso_tipo}:")
+            print(f"   • Configs: {len(configs)}")
+            print(f"   • Tamaños: {len(self.SIZE_COMBINATIONS)}")
+            print(f"   • Distribuciones: {len(self.DISTRIBUTIONS)}")
+            print(f"   • Varianzas: {len(self.VARIANCES)}")
+            esperados = len(configs) * len(self.SIZE_COMBINATIONS) * len(self.DISTRIBUTIONS) * len(self.VARIANCES)
+            print(f"   • ESPERADOS: {esperados} escenarios")
+            print(f"   • Filas esperadas: {esperados * self.N_TEST_STEPS}\n")
+        
         s_id = 0
-        configs = self.CONFIGS.get(self.proceso_tipo, [])
-        
-        # DEBUG: Imprime información
-        print(f"\n🔍 DEBUG generate_all_scenarios():")
-        print(f"   proceso_tipo: {self.proceso_tipo}")
-        print(f"   len(configs): {len(configs)}")
-        print(f"   len(SIZE_COMBINATIONS): {len(self.SIZE_COMBINATIONS)}")
-        print(f"   len(DISTRIBUTIONS): {len(self.DISTRIBUTIONS)}")
-        print(f"   len(VARIANCES): {len(self.VARIANCES)}")
-        print(f"   Esperados: {len(configs)} × {len(self.SIZE_COMBINATIONS)} × {len(self.DISTRIBUTIONS)} × {len(self.VARIANCES)} = {len(configs) * len(self.SIZE_COMBINATIONS) * len(self.DISTRIBUTIONS) * len(self.VARIANCES)}")
-        
-        for size in self.SIZE_COMBINATIONS:
-            for cfg in configs:
+        for cfg in configs:
+            for size in self.SIZE_COMBINATIONS:
                 for dist in self.DISTRIBUTIONS:
                     for var in self.VARIANCES:
                         scenarios.append((
-                            cfg.copy(), 
-                            dist, 
-                            var, 
-                            size['n_train'], 
-                            size['n_calib'], 
-                            size['prop_tag'], 
+                            cfg.copy(),
+                            dist,
+                            var,
+                            size['n_train'],
+                            size['n_calib'],
+                            size['tag'],
                             self.seed + s_id
                         ))
                         s_id += 1
         
-        print(f"   Generados realmente: {len(scenarios)}")
-        print(f"   Diferencia: {len(scenarios) - (len(configs) * len(self.SIZE_COMBINATIONS) * len(self.DISTRIBUTIONS) * len(self.VARIANCES))}")
-        
+        print(f"✅ Generados {len(scenarios)} escenarios\n")
         return scenarios
 
-    def run_all(self, excel_filename=None, batch_size=10, max_workers=3):
+    def run_all(self, excel_filename: str = None, batch_size: int = 20, 
+                max_workers: int = None, save_frequency: int = 3) -> pd.DataFrame:
+        """
+        Ejecuta todos los escenarios con paralelización
+        """
+        
+        # Auto-detecta workers
+        if max_workers is None:
+            cpu_count = os.cpu_count() or 4
+            max_workers = max(10, min(int(cpu_count * 0.75), cpu_count - 2))
+        
         if excel_filename is None:
-            excel_filename = "RESULTADOS_TODOS_PROCESOS.xlsx"
-            
+            excel_filename = f"RESULTADOS_TAMANOS_{self.proceso_tipo}.xlsx"
+        
         tasks = self.generate_all_scenarios()
-        all_results = []
         num_batches = (len(tasks) + batch_size - 1) // batch_size
-
-        print(f"📊 Total de escenarios: {len(tasks)}")
-        print(f"📦 Número de batches: {num_batches}")
+        
+        print(f"\n{'='*60}")
+        print(f"🚀 PIPELINE TAMAÑOS CRECIENTES - {self.proceso_tipo}")
+        print(f"{'='*60}")
+        print(f"📊 Total escenarios: {len(tasks)}")
+        print(f"📦 Batches: {num_batches} (tamaño {batch_size})")
+        print(f"👷 Workers: {max_workers} de {os.cpu_count()} cores")
+        print(f"💾 Guardado cada {save_frequency} batches")
+        print(f"{'='*60}\n")
+        
+        all_results = []
         
         for i in range(num_batches):
             start_idx = i * batch_size
             end_idx = min((i + 1) * batch_size, len(tasks))
             batch = tasks[start_idx:end_idx]
             
-            print(f"🔄 Procesando batch {i+1}/{num_batches}...")
+            print(f"🔄 Batch {i+1}/{num_batches}... ", end='', flush=True)
             
-            results = Parallel(n_jobs=max_workers, backend='loky')(
+            batch_results = Parallel(n_jobs=max_workers, backend='loky', verbose=0)(
                 delayed(self._run_scenario_wrapper)(t) for t in batch
             )
             
-            for r in results: 
-                all_results.extend(r)
+            for result_list in batch_results:
+                all_results.extend(result_list)
             
-            # Guardar después de cada batch
-            pd.DataFrame(all_results).to_excel(excel_filename, index=False)
-            print(f"✅ Guardado progreso: {len(all_results)} filas")
+            print(f"✅ {len(all_results)} filas")
             
+            if (i + 1) % save_frequency == 0 or (i + 1) == num_batches:
+                pd.DataFrame(all_results).to_excel(excel_filename, index=False)
+                print(f"💾 Checkpoint: {excel_filename}")
+            
+            del batch_results, batch
+            clear_all_sessions()
             gc.collect()
         
-        print(f"\n🎉 ¡Completado! Total de filas: {len(all_results)}")
-        return pd.DataFrame(all_results)
-
-
+        df_final = pd.DataFrame(all_results)
+        df_final.to_excel(excel_filename, index=False)
+        
+        print(f"\n🎉 Completado: {len(all_results)} filas → {excel_filename}\n")
+        return df_final
+    
 # ============================================================================
 # ¿La proporción de datos afecta a la calidad de las densidades predictivas?
 # ============================================================================
+import numpy as np
+import pandas as pd
+import gc
+import os
+import psutil
+from joblib import Parallel, delayed
+from typing import Dict, List, Tuple
+
+
+import numpy as np
+import pandas as pd
+import warnings
+import gc
+import os
+import time
+from joblib import Parallel, delayed
+from typing import Dict, List, Tuple
+
+warnings.filterwarnings("ignore")
+
+from simulacion import ARMASimulation, ARIMASimulation, SETARSimulation
+from modelos import (CircularBlockBootstrapModel, SieveBootstrapModel, LSPM, LSPMW, 
+                     DeepARModel, AREPD, MondrianCPSModel, AdaptiveVolatilityMondrianCPS,
+                     EnCQR_LSTM_Model, TimeBalancedOptimizer)
+from metricas import ecrps
+
+def clear_all_sessions():
+    """Limpia memoria de forma agresiva."""
+    gc.collect()
+    try:
+        import torch
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+    except:
+        pass
+    try:
+        import tensorflow as tf
+        tf.keras.backend.clear_session()
+    except:
+        pass
+
 
 class Pipeline240_ProporcionesVariables:
     """
-    Pipeline unificado con Tamaño Fijo (240) y Proporciones Variables.
-    1) Compara Densidad Predictiva vs Densidad Teórica mediante ECRPS.
-    2) Proporciones de Calibración: 10%, 20%, 30%, 40%, 50%.
+    ✅ PIPELINE OPTIMIZADO - Proporciones Variables (N=240)
+    
+    Evalúa cómo afecta la proporción Train/Calib al desempeño de los modelos.
+    
+    ESTRUCTURA:
+    - N_TOTAL fijo = 240
+    - 5 proporciones: 10%, 20%, 30%, 40%, 50% de calibración
+    - 3 tipos de procesos: ARMA (7 configs), ARIMA (7 configs), SETAR (7 configs)
+    - 5 distribuciones × 4 varianzas
+    - TOTAL: 21 × 5 × 5 × 4 = 2,100 escenarios
+    
+    OPTIMIZACIONES:
+    ✅ Usa fit_predict() en CADA paso
+    ✅ Limpieza agresiva de memoria después de cada batch
+    ✅ Guardado incremental con liberación de memoria
+    ✅ Monitoreo de uso de memoria
     """
     
     N_TOTAL = 240  # Tamaño histórico fijo
     N_TEST_STEPS = 12 
     
-    # Configuraciones de Proporciones (N_TRAIN + N_CALIB = 240)
+    # 5 Proporciones de calibración
     SIZE_COMBINATIONS = [
         {'prop_tag': '10%', 'n_train': 216, 'n_calib': 24, 'prop_val': 0.10},
         {'prop_tag': '20%', 'n_train': 192, 'n_calib': 48, 'prop_val': 0.20},
@@ -1480,6 +1661,7 @@ class Pipeline240_ProporcionesVariables:
         {'prop_tag': '50%', 'n_train': 120, 'n_calib': 120, 'prop_val': 0.50}
     ]
     
+    # 21 Configuraciones (7 ARMA + 7 ARIMA + 7 SETAR)
     CONFIGS = {
         'ARMA': [
             {'nombre': 'AR(1)', 'phi': [0.9], 'theta': []},
@@ -1521,151 +1703,275 @@ class Pipeline240_ProporcionesVariables:
         self.rng = np.random.default_rng(seed)
 
     def _setup_models(self, seed: int):
+        """Configuración de modelos"""
         return {
             'Block Bootstrapping': CircularBlockBootstrapModel(n_boot=self.n_boot, random_state=seed),
             'Sieve Bootstrap': SieveBootstrapModel(n_boot=self.n_boot, random_state=seed),
             'LSPM': LSPM(random_state=seed),
             'LSPMW': LSPMW(rho=0.95, random_state=seed),
-            'AREPD': AREPD(n_lags=5, rho=0.9, random_state=seed),
+            'AREPD': AREPD(n_lags=5, rho=0.93, random_state=seed),
             'MCPS': MondrianCPSModel(n_lags=10, random_state=seed),
-            'AV-MCPS': AdaptiveVolatilityMondrianCPS(n_lags=15, random_state=seed),
-            'DeepAR': DeepARModel(hidden_size=15, n_lags=5, epochs=25, num_samples=self.n_boot, random_state=seed),
-            'EnCQR-LSTM': EnCQR_LSTM_Model(n_lags=20, B=3, units=24, epochs=15, num_samples=self.n_boot, random_state=seed)
+            'AV-MCPS': AdaptiveVolatilityMondrianCPS(n_lags=12, random_state=seed),
+            'DeepAR': DeepARModel(hidden_size=20, n_lags=10, epochs=25, num_samples=self.n_boot, random_state=seed),
+            'EnCQR-LSTM': EnCQR_LSTM_Model(n_lags=15, B=3, units=24, epochs=20, num_samples=self.n_boot, random_state=seed)
         }
 
     def _create_simulator(self, config: dict, dist: str, var: float, seed: int):
+        """Crea simulador según tipo de proceso"""
         sigma = np.sqrt(var)
+        
         if self.proceso_tipo == 'ARMA':
-            return ARMASimulation(phi=config['phi'], theta=config['theta'], noise_dist=dist, sigma=sigma, seed=seed)
+            return ARMASimulation(
+                phi=config['phi'], 
+                theta=config['theta'],
+                noise_dist=dist, 
+                sigma=sigma, 
+                seed=seed
+            )
         elif self.proceso_tipo == 'ARIMA':
-            return ARIMASimulation(phi=config['phi'], theta=config['theta'], noise_dist=dist, sigma=sigma, seed=seed)
-        else: # SETAR
-            return SETARSimulation(phi_regime1=config['phi_regime1'], phi_regime2=config['phi_regime2'], 
-                                   threshold=config['threshold'], delay=config['delay'], noise_dist=dist, sigma=sigma, seed=seed)
+            return ARIMASimulation(
+                phi=config['phi'], 
+                theta=config['theta'],
+                noise_dist=dist, 
+                sigma=sigma, 
+                seed=seed
+            )
+        else:  # SETAR
+            return SETARSimulation(
+                phi_regime1=config['phi_regime1'],
+                phi_regime2=config['phi_regime2'],
+                threshold=config['threshold'],
+                delay=config['delay'],
+                noise_dist=dist,
+                sigma=sigma,
+                seed=seed
+            )
 
-    def run_single_scenario(self, config, dist, var, n_train, n_calib, prop_tag, scenario_seed):
+    def run_single_scenario(self, config: dict, dist: str, var: float, 
+                           n_train: int, n_calib: int, prop_tag: str, 
+                           scenario_seed: int) -> List[Dict]:
+        """
+        ✅ Ejecuta un escenario completo usando fit_predict()
+        
+        CLAVE: USA fit_predict() en cada paso (NO predict() solo)
+        """
+        
         # 1. Simulación
         simulator = self._create_simulator(config, dist, var, scenario_seed)
         total_len = self.N_TOTAL + self.N_TEST_STEPS
         series, errors = simulator.simulate(n=total_len, burn_in=100)
         
         train_data = series[:n_train]
-        val_data = series[n_train : self.N_TOTAL]
+        val_data = series[n_train:self.N_TOTAL]
         
-        # 2. Optimización y Congelamiento
+        # 2. Optimización de hiperparámetros
         models = self._setup_models(scenario_seed)
         optimizer = TimeBalancedOptimizer(random_state=scenario_seed, verbose=self.verbose)
         best_params = optimizer.optimize_all_models(models, train_data, val_data)
         
+        # 3. Aplicar mejores hiperparámetros y congelar
         train_val_full = series[:self.N_TOTAL]
         for name, model in models.items():
             if name in best_params:
                 for k, v in best_params[name].items():
-                    if hasattr(model, k): setattr(model, k, v)
+                    if hasattr(model, k): 
+                        setattr(model, k, v)
+            
             if hasattr(model, 'freeze_hyperparameters'):
                 model.freeze_hyperparameters(train_val_full)
 
-        # 3. Test Rolling con ECRPS
+        # 4. Testing Rolling Window
         results_rows = []
-        model_names = list(models.keys())
 
         for t in range(self.N_TEST_STEPS):
             idx = self.N_TOTAL + t
             h_series = series[:idx]
             h_errors = errors[:idx]
             
-            # Densidad Teórica (Ground Truth)
+            # Densidad teórica (Ground Truth)
             true_samples = simulator.get_true_next_step_samples(h_series, h_errors, n_samples=1000)
             
-            # FILA RECTIFICADA
+            # Fila de resultados
             row = {
-                'Paso': t + 1, 
-                'Proceso': config['nombre'], 
-                'Distribución': dist,   # Cambio Dist -> Distribución
-                'Varianza': var,        # Cambio Var -> Varianza
-                'N_Train': n_train, 
-                'N_Calib': n_calib, 
-                'Prop_Calib': prop_tag  # Cambio Prop -> Prop_Calib
+                'Paso': t + 1,
+                'Tipo_Proceso': self.proceso_tipo,
+                'Proceso': config['nombre'],
+                'Distribución': dist,
+                'Varianza': var,
+                'N_Train': n_train,
+                'N_Calib': n_calib,
+                'Prop_Calib': prop_tag
             }
             
+            # ✅ CLAVE: Usar fit_predict()
             for name, model in models.items():
                 try:
-                    if "Bootstrap" in name: pred = model.fit_predict(h_series)
-                    else: pred = model.fit_predict(pd.DataFrame({'valor': h_series}))
+                    if "Bootstrap" in name:
+                        pred = model.fit_predict(h_series)
+                    else:
+                        pred = model.fit_predict(pd.DataFrame({'valor': h_series}))
                     
                     pred_array = np.asarray(pred).flatten()
                     row[name] = ecrps(pred_array, true_samples)
-                except:
+                    
+                except Exception as e:
+                    if self.verbose:
+                        print(f"⚠️ Error {name} en paso {t+1}: {e}")
                     row[name] = np.nan
             
             results_rows.append(row)
 
-        # 4. GENERACIÓN DE FILA "Promedio" (Crucial para analisis_proporciones_240)
-        df_temp = pd.DataFrame(results_rows)
-        avg_row = {
-            'Paso': 'Promedio',
-            'Proceso': config['nombre'],
-            'Distribución': dist,
-            'Varianza': var,
-            'N_Train': n_train,
-            'N_Calib': n_calib,
-            'Prop_Calib': prop_tag
-        }
-        for m_name in model_names:
-            avg_row[m_name] = df_temp[m_name].mean()
-        
-        results_rows.append(avg_row)
-
         clear_all_sessions()
         return results_rows
 
-    def _run_scenario_wrapper(self, args):
+    def _run_scenario_wrapper(self, args: Tuple) -> List[Dict]:
+        """Wrapper para paralelización"""
         return self.run_single_scenario(*args)
 
-    def generate_all_scenarios(self):
+    def generate_all_scenarios(self) -> List[Tuple]:
+        """
+        Genera todos los escenarios para un tipo de proceso
+        
+        ✅ ORDEN: configs × props × dists × vars
+        """
         scenarios = []
-        s_id = 0
         configs = self.CONFIGS.get(self.proceso_tipo, [])
         
-        for size in self.SIZE_COMBINATIONS:
-            for cfg in configs:
+        # Debug info
+        if self.verbose or True:
+            print(f"\n🔍 Generando escenarios para {self.proceso_tipo}:")
+            print(f"   • Configs: {len(configs)}")
+            print(f"   • Proporciones: {len(self.SIZE_COMBINATIONS)}")
+            print(f"   • Distribuciones: {len(self.DISTRIBUTIONS)}")
+            print(f"   • Varianzas: {len(self.VARIANCES)}")
+            esperados = len(configs) * len(self.SIZE_COMBINATIONS) * len(self.DISTRIBUTIONS) * len(self.VARIANCES)
+            print(f"   • ESPERADOS: {esperados} escenarios")
+            print(f"   • Filas esperadas: {esperados * self.N_TEST_STEPS}\n")
+        
+        s_id = 0
+        for cfg in configs:
+            for size in self.SIZE_COMBINATIONS:
                 for dist in self.DISTRIBUTIONS:
                     for var in self.VARIANCES:
                         scenarios.append((
-                            cfg.copy(), 
-                            dist, 
-                            var, 
-                            size['n_train'], 
-                            size['n_calib'], 
-                            size['prop_tag'], 
+                            cfg.copy(),
+                            dist,
+                            var,
+                            size['n_train'],
+                            size['n_calib'],
+                            size['prop_tag'],
                             self.seed + s_id
                         ))
                         s_id += 1
+        
+        # Verificación final
+        if len(scenarios) != esperados:
+            print(f"⚠️ WARNING: Se generaron {len(scenarios)} pero se esperaban {esperados}")
+        else:
+            print(f"✅ Generados correctamente {len(scenarios)} escenarios\n")
+        
         return scenarios
 
-    def run_all(self, excel_filename=None, batch_size=10, max_workers=3):
+    def run_all(self, excel_filename: str = None, batch_size: int = 20, 
+                max_workers: int = None, save_frequency: int = 3) -> pd.DataFrame:
+        """
+        ✅ Ejecuta todos los escenarios con paralelización y optimización de memoria
+        """
+        
+        # Auto-detecta workers (75% de cores, mínimo 10)
+        if max_workers is None:
+            cpu_count = os.cpu_count() or 4
+            max_workers = max(10, min(int(cpu_count * 0.75), cpu_count - 2))
+        
         if excel_filename is None:
-            excel_filename = f"RESULTADOS_PROPORCIONES_{self.proceso_tipo}.xlsx"
-            
+            excel_filename = f"RESULTADOS_PROPORCIONES_240_{self.proceso_tipo}.xlsx"
+        
         tasks = self.generate_all_scenarios()
-        print(f"🚀 Iniciando Pipeline Proporciones ({self.proceso_tipo}): {len(tasks)} escenarios.")
+        num_batches = (len(tasks) + batch_size - 1) // batch_size
+        
+        print(f"\n{'='*60}")
+        print(f"🚀 PIPELINE PROPORCIONES 240 - {self.proceso_tipo}")
+        print(f"{'='*60}")
+        print(f"📊 Total escenarios: {len(tasks)}")
+        print(f"📦 Batches: {num_batches} (tamaño {batch_size})")
+        print(f"👷 Workers: {max_workers} de {os.cpu_count()} cores")
+        print(f"💾 Guardado cada {save_frequency} batches")
+        print(f"{'='*60}\n")
         
         all_results = []
-        num_batches = (len(tasks) + batch_size - 1) // batch_size
-
+        checkpoint_counter = 0
+        
         for i in range(num_batches):
             start_idx = i * batch_size
             end_idx = min((i + 1) * batch_size, len(tasks))
             batch = tasks[start_idx:end_idx]
             
-            print(f"📦 Procesando Lote {i+1}/{num_batches}...")
-            results = Parallel(n_jobs=max_workers, backend='loky')(
+            print(f"🔄 Batch {i+1}/{num_batches}... ", end='', flush=True)
+            
+            # Procesa batch en paralelo
+            batch_results = Parallel(n_jobs=max_workers, backend='loky', verbose=0)(
                 delayed(self._run_scenario_wrapper)(t) for t in batch
             )
             
-            for r in results: all_results.extend(r)
-            pd.DataFrame(all_results).to_excel(excel_filename, index=False)
+            # Acumula resultados
+            for result_list in batch_results:
+                all_results.extend(result_list)
+            
+            print(f"✅ {len(all_results)} filas acumuladas")
+            
+            # ✅ MEJORADO: Guarda periódicamente con limpieza de memoria
+            if (i + 1) % save_frequency == 0 or (i + 1) == num_batches:
+                
+                if checkpoint_counter == 0:
+                    # Primera vez: crear archivo
+                    df_checkpoint = pd.DataFrame(all_results)
+                    df_checkpoint.to_excel(excel_filename, index=False)
+                    del df_checkpoint
+                else:
+                    # Subsecuentes: leer, concatenar, guardar
+                    df_new = pd.DataFrame(all_results)
+                    df_prev = pd.read_excel(excel_filename)
+                    df_combined = pd.concat([df_prev, df_new], ignore_index=True)
+                    df_combined.to_excel(excel_filename, index=False)
+                    
+                    del df_prev, df_new, df_combined
+                
+                print(f"💾 Checkpoint {checkpoint_counter + 1}: {excel_filename}")
+                
+                # ✅ CLAVE: Vaciar lista después de guardar
+                all_results.clear()
+                checkpoint_counter += 1
+                gc.collect()
+            
+            # ✅ Limpieza agresiva después de cada batch
+            del batch_results, batch
             clear_all_sessions()
             gc.collect()
+            
+            # ✅ Monitoreo de memoria cada 6 batches
+            if (i + 1) % (save_frequency * 2) == 0:
+                try:
+                    import psutil
+                    process = psutil.Process()
+                    mem_percent = process.memory_percent()
+                    print(f"   🧹 Memoria en uso: {mem_percent:.1f}%")
+                    
+                    # Si memoria > 70%, limpieza adicional
+                    if mem_percent > 70:
+                        print("   ⚠️ Ejecutando limpieza agresiva...")
+                        gc.collect()
+                        gc.collect()  # Doble pasada
+                except ImportError:
+                    pass  # psutil no disponible
+        
+        # Leer resultado final del archivo guardado
+        df_final = pd.read_excel(excel_filename)
+        
+        # Limpieza final
+        all_results.clear()
+        del all_results
+        gc.collect()
+        
+        print(f"\n🎉 Completado: {len(df_final)} filas → {excel_filename}\n")
+        return df_final
 
-        return pd.DataFrame(all_results)
