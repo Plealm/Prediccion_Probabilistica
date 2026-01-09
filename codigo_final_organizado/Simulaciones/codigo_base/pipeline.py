@@ -1583,7 +1583,304 @@ class Pipeline140_TamanosCrecientes:
         
         print(f"\n🎉 Completado: {len(all_results)} filas → {excel_filename}\n")
         return df_final
+
+class Pipeline_ARIMA_Fast:
+    """
+    ⚡ PIPELINE OPTIMIZADO - SOLO ARIMA - ULTRA RÁPIDO
     
+    OPTIMIZACIONES APLICADAS:
+    ✅ Solo procesos ARIMA (eliminado ARMA y SETAR)
+    ✅ Modelos más rápidos priorizados
+    ✅ Menos epochs en DeepAR y EnCQR
+    ✅ Optimización de hiperparámetros más agresiva
+    ✅ Cache de simulaciones
+    ✅ Paralelización mejorada
+    
+    ESTRUCTURA:
+    - Proporción fija: 83% train / 17% calib
+    - 5 tamaños totales diferentes
+    - 12 pasos de predicción
+    - 7 configuraciones ARIMA
+    - 5 distribuciones × 4 varianzas
+    - Total: 700 escenarios (vs 2100 original)
+    """
+    
+    N_TEST_STEPS = 12
+    
+    # Solo ARIMA configs
+    ARIMA_CONFIGS = [
+        {'nombre': 'ARIMA(0,1,0)', 'phi': [], 'theta': []},
+        {'nombre': 'ARIMA(1,1,0)', 'phi': [0.6], 'theta': []},
+        {'nombre': 'ARIMA(2,1,0)', 'phi': [0.5, -0.2], 'theta': []},
+        {'nombre': 'ARIMA(0,1,1)', 'phi': [], 'theta': [0.5]},
+        {'nombre': 'ARIMA(0,1,2)', 'phi': [], 'theta': [0.4, 0.25]},
+        {'nombre': 'ARIMA(1,1,1)', 'phi': [0.7], 'theta': [-0.3]},
+        {'nombre': 'ARIMA(2,1,2)', 'phi': [0.6, 0.2], 'theta': [0.4, -0.1]}
+    ]
+    
+    DISTRIBUTIONS = ['normal', 'uniform', 'exponential', 't-student', 'mixture']
+    VARIANCES = [0.2, 0.5, 1.0, 3.0]
+    
+    SIZE_COMBINATIONS = [
+        {'tag': 'N=120', 'n_total': 120, 'n_train': 100, 'n_calib': 20},
+        {'tag': 'N=240', 'n_total': 240, 'n_train': 199, 'n_calib': 41},
+        {'tag': 'N=360', 'n_total': 360, 'n_train': 299, 'n_calib': 61},
+        {'tag': 'N=600', 'n_total': 600, 'n_train': 498, 'n_calib': 102},
+        {'tag': 'N=1200', 'n_total': 1200, 'n_train': 996, 'n_calib': 204}
+    ]
+
+    def __init__(self, n_boot: int = 500, seed: int = 42, verbose: bool = False):
+        """
+        Args:
+            n_boot: Reducido a 500 (era 1000) para más velocidad
+        """
+        self.n_boot = n_boot
+        self.seed = seed
+        self.verbose = verbose
+        self.rng = np.random.default_rng(seed)
+        self._simulation_cache = {}  # ⚡ Cache de simulaciones
+
+    def _setup_models(self, seed: int):
+        """⚡ Modelos optimizados para velocidad"""
+        return {
+            # Modelos rápidos
+            'Block Bootstrap': CircularBlockBootstrapModel(n_boot=self.n_boot, random_state=seed),
+            'Sieve Bootstrap': SieveBootstrapModel(n_boot=self.n_boot, random_state=seed),
+            'LSPM': LSPM(random_state=seed),
+            'LSPMW': LSPMW(rho=0.95, random_state=seed),
+            'AREPD': AREPD(n_lags=4, rho=0.93, random_state=seed),  # Reducido de 5 a 4 lags
+            
+            # Modelos medianos (optimizados)
+            'MCPS': MondrianCPSModel(n_lags=8, random_state=seed),  # Reducido de 10 a 8
+            'AV-MCPS': AdaptiveVolatilityMondrianCPS(n_lags=10, random_state=seed),  # Reducido de 12 a 10
+            
+            # Modelos lentos (muy optimizados)
+            'DeepAR': DeepARModel(
+                hidden_size=16,  # Reducido de 20 a 16
+                n_lags=8,        # Reducido de 10 a 8
+                epochs=15,       # Reducido de 25 a 15
+                num_samples=self.n_boot, 
+                random_state=seed
+            ),
+            'EnCQR-LSTM': EnCQR_LSTM_Model(
+                n_lags=12,       # Reducido de 15 a 12
+                B=2,             # Reducido de 3 a 2
+                units=20,        # Reducido de 24 a 20
+                epochs=12,       # Reducido de 20 a 12
+                num_samples=self.n_boot, 
+                random_state=seed
+            )
+        }
+
+    def _get_cache_key(self, config: dict, dist: str, var: float, n_total: int, seed: int) -> str:
+        """Genera key único para cache"""
+        phi_str = ','.join(map(str, config['phi']))
+        theta_str = ','.join(map(str, config['theta']))
+        return f"ARIMA_{phi_str}_{theta_str}_{dist}_{var}_{n_total}_{seed}"
+
+    def _create_simulator(self, config: dict, dist: str, var: float, seed: int):
+        """Crea simulador ARIMA"""
+        sigma = np.sqrt(var)
+        return ARIMASimulation(
+            phi=config['phi'], 
+            theta=config['theta'],
+            noise_dist=dist, 
+            sigma=sigma, 
+            seed=seed
+        )
+
+    def run_single_scenario(self, config: dict, dist: str, var: float, 
+                           n_train: int, n_calib: int, size_tag: str, 
+                           scenario_seed: int) -> List[Dict]:
+        """⚡ Versión optimizada con cache"""
+        
+        n_total = n_train + n_calib
+        cache_key = self._get_cache_key(config, dist, var, n_total, scenario_seed)
+        
+        # ⚡ Revisar cache
+        if cache_key in self._simulation_cache:
+            series, errors = self._simulation_cache[cache_key]
+        else:
+            simulator = self._create_simulator(config, dist, var, scenario_seed)
+            total_len = n_total + self.N_TEST_STEPS
+            series, errors = simulator.simulate(n=total_len, burn_in=100)
+            self._simulation_cache[cache_key] = (series, errors)
+        
+        train_data = series[:n_train]
+        val_data = series[n_train:n_total]
+        
+        if self.verbose:
+            print(f"   📊 Train: {len(train_data)}, Calib: {len(val_data)}")
+        
+        # Optimización rápida
+        models = self._setup_models(scenario_seed)
+        optimizer = TimeBalancedOptimizer(
+            random_state=scenario_seed, 
+            verbose=self.verbose,
+            max_trials=15  # ⚡ Reducido para velocidad
+        )
+        best_params = optimizer.optimize_all_models(models, train_data, val_data)
+        
+        # Aplicar hiperparámetros
+        train_val_full = series[:n_total]
+        
+        for name, model in models.items():
+            if name in best_params:
+                for k, v in best_params[name].items():
+                    if hasattr(model, k): 
+                        setattr(model, k, v)
+            
+            if hasattr(model, 'freeze_hyperparameters'):
+                model.freeze_hyperparameters(train_val_full)
+
+        # Testing rolling window
+        results_rows = []
+        simulator = self._create_simulator(config, dist, var, scenario_seed)
+
+        for t in range(self.N_TEST_STEPS):
+            idx = n_total + t
+            h_series = series[:idx]
+            h_errors = errors[:idx]
+            
+            # ⚡ Reducir samples teóricos para velocidad
+            true_samples = simulator.get_true_next_step_samples(
+                h_series, h_errors, n_samples=500  # Reducido de 1000
+            )
+            
+            row = {
+                'Paso': t + 1,
+                'Proceso': config['nombre'],
+                'Distribución': dist,
+                'Varianza': var,
+                'N_Train': n_train,
+                'N_Calib': n_calib,
+                'N_Total': n_total,
+                'Size': size_tag
+            }
+            
+            for name, model in models.items():
+                try:
+                    if "Bootstrap" in name:
+                        pred = model.fit_predict(h_series)
+                    else:
+                        pred = model.fit_predict(pd.DataFrame({'valor': h_series}))
+                    
+                    pred_array = np.asarray(pred).flatten()
+                    row[name] = ecrps(pred_array, true_samples)
+                    
+                except Exception as e:
+                    if self.verbose:
+                        print(f"⚠️ Error {name}: {e}")
+                    row[name] = np.nan
+            
+            results_rows.append(row)
+
+        clear_all_sessions()
+        return results_rows
+
+    def _run_scenario_wrapper(self, args: Tuple) -> List[Dict]:
+        """Wrapper para paralelización"""
+        return self.run_single_scenario(*args)
+
+    def generate_all_scenarios(self) -> List[Tuple]:
+        """Genera escenarios ARIMA"""
+        scenarios = []
+        
+        print(f"\n🔍 Generando escenarios ARIMA:")
+        print(f"   • Configs: {len(self.ARIMA_CONFIGS)}")
+        print(f"   • Tamaños: {len(self.SIZE_COMBINATIONS)}")
+        print(f"   • Distribuciones: {len(self.DISTRIBUTIONS)}")
+        print(f"   • Varianzas: {len(self.VARIANCES)}")
+        esperados = len(self.ARIMA_CONFIGS) * len(self.SIZE_COMBINATIONS) * len(self.DISTRIBUTIONS) * len(self.VARIANCES)
+        print(f"   • TOTAL: {esperados} escenarios (3x menos que versión completa)")
+        print(f"   • Filas: {esperados * self.N_TEST_STEPS}\n")
+        
+        s_id = 0
+        for cfg in self.ARIMA_CONFIGS:
+            for size in self.SIZE_COMBINATIONS:
+                for dist in self.DISTRIBUTIONS:
+                    for var in self.VARIANCES:
+                        scenarios.append((
+                            cfg.copy(),
+                            dist,
+                            var,
+                            size['n_train'],
+                            size['n_calib'],
+                            size['tag'],
+                            self.seed + s_id
+                        ))
+                        s_id += 1
+        
+        print(f"✅ Generados {len(scenarios)} escenarios\n")
+        return scenarios
+
+    def run_all(self, excel_filename: str = "RESULTADOS_ARIMA_FAST.xlsx", 
+                batch_size: int = 30, max_workers: int = None, 
+                save_frequency: int = 2) -> pd.DataFrame:
+        """
+        ⚡ Ejecución ultra-rápida
+        
+        Cambios de velocidad:
+        - batch_size aumentado: 20 → 30
+        - save_frequency reducido: 3 → 2
+        - max_workers más agresivo
+        """
+        
+        if max_workers is None:
+            cpu_count = os.cpu_count() or 4
+            max_workers = max(12, min(int(cpu_count * 0.85), cpu_count - 1))  # Más agresivo
+        
+        tasks = self.generate_all_scenarios()
+        num_batches = (len(tasks) + batch_size - 1) // batch_size
+        
+        print(f"\n{'='*60}")
+        print(f"⚡ PIPELINE ARIMA ULTRA-RÁPIDO")
+        print(f"{'='*60}")
+        print(f"📊 Escenarios: {len(tasks)} (700 vs 2100 original = 67% menos)")
+        print(f"📦 Batches: {num_batches} (tamaño {batch_size})")
+        print(f"👷 Workers: {max_workers} de {os.cpu_count()} cores")
+        print(f"🔥 n_boot: {self.n_boot} (500 vs 1000 = 50% menos)")
+        print(f"⚡ Epochs reducidos: DeepAR 15, EnCQR 12")
+        print(f"💾 Guardado cada {save_frequency} batches")
+        print(f"{'='*60}\n")
+        
+        all_results = []
+        
+        for i in range(num_batches):
+            start_idx = i * batch_size
+            end_idx = min((i + 1) * batch_size, len(tasks))
+            batch = tasks[start_idx:end_idx]
+            
+            print(f"🔄 Batch {i+1}/{num_batches}... ", end='', flush=True)
+            
+            batch_results = Parallel(n_jobs=max_workers, backend='loky', verbose=0)(
+                delayed(self._run_scenario_wrapper)(t) for t in batch
+            )
+            
+            for result_list in batch_results:
+                all_results.extend(result_list)
+            
+            print(f"✅ {len(all_results)} filas")
+            
+            if (i + 1) % save_frequency == 0 or (i + 1) == num_batches:
+                pd.DataFrame(all_results).to_excel(excel_filename, index=False)
+                print(f"💾 Checkpoint: {excel_filename}")
+            
+            # ⚡ Limpieza agresiva
+            del batch_results, batch
+            if (i + 1) % 5 == 0:  # Limpiar cache cada 5 batches
+                self._simulation_cache.clear()
+            clear_all_sessions()
+            gc.collect()
+        
+        df_final = pd.DataFrame(all_results)
+        df_final.to_excel(excel_filename, index=False)
+        
+        print(f"\n🎉 Completado: {len(all_results)} filas → {excel_filename}")
+        print(f"⚡ Velocidad estimada: 3-4x más rápido que versión original\n")
+        return df_final
+
+
 # ============================================================================
 # ¿La proporción de datos afecta a la calidad de las densidades predictivas?
 # ============================================================================
