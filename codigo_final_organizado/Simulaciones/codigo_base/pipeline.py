@@ -2902,3 +2902,1570 @@ class Pipeline_SETAR_Fast:
         print(f"⚡ Velocidad estimada: 3-4x más rápido que versión original\n")
         return df_final
 
+
+
+# ============================================================================
+# LSPMW
+# ============================================================================
+
+import numpy as np
+import pandas as pd
+from scipy import stats
+from scipy.fft import fft
+from joblib import Parallel, delayed
+import time
+import gc
+
+import numpy as np
+import pandas as pd
+from scipy import stats
+from scipy.fft import fft
+from joblib import Parallel, delayed
+import time
+import gc
+
+class UnifiedPipeline_LSPM_LSPMW:
+    """
+    Pipeline Unificado para ARMA, ARIMA y SETAR.
+    Compara LSPM vs LSPMW usando ECRPS y Test de Diebold-Mariano Modificado por grupos.
+    """
+    
+    N_TEST_STEPS = 12
+    N_VALIDATION = 40
+    N_TRAIN = 200
+    
+    # Configuraciones ARMA
+    ARMA_CONFIGS = [
+        {'nombre': 'AR(1)', 'phi': [0.9], 'theta': []},
+        {'nombre': 'AR(2)', 'phi': [0.5, -0.3], 'theta': []},
+        {'nombre': 'MA(1)', 'phi': [], 'theta': [0.7]},
+        {'nombre': 'MA(2)', 'phi': [], 'theta': [0.4, 0.2]},
+        {'nombre': 'ARMA(1,1)', 'phi': [0.6], 'theta': [0.3]},
+        {'nombre': 'ARMA(2,2)', 'phi': [0.4, -0.2], 'theta': [0.5, 0.1]},
+        {'nombre': 'ARMA(2,1)', 'phi': [0.7, 0.2], 'theta': [0.5]}
+    ]
+    
+    # Configuraciones ARIMA
+    ARIMA_CONFIGS = [
+        {'nombre': 'ARIMA(0,1,0)', 'phi': [], 'theta': []},
+        {'nombre': 'ARIMA(1,1,0)', 'phi': [0.6], 'theta': []},
+        {'nombre': 'ARIMA(2,1,0)', 'phi': [0.5, -0.2], 'theta': []},
+        {'nombre': 'ARIMA(0,1,1)', 'phi': [], 'theta': [0.5]},
+        {'nombre': 'ARIMA(0,1,2)', 'phi': [], 'theta': [0.4, 0.25]},
+        {'nombre': 'ARIMA(1,1,1)', 'phi': [0.7], 'theta': [-0.3]},
+        {'nombre': 'ARIMA(2,1,2)', 'phi': [0.6, 0.2], 'theta': [0.4, -0.1]}
+    ]
+    
+    # Configuraciones SETAR
+    SETAR_CONFIGS = [
+        {'nombre': 'SETAR-1', 'phi_regime1': [0.6], 'phi_regime2': [-0.5], 'threshold': 0.0, 'delay': 1},
+        {'nombre': 'SETAR-2', 'phi_regime1': [0.7], 'phi_regime2': [-0.7], 'threshold': 0.0, 'delay': 2},
+        {'nombre': 'SETAR-3', 'phi_regime1': [0.5, -0.2], 'phi_regime2': [-0.3, 0.1], 'threshold': 0.5, 'delay': 1},
+        {'nombre': 'SETAR-4', 'phi_regime1': [0.8, -0.15], 'phi_regime2': [-0.6, 0.2], 'threshold': 1.0, 'delay': 2},
+        {'nombre': 'SETAR-5', 'phi_regime1': [0.4, -0.1, 0.05], 'phi_regime2': [-0.3, 0.1, -0.05], 'threshold': 0.0, 'delay': 1},
+        {'nombre': 'SETAR-6', 'phi_regime1': [0.5, -0.3, 0.1], 'phi_regime2': [-0.4, 0.2, -0.05], 'threshold': 0.5, 'delay': 2},
+        {'nombre': 'SETAR-7', 'phi_regime1': [0.3, 0.1], 'phi_regime2': [-0.2, -0.1], 'threshold': 0.8, 'delay': 3}
+    ]
+    
+    DISTRIBUTIONS = ['normal', 'uniform', 'exponential', 't-student', 'mixture']
+    VARIANCES = [0.2, 0.5, 1.0, 3.0]
+
+    def __init__(self, seed: int = 42, verbose: bool = False):
+        self.seed = seed
+        self.verbose = verbose
+        self.rng = np.random.default_rng(seed)
+
+    def generate_all_scenarios(self, model_type='ARMA'):
+        """Genera escenarios según el tipo de modelo."""
+        scenarios = []
+        scenario_id = 0
+        
+        if model_type == 'ARMA':
+            configs = self.ARMA_CONFIGS
+        elif model_type == 'ARIMA':
+            configs = self.ARIMA_CONFIGS
+        elif model_type == 'SETAR':
+            configs = self.SETAR_CONFIGS
+        else:
+            raise ValueError(f"Tipo de modelo no válido: {model_type}")
+        
+        for cfg in configs:
+            for dist in self.DISTRIBUTIONS:
+                for var in self.VARIANCES:
+                    scenarios.append((cfg.copy(), dist, var, self.seed + scenario_id, model_type))
+                    scenario_id += 1
+        return scenarios
+
+    def modified_diebold_mariano_test(self, errors1, errors2, h=1):
+        """
+        Test Diebold-Mariano con fixed-smoothing asymptotics (Coroneo & Iacone, 2020)
+        
+        Parameters:
+        -----------
+        errors1, errors2 : array-like
+            Errores de pronóstico (ECRPS) de los dos modelos
+        h : int
+            Horizonte de pronóstico (forecast horizon)
+        
+        Returns:
+        --------
+        hln_dm_stat : float
+            Estadístico con fixed-m asymptotics
+        p_value : float
+            P-valor usando distribución t-Student con 2m grados de libertad
+        dm_stat : float
+            Estadístico DM original (para referencia)
+        """
+        d = errors1 - errors2
+        d_bar = np.mean(d)
+        T = len(d)
+        
+        if T < 2:
+            return np.nan, np.nan, np.nan
+        
+        u = d - d_bar
+        m = max(1, int(np.floor(T**(1/3))))
+        
+        # FFT de las desviaciones
+        fft_u = fft(u)
+        periodogram = np.abs(fft_u)**2 / (2 * np.pi * T)
+        
+        if m >= len(periodogram) - 1:
+            m = len(periodogram) - 2
+        
+        sigma_hat_sq = 2 * np.pi * np.mean(periodogram[1:m+1])
+        
+        if sigma_hat_sq <= 0:
+            sigma_hat_sq = np.var(d, ddof=1) / T
+            if sigma_hat_sq <= 0:
+                return 0, 1.0, 0
+        
+        dm_stat = np.sqrt(T) * d_bar / np.sqrt(sigma_hat_sq)
+        df = 2 * m
+        hln_dm_stat = dm_stat
+        p_value = 2 * (1 - stats.t.cdf(abs(hln_dm_stat), df))
+        
+        return hln_dm_stat, p_value, dm_stat
+
+    def _run_scenario_wrapper(self, args):
+        return self.run_single_scenario(*args)
+
+    def run_single_scenario(self, config, dist, var, scenario_seed, model_type):
+        """Ejecuta un escenario individual para cualquier tipo de modelo."""
+        
+        # 1. Simulación según tipo de modelo
+        if model_type == 'ARMA':
+            simulator = ARMASimulation(
+                phi=config['phi'], theta=config['theta'],
+                noise_dist=dist, sigma=np.sqrt(var), seed=scenario_seed
+            )
+        elif model_type == 'ARIMA':
+            simulator = ARIMASimulation(
+                phi=config['phi'], theta=config['theta'],
+                noise_dist=dist, sigma=np.sqrt(var), seed=scenario_seed
+            )
+        elif model_type == 'SETAR':
+            simulator = SETARSimulation(
+                model_type=config['nombre'],
+                phi_regime1=config['phi_regime1'],
+                phi_regime2=config['phi_regime2'],
+                threshold=config['threshold'],
+                delay=config['delay'],
+                noise_dist=dist,
+                sigma=np.sqrt(var),
+                seed=scenario_seed
+            )
+        
+        total_len = self.N_TRAIN + self.N_VALIDATION + self.N_TEST_STEPS
+        series, errors = simulator.simulate(n=total_len, burn_in=100)
+        
+        train_data = series[:self.N_TRAIN]
+        val_data = series[self.N_TRAIN : self.N_TRAIN + self.N_VALIDATION]
+        
+        # 2. Configurar solo LSPM y LSPMW
+        models = {
+            'LSPM': LSPM(random_state=scenario_seed),
+            'LSPMW': LSPMW(rho=0.95, random_state=scenario_seed)
+        }
+        
+        # 3. Optimización
+        optimizer = TimeBalancedOptimizer(random_state=scenario_seed, verbose=self.verbose)
+        best_params = optimizer.optimize_all_models(models, train_data, val_data)
+        
+        train_val_full = series[:self.N_TRAIN + self.N_VALIDATION]
+        for name, model in models.items():
+            if name in best_params:
+                for k, v in best_params[name].items():
+                    if hasattr(model, k): 
+                        setattr(model, k, v)
+            if hasattr(model, 'freeze_hyperparameters'):
+                model.freeze_hyperparameters(train_val_full)
+        
+        # 4. Testing Rolling Window - Generar filas por cada paso
+        results_rows = []
+        
+        for t in range(self.N_TEST_STEPS):
+            idx = self.N_TRAIN + self.N_VALIDATION + t
+            h_series = series[:idx]
+            h_errors = errors[:idx]
+            
+            true_samples = simulator.get_true_next_step_samples(h_series, h_errors, n_samples=1000)
+            
+            row = {
+                'Tipo': model_type,
+                'Config': config['nombre'],
+                'Dist': dist,
+                'Var': var,
+                'Paso': t + 1,
+                'LSPM_ECRPS': np.nan,
+                'LSPMW_ECRPS': np.nan
+            }
+            
+            for name, model in models.items():
+                try:
+                    pred = model.fit_predict(pd.DataFrame({'valor': h_series}))
+                    pred_array = np.asarray(pred).flatten()
+                    ecrps_value = ecrps(pred_array, true_samples)
+                    
+                    if name == 'LSPM':
+                        row['LSPM_ECRPS'] = ecrps_value
+                    else:
+                        row['LSPMW_ECRPS'] = ecrps_value
+                except:
+                    pass
+            
+            results_rows.append(row)
+        
+        clear_all_sessions()
+        return results_rows
+
+    def run_all(self, model_types=['ARMA', 'ARIMA', 'SETAR'], 
+                excel_filename="resultados_lspm_vs_lspmw.xlsx", 
+                batch_size=10, max_workers=4):
+        """
+        Ejecuta todos los escenarios para los tipos de modelos especificados.
+        """
+        all_results = []
+        
+        for model_type in model_types:
+            tasks = self.generate_all_scenarios(model_type)
+            print(f"\n🚀 Procesando {model_type}: {len(tasks)} escenarios")
+            
+            num_batches = (len(tasks) + batch_size - 1) // batch_size
+            
+            for i in range(num_batches):
+                start_idx = i * batch_size
+                end_idx = min((i + 1) * batch_size, len(tasks))
+                batch = tasks[start_idx:end_idx]
+                
+                print(f"  📦 Lote {i+1}/{num_batches}...")
+                results = Parallel(n_jobs=max_workers, backend='loky')(
+                    delayed(self._run_scenario_wrapper)(t) for t in batch
+                )
+                
+                # Aplanar resultados (cada escenario devuelve 12 filas)
+                for r in results:
+                    all_results.extend(r)
+                
+                # Guardado intermedio
+                pd.DataFrame(all_results).to_excel(excel_filename, index=False)
+                clear_all_sessions()
+                gc.collect()
+        
+        # Crear DataFrame completo
+        df_raw = pd.DataFrame(all_results)
+        
+        # Aplicar Test Diebold-Mariano por grupos
+        df_summary = self.generate_dm_summary_table(df_raw)
+        
+        # Guardar Excel con dos hojas
+        with pd.ExcelWriter(excel_filename, engine='openpyxl') as writer:
+            df_raw.to_excel(writer, sheet_name='Datos_Brutos', index=False)
+            df_summary.to_excel(writer, sheet_name='Resumen_DM', index=False)
+        
+        print(f"\n✅ Archivo generado: {excel_filename}")
+        print(f"   - Datos brutos: {len(df_raw)} filas")
+        print(f"   - Total escenarios: {len(df_raw) // 12}")
+        
+        return df_raw, df_summary
+
+    def generate_dm_summary_table(self, df_raw):
+        """
+        Genera tabla resumen con Test Diebold-Mariano por grupos.
+        """
+        results = []
+        
+        # 1. Test para cada tipo de modelo (ARMA, ARIMA, SETAR)
+        for model_type in ['ARMA', 'ARIMA', 'SETAR']:
+            df_type = df_raw[df_raw['Tipo'] == model_type].copy()
+            
+            if len(df_type) == 0:
+                continue
+            
+            # Filtrar NaN
+            df_type = df_type.dropna(subset=['LSPM_ECRPS', 'LSPMW_ECRPS'])
+            
+            if len(df_type) < 2:
+                continue
+            
+            lspm_errors = df_type['LSPM_ECRPS'].values
+            lspmw_errors = df_type['LSPMW_ECRPS'].values
+            
+            # Test DM
+            dm_stat, p_value, _ = self.modified_diebold_mariano_test(lspm_errors, lspmw_errors)
+            
+            # Determinar conclusión
+            if p_value < 0.05:
+                if dm_stat < 0:
+                    conclusion = 'LSPM es significativamente mejor'
+                else:
+                    conclusion = 'LSPMW es significativamente mejor'
+            else:
+                conclusion = 'No hay diferencia significativa'
+            
+            # Agregar fila para LSPM
+            results.append({
+                'Modelo': 'LSPM',
+                f'ECRPS Promedio {model_type}': np.mean(lspm_errors),
+                f'ECRPS Mediano {model_type}': np.median(lspm_errors),
+                f'Significativo en {model_type}': 'Sí' if p_value < 0.05 else 'No',
+                f'Conclusión {model_type}': conclusion,
+                f'DM Stat {model_type}': dm_stat,
+                f'P-Value {model_type}': p_value
+            })
+        
+        # Reorganizar para que sea una tabla con LSPM y LSPMW en filas
+        # y cada grupo de modelo (ARMA, ARIMA, SETAR) en columnas
+        
+        # Primero extraer datos por tipo
+        summary_data = {'Modelo': ['LSPM', 'LSPMW']}
+        
+        for model_type in ['ARMA', 'ARIMA', 'SETAR']:
+            df_type = df_raw[df_raw['Tipo'] == model_type].copy()
+            df_type = df_type.dropna(subset=['LSPM_ECRPS', 'LSPMW_ECRPS'])
+            
+            if len(df_type) < 2:
+                summary_data[f'ECRPS Promedio {model_type}'] = [np.nan, np.nan]
+                summary_data[f'ECRPS Mediano {model_type}'] = [np.nan, np.nan]
+                summary_data[f'Significativo en {model_type}'] = ['N/A', 'N/A']
+                summary_data[f'Conclusión {model_type}'] = ['N/A', 'N/A']
+                continue
+            
+            lspm_errors = df_type['LSPM_ECRPS'].values
+            lspmw_errors = df_type['LSPMW_ECRPS'].values
+            
+            dm_stat, p_value, _ = self.modified_diebold_mariano_test(lspm_errors, lspmw_errors)
+            
+            significativo = 'Sí' if p_value < 0.05 else 'No'
+            
+            if p_value < 0.05:
+                if dm_stat < 0:
+                    conclusion_lspm = f'Mejor (DM={dm_stat:.3f}, p={p_value:.4f})'
+                    conclusion_lspmw = f'Peor (DM={dm_stat:.3f}, p={p_value:.4f})'
+                else:
+                    conclusion_lspm = f'Peor (DM={dm_stat:.3f}, p={p_value:.4f})'
+                    conclusion_lspmw = f'Mejor (DM={dm_stat:.3f}, p={p_value:.4f})'
+            else:
+                conclusion_lspm = f'Empate (DM={dm_stat:.3f}, p={p_value:.4f})'
+                conclusion_lspmw = f'Empate (DM={dm_stat:.3f}, p={p_value:.4f})'
+            
+            summary_data[f'ECRPS Promedio {model_type}'] = [
+                np.mean(lspm_errors),
+                np.mean(lspmw_errors)
+            ]
+            summary_data[f'ECRPS Mediano {model_type}'] = [
+                np.median(lspm_errors),
+                np.median(lspmw_errors)
+            ]
+            summary_data[f'Significativo en {model_type}'] = [
+                significativo,
+                significativo
+            ]
+            summary_data[f'Conclusión {model_type}'] = [
+                conclusion_lspm,
+                conclusion_lspmw
+            ]
+        
+        # Agregar columna "GENERAL" con todos los datos combinados
+        df_all = df_raw.dropna(subset=['LSPM_ECRPS', 'LSPMW_ECRPS'])
+        
+        if len(df_all) >= 2:
+            lspm_all = df_all['LSPM_ECRPS'].values
+            lspmw_all = df_all['LSPMW_ECRPS'].values
+            
+            dm_stat_all, p_value_all, _ = self.modified_diebold_mariano_test(lspm_all, lspmw_all)
+            
+            significativo_all = 'Sí' if p_value_all < 0.05 else 'No'
+            
+            if p_value_all < 0.05:
+                if dm_stat_all < 0:
+                    conclusion_lspm_all = f'Mejor (DM={dm_stat_all:.3f}, p={p_value_all:.4f})'
+                    conclusion_lspmw_all = f'Peor (DM={dm_stat_all:.3f}, p={p_value_all:.4f})'
+                else:
+                    conclusion_lspm_all = f'Peor (DM={dm_stat_all:.3f}, p={p_value_all:.4f})'
+                    conclusion_lspmw_all = f'Mejor (DM={dm_stat_all:.3f}, p={p_value_all:.4f})'
+            else:
+                conclusion_lspm_all = f'Empate (DM={dm_stat_all:.3f}, p={p_value_all:.4f})'
+                conclusion_lspmw_all = f'Empate (DM={dm_stat_all:.3f}, p={p_value_all:.4f})'
+            
+            summary_data['ECRPS Promedio GENERAL'] = [
+                np.mean(lspm_all),
+                np.mean(lspmw_all)
+            ]
+            summary_data['ECRPS Mediano GENERAL'] = [
+                np.median(lspm_all),
+                np.median(lspmw_all)
+            ]
+            summary_data['Significativo en GENERAL'] = [
+                significativo_all,
+                significativo_all
+            ]
+            summary_data['Conclusión GENERAL'] = [
+                conclusion_lspm_all,
+                conclusion_lspmw_all
+            ]
+        
+        return pd.DataFrame(summary_data)
+
+class Pipeline140SinSesgos_ARIMA_ConDiferenciacion_LSPMW:
+    """
+    Pipeline ARIMA optimizado para evaluar únicamente LSPMW.
+    Evalúa cada escenario en dos modalidades: SIN_DIFF y CON_DIFF.
+    """
+    
+    N_TEST_STEPS = 12
+    N_VALIDATION = 40
+    N_TRAIN = 200
+    
+    # Configuraciones ARIMA (d=1 por defecto para estos nombres)
+    ARIMA_CONFIGS = [
+        {'nombre': 'RW', 'phi': [], 'theta': []}, # Random Walk es ARIMA(0,1,0)
+        {'nombre': 'AR(1)', 'phi': [0.6], 'theta': []},
+        {'nombre': 'AR(2)', 'phi': [0.5, -0.2], 'theta': []},
+        {'nombre': 'MA(1)', 'phi': [], 'theta': [0.5]},
+        {'nombre': 'MA(2)', 'phi': [], 'theta': [0.4, 0.25]},
+        {'nombre': 'ARMA(1,1)', 'phi': [0.7], 'theta': [-0.3]},
+        {'nombre': 'ARMA(2,2)', 'phi': [0.6, 0.2], 'theta': [0.4, -0.1]}
+    ]
+    DISTRIBUTIONS = ['normal', 'uniform', 'exponential', 't-student', 'mixture']
+    VARIANCES = [0.2, 0.5, 1.0, 3.0]
+
+    def __init__(self, n_boot: int = 1000, seed: int = 42, verbose: bool = False):
+        self.n_boot = n_boot
+        self.seed = seed
+        self.verbose = verbose
+        self.rng = np.random.default_rng(seed)
+
+    def _setup_model(self, seed: int):
+        """Solo crea LSPMW"""
+        return LSPMW(rho=0.95, random_state=seed)
+
+    def _run_modalidad(self, simulator, series_levels, errors, arima_config, dist, var, modalidad, scenario_seed):
+        """Ejecuta una modalidad específica (SIN_DIFF o CON_DIFF)"""
+        
+        # 1. Preparar datos según modalidad
+        if modalidad == "CON_DIFF":
+            # El modelo ve incrementos ΔY_t
+            series_to_model = np.diff(series_levels, prepend=series_levels[0])
+        else:
+            # El modelo ve niveles Y_t
+            series_to_model = series_levels
+
+        train_data = series_to_model[:self.N_TRAIN]
+        val_data = series_to_model[self.N_TRAIN : self.N_TRAIN + self.N_VALIDATION]
+        
+        # 2. Setup y Optimización
+        model = self._setup_model(scenario_seed)
+        optimizer = TimeBalancedOptimizer(random_state=scenario_seed, verbose=False)
+        
+        # Optimizar solo LSPMW
+        models_dict = {'LSPMW': model}
+        best_params = optimizer.optimize_all_models(models_dict, train_data, val_data)
+        
+        train_val_full = series_to_model[:self.N_TRAIN + self.N_VALIDATION]
+        if 'LSPMW' in best_params:
+            for k, v in best_params['LSPMW'].items():
+                if hasattr(model, k): 
+                    setattr(model, k, v)
+        
+        if hasattr(model, 'freeze_hyperparameters'):
+            model.freeze_hyperparameters(train_val_full)
+
+        # 3. Testing Rolling Window
+        results_rows = []
+        p, q = len(arima_config['phi']), len(arima_config['theta'])
+        d = 1 # Por defecto en esta simulación
+
+        for t in range(self.N_TEST_STEPS):
+            idx = self.N_TRAIN + self.N_VALIDATION + t
+            h_series_levels = series_levels[:idx]
+            h_errors = errors[:idx]
+            h_to_model = series_to_model[:idx]
+            
+            # Densidad Teórica (Siguiente paso real)
+            true_samples = simulator.get_true_next_step_samples(h_series_levels, h_errors, n_samples=1000)
+            
+            # Fila base con el formato de la imagen
+            row = {
+                'Paso': t + 1,
+                'Proceso': f"ARMA_I({p},{d},{q})",
+                'p': p,
+                'd': d,
+                'q': q,
+                'ARMA_base': arima_config['nombre'],
+                'Distribución': dist,
+                'Varianza': var,
+                'Modalidad': modalidad,
+                'Valor_Observado': series_levels[idx] # El valor real que ocurrió
+            }
+            
+            try:
+                pred = model.fit_predict(pd.DataFrame({'valor': h_to_model}))
+                pred_array = np.asarray(pred).flatten()
+                
+                # Si predijo incremento, sumar al último nivel para comparar densidades en niveles
+                if modalidad == "CON_DIFF":
+                    pred_array = series_levels[idx-1] + pred_array
+                
+                row['LSPMW'] = ecrps(pred_array, true_samples)
+            except:
+                row['LSPMW'] = np.nan
+            
+            results_rows.append(row)
+            
+        return results_rows
+
+    def _run_scenario_wrapper(self, args):
+        arima_cfg, dist, var, seed = args
+        
+        # Simulación (Niveles)
+        simulator = ARIMASimulation(
+            phi=arima_cfg['phi'], theta=arima_cfg['theta'],
+            noise_dist=dist, sigma=np.sqrt(var), seed=seed
+        )
+        total_len = self.N_TRAIN + self.N_VALIDATION + self.N_TEST_STEPS
+        series_levels, errors = simulator.simulate(n=total_len, burn_in=100)
+        
+        # Ejecutar ambas modalidades
+        res_sin = self._run_modalidad(simulator, series_levels, errors, arima_cfg, dist, var, "SIN_DIFF", seed)
+        res_con = self._run_modalidad(simulator, series_levels, errors, arima_cfg, dist, var, "CON_DIFF", seed + 1)
+        
+        clear_all_sessions()
+        return res_sin + res_con
+
+    def generate_all_scenarios(self) -> list:
+        scenarios = []
+        s_id = 0
+        for arima_cfg in self.ARIMA_CONFIGS:
+            for dist in self.DISTRIBUTIONS:
+                for var in self.VARIANCES:
+                    scenarios.append((arima_cfg.copy(), dist, var, self.seed + s_id))
+                    s_id += 1
+        return scenarios
+
+    def run_all(self, excel_filename="resultados_arima_lspmw.xlsx", batch_size=5, n_jobs=2):
+        tasks = self.generate_all_scenarios()
+        print(f"🚀 Ejecutando {len(tasks)} escenarios ARIMA (Solo LSPMW - Doble Modalidad)...")
+        
+        all_results = []
+        for i in range(0, len(tasks), batch_size):
+            batch = tasks[i:i + batch_size]
+            print(f"  -> Procesando lote {i//batch_size + 1}...")
+            results = Parallel(n_jobs=n_jobs)(delayed(self._run_scenario_wrapper)(t) for t in batch)
+            for r in results:
+                all_results.extend(r)
+            
+            pd.DataFrame(all_results).to_excel(excel_filename, index=False)
+
+        return pd.DataFrame(all_results)
+
+class PipelineARIMA_MultiD_LSPMW_Only:
+    """
+    Pipeline Multi-D CORREGIDO para ARIMA(p,d,q) con múltiples órdenes de integración.
+    VERSION OPTIMIZADA: Solo evalúa LSPMW.
+    
+    CORRECCIONES FUNDAMENTALES:
+    1. Usa ARIMASimulation (no ARIMAMultiDSimulation) para d=1
+    2. Implementa integración manual para d>1
+    3. Densidades predictivas calculadas en el espacio correcto
+    4. Integración coherente para predicciones
+    5. Evalúa solo LSPMW (más rápido)
+    """
+    
+    N_TEST_STEPS = 12
+    N_VALIDATION_FOR_OPT = 40
+    N_TRAIN_INITIAL = 200
+
+    ARMA_CONFIGS = [
+        {'nombre': 'RW', 'phi': [], 'theta': []},
+        {'nombre': 'AR(1)', 'phi': [0.6], 'theta': []},
+        {'nombre': 'AR(2)', 'phi': [0.5, -0.2], 'theta': []},
+        {'nombre': 'MA(1)', 'phi': [], 'theta': [0.5]},
+        {'nombre': 'MA(2)', 'phi': [], 'theta': [0.4, 0.25]},
+        {'nombre': 'ARMA(1,1)', 'phi': [0.7], 'theta': [-0.3]},
+        {'nombre': 'ARMA(2,2)', 'phi': [0.6, 0.2], 'theta': [0.4, -0.1]}
+    ]
+    
+    DISTRIBUTIONS = ['normal', 'uniform', 'exponential', 't-student', 'mixture']
+    VARIANCES = [0.2, 0.5, 1.0, 3.0]
+    D_VALUES = [1, 2, 3, 4, 5, 6, 7, 10]
+    
+    def __init__(self, n_boot: int = 1000, seed: int = 42, verbose: bool = False):
+        self.n_boot = n_boot
+        self.seed = seed
+        self.verbose = verbose
+        self.rng = np.random.default_rng(seed)
+
+    def _setup_model(self, seed: int):
+        """Solo crea LSPMW."""
+        return LSPMW(rho=0.95, random_state=seed)
+
+    def _simulate_arima_manual(self, arma_config: dict, d_value: int, 
+                              dist: str, var: float, seed: int, n: int):
+        """
+        Simula ARIMA EXACTAMENTE como Pipeline140SinSesgos_ARIMA_ConDiferenciacion.
+        
+        Proceso:
+        1. Simula W_t ~ ARMA(p,q) usando ARIMASimulation
+        2. Integra manualmente d veces: Y_t = S^d(W_t)
+        
+        IMPORTANTE: Para d=1, esto es IDÉNTICO a ARIMASimulation directamente.
+        """
+        from simulacion import ARIMASimulation
+        
+        # Simular usando ARIMASimulation (siempre con d=1 internamente)
+        simulator = ARIMASimulation(
+            phi=arma_config['phi'],
+            theta=arma_config['theta'],
+            noise_dist=dist,
+            sigma=np.sqrt(var),
+            seed=seed
+        )
+        
+        # Para ARIMASimulation, la serie ya viene con 1 integración
+        # Si d=1, usamos directamente. Si d>1, integramos (d-1) veces adicionales
+        series_base, errors = simulator.simulate(n=n, burn_in=100)
+        
+        # Si d=1, ya está integrada correctamente
+        if d_value == 1:
+            y_series = series_base.copy()
+        else:
+            # Para d>1, integrar (d-1) veces adicionales
+            y_series = series_base.copy()
+            for _ in range(d_value - 1):
+                y_series = np.cumsum(y_series)
+        
+        return y_series, series_base, errors, simulator
+
+    def _get_true_density_from_simulator(self, simulator, series_history: np.ndarray,
+                                        errors_history: np.ndarray, 
+                                        n_samples: int = 1000) -> np.ndarray:
+        """
+        Obtiene densidad verdadera usando EXACTAMENTE el método de ARIMASimulation.
+        
+        IDÉNTICO a Pipeline140SinSesgos_ARIMA_ConDiferenciacion.
+        """
+        return simulator.get_true_next_step_samples(
+            series_history, errors_history, n_samples=n_samples
+        )
+
+    def _integrate_d_times_for_prediction(self, w_next_samples: np.ndarray,
+                                         y_series: np.ndarray, 
+                                         current_idx: int,
+                                         d_value: int) -> np.ndarray:
+        """
+        Integra predicciones desde espacio ARMA(d=1) a ARIMA(d>1).
+        
+        Para d=1: Y_{t+1} = Y_t + W_{t+1}
+        Para d>1: Usar fórmula recursiva
+        """
+        if d_value == 1:
+            # Caso simple: Y_{t+1} = Y_t + ΔY_t donde ΔY_t = W_{t+1}
+            return y_series[current_idx - 1] + w_next_samples
+        else:
+            # Para d>1, necesitamos aplicar integración múltiple
+            # Guardamos los últimos d valores de Y
+            y_last_values = []
+            temp_y = y_series[:current_idx].copy()
+            
+            for level in range(d_value):
+                y_last_values.append(temp_y[-1])
+                if level < d_value - 1:
+                    temp_y = np.diff(temp_y)
+            
+            # Integrar desde W_{t+1} hasta Y_{t+1}
+            y_next_samples = w_next_samples.copy()
+            for level in range(d_value - 1, -1, -1):
+                y_next_samples = y_last_values[level] + y_next_samples
+            
+            return y_next_samples
+
+    def _run_single_modalidad(self, arma_config: dict, d_value: int,
+                             dist: str, var: float, scenario_seed: int,
+                             y_series: np.ndarray, series_base: np.ndarray,
+                             errors: np.ndarray, test_start_idx: int,
+                             usar_diferenciacion: bool, simulator) -> list:
+        """
+        Ejecuta una modalidad EXACTAMENTE como Pipeline140SinSesgos_ARIMA_ConDiferenciacion.
+        Solo evalúa LSPMW.
+        
+        MODALIDADES:
+        - SIN_DIFF: Modelo ve Y_t (serie integrada de orden d)
+        - CON_DIFF: Modelo ve ∇Y_t (serie diferenciada 1 vez)
+        """
+        modalidad_str = "CON_DIFF" if usar_diferenciacion else "SIN_DIFF"
+        
+        # Preparar serie según modalidad
+        if usar_diferenciacion:
+            # El modelo ve incrementos ΔY_t
+            series_to_model = np.diff(y_series, prepend=y_series[0])
+        else:
+            # El modelo ve niveles Y_t
+            series_to_model = y_series.copy()
+        
+        train_calib_data = series_to_model[:test_start_idx]
+        
+        # Crear solo LSPMW
+        model = self._setup_model(scenario_seed)
+        
+        # Optimización
+        optimizer = TimeBalancedOptimizer(random_state=self.seed, verbose=self.verbose)
+        
+        split = min(self.N_VALIDATION_FOR_OPT, len(train_calib_data) // 3)
+        models_dict = {'LSPMW': model}
+        best_params = optimizer.optimize_all_models(
+            models_dict, 
+            train_calib_data[:-split], 
+            train_calib_data[-split:]
+        )
+        
+        # Aplicar hiperparámetros óptimos
+        if 'LSPMW' in best_params:
+            for k, v in best_params['LSPMW'].items():
+                if hasattr(model, k): 
+                    setattr(model, k, v)
+        
+        if hasattr(model, 'freeze_hyperparameters'):
+            model.freeze_hyperparameters(train_calib_data)
+
+        # Testing rolling window
+        results_rows = []
+        p = len(arma_config['phi'])
+        q = len(arma_config['theta'])
+
+        for t in range(self.N_TEST_STEPS):
+            curr_idx = test_start_idx + t
+            h_series_levels = y_series[:curr_idx]
+            h_to_model = series_to_model[:curr_idx]
+            
+            # DENSIDAD VERDADERA
+            if d_value == 1:
+                true_samples_base = self._get_true_density_from_simulator(
+                    simulator, series_base[:curr_idx], errors[:curr_idx]
+                )
+                true_samples = true_samples_base
+            else:
+                # Para d>1, obtener densidad base y luego integrar
+                true_samples_base = self._get_true_density_from_simulator(
+                    simulator, series_base[:curr_idx], errors[:curr_idx]
+                )
+                # Integrar las muestras (d-1) veces adicionales
+                true_samples = self._integrate_d_times_for_prediction(
+                    true_samples_base, y_series, curr_idx, d_value
+                )
+            
+            # Fila de resultados
+            row = {
+                'Paso': t + 1,
+                'Proceso': f"ARMA_I({p},{d_value},{q})",
+                'p': p,
+                'd': d_value,
+                'q': q,
+                'ARMA_base': arma_config['nombre'],
+                'Distribución': dist,
+                'Varianza': var,
+                'Modalidad': modalidad_str,
+                'Valor_Observado': y_series[curr_idx]
+            }
+            
+            # Evaluar LSPMW
+            try:
+                pred = model.fit_predict(pd.DataFrame({'valor': h_to_model}))
+                pred_array = np.asarray(pred).flatten()
+                
+                # Integrar predicciones si es necesario
+                if usar_diferenciacion:
+                    # pred_array son incrementos ΔY_{t+1}
+                    # Y_{t+1} = Y_t + ΔY_{t+1}
+                    pred_array = y_series[curr_idx - 1] + pred_array
+                
+                # Calcular ECRPS
+                row['LSPMW'] = ecrps(pred_array, true_samples)
+            except Exception as e:
+                if self.verbose:
+                    print(f"Error en LSPMW: {e}")
+                row['LSPMW'] = np.nan
+            
+            results_rows.append(row)
+
+        return results_rows
+
+    def _run_scenario_wrapper(self, args):
+        """Wrapper para procesamiento paralelo."""
+        arma_cfg, d_val, dist, var, seed = args
+        
+        total_n = self.N_TRAIN_INITIAL + self.N_TEST_STEPS
+        
+        # Simular ARIMA manualmente
+        y_series, series_base, errors, simulator = self._simulate_arima_manual(
+            arma_cfg, d_val, dist, var, seed, total_n
+        )
+        
+        # Ejecutar ambas modalidades
+        res_sin_diff = self._run_single_modalidad(
+            arma_cfg, d_val, dist, var, seed,
+            y_series, series_base, errors,
+            self.N_TRAIN_INITIAL, False, simulator
+        )
+        
+        res_con_diff = self._run_single_modalidad(
+            arma_cfg, d_val, dist, var, seed + 1,
+            y_series, series_base, errors,
+            self.N_TRAIN_INITIAL, True, simulator
+        )
+        
+        clear_all_sessions()
+        return res_sin_diff + res_con_diff
+
+    def run_all(self, excel_filename: str = "RESULTADOS_MULTID_LSPMW_ONLY.xlsx", 
+                batch_size: int = 10, n_jobs: int = 3):
+        """
+        Ejecuta todas las simulaciones.
+        Devuelve df_resultados, df_resumen para mantener compatibilidad.
+        """
+        print("="*80)
+        print("🚀 PIPELINE MULTI-D: ARIMA_I(p,d,q) - SOLO LSPMW")
+        print("="*80)
+        
+        # Generar tareas
+        tasks = []
+        s_id = 0
+        for d in self.D_VALUES:
+            for cfg in self.ARMA_CONFIGS:
+                for dist in self.DISTRIBUTIONS:
+                    for var in self.VARIANCES:
+                        tasks.append((cfg.copy(), d, dist, var, self.seed + s_id))
+                        s_id += 1
+        
+        print(f"📊 Total de escenarios: {len(tasks)}")
+        print(f"   - Valores de d: {self.D_VALUES}")
+        print(f"   - ARMA configs: {len(self.ARMA_CONFIGS)}")
+        print(f"   - Distribuciones: {len(self.DISTRIBUTIONS)}")
+        print(f"   - Varianzas: {len(self.VARIANCES)}")
+        print(f"   - Modalidades por escenario: 2 (SIN_DIFF, CON_DIFF)")
+        print(f"   - Modelo: LSPMW únicamente")
+        print(f"   - Total filas esperadas: {len(tasks) * 2 * self.N_TEST_STEPS}")
+        
+        # Procesamiento por lotes
+        all_results = []
+        num_batches = (len(tasks) + batch_size - 1) // batch_size
+        
+        for i in range(num_batches):
+            start_idx = i * batch_size
+            end_idx = min((i + 1) * batch_size, len(tasks))
+            batch = tasks[start_idx:end_idx]
+            
+            print(f"📦 Procesando lote {i+1}/{num_batches}...")
+            
+            results = Parallel(n_jobs=n_jobs, backend='loky')(
+                delayed(self._run_scenario_wrapper)(t) for t in batch
+            )
+            
+            for r in results: 
+                all_results.extend(r)
+            
+            # Guardar progreso
+            pd.DataFrame(all_results).to_excel(excel_filename, index=False)
+            print(f"   ✅ {len(all_results)} filas guardadas")
+            
+            clear_all_sessions()
+            gc.collect()
+        
+        df_resultados = pd.DataFrame(all_results)
+        
+        # Crear resumen agregado
+        df_resumen = df_resultados.groupby(
+            ['Proceso', 'ARMA_base', 'Distribución', 'Varianza', 'Modalidad', 'd']
+        ).agg({
+            'LSPMW': ['mean', 'std', 'count']
+        }).reset_index()
+        
+        # Aplanar nombres de columnas
+        df_resumen.columns = ['_'.join(col).strip('_') if col[1] else col[0] 
+                              for col in df_resumen.columns.values]
+        
+        print(f"✅ Simulación completa: {excel_filename}")
+        return df_resultados, df_resumen
+    
+
+class Pipeline140_TamanosCrecientes_LSPMW_Only:
+    """
+    ✅ PIPELINE CORREGIDO - Tamaños Crecientes
+    VERSION OPTIMIZADA: Solo evalúa LSPMW
+    
+    CORRECCIÓN APLICADA:
+    - Mantiene proporción FIJA 83%/17% en OPTIMIZACIÓN
+    - Usa TODO el histórico (train+calib) para freeze_hyperparameters
+    - Esto garantiza que tamaños diferentes tomen tiempos diferentes
+    
+    ESTRUCTURA:
+    - Proporción fija: 83% train / 17% calib (SOLO para optimización)
+    - 5 tamaños totales diferentes
+    - 12 pasos de predicción (fijos)
+    - 3 tipos de procesos: ARMA (7 configs), ARIMA (7 configs), SETAR (7 configs)
+    - 5 distribuciones × 4 varianzas
+    - Solo evalúa LSPMW
+    """
+    
+    N_TEST_STEPS = 12  # Siempre 12 pasos de predicción
+    
+    # 21 Configuraciones (7 ARMA + 7 ARIMA + 7 SETAR)
+    ARMA_CONFIGS = [
+        {'nombre': 'AR(1)', 'phi': [0.9], 'theta': []},
+        {'nombre': 'AR(2)', 'phi': [0.5, -0.3], 'theta': []},
+        {'nombre': 'MA(1)', 'phi': [], 'theta': [0.7]},
+        {'nombre': 'MA(2)', 'phi': [], 'theta': [0.4, 0.2]},
+        {'nombre': 'ARMA(1,1)', 'phi': [0.6], 'theta': [0.3]},
+        {'nombre': 'ARMA(2,2)', 'phi': [0.4, -0.2], 'theta': [0.5, 0.1]},
+        {'nombre': 'ARMA(2,1)', 'phi': [0.7, 0.2], 'theta': [0.5]}
+    ]
+    
+    ARIMA_CONFIGS = [
+        {'nombre': 'ARIMA(0,1,0)', 'phi': [], 'theta': []},
+        {'nombre': 'ARIMA(1,1,0)', 'phi': [0.6], 'theta': []},
+        {'nombre': 'ARIMA(2,1,0)', 'phi': [0.5, -0.2], 'theta': []},
+        {'nombre': 'ARIMA(0,1,1)', 'phi': [], 'theta': [0.5]},
+        {'nombre': 'ARIMA(0,1,2)', 'phi': [], 'theta': [0.4, 0.25]},
+        {'nombre': 'ARIMA(1,1,1)', 'phi': [0.7], 'theta': [-0.3]},
+        {'nombre': 'ARIMA(2,1,2)', 'phi': [0.6, 0.2], 'theta': [0.4, -0.1]}
+    ]
+    
+    SETAR_CONFIGS = [
+        {'nombre': 'SETAR-1', 'phi_regime1': [0.6], 'phi_regime2': [-0.5], 'threshold': 0.0, 'delay': 1},
+        {'nombre': 'SETAR-2', 'phi_regime1': [0.7], 'phi_regime2': [-0.7], 'threshold': 0.0, 'delay': 2},
+        {'nombre': 'SETAR-3', 'phi_regime1': [0.5, -0.2], 'phi_regime2': [-0.3, 0.1], 'threshold': 0.5, 'delay': 1},
+        {'nombre': 'SETAR-4', 'phi_regime1': [0.8, -0.15], 'phi_regime2': [-0.6, 0.2], 'threshold': 1.0, 'delay': 2},
+        {'nombre': 'SETAR-5', 'phi_regime1': [0.4, -0.1, 0.05], 'phi_regime2': [-0.3, 0.1, -0.05], 'threshold': 0.0, 'delay': 1},
+        {'nombre': 'SETAR-6', 'phi_regime1': [0.5, -0.3, 0.1], 'phi_regime2': [-0.4, 0.2, -0.05], 'threshold': 0.5, 'delay': 2},
+        {'nombre': 'SETAR-7', 'phi_regime1': [0.3, 0.1], 'phi_regime2': [-0.2, -0.1], 'threshold': 0.8, 'delay': 3}
+    ]
+    
+    DISTRIBUTIONS = ['normal', 'uniform', 'exponential', 't-student', 'mixture']
+    VARIANCES = [0.2, 0.5, 1.0, 3.0]
+    
+    # ✅ 5 Tamaños con proporción fija 83% / 17%
+    SIZE_COMBINATIONS = [
+        {'tag': 'N=120', 'n_total': 120, 'n_train': 100, 'n_calib': 20},
+        {'tag': 'N=240', 'n_total': 240, 'n_train': 199, 'n_calib': 41},
+        {'tag': 'N=360', 'n_total': 360, 'n_train': 299, 'n_calib': 61},
+        {'tag': 'N=600', 'n_total': 600, 'n_train': 498, 'n_calib': 102},
+        {'tag': 'N=1200', 'n_total': 1200, 'n_train': 996, 'n_calib': 204}
+    ]
+
+    def __init__(self, n_boot: int = 1000, seed: int = 42, verbose: bool = False, proceso_tipo: str = 'ARMA'):
+        self.n_boot = n_boot
+        self.seed = seed
+        self.verbose = verbose
+        self.proceso_tipo = proceso_tipo.upper()
+        self.rng = np.random.default_rng(seed)
+
+    def _setup_model(self, seed: int):
+        """Solo crea LSPMW"""
+        return LSPMW(rho=0.95, random_state=seed)
+
+    def _get_configs_for_process_type(self):
+        """Obtiene las configuraciones según el tipo de proceso"""
+        if self.proceso_tipo == 'ARMA':
+            return self.ARMA_CONFIGS
+        elif self.proceso_tipo == 'ARIMA':
+            return self.ARIMA_CONFIGS
+        elif self.proceso_tipo == 'SETAR':
+            return self.SETAR_CONFIGS
+        else:
+            raise ValueError(f"Tipo de proceso desconocido: {self.proceso_tipo}")
+
+    def _create_simulator(self, config: dict, dist: str, var: float, seed: int):
+        """Crea simulador según tipo de proceso"""
+        sigma = np.sqrt(var)
+        
+        if self.proceso_tipo == 'ARMA':
+            return ARMASimulation(
+                phi=config['phi'], 
+                theta=config['theta'],
+                noise_dist=dist, 
+                sigma=sigma, 
+                seed=seed
+            )
+        elif self.proceso_tipo == 'ARIMA':
+            return ARIMASimulation(
+                phi=config['phi'], 
+                theta=config['theta'],
+                noise_dist=dist, 
+                sigma=sigma, 
+                seed=seed
+            )
+        else:  # SETAR
+            return SETARSimulation(
+                phi_regime1=config['phi_regime1'],
+                phi_regime2=config['phi_regime2'],
+                threshold=config['threshold'],
+                delay=config['delay'],
+                noise_dist=dist,
+                sigma=sigma,
+                seed=seed
+            )
+
+    def run_single_scenario(self, config: dict, dist: str, var: float, 
+                           n_train: int, n_calib: int, size_tag: str, 
+                           scenario_seed: int) -> List[Dict]:
+        """
+        ✅ CORREGIDO: Ahora usa consistentemente los datos
+        Solo evalúa LSPMW
+        
+        CAMBIOS:
+        1. Optimización usa solo n_train para entrenar
+        2. freeze_hyperparameters() usa TODO (train+calib)
+        3. Esto hace que tamaños diferentes tomen tiempos diferentes
+        """
+        
+        n_total = n_train + n_calib
+        
+        # 1. Simulación
+        simulator = self._create_simulator(config, dist, var, scenario_seed)
+        total_len = n_total + self.N_TEST_STEPS
+        series, errors = simulator.simulate(n=total_len, burn_in=100)
+        
+        # ✅ CORRECCIÓN: Usar solo n_train para optimización
+        train_data = series[:n_train]
+        val_data = series[n_train:n_total]  # Solo n_calib datos
+        
+        if self.verbose:
+            print(f"   📊 Train: {len(train_data)}, Calib: {len(val_data)}, Test steps: {self.N_TEST_STEPS}")
+        
+        # 2. Optimización de hiperparámetros (solo LSPMW)
+        model = self._setup_model(scenario_seed)
+        optimizer = TimeBalancedOptimizer(random_state=scenario_seed, verbose=self.verbose)
+        
+        models_dict = {'LSPMW': model}
+        best_params = optimizer.optimize_all_models(models_dict, train_data, val_data)
+        
+        # 3. Aplicar mejores hiperparámetros y congelar con TODOS los datos
+        train_val_full = series[:n_total]  # ✅ ESTO crece con el tamaño
+        
+        if 'LSPMW' in best_params:
+            for k, v in best_params['LSPMW'].items():
+                if hasattr(model, k): 
+                    setattr(model, k, v)
+        
+        # ✅ CLAVE: freeze_hyperparameters() usa TODO el histórico
+        # Esto hace que N=1200 tome más tiempo que N=120
+        if hasattr(model, 'freeze_hyperparameters'):
+            model.freeze_hyperparameters(train_val_full)
+
+        # 4. Testing Rolling Window
+        results_rows = []
+
+        for t in range(self.N_TEST_STEPS):
+            idx = n_total + t
+            h_series = series[:idx]
+            h_errors = errors[:idx]
+            
+            # Densidad teórica
+            true_samples = simulator.get_true_next_step_samples(h_series, h_errors, n_samples=1000)
+            
+            # Fila de resultados
+            row = {
+                'Paso': t + 1,
+                'Tipo_Proceso': self.proceso_tipo,
+                'Proceso': config['nombre'],
+                'Distribución': dist,
+                'Varianza': var,
+                'N_Train': n_train,
+                'N_Calib': n_calib,
+                'N_Total': n_total,
+                'Size': size_tag
+            }
+            
+            # ✅ Evaluar solo LSPMW
+            try:
+                pred = model.fit_predict(pd.DataFrame({'valor': h_series}))
+                pred_array = np.asarray(pred).flatten()
+                row['LSPMW'] = ecrps(pred_array, true_samples)
+            except Exception as e:
+                if self.verbose:
+                    print(f"⚠️ Error LSPMW en paso {t+1}: {e}")
+                row['LSPMW'] = np.nan
+            
+            results_rows.append(row)
+
+        clear_all_sessions()
+        return results_rows
+
+    def _run_scenario_wrapper(self, args: Tuple) -> List[Dict]:
+        """Wrapper para paralelización"""
+        return self.run_single_scenario(*args)
+
+    def generate_all_scenarios(self) -> List[Tuple]:
+        """
+        ✅ Genera escenarios para UN tipo de proceso
+        """
+        scenarios = []
+        configs = self._get_configs_for_process_type()
+        
+        # Debug info
+        if self.verbose or True:
+            print(f"\n🔍 Generando escenarios para {self.proceso_tipo}:")
+            print(f"   • Configs: {len(configs)}")
+            print(f"   • Tamaños: {len(self.SIZE_COMBINATIONS)}")
+            print(f"   • Distribuciones: {len(self.DISTRIBUTIONS)}")
+            print(f"   • Varianzas: {len(self.VARIANCES)}")
+            esperados = len(configs) * len(self.SIZE_COMBINATIONS) * len(self.DISTRIBUTIONS) * len(self.VARIANCES)
+            print(f"   • ESPERADOS: {esperados} escenarios")
+            print(f"   • Filas esperadas: {esperados * self.N_TEST_STEPS}\n")
+        
+        s_id = 0
+        for cfg in configs:
+            for size in self.SIZE_COMBINATIONS:
+                for dist in self.DISTRIBUTIONS:
+                    for var in self.VARIANCES:
+                        scenarios.append((
+                            cfg.copy(),
+                            dist,
+                            var,
+                            size['n_train'],
+                            size['n_calib'],
+                            size['tag'],
+                            self.seed + s_id
+                        ))
+                        s_id += 1
+        
+        print(f"✅ Generados {len(scenarios)} escenarios\n")
+        return scenarios
+
+    def run_all(self, excel_filename: str = None, batch_size: int = 20, 
+                n_jobs: int = None, save_frequency: int = 3) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        """
+        Ejecuta todos los escenarios con paralelización.
+        Devuelve df_resultados, df_resumen para compatibilidad.
+        """
+        
+        # Auto-detecta workers
+        if n_jobs is None:
+            cpu_count = os.cpu_count() or 4
+            n_jobs = max(10, min(int(cpu_count * 0.75), cpu_count - 2))
+        
+        if excel_filename is None:
+            excel_filename = f"RESULTADOS_TAMANOS_{self.proceso_tipo}_LSPMW.xlsx"
+        
+        tasks = self.generate_all_scenarios()
+        num_batches = (len(tasks) + batch_size - 1) // batch_size
+        
+        print(f"\n{'='*60}")
+        print(f"🚀 PIPELINE TAMAÑOS CRECIENTES - {self.proceso_tipo} - SOLO LSPMW")
+        print(f"{'='*60}")
+        print(f"📊 Total escenarios: {len(tasks)}")
+        print(f"📦 Batches: {num_batches} (tamaño {batch_size})")
+        print(f"👷 Workers: {n_jobs} de {os.cpu_count()} cores")
+        print(f"💾 Guardado cada {save_frequency} batches")
+        print(f"{'='*60}\n")
+        
+        all_results = []
+        
+        for i in range(num_batches):
+            start_idx = i * batch_size
+            end_idx = min((i + 1) * batch_size, len(tasks))
+            batch = tasks[start_idx:end_idx]
+            
+            print(f"🔄 Batch {i+1}/{num_batches}... ", end='', flush=True)
+            
+            batch_results = Parallel(n_jobs=n_jobs, backend='loky', verbose=0)(
+                delayed(self._run_scenario_wrapper)(t) for t in batch
+            )
+            
+            for result_list in batch_results:
+                all_results.extend(result_list)
+            
+            print(f"✅ {len(all_results)} filas")
+            
+            if (i + 1) % save_frequency == 0 or (i + 1) == num_batches:
+                pd.DataFrame(all_results).to_excel(excel_filename, index=False)
+                print(f"💾 Checkpoint: {excel_filename}")
+            
+            del batch_results, batch
+            clear_all_sessions()
+            gc.collect()
+        
+        df_resultados = pd.DataFrame(all_results)
+        df_resultados.to_excel(excel_filename, index=False)
+        
+        # Crear resumen agregado
+        df_resumen = df_resultados.groupby(
+            ['Tipo_Proceso', 'Proceso', 'Distribución', 'Varianza', 'Size', 'N_Total']
+        ).agg({
+            'LSPMW': ['mean', 'std', 'count']
+        }).reset_index()
+        
+        # Aplanar nombres de columnas
+        df_resumen.columns = ['_'.join(col).strip('_') if col[1] else col[0] 
+                              for col in df_resumen.columns.values]
+        
+        print(f"\n🎉 Completado: {len(all_results)} filas → {excel_filename}\n")
+        return df_resultados, df_resumen
+    
+
+class Pipeline240_ProporcionesVariables_LSPMW_Only:
+    """
+    ✅ PIPELINE OPTIMIZADO - Proporciones Variables (N=240)
+    VERSION OPTIMIZADA: Solo evalúa LSPMW
+    
+    Evalúa cómo afecta la proporción Train/Calib al desempeño de LSPMW.
+    
+    ESTRUCTURA:
+    - N_TOTAL fijo = 240
+    - 5 proporciones: 10%, 20%, 30%, 40%, 50% de calibración
+    - 3 tipos de procesos: ARMA (7 configs), ARIMA (7 configs), SETAR (7 configs)
+    - 5 distribuciones × 4 varianzas
+    - TOTAL: 21 × 5 × 5 × 4 = 2,100 escenarios
+    - Solo evalúa LSPMW
+    
+    OPTIMIZACIONES:
+    ✅ Usa fit_predict() en CADA paso
+    ✅ Limpieza agresiva de memoria después de cada batch
+    ✅ Guardado incremental con liberación de memoria
+    ✅ Monitoreo de uso de memoria
+    """
+    
+    N_TOTAL = 240  # Tamaño histórico fijo
+    N_TEST_STEPS = 12 
+    
+    # 5 Proporciones de calibración
+    SIZE_COMBINATIONS = [
+        {'prop_tag': '10%', 'n_train': 216, 'n_calib': 24, 'prop_val': 0.10},
+        {'prop_tag': '20%', 'n_train': 192, 'n_calib': 48, 'prop_val': 0.20},
+        {'prop_tag': '30%', 'n_train': 168, 'n_calib': 72, 'prop_val': 0.30},
+        {'prop_tag': '40%', 'n_train': 144, 'n_calib': 96, 'prop_val': 0.40},
+        {'prop_tag': '50%', 'n_train': 120, 'n_calib': 120, 'prop_val': 0.50}
+    ]
+    
+    # 21 Configuraciones (7 ARMA + 7 ARIMA + 7 SETAR)
+    CONFIGS = {
+        'ARMA': [
+            {'nombre': 'AR(1)', 'phi': [0.9], 'theta': []},
+            {'nombre': 'AR(2)', 'phi': [0.5, -0.3], 'theta': []},
+            {'nombre': 'MA(1)', 'phi': [], 'theta': [0.7]},
+            {'nombre': 'MA(2)', 'phi': [], 'theta': [0.4, 0.2]},
+            {'nombre': 'ARMA(1,1)', 'phi': [0.6], 'theta': [0.3]},
+            {'nombre': 'ARMA(2,2)', 'phi': [0.4, -0.2], 'theta': [0.5, 0.1]},
+            {'nombre': 'ARMA(2,1)', 'phi': [0.7, 0.2], 'theta': [0.5]}
+        ],
+        'ARIMA': [
+            {'nombre': 'ARIMA(0,1,0)', 'phi': [], 'theta': []},
+            {'nombre': 'ARIMA(1,1,0)', 'phi': [0.6], 'theta': []},
+            {'nombre': 'ARIMA(2,1,0)', 'phi': [0.5, -0.2], 'theta': []},
+            {'nombre': 'ARIMA(0,1,1)', 'phi': [], 'theta': [0.5]},
+            {'nombre': 'ARIMA(0,1,2)', 'phi': [], 'theta': [0.4, 0.25]},
+            {'nombre': 'ARIMA(1,1,1)', 'phi': [0.7], 'theta': [-0.3]},
+            {'nombre': 'ARIMA(2,1,2)', 'phi': [0.6, 0.2], 'theta': [0.4, -0.1]}
+        ],
+        'SETAR': [
+            {'nombre': 'SETAR-1', 'phi_regime1': [0.6], 'phi_regime2': [-0.5], 'threshold': 0.0, 'delay': 1},
+            {'nombre': 'SETAR-2', 'phi_regime1': [0.7], 'phi_regime2': [-0.7], 'threshold': 0.0, 'delay': 2},
+            {'nombre': 'SETAR-3', 'phi_regime1': [0.5, -0.2], 'phi_regime2': [-0.3, 0.1], 'threshold': 0.5, 'delay': 1},
+            {'nombre': 'SETAR-4', 'phi_regime1': [0.8, -0.15], 'phi_regime2': [-0.6, 0.2], 'threshold': 1.0, 'delay': 2},
+            {'nombre': 'SETAR-5', 'phi_regime1': [0.4, -0.1, 0.05], 'phi_regime2': [-0.3, 0.1, -0.05], 'threshold': 0.0, 'delay': 1},
+            {'nombre': 'SETAR-6', 'phi_regime1': [0.5, -0.3, 0.1], 'phi_regime2': [-0.4, 0.2, -0.05], 'threshold': 0.5, 'delay': 2},
+            {'nombre': 'SETAR-7', 'phi_regime1': [0.3, 0.1], 'phi_regime2': [-0.2, -0.1], 'threshold': 0.8, 'delay': 3}
+        ]
+    }
+    
+    DISTRIBUTIONS = ['normal', 'uniform', 'exponential', 't-student', 'mixture']
+    VARIANCES = [0.2, 0.5, 1.0, 3.0]
+
+    def __init__(self, n_boot: int = 1000, seed: int = 42, verbose: bool = False, proceso_tipo: str = 'ARMA'):
+        self.n_boot = n_boot
+        self.seed = seed
+        self.verbose = verbose
+        self.proceso_tipo = proceso_tipo.upper()
+        self.rng = np.random.default_rng(seed)
+
+    def _setup_model(self, seed: int):
+        """Solo crea LSPMW"""
+        return LSPMW(rho=0.95, random_state=seed)
+
+    def _create_simulator(self, config: dict, dist: str, var: float, seed: int):
+        """Crea simulador según tipo de proceso"""
+        sigma = np.sqrt(var)
+        
+        if self.proceso_tipo == 'ARMA':
+            return ARMASimulation(
+                phi=config['phi'], 
+                theta=config['theta'],
+                noise_dist=dist, 
+                sigma=sigma, 
+                seed=seed
+            )
+        elif self.proceso_tipo == 'ARIMA':
+            return ARIMASimulation(
+                phi=config['phi'], 
+                theta=config['theta'],
+                noise_dist=dist, 
+                sigma=sigma, 
+                seed=seed
+            )
+        else:  # SETAR
+            return SETARSimulation(
+                phi_regime1=config['phi_regime1'],
+                phi_regime2=config['phi_regime2'],
+                threshold=config['threshold'],
+                delay=config['delay'],
+                noise_dist=dist,
+                sigma=sigma,
+                seed=seed
+            )
+
+    def run_single_scenario(self, config: dict, dist: str, var: float, 
+                           n_train: int, n_calib: int, prop_tag: str, 
+                           scenario_seed: int) -> List[Dict]:
+        """
+        ✅ Ejecuta un escenario completo usando fit_predict()
+        Solo evalúa LSPMW
+        
+        CLAVE: USA fit_predict() en cada paso (NO predict() solo)
+        """
+        
+        # 1. Simulación
+        simulator = self._create_simulator(config, dist, var, scenario_seed)
+        total_len = self.N_TOTAL + self.N_TEST_STEPS
+        series, errors = simulator.simulate(n=total_len, burn_in=100)
+        
+        train_data = series[:n_train]
+        val_data = series[n_train:self.N_TOTAL]
+        
+        # 2. Optimización de hiperparámetros (solo LSPMW)
+        model = self._setup_model(scenario_seed)
+        optimizer = TimeBalancedOptimizer(random_state=scenario_seed, verbose=self.verbose)
+        
+        models_dict = {'LSPMW': model}
+        best_params = optimizer.optimize_all_models(models_dict, train_data, val_data)
+        
+        # 3. Aplicar mejores hiperparámetros y congelar
+        train_val_full = series[:self.N_TOTAL]
+        
+        if 'LSPMW' in best_params:
+            for k, v in best_params['LSPMW'].items():
+                if hasattr(model, k): 
+                    setattr(model, k, v)
+        
+        if hasattr(model, 'freeze_hyperparameters'):
+            model.freeze_hyperparameters(train_val_full)
+
+        # 4. Testing Rolling Window
+        results_rows = []
+        
+        for t in range(self.N_TEST_STEPS):
+            idx = self.N_TOTAL + t
+            h_series = series[:idx]
+            h_errors = errors[:idx]
+            
+            # Densidad teórica (Ground Truth)
+            true_samples = simulator.get_true_next_step_samples(h_series, h_errors, n_samples=1000)
+            
+            # Fila de resultados
+            row = {
+                'Paso': t + 1,
+                'Tipo_Proceso': self.proceso_tipo,
+                'Proceso': config['nombre'],
+                'Distribución': dist,
+                'Varianza': var,
+                'N_Train': n_train,
+                'N_Calib': n_calib,
+                'Prop_Calib': prop_tag
+            }
+            
+            # ✅ CLAVE: Usar fit_predict()
+            try:
+                pred = model.fit_predict(pd.DataFrame({'valor': h_series}))
+                pred_array = np.asarray(pred).flatten()
+                row['LSPMW'] = ecrps(pred_array, true_samples)
+            except Exception as e:
+                if self.verbose:
+                    print(f"⚠️ Error LSPMW en paso {t+1}: {e}")
+                row['LSPMW'] = np.nan
+            
+            results_rows.append(row)
+        
+        clear_all_sessions()
+        return results_rows
+
+    def _run_scenario_wrapper(self, args: Tuple) -> List[Dict]:
+        """Wrapper para paralelización"""
+        return self.run_single_scenario(*args)
+
+    def generate_all_scenarios(self) -> List[Tuple]:
+        """
+        Genera todos los escenarios para un tipo de proceso
+        
+        ✅ ORDEN: configs × props × dists × vars
+        """
+        scenarios = []
+        configs = self.CONFIGS.get(self.proceso_tipo, [])
+        
+        # Debug info
+        if self.verbose or True:
+            print(f"\n🔍 Generando escenarios para {self.proceso_tipo}:")
+            print(f"   • Configs: {len(configs)}")
+            print(f"   • Proporciones: {len(self.SIZE_COMBINATIONS)}")
+            print(f"   • Distribuciones: {len(self.DISTRIBUTIONS)}")
+            print(f"   • Varianzas: {len(self.VARIANCES)}")
+            esperados = len(configs) * len(self.SIZE_COMBINATIONS) * len(self.DISTRIBUTIONS) * len(self.VARIANCES)
+            print(f"   • ESPERADOS: {esperados} escenarios")
+            print(f"   • Filas esperadas: {esperados * self.N_TEST_STEPS}\n")
+        
+        s_id = 0
+        for cfg in configs:
+            for size in self.SIZE_COMBINATIONS:
+                for dist in self.DISTRIBUTIONS:
+                    for var in self.VARIANCES:
+                        scenarios.append((
+                            cfg.copy(),
+                            dist,
+                            var,
+                            size['n_train'],
+                            size['n_calib'],
+                            size['prop_tag'],
+                            self.seed + s_id
+                        ))
+                        s_id += 1
+        
+        # Verificación final
+        if len(scenarios) != esperados:
+            print(f"⚠️ WARNING: Se generaron {len(scenarios)} pero se esperaban {esperados}")
+        else:
+            print(f"✅ Generados correctamente {len(scenarios)} escenarios\n")
+        
+        return scenarios
+
+    def run_all(self, excel_filename: str = None, batch_size: int = 20, 
+                n_jobs: int = None, save_frequency: int = 3) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        """
+        ✅ Ejecuta todos los escenarios con paralelización y optimización de memoria
+        Devuelve df_resultados, df_resumen para compatibilidad
+        """
+        
+        # Auto-detecta workers (75% de cores, mínimo 10)
+        if n_jobs is None:
+            cpu_count = os.cpu_count() or 4
+            n_jobs = max(10, min(int(cpu_count * 0.75), cpu_count - 2))
+        
+        if excel_filename is None:
+            excel_filename = f"RESULTADOS_PROPORCIONES_240_{self.proceso_tipo}_LSPMW.xlsx"
+        
+        tasks = self.generate_all_scenarios()
+        num_batches = (len(tasks) + batch_size - 1) // batch_size
+        
+        print(f"\n{'='*60}")
+        print(f"🚀 PIPELINE PROPORCIONES 240 - {self.proceso_tipo} - SOLO LSPMW")
+        print(f"{'='*60}")
+        print(f"📊 Total escenarios: {len(tasks)}")
+        print(f"📦 Batches: {num_batches} (tamaño {batch_size})")
+        print(f"👷 Workers: {n_jobs} de {os.cpu_count()} cores")
+        print(f"💾 Guardado cada {save_frequency} batches")
+        print(f"{'='*60}\n")
+        
+        all_results = []
+        checkpoint_counter = 0
+        
+        for i in range(num_batches):
+            start_idx = i * batch_size
+            end_idx = min((i + 1) * batch_size, len(tasks))
+            batch = tasks[start_idx:end_idx]
+            
+            print(f"🔄 Batch {i+1}/{num_batches}... ", end='', flush=True)
+            
+            # Procesa batch en paralelo
+            batch_results = Parallel(n_jobs=n_jobs, backend='loky', verbose=0)(
+                delayed(self._run_scenario_wrapper)(t) for t in batch
+            )
+            
+            # Acumula resultados
+            for result_list in batch_results:
+                all_results.extend(result_list)
+            
+            print(f"✅ {len(all_results)} filas acumuladas")
+            
+            # ✅ MEJORADO: Guarda periódicamente con limpieza de memoria
+            if (i + 1) % save_frequency == 0 or (i + 1) == num_batches:
+                
+                if checkpoint_counter == 0:
+                    # Primera vez: crear archivo
+                    df_checkpoint = pd.DataFrame(all_results)
+                    df_checkpoint.to_excel(excel_filename, index=False)
+                    del df_checkpoint
+                else:
+                    # Subsecuentes: leer, concatenar, guardar
+                    df_new = pd.DataFrame(all_results)
+                    df_prev = pd.read_excel(excel_filename)
+                    df_combined = pd.concat([df_prev, df_new], ignore_index=True)
+                    df_combined.to_excel(excel_filename, index=False)
+                    
+                    del df_prev, df_new, df_combined
+                
+                print(f"💾 Checkpoint {checkpoint_counter + 1}: {excel_filename}")
+                
+                # ✅ CLAVE: Vaciar lista después de guardar
+                all_results.clear()
+                checkpoint_counter += 1
+                gc.collect()
+            
+            # ✅ Limpieza agresiva después de cada batch
+            del batch_results, batch
+            clear_all_sessions()
+            gc.collect()
+            
+            # ✅ Monitoreo de memoria cada 6 batches
+            if (i + 1) % (save_frequency * 2) == 0:
+                try:
+                    import psutil
+                    process = psutil.Process()
+                    mem_percent = process.memory_percent()
+                    print(f"   🧹 Memoria en uso: {mem_percent:.1f}%")
+                    
+                    # Si memoria > 70%, limpieza adicional
+                    if mem_percent > 70:
+                        print("   ⚠️ Ejecutando limpieza agresiva...")
+                        gc.collect()
+                        gc.collect()  # Doble pasada
+                except ImportError:
+                    pass  # psutil no disponible
+        
+        # Leer resultado final del archivo guardado
+        df_resultados = pd.read_excel(excel_filename)
+        
+        # Crear resumen agregado
+        df_resumen = df_resultados.groupby(
+            ['Tipo_Proceso', 'Proceso', 'Distribución', 'Varianza', 'Prop_Calib', 'N_Train', 'N_Calib']
+        ).agg({
+            'LSPMW': ['mean', 'std', 'count']
+        }).reset_index()
+        
+        # Aplanar nombres de columnas
+        df_resumen.columns = ['_'.join(col).strip('_') if col[1] else col[0] 
+                              for col in df_resumen.columns.values]
+        
+        # Limpieza final
+        all_results.clear()
+        del all_results
+        gc.collect()
+        
+        print(f"\n🎉 Completado: {len(df_resultados)} filas → {excel_filename}\n")
+        return df_resultados, df_resumen

@@ -386,137 +386,181 @@ class LSPMW(LSPM):
     """
     LSPMW - Least Squares Prediction Machine with Weighted Residuals
     
-    Implementación corregida para integración con TimeBalancedOptimizer y
-    cumplimiento teórico con Barber et al. (2023) "Nonexchangeable Conformal Prediction".
+    Implementación según Barber et al. (2023) "Conformal Prediction Beyond Exchangeability".
     
-    Principios Clave:
-    1. Pesos Temporales: w_i ∝ ρ^(n-i). Prioriza datos recientes.
-    2. Optimización Externa: TimeBalancedOptimizer inyecta 'rho' y evalúa CRPS.
-    3. Predicción Determinística: Expande la distribución empírica replicando
-       valores según su peso. Esto reduce la varianza en la validación.
+    DIFERENCIA CON LSPM:
+    -------------------
+    - LSPM: Retorna residuos R_i (distribución empírica sin ponderar)
+    - LSPMW: Retorna residuos R_i (para usar con pesos w_i = ρ^(n-i))
+    
+    Los pesos NO se aplican en fit_predict, sino externamente:
+    - En cuantiles: Q_{1-α}(Σ w̃_i δ_{R_i})
+    - En CRPS ponderado durante optimización
+    
+    Congela: n_lags y rho (NO congela residuos por adaptabilidad a drift)
     """
     
     def __init__(self, rho: float = 0.95, random_state: int = 42, 
                  verbose: bool = False):
         super().__init__(random_state=random_state, verbose=verbose)
-        if not (0 < rho < 1):
+        if not (0 < rho <= 1):
             raise ValueError("rho debe estar entre 0 y 1")
         self.rho = rho
         self.best_params = {'rho': rho}
         
-        # Estado congelado
+        # Estado congelado: SOLO hiperparámetros
         self._frozen_rho = None
-        self._frozen_critical_values = None
-        self._frozen_weights = None
-        self._is_frozen = False
+        # NO congelamos critical_values ni weights
     
     def freeze_hyperparameters(self, train_data: np.ndarray):
         """
-        Congela la estructura predictiva usando el mejor rho encontrado.
-        Se llama UNA VEZ al final del entrenamiento.
+        Congela SOLO hiperparámetros: n_lags y rho.
+        
+        NO congela critical_values porque:
+        - LSPMW está diseñado para drift continuo
+        - Los residuos deben recalcularse con datos actuales
+        - w_i = ρ^(n-i) asume que "n" es el tiempo ACTUAL
         """
-        # 1. Congelar lógica base (n_lags)
+        # 1. Congelar n_lags (heredado de LSPM)
         super().freeze_hyperparameters(train_data)
         
-        # 2. Determinar qué rho usar (del optimizador o el default)
+        # 2. Congelar rho (usar el mejor encontrado por optimizador)
         if self.best_params and 'rho' in self.best_params:
             self._frozen_rho = self.best_params['rho']
         else:
             self._frozen_rho = self.rho
         
-        try:
-            # 3. Calcular residuos en orden cronológico
-            critical_vals = self._calculate_critical_values(train_data)
-            
-            if len(critical_vals) > 0:
-                n_crit = len(critical_vals)
-                
-                # 4. Calcular pesos: w_i = ρ^(n-1 - i)
-                exponents = np.arange(n_crit - 1, -1, -1)
-                temporal_weights = self._frozen_rho ** exponents
-                temporal_weights = temporal_weights / temporal_weights.sum()
-                
-                # 5. Guardar artefactos
-                self._frozen_critical_values = critical_vals
-                self._frozen_weights = temporal_weights
-                self._is_frozen = True
-                
-                if self.verbose:
-                    print(f"  ✅ LSPMW congelado: ρ={self._frozen_rho:.2f}, "
-                          f"n_lags={self._frozen_n_lags}, "
-                          f"n_critical={n_crit}")
-            else:
-                self._is_frozen = False
-                if self.verbose:
-                    print("  ⚠️ LSPMW: No se generaron residuos.")
-                    
-        except Exception as e:
-            self._is_frozen = False
-            if self.verbose:
-                print(f"  ✗ Error congelando LSPMW: {e}")
+        if self.verbose:
+            print(f"  ✅ LSPMW congelado: ρ={self._frozen_rho:.3f}, "
+                  f"n_lags={self._frozen_n_lags}")
+            print(f"     (residuos se recalculan dinámicamente)")
     
     def fit_predict(self, df: Union[pd.DataFrame, np.ndarray]) -> np.ndarray:
         """
-        Genera la distribución predictiva.
+        Genera distribución predictiva PONDERADA mediante muestreo estratificado.
         
-        - Si está optimizando: Usa self.rho actual (inyectado por optimizador)
-        - Si está congelado: Usa artefactos guardados
+        DIFERENCIA CLAVE CON LSPM:
+        --------------------------
+        LSPM: Retorna residuos {R_1, ..., R_n} directamente (todos con igual probabilidad)
+        LSPMW: Muestrea residuos con probabilidades proporcionales a w_i = ρ^(n-i)
+        
+        Esto NO es "expansión por replicación" sino MUESTREO PONDERADO:
+        - Cada residuo R_i tiene probabilidad w̃_i de ser seleccionado
+        - Residuos recientes tienen mayor probabilidad
+        - El resultado es una distribución empírica ponderada
+        
+        Teoría (Barber et al. 2023):
+        ----------------------------
+        La distribución predictiva conformal es:
+        F(y) = Σ w̃_i · 1{R_i ≤ y} + w̃_{n+1} · 1{+∞ ≤ y}
+        
+        Muestrear de esta distribución es equivalente a:
+        1. Seleccionar índice i con probabilidad w̃_i
+        2. Retornar R_i
+        
+        Esto es EXACTAMENTE lo que hace np.random.choice con p=weights.
         """
         values = df['valor'].values if isinstance(df, pd.DataFrame) else np.asarray(df)
-        n_samples_target = 1000
         
-        # ═══ MODO CONGELADO ═══
-        if self._is_frozen and self._frozen_critical_values is not None:
-            if len(self._frozen_critical_values) == 0:
-                return np.full(n_samples_target, np.mean(values[-min(8, len(values)):]))
-            
-            critical_vals = self._frozen_critical_values
-            weights = self._frozen_weights
-            
-        # ═══ MODO NO CONGELADO (Optimización) ═══
-        else:
-            critical_vals = self._calculate_critical_values(values.astype(np.float64))
-            
-            if len(critical_vals) == 0:
-                return np.full(n_samples_target, np.mean(values[-min(8, len(values)):]))
-            
-            # ✅ CRÍTICO: Usar self.rho (valor actual del optimizador)
-            current_rho = self.rho
-            
-            n_crit = len(critical_vals)
-            exponents = np.arange(n_crit - 1, -1, -1)
-            weights = current_rho ** exponents
-            weights = weights / weights.sum()
-
-        # ═══ EXPANSIÓN PONDERADA ═══
-        replications = np.round(weights * n_samples_target).astype(int)
-        replications = np.maximum(replications, 1)
+        # Recalcular residuos usando n_lags congelado
+        critical_vals = self._calculate_critical_values(values.astype(np.float64))
         
-        # Ajuste fino
-        current_total = replications.sum()
-        diff = n_samples_target - current_total
+        # Fallback si no hay residuos
+        if len(critical_vals) == 0:
+            return np.full(1000, np.mean(values[-min(8, len(values)):]))
         
-        if diff > 0:
-            top_indices = np.argsort(weights)[-diff:]
-            replications[top_indices] += 1
-        elif diff < 0:
-            bottom_indices = np.argsort(weights)[:abs(diff)]
-            can_reduce_mask = replications[bottom_indices] > 1
-            replications[bottom_indices[can_reduce_mask]] -= 1
-
-        # Expandir
-        expanded_distribution = np.repeat(critical_vals, replications)
+        # ═══ APLICAR PESOS PARA GENERAR DISTRIBUCIÓN PONDERADA ═══
         
-        # Recorte/relleno de emergencia
-        if len(expanded_distribution) > n_samples_target:
-            expanded_distribution = expanded_distribution[:n_samples_target]
-        elif len(expanded_distribution) < n_samples_target:
-            missing = n_samples_target - len(expanded_distribution)
-            fill = self.rng.choice(expanded_distribution, size=missing)
-            expanded_distribution = np.concatenate([expanded_distribution, fill])
+        # Calcular pesos actuales (adaptativos al tamaño de ventana)
+        rho = self._frozen_rho if self._is_frozen else self.rho
+        n = len(critical_vals)
+        
+        # w_i = ρ^(n-1-i) para i=0,...,n-1
+        exponents = np.arange(n - 1, -1, -1)
+        weights = rho ** exponents
+        
+        # Normalizar para que sumen 1 (probabilidades de muestreo)
+        # Nota: NO dividimos por (sum + 1) porque NO incluimos δ_{+∞}
+        # Estamos muestreando SOLO de los residuos finitos
+        weights = weights / weights.sum()
+        
+        # Muestrear 1000 valores de la distribución empírica ponderada
+        # Esto implementa: F(y) = Σ w̃_i · 1{R_i ≤ y}
+        n_samples = 1000
+        sampled_residuals = self.rng.choice(
+            critical_vals, 
+            size=n_samples, 
+            p=weights,
+            replace=True
+        )
+        
+        return sampled_residuals
+    
+    def get_weights(self, n: int) -> np.ndarray:
+        """
+        Calcula pesos w̃_i para n residuos según ecuación (10) del paper.
+        
+        Este método es AUXILIAR para uso externo (evaluación, conformal prediction).
+        
+        Args:
+            n: Número de residuos
             
-        self.rng.shuffle(expanded_distribution)
-        return expanded_distribution
+        Returns:
+            Array de pesos normalizados w̃_i de tamaño n
+            
+        Formula:
+            w_i = ρ^(n-1-i) para i=0,...,n-1 (más reciente = índice mayor)
+            w̃_i = w_i / (Σw_j + 1) según ecuación (10) del paper
+        """
+        rho = self._frozen_rho if self._is_frozen else self.rho
+        
+        # w_i = ρ^(n-1-i) para i=0,...,n-1
+        exponents = np.arange(n - 1, -1, -1)  # [n-1, n-2, ..., 1, 0]
+        raw_weights = rho ** exponents
+        
+        # w̃_i = w_i / (Σw_j + 1) según ecuación (10)
+        normalized_weights = raw_weights / (raw_weights.sum() + 1)
+        
+        return normalized_weights
+    
+    def compute_weighted_quantile(self, values: np.ndarray, alpha: float = 0.1) -> float:
+        """
+        Calcula cuantil ponderado Q_{1-α}(Σ w̃_i δ_{R_i} + w̃_{n+1} δ_{+∞})
+        según ecuación (11) del paper.
+        
+        Este método es AUXILIAR para referencia teórica.
+        
+        Args:
+            values: Residuos R_i ordenados cronológicamente
+            alpha: Nivel de significancia
+            
+        Returns:
+            Cuantil 1-α ponderado
+        """
+        if len(values) == 0:
+            return np.inf
+        
+        # Calcular pesos para estos residuos
+        weights = self.get_weights(len(values))
+        
+        # Ordenar valores y sus pesos
+        sorted_idx = np.argsort(values)
+        sorted_values = values[sorted_idx]
+        sorted_weights = weights[sorted_idx]
+        
+        # Masa acumulada (sin incluir w̃_{n+1} que está en +∞)
+        cumsum_weights = np.cumsum(sorted_weights)
+        
+        # Encontrar primer índice donde masa ≥ 1-α
+        threshold = 1 - alpha
+        idx = np.searchsorted(cumsum_weights, threshold, side='left')
+        
+        if idx >= len(sorted_values):
+            # Si todos los pesos no llegan a 1-α, 
+            # el peso restante w̃_{n+1} está en +∞
+            return sorted_values[-1]
+        
+        return sorted_values[idx]
     
 
 

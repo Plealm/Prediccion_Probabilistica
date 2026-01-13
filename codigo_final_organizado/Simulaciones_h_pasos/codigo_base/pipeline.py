@@ -1043,3 +1043,328 @@ class PipelineSETAR_100Trayectorias:
             return self._predictions_cache
         else:
             raise ValueError("No hay predicciones disponibles. Ejecuta run_all() primero.")
+        
+
+class PipelineUnified_LSPMW:
+    """
+    Pipeline unificado que ejecuta ARMA, ARIMA y SETAR en paralelo, 
+    evaluando únicamente el modelo LSPMW contra la distribución teórica.
+    
+    Genera 100 trayectorias por escenario y compara con distribución teórica
+    usando ECRPS en predicción multi-paso (h-steps ahead).
+    """
+    N_TEST_STEPS = 12
+    N_VALIDATION = 40
+    N_TRAIN = 200
+    N_TRAJECTORIES_MODEL = 100    # Trayectorias del modelo LSPMW
+    N_TRAJECTORIES_TRUE = 1000    # Muestras para distribución teórica
+    N_SAMPLES_TRUE = 1000
+
+    # Configuraciones de todos los procesos
+    ARMA_CONFIGS = [
+        {'tipo': 'ARMA', 'nombre': 'AR(1)', 'phi': [0.9], 'theta': []},
+        {'tipo': 'ARMA', 'nombre': 'AR(2)', 'phi': [0.5, -0.3], 'theta': []},
+        {'tipo': 'ARMA', 'nombre': 'MA(1)', 'phi': [], 'theta': [0.7]},
+        {'tipo': 'ARMA', 'nombre': 'MA(2)', 'phi': [], 'theta': [0.4, 0.2]},
+        {'tipo': 'ARMA', 'nombre': 'ARMA(1,1)', 'phi': [0.6], 'theta': [0.3]},
+        {'tipo': 'ARMA', 'nombre': 'ARMA(2,2)', 'phi': [0.4, -0.2], 'theta': [0.5, 0.1]},
+        {'tipo': 'ARMA', 'nombre': 'ARMA(2,1)', 'phi': [0.7, 0.2], 'theta': [0.5]}
+    ]
+    
+    ARIMA_CONFIGS = [
+        {'tipo': 'ARIMA', 'nombre': 'ARIMA(0,1,0)', 'phi': [], 'theta': []},
+        {'tipo': 'ARIMA', 'nombre': 'ARIMA(1,1,0)', 'phi': [0.6], 'theta': []},
+        {'tipo': 'ARIMA', 'nombre': 'ARIMA(2,1,0)', 'phi': [0.5, -0.2], 'theta': []},
+        {'tipo': 'ARIMA', 'nombre': 'ARIMA(0,1,1)', 'phi': [], 'theta': [0.5]},
+        {'tipo': 'ARIMA', 'nombre': 'ARIMA(0,1,2)', 'phi': [], 'theta': [0.4, 0.25]},
+        {'tipo': 'ARIMA', 'nombre': 'ARIMA(1,1,1)', 'phi': [0.7], 'theta': [-0.3]},
+        {'tipo': 'ARIMA', 'nombre': 'ARIMA(2,1,2)', 'phi': [0.6, 0.2], 'theta': [0.4, -0.1]}
+    ]
+    
+    SETAR_CONFIGS = [
+        {'tipo': 'SETAR', 'nombre': 'SETAR-1', 'phi_regime1': [0.6], 'phi_regime2': [-0.5], 
+         'threshold': 0.0, 'delay': 1, 'description': 'SETAR(2;1,1) d=1, r=0'},
+        {'tipo': 'SETAR', 'nombre': 'SETAR-2', 'phi_regime1': [0.7], 'phi_regime2': [-0.7], 
+         'threshold': 0.0, 'delay': 2, 'description': 'SETAR(2;1,1) d=2, r=0'},
+        {'tipo': 'SETAR', 'nombre': 'SETAR-3', 'phi_regime1': [0.5, -0.2], 'phi_regime2': [-0.3, 0.1], 
+         'threshold': 0.5, 'delay': 1, 'description': 'SETAR(2;2,2) d=1, r=0.5'},
+        {'tipo': 'SETAR', 'nombre': 'SETAR-4', 'phi_regime1': [0.8, -0.15], 'phi_regime2': [-0.6, 0.2], 
+         'threshold': 1.0, 'delay': 2, 'description': 'SETAR(2;2,2) d=2, r=1.0'},
+        {'tipo': 'SETAR', 'nombre': 'SETAR-5', 'phi_regime1': [0.4, -0.1, 0.05], 'phi_regime2': [-0.3, 0.1, -0.05], 
+         'threshold': 0.0, 'delay': 1, 'description': 'SETAR(2;3,3) d=1, r=0'},
+        {'tipo': 'SETAR', 'nombre': 'SETAR-6', 'phi_regime1': [0.5, -0.3, 0.1], 'phi_regime2': [-0.4, 0.2, -0.05], 
+         'threshold': 0.5, 'delay': 2, 'description': 'SETAR(2;3,3) d=2, r=0.5'},
+        {'tipo': 'SETAR', 'nombre': 'SETAR-7', 'phi_regime1': [0.3, 0.1], 'phi_regime2': [-0.2, -0.1], 
+         'threshold': 0.8, 'delay': 3, 'description': 'SETAR(2;2,2) d=3, r=0.8'}
+    ]
+    
+    DISTRIBUTIONS = ['normal', 'uniform', 'exponential', 't-student', 'mixture']
+    VARIANCES = [0.2, 0.5, 1.0, 3.0]
+
+    def __init__(self, seed: int = 42, verbose: bool = False):
+        self.seed = seed
+        self.verbose = verbose
+        self.rng = np.random.default_rng(seed)
+
+    def _create_simulator(self, config: dict, dist: str, var: float, seed: int):
+        """Crea el simulador apropiado según el tipo de proceso."""
+        if config['tipo'] == 'ARMA':
+            return ARMASimulation(
+                phi=config['phi'], theta=config['theta'],
+                noise_dist=dist, sigma=np.sqrt(var), seed=seed
+            )
+        elif config['tipo'] == 'ARIMA':
+            return ARIMASimulation(
+                phi=config['phi'], theta=config['theta'],
+                noise_dist=dist, sigma=np.sqrt(var), seed=seed
+            )
+        elif config['tipo'] == 'SETAR':
+            return SETARSimulation(
+                model_type=config['nombre'],
+                phi_regime1=config['phi_regime1'],
+                phi_regime2=config['phi_regime2'],
+                threshold=config['threshold'],
+                delay=config['delay'],
+                noise_dist=dist,
+                sigma=np.sqrt(var),
+                seed=seed
+            )
+        else:
+            raise ValueError(f"Tipo de proceso desconocido: {config['tipo']}")
+
+    def _generate_true_distribution_recursive(self, simulator, history_series, history_errors, steps):
+        """
+        Genera distribución teórica recursiva usando get_true_next_step_samples.
+        Funciona para ARMA, ARIMA y SETAR.
+        """
+        true_forecasts = np.zeros((self.N_TRAJECTORIES_TRUE, steps))
+        
+        for sample_idx in range(self.N_TRAJECTORIES_TRUE):
+            current_series = history_series.copy()
+            current_errors = history_errors.copy()
+            
+            for h in range(steps):
+                next_step_samples = simulator.get_true_next_step_samples(
+                    current_series, current_errors, n_samples=1
+                )
+                sampled_value = next_step_samples[0]
+                true_forecasts[sample_idx, h] = sampled_value
+                
+                current_series = np.append(current_series, sampled_value)
+                
+                # Calcular error implícito (simplificado)
+                if hasattr(simulator, '_compute_error_from_observation'):
+                    error = simulator._compute_error_from_observation(
+                        sampled_value, current_series, current_errors
+                    )
+                else:
+                    # Fallback básico
+                    if len(current_series) >= 2:
+                        error = sampled_value - current_series[-2]
+                    else:
+                        error = sampled_value
+                
+                current_errors = np.append(current_errors, error)
+        
+        return true_forecasts
+
+    def run_single_scenario(self, config: dict, dist: str, var: float, rep: int) -> tuple:
+        """
+        Ejecuta un escenario: simula datos, entrena LSPM, genera trayectorias
+        y calcula ECRPS contra distribución teórica.
+        """
+        scenario_seed = self.seed + rep
+        scenario_name = f"{config['nombre']}_{dist}_V{var}_S{scenario_seed}"
+        
+        if self.verbose:
+            print(f"\n🔄 [{config['tipo']}] Procesando: {scenario_name}")
+        
+        # 1. SIMULACIÓN
+        simulator = self._create_simulator(config, dist, var, scenario_seed)
+        total_len = self.N_TRAIN + self.N_VALIDATION + self.N_TEST_STEPS
+        full_series, full_errors = simulator.simulate(n=total_len, burn_in=100)
+        
+        train_series = full_series[:self.N_TRAIN]
+        val_series = full_series[self.N_TRAIN:self.N_TRAIN + self.N_VALIDATION]
+        train_val_combined = np.concatenate([train_series, val_series])
+        
+        # 2. OPTIMIZAR Y ENTRENAR LSPMW
+        lspmw_model = LSPMW(random_state=scenario_seed)
+        
+        # LSPMW requiere optimización específica usando train/validation
+        # Usa TimeBalancedOptimizer para encontrar mejores hiperparámetros
+        optimizer = TimeBalancedOptimizer(random_state=scenario_seed, verbose=self.verbose)
+        
+        models_dict = {'LSPMW': lspmw_model}
+        best_params = optimizer.optimize_all_models(models_dict, train_series, val_series)
+        
+        # Aplicar mejores hiperparámetros encontrados
+        if 'LSPMW' in best_params and best_params['LSPMW']:
+            for k, v in best_params['LSPMW'].items():
+                if hasattr(lspmw_model, k):
+                    setattr(lspmw_model, k, v)
+        
+        # Congelar hiperparámetros con datos completos (train + validation)
+        if hasattr(lspmw_model, 'freeze_hyperparameters'):
+            lspmw_model.freeze_hyperparameters(train_val_combined)
+        
+        # 3. GENERAR TRAYECTORIAS LSPMW
+        if self.verbose:
+            print(f"  Generando {self.N_TRAJECTORIES_MODEL} trayectorias LSPMW...")
+        
+        lspmw_forecasts = np.zeros((self.N_TRAJECTORIES_MODEL, self.N_TEST_STEPS))
+        
+        for i in range(self.N_TRAJECTORIES_MODEL):
+            current_history = train_val_combined.copy()
+            
+            for h in range(self.N_TEST_STEPS):
+                pred_dist = lspmw_model.fit_predict(pd.DataFrame({'valor': current_history}))
+                sampled_val = self.rng.choice(np.asarray(pred_dist).flatten())
+                lspmw_forecasts[i, h] = sampled_val
+                current_history = np.append(current_history, sampled_val)
+        
+        clear_all_sessions()
+        
+        # 4. GENERAR DISTRIBUCIÓN TEÓRICA
+        train_val_errors = full_errors[:self.N_TRAIN + self.N_VALIDATION]
+        
+        if self.verbose:
+            print(f"  Generando distribución teórica...")
+        
+        true_dist_paths = self._generate_true_distribution_recursive(
+            simulator, train_val_combined, train_val_errors, self.N_TEST_STEPS
+        )
+        
+        # 5. CALCULAR ECRPS POR HORIZONTE
+        results_rows = []
+        for h in range(self.N_TEST_STEPS):
+            row = {
+                'Tipo_Proceso': config['tipo'],
+                'Paso': h + 1,
+                'Paso_H': h + 1,
+                'Config': config['nombre'],
+                'Proceso': config['nombre'],
+                'Dist': dist,
+                'Distribución': dist,
+                'Var': var,
+                'Varianza': var,
+                'Semilla': scenario_seed
+            }
+            
+            if config['tipo'] == 'SETAR' and 'description' in config:
+                row['Descripción'] = config['description']
+            
+            true_samples_h = true_dist_paths[:, h]
+            model_samples_h = lspmw_forecasts[:, h]
+            row['LSPMW'] = ecrps(model_samples_h, true_samples_h)
+            
+            results_rows.append(row)
+        
+        # 6. PREPARAR DATOS PARA GRÁFICOS
+        plot_data = {}
+        for h in range(self.N_TEST_STEPS):
+            plot_data[h] = {
+                'true_distribution': true_dist_paths[:, h],
+                'model_predictions': {
+                    'LSPMW': lspmw_forecasts[:, h]
+                }
+            }
+        
+        df_results = pd.DataFrame(results_rows)
+        
+        # 7. GENERAR GRÁFICO
+        output_path = f"reportes_unified_lspmw/{config['tipo']}/{scenario_name}/LSPMW.png"
+        PlotManager.plot_individual_model_evolution(
+            scenario_name, 'LSPMW', plot_data, df_results, output_path
+        )
+        
+        return results_rows, plot_data, scenario_name, df_results
+
+    def run_all(self, excel_filename="resultados_unified_LSPMW.xlsx", 
+                n_jobs=4, batch_size=10):
+        """
+        Ejecuta todos los escenarios (ARMA + ARIMA + SETAR) en paralelo
+        evaluando solo LSPMW.
+        """
+        # Combinar todas las configuraciones
+        all_configs = self.ARMA_CONFIGS + self.ARIMA_CONFIGS + self.SETAR_CONFIGS
+        
+        # Generar lista de escenarios
+        scenarios = []
+        scenario_id = 0
+        for config in all_configs:
+            for dist in self.DISTRIBUTIONS:
+                for var in self.VARIANCES:
+                    scenarios.append((config.copy(), dist, var, scenario_id))
+                    scenario_id += 1
+        
+        print("="*80)
+        print(f"🚀 INICIANDO EVALUACIÓN UNIFICADA - SOLO LSPMW")
+        print("="*80)
+        print(f"📊 Configuración:")
+        print(f"   - Procesos ARMA: {len(self.ARMA_CONFIGS)}")
+        print(f"   - Procesos ARIMA: {len(self.ARIMA_CONFIGS)}")
+        print(f"   - Procesos SETAR: {len(self.SETAR_CONFIGS)}")
+        print(f"   - Total procesos: {len(all_configs)}")
+        print(f"   - Distribuciones: {len(self.DISTRIBUTIONS)}")
+        print(f"   - Varianzas: {len(self.VARIANCES)}")
+        print(f"   - Total escenarios: {len(scenarios)}")
+        print(f"   - Trayectorias LSPMW: {self.N_TRAJECTORIES_MODEL}")
+        print(f"   - Muestras teóricas: {self.N_TRAJECTORIES_TRUE}")
+        print(f"   - Pasos predicción: {self.N_TEST_STEPS}")
+        print(f"   - Procesos paralelos: {n_jobs}")
+        print(f"   - Tamaño de lote: {batch_size}")
+        print()
+        
+        # Procesamiento en lotes
+        all_results = []
+        all_predictions = {}
+        
+        for i in range(0, len(scenarios), batch_size):
+            batch = scenarios[i:i + batch_size]
+            batch_num = i // batch_size + 1
+            total_batches = (len(scenarios) + batch_size - 1) // batch_size
+            
+            print(f"📦 Procesando lote {batch_num}/{total_batches}...")
+            
+            results = Parallel(n_jobs=n_jobs, backend='loky')(
+                delayed(self.run_single_scenario)(*s) for s in batch
+            )
+            
+            # Consolidar resultados
+            for idx, (rows, preds, name, _) in enumerate(results):
+                all_results.extend(rows)
+                all_predictions[name] = preds
+            
+            # Guardado intermedio
+            temp_df = pd.DataFrame(all_results)
+            temp_df.to_excel(excel_filename, index=False)
+            print(f"   ✅ Lote {batch_num} completado. Guardado en {excel_filename}")
+        
+        # Guardado final
+        final_df = pd.DataFrame(all_results)
+        final_df.to_excel(excel_filename, index=False)
+        
+        print()
+        print("="*80)
+        print("✅ PROCESO COMPLETADO")
+        print("="*80)
+        print(f"📁 Resultados: {excel_filename}")
+        print(f"📊 Total filas: {len(final_df)}")
+        print(f"📈 Columnas: {list(final_df.columns)}")
+        print()
+        print("📋 Resumen por tipo de proceso:")
+        print(final_df.groupby('Tipo_Proceso')['LSPMW'].agg(['count', 'mean', 'std']))
+        print()
+        
+        self._predictions_cache = all_predictions
+        return final_df
+
+    def get_predictions_dict(self):
+        """Retorna predicciones del último run_all()."""
+        if hasattr(self, '_predictions_cache'):
+            return self._predictions_cache
+        else:
+            raise ValueError("No hay predicciones disponibles. Ejecuta run_all() primero.")
+
+
