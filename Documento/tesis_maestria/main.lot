@@ -7,20 +7,25 @@
 \contentsline {table}{\numberline {\textbf {3-4}}{\ignorespaces Comparativa: Teoría vs. Implementación del CBB}}{46}{table.caption.46}%
 \contentsline {table}{\numberline {\textbf {3-5}}{\ignorespaces Comparativa: Teoría vs. Implementación del Sieve Bootstrap}}{50}{table.caption.59}%
 \contentsline {table}{\numberline {\textbf {3-6}}{\ignorespaces Comparativa: Teoría vs. Implementación del LSPM}}{54}{table.caption.75}%
-\contentsline {table}{\numberline {\textbf {3-7}}{\ignorespaces Comparativa: Teoría vs. Implementación del LSPMW}}{58}{table.caption.91}%
-\contentsline {table}{\numberline {\textbf {3-8}}{\ignorespaces Comparación entre MCPS Teórico y su Implementación para Series Temporales}}{64}{table.caption.105}%
-\contentsline {table}{\numberline {\textbf {3-9}}{\ignorespaces Comparación entre MCPS Estándar y AV-MCPS}}{70}{table.caption.120}%
-\contentsline {table}{\numberline {\textbf {3-10}}{\ignorespaces Comparación entre DeepAR Original y DeepAR Adaptado}}{76}{table.caption.137}%
-\contentsline {table}{\numberline {\textbf {3-11}}{\ignorespaces Comparación Conceptual de AREPD con Métodos Relacionados}}{80}{table.caption.150}%
-\contentsline {table}{\numberline {\textbf {3-12}}{\ignorespaces Comparación entre AREPD Teórico y AREPD Implementado}}{82}{table.caption.153}%
-\contentsline {table}{\numberline {\textbf {3-13}}{\ignorespaces Comparación entre teoría y práctica en EnCQR-LSTM}}{88}{table.caption.169}%
-\contentsline {table}{\numberline {\textbf {3-14}}{\ignorespaces Tamaños muestrales evaluados con proporción fija}}{93}{table.caption.183}%
-\contentsline {table}{\numberline {\textbf {3-15}}{\ignorespaces Proporciones de calibración evaluadas (N=240 fijo)}}{94}{table.caption.186}%
-\contentsline {table}{\numberline {\textbf {3-16}}{\ignorespaces Resumen de la carga experimental de simulaciones complementarias}}{98}{table.caption.192}%
+\contentsline {table}{\numberline {\textbf {3-7}}{\ignorespaces Comparativa: Teoría vs. Implementación del LSPMW}}{59}{table.caption.91}%
+\contentsline {table}{\numberline {\textbf {3-8}}{\ignorespaces Comparación entre MCPS Teórico y su Implementación para Series Temporales}}{64}{table.caption.106}%
+\contentsline {table}{\numberline {\textbf {3-9}}{\ignorespaces Comparación entre MCPS Estándar y AV-MCPS}}{70}{table.caption.121}%
+\contentsline {table}{\numberline {\textbf {3-10}}{\ignorespaces Comparación entre DeepAR Original y DeepAR Adaptado}}{76}{table.caption.138}%
+\contentsline {table}{\numberline {\textbf {3-11}}{\ignorespaces Comparación Conceptual de AREPD con Métodos Relacionados}}{81}{table.caption.151}%
+\contentsline {table}{\numberline {\textbf {3-12}}{\ignorespaces Comparación entre AREPD Teórico y AREPD Implementado}}{82}{table.caption.154}%
+\contentsline {table}{\numberline {\textbf {3-13}}{\ignorespaces Comparación entre teoría y práctica en EnCQR-LSTM}}{89}{table.caption.170}%
+\contentsline {table}{\numberline {\textbf {3-14}}{\ignorespaces Tamaños muestrales evaluados con proporción fija}}{94}{table.caption.184}%
+\contentsline {table}{\numberline {\textbf {3-15}}{\ignorespaces Proporciones de calibración evaluadas (N=240 fijo)}}{95}{table.caption.187}%
+\contentsline {table}{\numberline {\textbf {3-16}}{\ignorespaces Resumen de la carga experimental de simulaciones complementarias}}{99}{table.caption.193}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {\textbf {4-1}}{\ignorespaces Resumen de características identificadas en el análisis exploratorio del dataset Electricity y sus implicaciones metodológicas.}}{114}{table.caption.231}%
-\contentsline {table}{\numberline {\textbf {4-2}}{\ignorespaces Ranking de modelos según desempeño en dataset Electricity. Se reportan media y mediana del CRPS sobre 24 predicciones one-step-ahead. Valores menores indican mejor desempeño.}}{116}{table.caption.235}%
-\contentsline {table}{\numberline {\textbf {4-3}}{\ignorespaces Ranking de modelos según desempeño en dataset Traffic. Se reportan media y mediana del CRPS, además de métricas de comparación pareada. Valores menores de CRPS indican mejor desempeño.}}{126}{table.caption.247}%
-\contentsline {table}{\numberline {\textbf {4-4}}{\ignorespaces Matriz de valores p del test de Diebold-Mariano modificado para el dataset Traffic. Valores menores a 0.05 (resaltados en negrita) indican diferencias estadísticamente significativas en capacidad predictiva al nivel de confianza del 95\%.}}{128}{table.caption.250}%
+\contentsline {table}{\numberline {\textbf {4-1}}{\ignorespaces Test de Diebold-Mariano: Sin Diferenciación vs Con Diferenciación en ARIMA}}{125}{table.caption.222}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {\textbf {5-1}}{\ignorespaces Resumen de características identificadas en el análisis exploratorio del dataset Electricity y sus implicaciones metodológicas.}}{152}{table.caption.269}%
+\contentsline {table}{\numberline {\textbf {5-2}}{\ignorespaces Ranking de modelos según desempeño en dataset Electricity. Se reportan media y mediana del CRPS sobre 24 predicciones one-step-ahead. Valores menores indican mejor desempeño.}}{154}{table.caption.273}%
+\contentsline {table}{\numberline {\textbf {5-3}}{\ignorespaces Ranking de modelos según desempeño en dataset Traffic. Se reportan media y mediana del CRPS, además de métricas de comparación pareada. Valores menores de CRPS indican mejor desempeño.}}{164}{table.caption.285}%
+\contentsline {table}{\numberline {\textbf {5-4}}{\ignorespaces Matriz de valores p del test de Diebold-Mariano modificado para el dataset Traffic. Valores menores a 0.05 (resaltados en negrita) indican diferencias estadísticamente significativas en capacidad predictiva al nivel de confianza del 95\%.}}{166}{table.caption.288}%
+\contentsline {table}{\numberline {\textbf {5-5}}{\ignorespaces Ranking de modelos según desempeño en dataset Exchange Rate. Se reportan media y mediana del CRPS, además de métricas de comparación pareada. Valores menores de CRPS indican mejor desempeño.}}{176}{table.caption.298}%
+\contentsline {table}{\numberline {\textbf {5-6}}{\ignorespaces Matriz de valores p del test de Diebold-Mariano modificado para el dataset Exchange Rate. Valores menores a 0.05 (resaltados en negrita) indican diferencias estadísticamente significativas en capacidad predictiva al nivel de confianza del 95\%.}}{178}{table.caption.301}%
+\contentsline {table}{\numberline {\textbf {5-7}}{\ignorespaces Comparación sistemática de características estructurales y desempeño de modelos a través de los tres datasets evaluados.}}{187}{table.caption.306}%
 \addvspace {10\p@ }
 \providecommand \tocbasic@end@toc@file {}\tocbasic@end@toc@file 

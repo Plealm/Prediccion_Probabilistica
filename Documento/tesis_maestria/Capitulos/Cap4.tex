@@ -1,0 +1,468 @@
+\chapter{Resultados y Análisis de Simulaciones}
+\label{cap:resultados_simulaciones}
+
+Este capítulo presenta los resultados del diseño experimental descrito en el Capítulo~\ref{cap:diseño_simulacion}, evaluando el desempeño de los nueve métodos de predicción conformal y probabilística bajo condiciones controladas donde el proceso generador de datos es conocido. A diferencia de las aplicaciones a series reales del Capítulo~\ref{cap:aplicaciones}, donde la distribución verdadera es desconocida, el entorno de simulación permite comparar directamente las distribuciones predictivas empíricas contra la densidad teórica mediante el ECRPS.
+
+La estructura del capítulo refleja la organización del diseño experimental. La Sección~\ref{sec:resultados_principal} analiza los resultados del diseño factorial principal, que combina tres escenarios de simulación (ARMA, ARIMA, SETAR), siete configuraciones paramétricas por escenario, cinco distribuciones de ruido y cuatro niveles de varianza. Las secciones subsecuentes abordan las cinco simulaciones complementarias que exploran dimensiones metodológicas específicas: impacto de la diferenciación en ARIMA (Sección~\ref{sec:resultados_diferenciacion}), límites de integración múltiple (Sección~\ref{sec:resultados_multi_d}), efectos del tamaño muestral (Sección~\ref{sec:resultados_tamano_muestral}), proporciones óptimas de calibración (Sección~\ref{sec:resultados_proporciones}), y degradación en predicción multi-paso (Sección~\ref{sec:resultados_multi_paso}).
+\section{Resultados del Diseño Factorial Principal}
+\label{sec:resultados_principal}
+
+Esta sección presenta los resultados del diseño factorial completo descrito en la Sección~\ref{sec:diseño_experimental}, que evalúa 9 métodos conformales bajo 420 configuraciones únicas distribuidas entre tres escenarios (ARMA, ARIMA, SETAR). El análisis se estructura en dos niveles: primero se examinan los patrones agregados que emergen del conjunto completo de simulaciones, y posteriormente se descomponen los resultados por escenario para identificar comportamientos específicos asociados a cada clase de proceso generador de datos.
+
+\subsection{Análisis Agregado de Desempeño}
+\label{subsec:resultados_agregados}
+
+La Figura~\ref{fig:ecrps_general_config} presenta los puntajes Z del ECRPS promedio para cada modelo evaluado en las 21 configuraciones paramétricas (7 por escenario). Los puntajes Z permiten comparar el desempeño relativo estandarizado, donde valores negativos indican un rendimiento superior al promedio y valores positivos señalan un desempeño inferior.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{Imagenes/rendimiento_por_escenario.png}
+\caption{Z-scores de ECRPS por configuración paramétrica agregando todos los escenarios. Valores negativos (verde) indican mejor desempeño relativo; valores positivos (rojo) indican peor desempeño. La columna ARIMA(2,1,2) destaca por concentrar los peores desempeños de la mayoría de métodos.}
+\label{fig:ecrps_general_config}
+\end{figure}
+
+Los resultados agregados revelan tres hallazgos principales. Primero, los métodos bootstrap (Sieve Bootstrap y Block Bootstrapping) exhiben la mayor estabilidad relativa, manteniendo puntajes Z consistentemente cercanos a cero o negativos en la mayoría de configuraciones. Segundo, se observa una marcada heterogeneidad en el desempeño según la configuración: la columna ARIMA(2,1,2) concentra los valores Z más elevados (rojo intenso) para prácticamente todos los métodos, sugiriendo que esta parametrización particular representa un desafío sistemático. Tercero, los métodos LSPM y LSPMW muestran un patrón bimodal, con excelente desempeño en configuraciones ARMA pero deterioro en configuraciones ARIMA específicas.
+
+La Figura~\ref{fig:desempeno_escenario} cuantifica el ECRPS promedio por escenario, ordenando los modelos según su desempeño en procesos ARIMA (el escenario más exigente). La clara separación entre grupos de métodos confirma que la no estacionariedad amplifica las diferencias de rendimiento.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{Imagenes/2.1_zscore_config.png}
+\caption{ECRPS promedio por escenario. Los modelos están ordenados por su desempeño en ARIMA (barras grises). Block Bootstrapping y AREPD muestran la mayor degradación relativa al pasar de ARMA a ARIMA, mientras que Sieve Bootstrap mantiene estabilidad entre escenarios.}
+\label{fig:desempeno_escenario}
+\end{figure}
+
+El ranking por escenario evidencia que Block Bootstrapping y AREPD, aunque competitivos en ARMA (ECRPS $\approx$ 0.55--0.63), experimentan degradación severa en ARIMA (ECRPS $>$ 10), superando por amplio margen a métodos como Sieve Bootstrap (ECRPS $\approx$ 0.55 en todos los escenarios) y DeepAR (ECRPS $\approx$ 0.57--4.33). En el escenario SETAR, los métodos convergen hacia un desempeño más homogéneo (ECRPS $\approx$ 0.63--0.70), con excepción nuevamente de Block Bootstrapping (ECRPS = 0.63).
+
+\subsubsection{Desempeño por Configuración Específica}
+
+Las Figuras~\ref{fig:ecrps_arma}--\ref{fig:ecrps_setar} desagregan los resultados por escenario, revelando patrones de especialización. En procesos ARMA (Figura~\ref{fig:ecrps_arma}), Block Bootstrapping y AREPD dominan en configuraciones AR simples (AR(1), AR(2)) pero pierden ventaja en modelos MA y ARMA mixtos. Los métodos conformales MCPS y AV-MCPS muestran sensibilidad a la complejidad del proceso, con deterioro visible en ARMA(2,1) y ARMA(2,2).
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{Imagenes/2.1.a_zscore_config.png}
+\caption{Z-scores de ECRPS para configuraciones ARMA. Métodos bootstrap exhiben ventaja en procesos AR puros, mientras que configuraciones MA(2) y ARMA(2,2) desafían uniformemente a todos los métodos (columnas amarillo-rojizas).}
+\label{fig:ecrps_arma}
+\end{figure}
+
+En procesos ARIMA (Figura~\ref{fig:ecrps_arima}), el patrón se invierte dramáticamente: LSPM, LSPMW, MCPS y AV-MCPS colapsan en ARIMA(2,1,2) (Z-scores $>$ 2.0, rojo intenso), mientras que Sieve Bootstrap mantiene estabilidad sobresaliente (Z-scores $\approx$ -1.0, verde). DeepAR muestra robustez intermedia con Z-scores consistentemente cercanos a -0.5.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{Imagenes/2.1.b_zscore_config.png}
+\caption{Z-scores de ECRPS para configuraciones ARIMA. La columna ARIMA(2,1,2) concentra los peores desempeños (rojo intenso) para la mayoría de métodos, excepto Sieve Bootstrap que mantiene valores negativos (verde).}
+\label{fig:ecrps_arima}
+\end{figure}
+
+Los procesos SETAR (Figura~\ref{fig:ecrps_setar}) presentan un desafío diferente: las configuraciones SETAR-2 y SETAR-4 (que incorporan cambios de régimen más abruptos) generan dificultades uniformes (Z-scores positivos) para todos los métodos excepto Sieve Bootstrap. Configuraciones con transiciones suaves (SETAR-1, SETAR-3, SETAR-5) permiten un desempeño más equilibrado.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{Imagenes/2.1.c_zscore_config.png}
+\caption{Z-scores de ECRPS para configuraciones SETAR. Las configuraciones SETAR-2 y SETAR-4 (cambios de régimen pronunciados) desafían uniformemente a todos los métodos con Z-scores elevados (rojo), mientras que SETAR-1, SETAR-3 y SETAR-5 permiten mejor adaptación.}
+\label{fig:ecrps_setar}
+\end{figure}
+
+\subsubsection{Sensibilidad a la Distribución del Error}
+
+La Figura~\ref{fig:ecrps_distribucion} examina el efecto de la distribución del término de innovación. La distribución uniforme genera sistemáticamente los peores desempeños (Z-scores $>$ 1.2 para todos los métodos excepto Sieve Bootstrap), mientras que la distribución exponencial favorece consistentemente a todos los métodos (Z-scores $<$ -0.4). Este patrón sugiere que los métodos conformales enfrentan mayor dificultad con distribuciones de soporte acotado que con asimetrías o colas pesadas.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{Imagenes/3.1_zscore_dist.png}
+\caption{Z-scores de ECRPS por distribución del error agregando todos los escenarios. La distribución uniforme (columna derecha) desafía sistemáticamente a todos los métodos, mientras que la exponencial (columna izquierda) favorece el desempeño relativo.}
+\label{fig:ecrps_distribucion}
+\end{figure}
+
+Las Figuras~\ref{fig:dist_arma}--\ref{fig:dist_setar} descomponen este análisis por escenario, confirmando que el efecto de la distribución se mantiene consistente: en ARMA (Figura~\ref{fig:dist_arma}), LSPM experimenta deterioro notable bajo distribución exponencial (Z-score = 1.38), mientras que en ARIMA (Figura~\ref{fig:dist_arima}) y SETAR (Figura~\ref{fig:dist_setar}) la distribución uniforme amplifica las dificultades de todos los métodos excepto Sieve Bootstrap.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.85\textwidth]{Imagenes/3.1.a_zscore_dist.png}
+\caption{Z-scores de ECRPS por distribución del error en procesos ARMA. LSPM y Block Bootstrapping muestran dificultades específicas con la distribución exponencial (primera columna).}
+\label{fig:dist_arma}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.85\textwidth]{Imagenes/3.1.b_zscore_dist.png}
+\caption{Z-scores de ECRPS por distribución del error en procesos ARIMA. La distribución uniforme magnifica las dificultades de los métodos conformales clásicos, mientras que Sieve Bootstrap mantiene robustez.}
+\label{fig:dist_arima}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.85\textwidth]{Imagenes/3.1.c_zscore_dist.png}
+\caption{Z-scores de ECRPS por distribución del error en procesos SETAR. Los patrones de sensibilidad se suavizan comparados con ARIMA, pero la distribución uniforme sigue representando el mayor desafío.}
+\label{fig:dist_setar}
+\end{figure}
+
+\subsubsection{Efecto de la Varianza del Error}
+
+La Figura~\ref{fig:varianza_general} cuantifica la evolución del ECRPS conforme aumenta la varianza del término de error. Dos grupos claramente diferenciados emergen: métodos con crecimiento aproximadamente lineal (Sieve Bootstrap, LSPMW, LSPM, MCPS, AV-MCPS) y métodos con crecimiento super-lineal o exponencial (DeepAR, EnCQR-LSTM, AREPD, Block Bootstrapping).
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{Imagenes/4.1_evolucion_var.png}
+\caption{Evolución del ECRPS promedio en función de la varianza del error ($\sigma^2 \in \{0.2, 0.5, 1.0, 3.0\}$) agregando todos los escenarios. Block Bootstrapping y AREPD exhiben crecimiento exponencial, mientras que Sieve Bootstrap mantiene pendiente casi constante.}
+\label{fig:varianza_general}
+\end{figure}
+
+Las Figuras~\ref{fig:var_arma}--\ref{fig:var_setar} revelan que este comportamiento es altamente dependiente del escenario. En ARMA (Figura~\ref{fig:var_arma}), todos los métodos mantienen crecimiento controlado con pendientes similares. En ARIMA (Figura~\ref{fig:var_arima}), Block Bootstrapping y AREPD experimentan crecimiento explosivo para $\sigma^2 = 3.0$ (ECRPS $>$ 20), mientras que Sieve Bootstrap permanece estable (ECRPS $<$ 2). En SETAR (Figura~\ref{fig:var_setar}), el crecimiento se homogeniza nuevamente, sugiriendo que la no linealidad estacionaria atenúa las diferencias inducidas por la varianza del ruido.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{Imagenes/4.1.a_evolucion_var.png}
+\caption{Evolución del ECRPS en función de la varianza del error para procesos ARMA. Todos los métodos exhiben crecimiento aproximadamente lineal y controlado.}
+\label{fig:var_arma}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{Imagenes/4.1.b_evolucion_var.png}
+\caption{Evolución del ECRPS en función de la varianza del error para procesos ARIMA. Block Bootstrapping y AREPD muestran crecimiento explosivo para $\sigma^2 = 3.0$, divergiendo dramáticamente del resto de métodos.}
+\label{fig:var_arima}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{Imagenes/4.1.c_evolucion_var.png}
+\caption{Evolución del ECRPS en función de la varianza del error para procesos SETAR. El crecimiento se suaviza comparado con ARIMA, con convergencia relativa entre métodos para altas varianzas.}
+\label{fig:var_setar}
+\end{figure}
+
+\subsection{Análisis de Robustez y Significancia Estadística}
+\label{subsec:robustez_dm}
+
+\subsubsection{Estabilidad del Desempeño: Coeficiente de Variación}
+
+La Figura~\ref{fig:robustez_cv} cuantifica la estabilidad del desempeño de cada método mediante el coeficiente de variación (CV) del ECRPS a través de todas las configuraciones evaluadas. El CV permite identificar métodos cuyo rendimiento es predecible versus aquellos que exhiben alta sensibilidad a las condiciones del problema.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.9\textwidth]{Imagenes/6.1_robustez_coeficiente_variacion.png}
+\caption{Coeficiente de variación del ECRPS por método, ordenado de menor a mayor. Valores bajos (verde) indican desempeño estable; valores altos (rojo) indican alta variabilidad. La línea punteada marca la mediana del grupo.}
+\label{fig:robustez_cv}
+\end{figure}
+
+Los resultados revelan una clara estratificación. Sieve Bootstrap emerge como el método más robusto (CV = 0.54), seguido por LSPMW (CV = 0.82) y LSPM (CV = 0.83), todos significativamente por debajo de la mediana grupal. En contraste, DeepAR exhibe la mayor variabilidad (CV = 4.04), seguido por AREPD (CV = 2.94) y Block Bootstrapping (CV = 2.87). Este patrón sugiere que los métodos paramétricos y aquellos basados en remuestreo de bloques sufren colapsos severos en configuraciones específicas, mientras que los métodos conformales basados en cuantiles mantienen consistencia.
+
+AV-MCPS (CV = 2.09) presenta una paradoja interesante: a pesar de ubicarse ligeramente por debajo de la mediana en términos absolutos, su variabilidad es sustancialmente mayor que los métodos conformales simples (LSPM, LSPMW), lo que indica que la ponderación adaptativa introduce inestabilidad en ciertos escenarios sin beneficios consistentes.
+
+\subsubsection{Comparaciones Pareadas: Test de Diebold-Mariano}
+
+La Figura~\ref{fig:dm_general} presenta los resultados del test de Diebold-Mariano modificado con corrección de Bonferroni para comparaciones múltiples, evaluando las 36 comparaciones pareadas posibles entre los 9 métodos. Las celdas verdes indican que el método de la fila supera significativamente al método de la columna ($p < \alpha$); las celdas rojas indican inferioridad significativa; las celdas amarillas señalan ausencia de diferencias estadísticamente detectables.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{Imagenes/6.2_dm_test_hln_bonferroni.png}
+\caption{Test de Diebold-Mariano modificado con corrección de Bonferroni para el diseño factorial completo (h=6, T=5040, df=5039, $\alpha$ ajustado=0.00139). Verde: fila supera columna; Rojo: columna supera fila; Amarillo: sin diferencia significativa.}
+\label{fig:dm_general}
+\end{figure}
+
+Los resultados agregados confirman la superioridad estadística robusta de Sieve Bootstrap: este método supera significativamente a 8 de los 8 competidores comparados (fila completamente verde), mientras que ningún método logra superarlo (columna verde para todos los competidores). Block Bootstrapping y LSPM/LSPMW muestran relaciones de dominancia incompleta: aunque superan a métodos específicos (DeepAR, AREPD, EnCQR-LSTM), son estadísticamente indistinguibles entre sí y pierden consistentemente frente a Sieve Bootstrap.
+
+Un hallazgo notable es la fuerte equivalencia estadística entre LSPM y LSPMW: ambos métodos no muestran diferencias significativas en sus comparaciones directas ni en su patrón de dominancia sobre terceros, sugiriendo que la ponderación adaptativa en LSPMW no aporta ventajas detectables en el diseño factorial agregado. Los métodos de aprendizaje profundo (DeepAR, EnCQR-LSTM) ocupan el estrato inferior, siendo dominados significativamente por prácticamente todos los métodos conformales y bootstrap.
+
+\subsubsection{Análisis por Escenario: Estacionariedad como Moderador}
+
+Las Figuras~\ref{fig:dm_arma}--\ref{fig:dm_setar} descomponen el test de Diebold-Mariano por escenario, revelando que las relaciones de dominancia estadística son altamente dependientes de la estructura del proceso generador.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{Imagenes/6.2.a_dm_test_hln_bonferroni.png}
+\caption{Test de Diebold-Mariano para procesos ARMA (h=6, T=1680, df=1679, $\alpha$ ajustado=0.00139). Sieve Bootstrap mantiene superioridad amplia, mientras que emerge competencia entre métodos conformales y bootstrap.}
+\label{fig:dm_arma}
+\end{figure}
+
+En procesos ARMA (Figura~\ref{fig:dm_arma}), Sieve Bootstrap amplía su ventaja: supera significativamente a todos los competidores con estadísticos HLN-DM consistentemente superiores a 8.0 ($p < 0.0001$). Block Bootstrapping y AREPD emergen como competidores secundarios, superando significativamente a DeepAR y EnCQR-LSTM, pero permaneciendo estadísticamente inferiores a Sieve Bootstrap. Los métodos MCPS/AV-MCPS muestran equivalencia estadística entre sí y con LSPM/LSPMW, sugiriendo que bajo estacionariedad lineal, la partición del espacio de calibración no aporta ventajas sobre métodos más simples.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{Imagenes/6.2.b_dm_test_hln_bonferroni.png}
+\caption{Test de Diebold-Mariano para procesos ARIMA (h=6, T=1680, df=1679, $\alpha$ ajustado=0.00139). Las diferencias se magnifican: Sieve Bootstrap domina categóricamente, mientras que Block Bootstrapping y AREPD colapsan estadísticamente.}
+\label{fig:dm_arima}
+\end{figure}
+
+En procesos ARIMA (Figura~\ref{fig:dm_arima}), el panorama se polariza dramáticamente. Sieve Bootstrap no solo mantiene superioridad universal, sino que las magnitudes de los estadísticos HLN-DM se amplifican (valores $>$ 10.0 contra Block Bootstrapping, AREPD), reflejando diferencias de ECRPS masivas. LSPM y LSPMW recuperan posiciones relativas: superan significativamente a todos los métodos excepto Sieve Bootstrap, MCPS y AV-MCPS, con quienes mantienen equivalencia estadística. Block Bootstrapping y AREPD experimentan colapso estadístico, siendo dominados significativamente incluso por DeepAR (celdas rojas en sus columnas). Este resultado confirma que el remuestreo de bloques sin diferenciación previa es inadecuado para series no estacionarias.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{Imagenes/6.2.c_dm_test_hln_bonferroni.png}
+\caption{Test de Diebold-Mariano para procesos SETAR (h=6, T=1680, df=1679, $\alpha$ ajustado=0.00139). Las relaciones de dominancia se atenúan: mayor número de comparaciones no significativas (amarillo), sugiriendo que la no linealidad homogeniza el desempeño relativo.}
+\label{fig:dm_setar}
+\end{figure}
+
+En procesos SETAR (Figura~\ref{fig:dm_setar}), las relaciones de dominancia se suavizan considerablemente. Sieve Bootstrap mantiene superioridad sobre la mayoría de métodos, pero con estadísticos HLN-DM reducidos (3.0--5.0), y pierde significancia estadística en comparaciones con DeepAR (HLN-DM = 2.01, $p = 0.0574 > \alpha$). Block Bootstrapping recupera competitividad, mostrando equivalencia estadística con métodos conformales (LSPM, LSPMW, MCPS, AV-MCPS) e incluso superando a DeepAR. Este patrón sugiere que bajo no linealidad estacionaria, las diferencias entre métodos se comprimen: la dificultad de capturar dinámicas de régimen afecta uniformemente a todos los enfoques, reduciendo las ventajas relativas de métodos específicos.
+
+\subsubsection{Síntesis de Robustez}
+
+El análisis conjunto de coeficiente de variación y tests de Diebold-Mariano permite clasificar los métodos en tres estratos de robustez:
+
+\begin{enumerate}
+\item \textbf{Estrato de Alta Robustez:} Sieve Bootstrap es el único método que combina baja variabilidad (CV = 0.54) con dominancia estadística universal en los tres escenarios. Su ventaja es máxima en ARIMA y se atenúa (pero no desaparece) en SETAR.
+
+\item \textbf{Estrato de Robustez Moderada:} LSPM, LSPMW, MCPS y AV-MCPS exhiben estabilidad intermedia (CV $\approx$ 0.8--2.1) y desempeño estadísticamente equivalente entre sí en la mayoría de escenarios. Su fortaleza relativa aumenta en ARIMA y disminuye en ARMA, sugiriendo especialización en contextos no estacionarios.
+
+\item \textbf{Estrato de Baja Robustez:} Block Bootstrapping, AREPD, DeepAR y EnCQR-LSTM sufren alta variabilidad (CV $>$ 2.0) y colapsos severos en escenarios específicos (particularmente ARIMA). Su uso en contextos operativos requiere validación cuidadosa de los supuestos subyacentes.
+\end{enumerate}
+
+Estos hallazgos tienen implicaciones metodológicas claras: en ausencia de conocimiento previo sobre la estructura del proceso generador, Sieve Bootstrap emerge como la opción más segura, mientras que métodos especializados (LSPM/LSPMW para ARIMA, Block Bootstrapping para ARMA) pueden ofrecer ventajas cuando las características del proceso son conocidas y estables.
+
+
+\section{Simulación 1: Impacto de la Diferenciación en Procesos ARIMA}
+\label{sec:sim1_diferenciacion}
+
+Esta simulación aborda una pregunta metodológica fundamental en el tratamiento de series no estacionarias: ¿deben los métodos conformales operar sobre la serie integrada original ($Y_t$) o sobre su transformación estacionaria diferenciada ($\Delta Y_t$)? La respuesta tiene implicaciones tanto teóricas como prácticas, dado que la diferenciación es el mecanismo estándar para inducir estacionariedad en procesos ARIMA, pero su aplicación en el contexto de predicción conformal no ha sido sistemáticamente evaluada.
+
+\subsection{Motivación Teórica}
+\label{subsec:motivacion_diferenciacion}
+
+Los procesos ARIMA$(p,d,q)$ con $d \geq 1$ exhiben no estacionariedad en niveles debido a la presencia de raíces unitarias en el polinomio autorregresivo. Esta no estacionariedad implica que la media, varianza y estructura de autocorrelación de $Y_t$ varían con el tiempo, violando supuestos fundamentales de muchos métodos estadísticos. La diferenciación de orden $d$ transforma el proceso no estacionario en un proceso ARMA$(p,q)$ estacionario:
+
+\begin{equation}
+\Delta^d Y_t = (1-B)^d Y_t = W_t \sim \text{ARMA}(p,q)
+\end{equation}
+
+donde $B$ es el operador de retardo. Desde una perspectiva de predicción conformal, la elección entre operar en niveles o en diferencias plantea un trade-off:
+
+\begin{itemize}
+\item \textbf{Ventaja de la diferenciación:} El proceso diferenciado $\Delta Y_t$ satisface los supuestos de estacionariedad requeridos por la mayoría de algoritmos de aprendizaje y métodos de calibración conformal. Los residuos de calibración provienen de un proceso estable, lo que favorece la validez asintótica de las garantías de cobertura.
+
+\item \textbf{Desventaja de la diferenciación:} La predicción en diferencias requiere integrar las predicciones mediante $\hat{Y}_{t+1} = Y_t + \widehat{\Delta Y}_{t+1}$, lo que propaga la incertidumbre del último valor observado $Y_t$ hacia adelante. Además, se pierde información sobre el nivel de la serie, que puede ser relevante para ciertos métodos adaptativos.
+\end{itemize}
+
+La presente simulación cuantifica empíricamente este trade-off evaluando las 140 configuraciones ARIMA del diseño principal bajo ambas modalidades.
+
+\subsection{Resultados Agregados}
+\label{subsec:resultados_diferenciacion}
+
+La Figura~\ref{fig:comparacion_diff} presenta el ECRPS promedio para cada método bajo las dos modalidades evaluadas. El contraste es dramático: con excepción de Sieve Bootstrap, todos los métodos experimentan mejoras porcentuales superiores al 75\% al operar sobre series diferenciadas, con varios métodos superando reducciones del 90\% en el ECRPS.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{Imagenes/Sim1/1.1_barras_ecrps_valores.png}
+\caption{ECRPS promedio por método según modalidad de procesamiento. Las barras rojas (Sin Dif.) corresponden a la serie integrada original; las barras verdes (Con Dif.) corresponden a la serie diferenciada. La escala logarítmica enfatiza las diferencias de magnitud.}
+\label{fig:comparacion_diff}
+\end{figure}
+
+Block Bootstrapping exhibe el colapso más severo sin diferenciación (ECRPS = 11.25), reducido a 0.67 con diferenciación, lo que representa una mejora del 94.1\%. AREPD sigue un patrón similar (ECRPS: 10.03 $\to$ 0.70, mejora del 93.0\%). Estos resultados confirman que el remuestreo de bloques sin tratamiento previo de no estacionariedad es fundamentalmente inadecuado para procesos integrados: los bloques extraídos de diferentes regiones de la serie provienen efectivamente de distribuciones distintas debido a la deriva estocástica, invalidando el supuesto de intercambiabilidad del bootstrap.
+
+Los métodos de aprendizaje profundo también muestran mejoras sustanciales: DeepAR (ECRPS: 4.33 $\to$ 0.56, mejora del 87.0\%) y EnCQR-LSTM (ECRPS: 6.11 $\to$ 0.88, mejora del 85.6\%). Estos métodos, aunque diseñados para capturar dependencias temporales complejas mediante arquitecturas recurrentes, no logran compensar automáticamente la no estacionariedad sin preprocesamiento explícito.
+
+Los métodos conformales basados en cuantiles (MCPS, AV-MCPS, LSPMW, LSPM) exhiben mejoras intermedias en el rango 75--80\%. Aunque estos métodos son conceptualmente más robustos a desviaciones de normalidad, la no estacionariedad afecta la validez de la calibración: los residuos de conformidad calculados en diferentes puntos temporales no son comparables cuando la distribución subyacente está cambiando sistemáticamente.
+
+\subsection{Caso Excepcional: Sieve Bootstrap}
+\label{subsec:sieve_excepcion}
+
+Sieve Bootstrap constituye una excepción notable: su desempeño es prácticamente idéntico bajo ambas modalidades (ECRPS: 0.547 sin diferenciación vs 0.546 con diferenciación, mejora del 0.3\%). Esta invarianza se explica por la naturaleza adaptativa del método: Sieve Bootstrap ajusta un modelo autorregresivo de orden creciente $\text{AR}(p_n)$ donde $p_n \to \infty$ conforme $n \to \infty$, permitiendo que el modelo capture automáticamente raíces unitarias mediante la inclusión de suficientes rezagos \parencite{Buhlmann1997}. El remuestreo posterior de los residuos filtrados opera sobre innovaciones aproximadamente estacionarias, incluso cuando la serie original no lo es.
+
+La Figura~\ref{fig:mejora_diferenciacion} cuantifica la magnitud de la mejora porcentual para todos los métodos, ordenados de menor a mayor beneficio.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.9\textwidth]{Imagenes/Sim1/1.2_mejora_porcentual_valores.png}
+\caption{Mejora porcentual en ECRPS al diferenciar series ARIMA, calculada como $100 \times (1 - \text{ECRPS}_{\text{diff}} / \text{ECRPS}_{\text{sin\_diff}})$. Valores cercanos a 100\% indican que la diferenciación es esencial; valores cercanos a 0\% indican invarianza.}
+\label{fig:mejora_diferenciacion}
+\end{figure}
+
+El ordenamiento revela una taxonomía clara de dependencia respecto al preprocesamiento: métodos de remuestreo sin filtrado previo (Block Bootstrapping, AREPD) son altamente dependientes; métodos paramétricos recurrentes (DeepAR, EnCQR-LSTM) presentan dependencia sustancial; métodos conformales de cuantiles (MCPS, AV-MCPS, LSPMW, LSPM) muestran dependencia moderada; y métodos adaptativos con filtrado autorregresivo (Sieve Bootstrap) son esencialmente invariantes.
+
+\subsection{Análisis de Significancia Estadística}
+\label{subsec:significancia_diferenciacion}
+
+La Tabla~\ref{tab:dm_diferenciacion} presenta los resultados del test de Diebold-Mariano modificado comparando las dos modalidades para cada método. Con excepción de Sieve Bootstrap ($p = 0.877$), todas las comparaciones rechazan la hipótesis nula de igualdad de desempeño con niveles de significancia extremadamente bajos ($p < 10^{-30}$), confirmando que las mejoras observadas no son artefactos del muestreo sino efectos sistemáticos y replicables.
+
+\begin{table}[htbp]
+\centering
+\caption{Test de Diebold-Mariano: Sin Diferenciación vs Con Diferenciación en ARIMA}
+\label{tab:dm_diferenciacion}
+\small
+\begin{tabular}{lcccp{3cm}}
+\toprule
+\textbf{Método} & \textbf{ECRPS Sin Dif.} & \textbf{ECRPS Con Dif.} & \textbf{Mejora (\%)} & \textbf{Conclusión} \\
+\midrule
+Block Bootstrapping & 11.252 & 0.666 & 94.1 & Diferenciación mejora*** \\
+AREPD & 10.031 & 0.704 & 93.0 & Diferenciación mejora*** \\
+DeepAR & 4.329 & 0.562 & 87.0 & Diferenciación mejora*** \\
+EnCQR-LSTM & 6.112 & 0.880 & 85.6 & Diferenciación mejora*** \\
+AV-MCPS & 3.324 & 0.654 & 80.3 & Diferenciación mejora*** \\
+MCPS & 3.218 & 0.677 & 78.9 & Diferenciación mejora*** \\
+LSPMW & 3.080 & 0.767 & 75.1 & Diferenciación mejora*** \\
+LSPM & 1.065 & 0.648 & 39.1 & Diferenciación mejora*** \\
+Sieve Bootstrap & 0.547 & 0.546 & 0.3 & Sin diferencia \\
+\bottomrule
+\multicolumn{5}{l}{\footnotesize *** $p < 0.001$. Test HLN-DM con corrección de Bonferroni.}
+\end{tabular}
+\end{table}
+
+\subsection{Heterogeneidad por Configuración}
+\label{subsec:hetero_config_diff}
+
+Las Figuras~\ref{fig:mejora_config} y \ref{fig:mejora_dist} desagregan la mejora porcentual por configuración paramétrica y distribución del error, revelando que el efecto de la diferenciación es consistente pero no uniforme.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{Imagenes/Sim1/3_heatmap_modelo_config.png}
+\caption{Mejora porcentual por configuración ARIMA. Las configuraciones ARIMA(2,1,2) y ARIMA(2,1,0) concentran las mayores mejoras para métodos como Block Bootstrapping y AREPD (verde oscuro), mientras que Sieve Bootstrap mantiene invarianza en todas las configuraciones (amarillo pálido).}
+\label{fig:mejora_config}
+\end{figure}
+
+Block Bootstrapping muestra mejoras superiores al 93\% en todas las configuraciones, con picos del 96.7\% en ARIMA(2,1,2), la configuración más compleja evaluada. LSPM, por otro lado, exhibe mayor heterogeneidad: mejoras modestas del 31--40\% en configuraciones simples (ARIMA(0,1,0), ARIMA(0,1,1)) pero incrementos hasta 49\% en ARIMA(2,1,2). Este patrón sugiere que LSPM posee cierta capacidad intrínseca para manejar no estacionariedad suave (paseos aleatorios simples) pero colapsa ante dinámicas más complejas.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.9\textwidth]{Imagenes/Sim1/4_heatmap_modelo_dist.png}
+\caption{Mejora porcentual por distribución del error. La distribución del término de innovación tiene efecto secundario comparado con la diferenciación: todos los métodos (excepto Sieve Bootstrap) muestran mejoras consistentemente altas ($>$ 70\%) independientemente de la forma distribucional.}
+\label{fig:mejora_dist}
+\end{figure}
+
+El análisis por distribución confirma que el efecto de la diferenciación domina sobre la forma distribucional del error: Block Bootstrapping y AREPD mantienen mejoras superiores al 90\% bajo las cinco distribuciones evaluadas. La distribución normal genera mejoras ligeramente superiores (94--95\%) comparada con la uniforme (92--96\%), pero estas diferencias son marginales frente a la magnitud del efecto principal.
+
+\subsection{Implicaciones Metodológicas}
+\label{subsec:implicaciones_diferenciacion}
+
+Los resultados de esta simulación establecen tres conclusiones operativas:
+
+\begin{enumerate}
+\item \textbf{La diferenciación es esencial para la mayoría de métodos conformales:} Con la excepción de Sieve Bootstrap, todos los métodos evaluados requieren diferenciación previa cuando operan sobre series ARIMA. Omitir este preprocesamiento degrada el desempeño en factores de 4--17×, haciendo a los métodos prácticamente inutilizables.
+
+\item \textbf{Sieve Bootstrap es intrínsecamente robusto a no estacionariedad:} Su mecanismo de filtrado autorregresivo adaptativo elimina la necesidad de diferenciación manual, simplificando el flujo de trabajo y reduciendo decisiones de preprocesamiento que requieren conocimiento experto.
+
+\item \textbf{La elección de diferenciación es no trivial para LSPM:} Aunque LSPM mejora con diferenciación, la magnitud del efecto (39\%) es sustancialmente menor que para otros métodos, sugiriendo que este método posee alguna robustez inherente. Sin embargo, dado que la diferenciación nunca degrada el desempeño, su aplicación sigue siendo recomendable como práctica conservadora.
+\end{enumerate}
+
+Estos hallazgos refuerzan la importancia del diagnóstico de estacionariedad mediante pruebas formales (ADF, KPSS) antes de aplicar métodos conformales, y sugieren que Sieve Bootstrap puede ser preferible en contextos donde la identificación del orden de integración es incierta o cuando se requiere un enfoque más automatizado.
+
+
+\section{Simulación 2: Límites de Integración y Persistencia Extrema}
+\label{sec:sim2_multi_d}
+
+Esta simulación extiende el análisis de la Sección~\ref{sec:sim1_diferenciacion} para caracterizar los límites operativos de los métodos conformales cuando el orden de integración $d$ aumenta progresivamente. A medida que $d$ crece, la serie integrada $Y_t$ desarrolla una persistencia extrema y rangos de valores explosivos que pueden desestabilizar métodos que no implementan diferenciación previa. El objetivo es cuantificar: (1) el umbral de $d$ a partir del cual los métodos sin diferenciación colapsan, y (2) si la diferenciación mantiene su efectividad para órdenes de integración arbitrariamente altos.
+
+\subsection{Motivación: Persistencia Acumulativa}
+\label{subsec:motivacion_multi_d}
+
+Un proceso ARIMA$(p,d,q)$ con orden de integración $d$ se construye aplicando $d$ diferenciaciones a un proceso ARMA$(p,q)$ estacionario. Equivalentemente, la serie en niveles puede escribirse como:
+
+\begin{equation}
+Y_t = \sum_{j=0}^{d-1} \binom{t}{j} W_{t-j} + \text{condiciones iniciales}
+\end{equation}
+
+donde $W_t \sim \text{ARMA}(p,q)$ es el proceso estacionario subyacente. Esta representación evidencia que $Y_t$ es una suma ponderada de innovaciones pasadas con pesos que crecen polinomialmente con $t$ cuando $d \geq 2$. Como consecuencia:
+
+\begin{itemize}
+\item La varianza de $Y_t$ crece como $\text{Var}(Y_t) \propto t^{2d-1}$ para $d \geq 1$ \parencite{Box2015}.
+\item El rango observado de $Y_t$ en una muestra de tamaño $n$ escala aproximadamente como $n^d$.
+\item Los residuos de calibración calculados en diferentes puntos temporales provienen de distribuciones con dispersiones radicalmente distintas, violando supuestos de intercambiabilidad.
+\end{itemize}
+
+Para $d = 1$ (paseo aleatorio simple), estos efectos son graduales y los métodos adaptativos pueden compensarlos parcialmente. Para $d \geq 2$ (integración múltiple), la dispersión explosiva desafía la estabilidad numérica de algoritmos que operan en el espacio de niveles.
+
+\subsection{Diseño Experimental}
+\label{subsec:diseño_multi_d}
+
+Se evalúan 8 órdenes de integración: $d \in \{1, 2, 3, 4, 5, 6, 7, 10\}$, combinados con las 7 configuraciones ARMA base del diseño principal, 5 distribuciones de error y 4 niveles de varianza, generando 1,120 configuraciones únicas. Cada configuración se evalúa bajo las dos modalidades (SIN\_DIFF y CON\_DIFF) en 12 pasos de predicción, produciendo 26,880 evaluaciones totales.
+
+Para garantizar que las series simuladas permanezcan dentro de rangos numéricos manejables, el período de burn-in se extiende a 200 observaciones (vs 100 en el diseño principal), y se implementa monitoreo de overflow: configuraciones donde $|Y_t| > 10^{10}$ en cualquier punto se marcan como numéricamente inestables.
+
+\subsection{Resultados: Degradación Sistemática por Orden de Integración}
+\label{subsec:resultados_multi_d}
+
+La Figura~\ref{fig:mejora_vs_d} presenta la mejora porcentual obtenida mediante diferenciación en función de $d$, revelando tres regímenes distintos de comportamiento.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{Imagenes/Sim2/0_mejora_global.png}
+\caption{Mejora porcentual en ECRPS por orden de integración $d$. Los colores representan la intensidad de la mejora: verde oscuro indica reducciones superiores al 95\%; amarillo pálido indica mejoras marginales ($<$ 20\%). Sieve Bootstrap mantiene invarianza aproximada para $d \leq 4$ pero requiere diferenciación para $d \geq 5$.}
+\label{fig:mejora_vs_d}
+\end{figure}
+
+\subsubsection{Régimen I: Integración Moderada ($d = 1, 2$)}
+
+Para $d = 1$, los patrones replican los hallazgos de la Simulación 1: Block Bootstrapping y AREPD exhiben mejoras del 92--98\%, mientras que LSPM/LSPMW muestran mejoras modestas del 41--50\%. Sieve Bootstrap permanece esencialmente invariante (mejora $< 1\%$).
+
+Para $d = 2$, las mejoras se amplifican uniformemente: Block Bootstrapping alcanza 98.1\%, LSPM/LSPMW suben a 50.3\%, y **Sieve Bootstrap comienza a mostrar sensibilidad marginal (mejora del 0.0\%)**. Este es el primer indicio de que incluso el filtrado autorregresivo adaptativo enfrenta limitaciones cuando la persistencia se intensifica.
+
+\subsubsection{Régimen II: Integración Alta ($d = 3, 4, 5$)}
+
+Para $d \geq 3$, todos los métodos excepto Sieve Bootstrap convergen hacia mejoras superiores al 98\%. LSPM y LSPMW, que mantenían cierta robustez para $d \leq 2$, colapsan completamente: sus mejoras saltan de 50\% en $d = 2$ a 98.8--98.9\% en $d = 3$, indicando que la modalidad SIN\_DIFF se vuelve prácticamente inutilizable.
+
+Sieve Bootstrap mantiene invarianza hasta $d = 4$ (mejora del 0.0\%), pero en $d = 5$ experimenta un cambio cualitativo: la mejora salta a 18.3\%. Este umbral es notable: sugiere que el filtrado AR adaptativo puede capturar hasta 4 raíces unitarias implícitamente, pero la quinta raíz excede su capacidad de aproximación con los tamaños muestrales disponibles ($n_{\text{train}} = 200$).
+
+\subsubsection{Régimen III: Integración Extrema ($d \geq 6$)}
+
+Para $d \geq 6$, **todos los métodos, incluido Sieve Bootstrap, requieren diferenciación de manera categórica**. Las mejoras convergen uniformemente hacia 95.5--99.3\%, con Sieve Bootstrap alcanzando 98.1--98.4\% para $d = 6, 7$ y 95.5\% para $d = 10$. 
+
+La ligera reducción en mejora para $d = 10$ (95.5\% vs 98\% en $d = 7$) no indica menor necesidad de diferenciación, sino un artefacto de selección: configuraciones con $d = 10$ que no diferenciaban frecuentemente generaban overflows numéricos, siendo excluidas del análisis. Las configuraciones viables sin diferenciación corresponden a combinaciones con varianza muy baja ($\sigma^2 = 0.2$) y procesos ARMA simples, sesgando la estadística agregada.
+
+\subsection{Análisis de Sensibilidad: Media vs Variabilidad}
+\label{subsec:sensibilidad_multi_d}
+
+La Figura~\ref{fig:sensibilidad_multi_d} descompone la sensibilidad al orden de integración mediante dos métricas: sensibilidad media (cambio promedio en ECRPS por unidad de $d$) y desviación estándar de la sensibilidad (variabilidad de este cambio entre configuraciones).
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{Imagenes/Sim2/2_heatmap_d_vs_modelo.png}
+\caption{Izquierda: Sensibilidad media del ECRPS al incremento de $d$, calculada como $\partial \text{ECRPS} / \partial d$ mediante regresión lineal. Derecha: Desviación estándar de la sensibilidad, cuantificando la heterogeneidad de respuesta entre configuraciones. Valores altos indican que el método colapsa de manera errática; valores bajos indican degradación predecible.}
+\label{fig:sensibilidad_multi_d}
+\end{figure}
+
+Block Bootstrapping exhibe tanto la mayor sensibilidad media ($2.17 \times 10^{15}$) como la mayor variabilidad ($5.01 \times 10^{15}$), indicando que su degradación sin diferenciación es tanto severa como impredecible: algunas configuraciones colapsan completamente mientras otras mantienen cierta funcionalidad. Este patrón refleja la dependencia del método con el tamaño de bloque óptimo, que se vuelve inestable cuando la autocorrelación efectiva diverge.
+
+AREPD y DeepAR muestran sensibilidades medias comparables ($2.14 \times 10^{15}$ y $2.13 \times 10^{15}$ respectivamente) pero con variabilidades distintas: AREPD es más volátil ($4.94 \times 10^{15}$) que DeepAR ($4.93 \times 10^{15}$), aunque las diferencias son marginales. Los métodos conformales MCPS, AV-MCPS, EnCQR-LSTM ocupan un estrato intermedio ($\approx 1.5 \times 10^{15}$), mientras que LSPM/LSPMW muestran las menores sensibilidades ($\approx 1.1 \times 10^{15}$).
+
+**Sieve Bootstrap es un caso atípico**: su sensibilidad media es la más baja del grupo ($1.12 \times 10^{14}$), aproximadamente **20 veces menor** que Block Bootstrapping, y con variabilidad también mínima ($2.60 \times 10^{14}$). Esto confirma que su degradación sin diferenciación, aunque eventualmente presente para $d \geq 5$, es gradual y predecible, no catastrófica.
+
+\subsection{Significancia Estadística del Efecto de Diferenciación}
+\label{subsec:dm_multi_d}
+
+La Figura~\ref{fig:dm_multi_d} presenta los $p$-valores del test de Diebold-Mariano comparando SIN\_DIFF vs CON\_DIFF para cada método y cada valor de $d$. Los valores están codificados por color: verde ($p \geq 0.05$) indica ausencia de diferencias significativas; rojo ($p < 0.001$) indica diferencias altamente significativas.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{Imagenes/Sim2/NUEVO_3_heatmap_dm_pvalor.png}
+\caption{$P$-valores del test de Diebold-Mariano para cada método y orden de integración. Verde: sin diferencia significativa ($p \geq 0.05$); amarillo-naranja: diferencias marginales ($0.01 \leq p < 0.05$); rojo: diferencias altamente significativas ($p < 0.001$). Sieve Bootstrap es el único método que mantiene equivalencia estadística para $d \leq 4$.}
+\label{fig:dm_multi_d}
+\end{figure}
+
+Los resultados confirman las conclusiones visuales:
+
+\begin{itemize}
+\item **Todos los métodos excepto Sieve Bootstrap** muestran diferencias altamente significativas ($p < 0.001$, rojo intenso) para todo $d \geq 1$, indicando que la diferenciación es estadísticamente necesaria incluso para un paseo aleatorio simple.
+
+\item **Sieve Bootstrap mantiene equivalencia estadística ($p > 0.05$, verde)** para $d = 1, 2, 3, 4$, confirmando su robustez intrínseca hasta integración de cuarto orden. Para $d = 5$, el $p$-valor cae a 0.034 (amarillo), indicando significancia marginal. Para $d \geq 6$, todos los $p$-valores son $< 0.001$ (rojo), estableciendo que la diferenciación se vuelve categóricamente necesaria.
+
+\item **DeepAR muestra una anomalía en $d = 1$**: su $p$-valor de 0.021 (naranja claro) es el más alto de todos los métodos no-Sieve, sugiriendo que las arquitecturas recurrentes pueden capturar paseos aleatorios simples con mayor efectividad que integraciones múltiples. Sin embargo, esta capacidad desaparece para $d \geq 2$.
+\end{itemize}
+
+\subsection{Consolidación: Mejora Global Agregando Todos los Órdenes}
+\label{subsec:consolidacion_multi_d}
+
+La Figura~\ref{fig:mejora_global_d} agrega las mejoras porcentuales a través de todos los valores de $d$ evaluados, proporcionando una métrica única de dependencia de diferenciación.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.9\textwidth]{Imagenes/Sim2/NUEVO_2_sensibilidad_incremento_d.png}
+\caption{Mejora porcentual promedio agregando $d \in \{1, 2, \ldots, 10\}$. Todos los métodos convergen hacia mejoras superiores al 95\%, con Block Bootstrapping, AREPD y LSPM/LSPMW ligeramente superiores (95.9--96.3\%) y Sieve Bootstrap en el extremo inferior (95.5\%).}
+\label{fig:mejora_global_d}
+\end{figure}
+
+Los resultados agregados muestran convergencia notable: las mejoras globales oscilan en el rango estrecho 95.5--96.3\%. Esta homogeneización refleja que para órdenes de integración altos ($d \geq 6$), que dominan la estadística agregada, **todos los métodos colapsan uniformemente sin diferenciación**, eliminando las diferencias observadas en el Régimen I.
+
+El ordenamiento relativo es contraintuitivo a primera vista: Sieve Bootstrap exhibe la menor mejora agregada (95.5\%), mientras que Block Bootstrapping alcanza la mayor (95.9\%). Este resultado no contradice la superioridad de Sieve Bootstrap; al contrario, la refuerza: Sieve Bootstrap tiene menor mejora porque su ECRPS sin diferenciación, aunque eventualmente subóptimo, nunca alcanza los valores explosivos de Block Bootstrapping. Es una señal de degradación gradual vs colapso catastrófico.
+
+\subsection{Implicaciones para la Práctica}
+\label{subsec:implicaciones_multi_d}
+
+Los hallazgos de esta simulación establecen tres conclusiones operativas:
+
+\begin{enumerate}
+\item \textbf{La diferenciación es universalmente necesaria para $d \geq 2$:} Incluso métodos adaptativos como Sieve Bootstrap, que toleran $d = 1$ sin diferenciación, colapsan para integración doble o superior. La identificación del orden de integración mediante pruebas ADF/KPSS es, por tanto, un paso crítico del preprocesamiento.
+
+\item \textbf{El umbral $d = 5$ marca el límite del filtrado autorregresivo adaptativo:} Sieve Bootstrap puede capturar hasta 4 raíces unitarias implícitamente con $n = 200$ observaciones, pero raíces adicionales exceden su capacidad. Este resultado sugiere que el orden máximo del filtro AR, $p_n = O(n^{1/3})$ en la teoría asintótica de Sieve Bootstrap \parencite{Buhlmann1997}, impone límites prácticos sobre la complejidad de no estacionariedad que puede manejarse sin diferenciación explícita.
+
+\item \textbf{Los métodos de remuestreo de bloques fallan categóricamente sin diferenciación:} Block Bootstrapping y AREPD no solo presentan las mayores sensibilidades medias, sino también la mayor variabilidad, indicando colapsos impredecibles. Su uso en series integradas requiere diferenciación previa obligatoria, sin excepciones.
+\end{enumerate}
+
+Estas conclusiones refuerzan la recomendación metodológica central: **la diferenciación debe ser el primer paso del pipeline de preprocesamiento cuando se detecta no estacionariedad**, independientemente del método conformal seleccionado posteriormente.

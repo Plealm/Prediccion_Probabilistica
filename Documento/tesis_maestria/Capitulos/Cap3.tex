@@ -754,6 +754,7 @@ El método ejecuta una operación crítica: congela $p$ basado en el tamaño del
     \item \texttt{verbose}: Control de mensajes diagnósticos durante congelamiento.
 \end{itemize}
 
+```latex
 
 \subsection{Least Squares Prediction Machine with Weighted Residuals (LSPMW)}
 \label{subsec:LSPMW}
@@ -806,35 +807,35 @@ El LSPMW es un método \textbf{no paramétrico adaptativo}. Mantiene la propieda
 
 \subsubsection{De la Teoría a la Práctica}
 
-La implementación desarrollada traduce los cuantiles ponderados de \textcite{Barber2023} a un contexto de distribuciones predictivas completas:
+La implementación desarrollada traduce la teoría de \textcite{Barber2023} mediante un esquema de \textbf{muestreo ponderado adaptativo} que recalcula dinámicamente los residuos conformales:
 
-\paragraph{Adaptación 1: Expansión Ponderada de Distribuciones}
-La teoría se enfoca en calcular cuantiles específicos. Para evaluar ECRPS (que requiere la distribución completa), la implementación genera una muestra sintética de tamaño fijo ($N = 1000$) mediante \textit{weighted expansion}: cada valor crítico $C_i$ se replica proporcionalmente a su peso:
+\paragraph{Adaptación 1: Muestreo Ponderado vs. Expansión por Replicación}
+A diferencia de métodos que pre-computan una distribución expandida, la implementación emplea \textit{muestreo estratificado} en tiempo real. Para generar una distribución predictiva de tamaño $N = 1000$, se ejecuta:
 \begin{equation}
-\text{replications}_i = \lfloor \tilde{w}_i \times N \rfloor
+\tilde{R}_j \sim \text{Categorical}(\{C_1, \dots, C_n\}, \{\tilde{w}_1, \dots, \tilde{w}_n\}), \quad j = 1, \dots, N
 \end{equation}
 
-Esto produce una distribución empírica discreta donde la frecuencia relativa de $C_i$ aproxima $\tilde{w}_i$.
+donde cada muestra $\tilde{R}_j$ se extrae de los valores críticos $\{C_i\}$ con probabilidades proporcionales a los pesos normalizados $\tilde{w}_i = w_i / \sum_k w_k$. Este enfoque es matemáticamente equivalente a muestrear de la distribución empírica ponderada $\hat{F}_n(y)$.
 
-\paragraph{Adaptación 2: Ajuste de Replicaciones Enteras}
-Como $\tilde{w}_i \times N$ rara vez es entero exacto, se implementa un algoritmo de ajuste que garantiza $\sum_i \text{replications}_i = N$ exactamente:
+\paragraph{Adaptación 2: Recálculo Dinámico de Residuos}
+Contrario a esquemas de congelamiento completo, la implementación mantiene únicamente los hiperparámetros ($\rho^*$, $p^*$) fijos tras calibración. En cada paso del rolling forecast:
 \begin{enumerate}
-    \item Se redondea cada $\tilde{w}_i \times N$ al entero más cercano.
-    \item Si la suma excede $N$, se decrementa la replicación de los valores con menor peso (manteniendo mínimo 1).
-    \item Si la suma es menor a $N$, se incrementa la replicación de los valores con mayor peso.
+    \item Se recalculan valores críticos $\{C_1, \dots, C_m\}$ usando la ventana temporal actual.
+    \item Se actualizan pesos $w_i = (\rho^*)^{m-1-i}$ para $i = 1, \dots, m$ (ajustados al tamaño $m$ de la ventana).
+    \item Se normalizan: $\tilde{w}_i = w_i / \sum_j w_j$.
+    \item Se genera la distribución predictiva mediante muestreo con reemplazo usando estos pesos actualizados.
 \end{enumerate}
 
-Este ajuste minimiza la distorsión de la distribución ponderada original.
+Este diseño permite que el modelo se adapte continuamente a derivas distributivas, pues los residuos más recientes (calculados con datos actuales) reciben mayor ponderación automáticamente.
 
-\paragraph{Adaptación 3: Congelamiento de Estructura Ponderada}
-A diferencia de un esquema rolling que recalcularía pesos en cada ventana, la implementación congela tres artefactos tras la calibración:
+\paragraph{Adaptación 3: Protocolo de Congelamiento Parcial}
+El método \texttt{freeze\_hyperparameters()} almacena únicamente:
 \begin{itemize}
     \item \texttt{\_frozen\_rho}: Valor óptimo $\rho^*$ seleccionado por validación
-    \item \texttt{\_frozen\_critical\_values}: Vector de residuos conformales $\{C_1, \dots, C_m\}$
-    \item \texttt{\_frozen\_weights}: Vector de pesos $\{\tilde{w}_1, \dots, \tilde{w}_m\}$
+    \item \texttt{\_frozen\_n\_lags}: Orden autorregresivo $p^*$ heredado de LSPM
 \end{itemize}
 
-En cada predicción rolling subsecuente, se reutilizan estos artefactos sin recalcular la matriz hat ni ajustar OLS, generando la distribución predictiva exclusivamente mediante expansión ponderada de los valores críticos congelados.
+\textit{No} se congelan los residuos conformales ni sus pesos asociados, permitiendo que la distribución predictiva refleje el estado más reciente de la serie temporal. Esta filosofía difiere del LSPM estándar, donde congelar la distribución completa es apropiado bajo intercambiabilidad, pero resulta inadecuado bajo deriva continua.
 
 \begin{table}[h]
 \centering
@@ -844,10 +845,11 @@ En cada predicción rolling subsecuente, se reutilizan estos artefactos sin reca
 \textbf{Aspecto} & \textbf{Teoría (Barber et al.)} & \textbf{Implementación} \\
 \midrule
 Salida & Cuantiles ponderados específicos & Distribución completa (1000 muestras) \\
-Pesos & Definición abstracta $w_i$ & Expansión por replicación entera \\
-Actualización & Recalcular en cada predicción & Artefactos congelados post-calibración \\
-Residuos & Conceptuales & Valores críticos LSPM studentizados \\
+Método de generación & Definición abstracta $\hat{F}_n(y)$ & Muestreo ponderado con reemplazo \\
+Actualización & Marco teórico general & Recálculo dinámico de residuos \\
+Residuos & Valores críticos conceptuales & LSPM studentizados recalculados \\
 Optimización & $\rho$ teórico o fijo & Búsqueda por validación (ECRPS) \\
+Congelamiento & No especificado & Solo hiperparámetros ($\rho^*$, $p^*$) \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -868,28 +870,35 @@ n_{\text{eff}} = \frac{1}{\sum_{i=1}^{n-1} \tilde{w}_i^2} \approx \frac{1-\rho}{
 \end{equation}
 
 \paragraph{Métrica de Optimización}
-La selección de $\rho^*$ se realiza minimizando el \textbf{ECRPS} (véase \ref{subsec:ecrps}) sobre el conjunto de validación. Para cada candidato $\rho$, se genera la distribución ponderada en cada tiempo de validación y se evalúa la calibración predictiva.
+La selección de $\rho^*$ se realiza minimizando el \textbf{ECRPS} (véase \ref{subsec:ecrps}) sobre el conjunto de validación. Para cada candidato $\rho$, se genera la distribución ponderada en cada tiempo de validación mediante muestreo estratificado y se evalúa la calibración predictiva.
 
-\paragraph{Protocolo de Congelamiento}
+\paragraph{Protocolo de Congelamiento Parcial}
 El método \texttt{freeze\_hyperparameters()} ejecuta:
 \begin{enumerate}
     \item Congela $p^*$ (número de lags) heredado de la clase base LSPM.
-    \item Calcula valores críticos $\{C_1, \dots, C_m\}$ sobre datos de entrenamiento+calibración.
-    \item Computa pesos temporales usando $\rho^*$: $w_i = (\rho^*)^{m-1-i}$ para $i = 1, \dots, m$.
-    \item Normaliza pesos: $\tilde{w}_i = w_i / \sum_j w_j$.
-    \item Almacena artefactos en atributos internos y activa bandera \texttt{\_is\_frozen}.
+    \item Identifica y almacena $\rho^*$ óptimo del proceso de validación.
+    \item Activa bandera \texttt{\_is\_frozen} para uso de hiperparámetros congelados.
+    \item \textit{No congela} valores críticos ni pesos, preservando adaptabilidad temporal.
 \end{enumerate}
 
-Durante la fase de prueba rolling, el método \texttt{fit\_predict()} usa exclusivamente los artefactos congelados para generar distribuciones predictivas, sin recalcular residuos ni ajustar modelos OLS.
+Durante la fase de prueba rolling, el método \texttt{fit\_predict()}:
+\begin{enumerate}
+    \item Recalcula residuos conformales $\{C_1, \dots, C_m\}$ usando $p^*$ sobre la ventana actual.
+    \item Computa pesos actualizados: $w_i = (\rho^*)^{m-1-i}$ para $i = 1, \dots, m$.
+    \item Normaliza: $\tilde{w}_i = w_i / \sum_j w_j$.
+    \item Genera 1000 muestras mediante \texttt{np.random.choice} con probabilidades $\{\tilde{w}_i\}$.
+\end{enumerate}
 
 \paragraph{Parámetros Operacionales}
 \begin{itemize}
     \item \texttt{n\_samples\_target}: Tamaño de la distribución sintética. Fijado en 1000 para resolución suficiente en cálculo de ECRPS.
     \item \texttt{n\_lags} ($p$): Heredado de LSPM, determina orden autorregresivo. Congelado como $p = \lfloor n^{1/3} \rfloor$.
-    \item \texttt{random\_state}: Semilla para shuffle final de la distribución expandida (rompe ordenamiento artificial).
+    \item \texttt{random\_state}: Semilla para muestreo estocástico reproducible.
     \item \texttt{verbose}: Control de mensajes diagnósticos.
 \end{itemize}
 
+\paragraph{Justificación del Diseño Adaptativo}
+El recálculo dinámico de residuos responde a la naturaleza del problema: bajo deriva continua, residuos históricos pierden relevancia predictiva progresivamente. Mientras que congelar $\rho^*$ captura la estructura óptima de decaimiento temporal identificada en validación, mantener los residuos actualizados asegura que la información más reciente sobre el proceso generador de datos se incorpore a cada predicción. Este balance entre estabilidad estructural (hiperparámetros fijos) y adaptabilidad táctica (residuos dinámicos) es la contribución clave de la implementación al marco teórico de \textcite{Barber2023}.
 
 \subsection{Mondrian Conformal Predictive System (MCPS)}
 \label{subsec:MCPS}

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.1.2)  8 JAN 2026 20:06
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.1.2)  13 JAN 2026 20:52
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1097,7 +1097,7 @@ Package: bookmark 2023-12-10 v1.31 PDF bookmarks (HO)
  (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/bookmark\bkm-pdftex.def
 File: bkm-pdftex.def 2023-12-10 v1.31 bookmark driver for pdfTeX and luaTeX (HO)
 \BKM@id=\count527
-)) (main.aux (Capitulos/Cap1.aux) (Capitulos/Cap2.aux) (Capitulos/Cap3.aux) (Capitulos/Cap5.aux))
+)) (main.aux (Capitulos/Cap1.aux) (Capitulos/Cap2.aux) (Capitulos/Cap3.aux) (Capitulos/Cap4.aux) (Capitulos/Cap5.aux))
 \openout1 = `main.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 81.
@@ -1217,7 +1217,15 @@ Package biblatex Info: Automatic encoding selection.
 
 Package biblatex Info: Trying to load bibliographic data...
 Package biblatex Info: ... file 'main.bbl' found.
- (main.bbl)
+ (main.bbl
+
+Package biblatex Warning: The following entry could not be found
+(biblatex)                in the database:
+(biblatex)                Box2015
+(biblatex)                Please verify the spelling and rerun
+(biblatex)                LaTeX afterwards.
+
+)
 Package biblatex Info: Reference section=0 on input line 81.
 Package biblatex Info: Reference segment=0 on input line 81.
 Package hyperref Info: Link coloring ON on input line 81.
@@ -1253,48 +1261,92 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ] (main.toc [6
 
 ] [7]
-Overfull \hbox (19.96803pt too wide) in paragraph at lines 190--190
+Overfull \hbox (19.96803pt too wide) in paragraph at lines 191--191
  [][] [][][]\OT1/cmr/m/n/12 Autoregressive Exponentially-weighted Poly-no-mial Dis-tri-bu-tion (AREPD)[][] [][]  
  []
 
 
-Overfull \hbox (1.58777pt too wide) detected at line 244
- []\OT1/cmss/bx/n/12 100
+Overfull \hbox (1.58777pt too wide) detected at line 245
+ []\OT1/cmss/bx/n/12 101
  []
 
-[8]
-Overfull \hbox (1.58777pt too wide) detected at line 316
- []\OT1/cmss/bx/n/12 134
+
+Overfull \hbox (1.58777pt too wide) detected at line 274
+ []\OT1/cmss/bx/n/12 138
+ []
+
+[8] [9]
+Overfull \hbox (1.58777pt too wide) detected at line 381
+ []\OT1/cmss/bx/n/12 198
  []
 
 )
 \tf@toc=\write5
 \openout5 = `main.toc'.
 
- [9] (main.lof)
+ [10] (main.lof
+Overfull \hbox (5.02791pt too wide) in paragraph at lines 9--9
+ \OT1/cmr/m/n/12 ARMA(2,2) de-saf^^S^^Pan uni-forme-mente a to-dos los m^^Setodos (colum-nas amarillo- 
+ []
+
+
+Overfull \hbox (6.33359pt too wide) in paragraph at lines 10--10
+ [][] [][][]\OT1/cmr/m/n/12 Z-scores de ECRPS para con-fig-u-ra-ciones ARIMA. La columna ARIMA(2,1,2) 
+ []
+
+
+Overfull \hbox (12.68631pt too wide) in paragraph at lines 11--11
+ [][] [][][]\OT1/cmr/m/n/12 Z-scores de ECRPS para con-fig-u-ra-ciones SE-TAR. Las con-fig-u-ra-ciones SETAR- 
+ []
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [11
+
+]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [12]
+Overfull \hbox (25.03883pt too wide) in paragraph at lines 27--27
+ [][] [][][]\OT1/cmr/m/n/12 Mejora por-centual por con-fig-u-raci^^Son ARIMA. Las con-fig-u-ra-ciones ARIMA(2,1,2) 
+ []
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [13]
+Overfull \hbox (5.67204pt too wide) in paragraph at lines 32--32
+ [][] [][][]\OT1/cmr/m/n/12 Mejora por-centual prome-dio agre-gando $\OML/cmm/m/it/12 d \OMS/cmsy/m/n/12 2 f\OT1/cmr/m/n/12 1\OML/cmm/m/it/12 ; \OT1/cmr/m/n/12 2\OML/cmm/m/it/12 ; [] ; \OT1/cmr/m/n/12 10\OMS/cmsy/m/n/12 g$\OT1/cmr/m/n/12 . To-dos los m^^Setodos 
+ []
+
+
+Overfull \hbox (8.58347pt too wide) in paragraph at lines 32--32
+ \OT1/cmr/m/n/12 con-ver-gen ha-cia mejo-ras su-pe-ri-ores al 95%, con Block Boot-strap-ping, AREPD 
+ []
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [14])
 \tf@lof=\write6
 \openout6 = `main.lof'.
 
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [10
-
-] [11] (main.lot
-Overfull \hbox (6.4765pt too wide) in paragraph at lines 21--21
+ [15] (main.lot
+Overfull \hbox (6.4765pt too wide) in paragraph at lines 23--23
  [][] [][][]\OT1/cmr/m/n/12 Resumen de car-ac-ter^^S^^Psticas iden-ti-fi-cadas en el an^^Salisis ex-plorato-rio del dataset 
  []
 
-)
-\tf@lot=\write7
-\openout7 = `main.lot'.
-
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [12
+ [16
 
-] [13] [14
+])
+\tf@lot=\write7
+\openout7 = `main.lot'.
+
+ [17] [18
 
 
 ]
@@ -1326,7 +1378,7 @@ Overfull \hbox (9.28336pt too wide) in paragraph at lines 10--11
 
 
 ]
-<./Imagenes/Cap2_prediccion.png, id=412, 785.18344pt x 467.49657pt>
+<./Imagenes/Cap2_prediccion.png, id=651, 785.18344pt x 467.49657pt>
 File: ./Imagenes/Cap2_prediccion.png Graphic file (type png)
 <use ./Imagenes/Cap2_prediccion.png>
 Package pdftex.def Info: ./Imagenes/Cap2_prediccion.png  used on input line 28.
@@ -1405,7 +1457,7 @@ Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [20] [21]
-<./Imagenes/mondrian.png, id=584, 259.97125pt x 194.7275pt>
+<./Imagenes/mondrian.png, id=824, 259.97125pt x 194.7275pt>
 File: ./Imagenes/mondrian.png Graphic file (type png)
 <use ./Imagenes/mondrian.png>
 Package pdftex.def Info: ./Imagenes/mondrian.png  used on input line 343.
@@ -1576,154 +1628,454 @@ Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [56] [57]
-Overfull \hbox (14.20734pt too wide) in paragraph at lines 842--853
+Overfull \hbox (28.93503pt too wide) in paragraph at lines 832--833
+[] \OT1/cmss/bx/n/12 Adaptaci^^Son 3: Pro-to-colo de Con-ge-lamiento Par-cial[][] \OT1/cmr/m/n/12 El m^^Setodo \OT1/cmtt/m/n/12 freeze[]hyperparameters()
+ []
+
+
+Overfull \hbox (57.61661pt too wide) in paragraph at lines 843--855
  [][] 
  []
 
 
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 858.
+LaTeX Warning: `h' float specifier changed to `ht'.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\rho' on input line 858.
+(hyperref)                removing `math shift' on input line 860.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 858.
+(hyperref)                removing `\rho' on input line 860.
 
 
-Underfull \vbox (badness 1648) has occurred while \output is active []
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 860.
+
+
+Underfull \vbox (badness 4120) has occurred while \output is active []
 
  [58] [59] [60]
-Overfull \hbox (9.22704pt too wide) in paragraph at lines 918--919
+Overfull \hbox (9.22704pt too wide) in paragraph at lines 927--928
 [] \OT1/cmss/bx/n/12 C^^Salculo Lo-cal-izado de Scores Con-for-males[][] \OT1/cmr/m/n/12 Para una in-stan-cia de prueba $\OML/cmm/m/it/12 x$ \OT1/cmr/m/n/12 con predicci^^Son
  []
 
-[61]
-Overfull \hbox (3.49174pt too wide) in paragraph at lines 964--965
+[61] [62]
+Overfull \hbox (3.49174pt too wide) in paragraph at lines 973--974
 \OT1/cmr/m/n/12 dise~nado para datos in-de-pen-di-entes en log^^S^^Pstica ([]Ye, Hi-jazi, and Van Hen-ten-ryck [][]2025[][])|ha-
  []
 
 
-Overfull \hbox (4.81395pt too wide) in paragraph at lines 968--969
+Overfull \hbox (4.81395pt too wide) in paragraph at lines 977--978
 \OT1/cmr/m/n/12 caci^^Son, peso, trans-portista), en se-ries tem-po-rales los ``ob-je-tos'' se con-struyen din^^Samicamente
  []
 
-[62] [63]
-Overfull \hbox (2.71603pt too wide) in paragraph at lines 1040--1041
+[63] [64]
+Overfull \hbox (2.71603pt too wide) in paragraph at lines 1049--1050
 [] \OT1/cmss/bx/n/12 Op-ti-mizaci^^Son de Hiper-par^^Sametros[][] \OT1/cmr/bx/n/12 Es-trate-gia de con-ge-lamiento: \OT1/cmr/m/n/12 El m^^Setodo definido
  []
 
-[64] [65] [66] [67]
-Overfull \hbox (17.21182pt too wide) in paragraph at lines 1193--1194
+[65] [66] [67] [68]
+Overfull \hbox (17.21182pt too wide) in paragraph at lines 1202--1203
 [] \OT1/cmss/bx/n/12 Adapta-ciones Prin-ci-pales[][] \OT1/cmr/bx/n/12 (1) Es-ti-maci^^Son Rolling de Volatil-i-dad: \OT1/cmr/m/n/12 Se em-plea desviaci^^Son
  []
 
-[68]
-Overfull \hbox (22.32533pt too wide) in paragraph at lines 1221--1222
+[69]
+Overfull \hbox (22.32533pt too wide) in paragraph at lines 1230--1231
 []\OT1/cmr/bx/n/12 (4) Pro-to-colo de Con-ge-lamiento Bidi-men-sional: \OT1/cmr/m/n/12 El m^^Setodo \OT1/cmtt/m/n/12 freeze[]hyperparameters()
  []
 
-[69] [70]
-Overfull \hbox (18.33629pt too wide) in paragraph at lines 1303--1304
+[70]
+Overfull \hbox (18.33629pt too wide) in paragraph at lines 1312--1313
 []\OT1/cmr/bx/n/12 Complejidad com-bi-na-to-ria: \OT1/cmr/m/n/12 Con 3 hiper-par^^Sametros in-ter-de-pen-di-entes, una b^^Susqueda
  []
 
-
-Overfull \hbox (4.67265pt too wide) in paragraph at lines 1318--1319
+[71]
+Overfull \hbox (4.67265pt too wide) in paragraph at lines 1327--1328
 \OT1/cmr/m/n/12 op-ti-mizada, la con-fig-u-raci^^Son se-lec-cionada se con-gela me-di-ante \OT1/cmtt/m/n/12 freeze[]hyperparameters()\OT1/cmr/m/n/12 ,
  []
 
-
-Underfull \vbox (badness 2460) has occurred while \output is active []
-
- [71] [72] [73] [74]
-Overfull \hbox (0.76016pt too wide) in paragraph at lines 1472--1473
+[72] [73] [74] [75]
+Overfull \hbox (0.76016pt too wide) in paragraph at lines 1481--1482
 [] \OT1/cmss/bx/n/12 Hiper-par^^Sametros Ar-qui-tect^^Sonicos[][] \OT1/cmr/bx/n/12 hid-den[]size ($\OML/cmm/m/it/12 h$\OT1/cmr/bx/n/12 ): \OT1/cmr/m/n/12 Di-men-sion-al-i-dad del es-tado oculto
  []
 
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [75] [76] [77]
-Overfull \hbox (9.40201pt too wide) in paragraph at lines 1548--1549
+ [76] [77]
+Underfull \vbox (badness 1762) has occurred while \output is active []
+
+ [78]
+Overfull \hbox (9.40201pt too wide) in paragraph at lines 1557--1558
 []\OT1/cmr/m/n/12 donde $\OML/cmm/m/it/12 ^^Z \OMS/cmsy/m/n/12 2 \OT1/cmr/m/n/12 (0\OML/cmm/m/it/12 ; \OT1/cmr/m/n/12 1)$ es el par^^Sametro de de-caimiento. Los pe-sos se nor-mal-izan: $[] = \OML/cmm/m/it/12 w[]= [][] w[]$\OT1/cmr/m/n/12 .
  []
 
-[78] [79]
-Overfull \hbox (5.672pt too wide) in paragraph at lines 1632--1633
+[79] [80]
+Overfull \hbox (5.672pt too wide) in paragraph at lines 1641--1642
 [] \OT1/cmss/bx/n/12 Adapta-ciones Prin-ci-pales[][] \OT1/cmr/bx/n/12 (1) Nor-mal-izaci^^Son Z-Score Pre-Expansi^^Son: \OT1/cmr/m/n/12 La ex-pansi^^Son
  []
 
-[80]
-Overfull \hbox (26.42313pt too wide) in paragraph at lines 1644--1645
+
+Overfull \hbox (26.42313pt too wide) in paragraph at lines 1653--1654
 \OT1/cmr/m/n/12 ante SVD op-ti-mizado y manejo ro-busto de ca-sos ex-tremos. El ar-gu-mento \OT1/cmtt/m/n/12 fit[]intercept=False
  []
 
-[81] [82] [83]
-Overfull \hbox (3.34314pt too wide) in paragraph at lines 1766--1767
+[81] [82] [83] [84]
+Overfull \hbox (3.34314pt too wide) in paragraph at lines 1775--1776
 []\OT1/cmr/m/n/12 Por otra parte, los m^^Setodos de predicci^^Son con-for-mal est^^Sandar garan-ti-zan cober-tura marginal
  []
 
-[84] [85]
-Overfull \hbox (9.60518pt too wide) in paragraph at lines 1825--1826
+[85] [86]
+Overfull \hbox (9.60518pt too wide) in paragraph at lines 1834--1835
 []\OT1/cmr/m/n/12 donde $\OML/cmm/m/it/12 ^^^\OT1/cmr/m/n/12 (\OMS/cmsy/m/n/12 ^^A\OT1/cmr/m/n/12 )$ y $^^H(\OMS/cmsy/m/n/12 ^^A\OT1/cmr/m/n/12 )$ son la den-si-dad y dis-tribuci^^Son acu-mu-lada Nor-mal est^^Sandar. Los par^^Sametros
  []
 
-[86] [87] [88] [89]
+
+Underfull \vbox (badness 5490) has occurred while \output is active []
+
+ [87] [88] [89] [90]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1971.
+(hyperref)                removing `math shift' on input line 1980.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1971.
+(hyperref)                removing `math shift' on input line 1980.
 
-[90] [91] [92]
-Overfull \hbox (9.93613pt too wide) in paragraph at lines 2049--2050
+[91]
+Underfull \vbox (badness 1509) has occurred while \output is active []
+
+ [92]
+Overfull \hbox (9.93613pt too wide) in paragraph at lines 2058--2059
 \OT1/cmr/m/n/12 Esta sim-u-laci^^Son car-ac-ter-iza la tasa de con-ver-gen-cia de las dis-tribu-ciones pre-dic-ti-vas emp^^S^^Pricas
  []
 
-[93]
-Underfull \vbox (badness 5548) has occurred while \output is active []
-
- [94]
+[93] [94]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 2132.
+(hyperref)                removing `math shift' on input line 2141.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 2132.
+(hyperref)                removing `math shift' on input line 2141.
 
-[95] [96]
-Underfull \vbox (badness 1127) has occurred while \output is active []
-
- [97]
-Underfull \hbox (badness 10000) in paragraph at lines 2226--2226
+[95] [96] [97]
+Underfull \hbox (badness 10000) in paragraph at lines 2235--2235
 []|\OT1/cmr/m/n/10.95 Modalidad (SIN[]DIFF vs
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2230--2230
+Underfull \hbox (badness 10000) in paragraph at lines 2239--2239
 []|\OT1/cmr/m/n/10.95 Orden de in-te-graci^^Son $\OML/cmm/m/it/10.95 d \OMS/cmsy/m/n/10.95 2
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2242--2242
+Underfull \hbox (badness 10000) in paragraph at lines 2251--2251
 []|\OT1/cmr/m/n/10.95 Horizonte de predicci^^Son
  []
 
 [98]
 
-LaTeX Warning: Reference `sec:optimizacion_hiperparametros' on page 99 undefined on input line 2261.
+LaTeX Warning: Reference `sec:optimizacion_hiperparametros' on page 99 undefined on input line 2270.
 
-) [99]
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [99]) [100]
+\openout2 = `Capitulos/Cap4.aux'.
+
+ (Capitulos/Cap4.tex
+chapter 4.
+
+LaTeX Warning: Reference `sec:resultados_diferenciacion' on page 101 undefined on input line 6.
+
+
+LaTeX Warning: Reference `sec:resultados_multi_d' on page 101 undefined on input line 6.
+
+
+LaTeX Warning: Reference `sec:resultados_tamano_muestral' on page 101 undefined on input line 6.
+
+
+LaTeX Warning: Reference `sec:resultados_proporciones' on page 101 undefined on input line 6.
+
+
+LaTeX Warning: Reference `sec:resultados_multi_paso' on page 101 undefined on input line 6.
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [101
+
+
+
+
+]
+<Imagenes/rendimiento_por_escenario.png, id=1660, 1004.553pt x 570.933pt>
+File: Imagenes/rendimiento_por_escenario.png Graphic file (type png)
+<use Imagenes/rendimiento_por_escenario.png>
+Package pdftex.def Info: Imagenes/rendimiento_por_escenario.png  used on input line 19.
+(pdftex.def)             Requested size: 457.80486pt x 260.19307pt.
+ [102 <./Imagenes/rendimiento_por_escenario.png>]
+<Imagenes/2.1_zscore_config.png, id=1667, 932.5239pt x 570.933pt>
+File: Imagenes/2.1_zscore_config.png Graphic file (type png)
+<use Imagenes/2.1_zscore_config.png>
+Package pdftex.def Info: Imagenes/2.1_zscore_config.png  used on input line 30.
+(pdftex.def)             Requested size: 457.80486pt x 280.29103pt.
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [103 <./Imagenes/2.1_zscore_config.png>]
+<Imagenes/2.1.a_zscore_config.png, id=1677, 945.0507pt x 570.933pt>
+File: Imagenes/2.1.a_zscore_config.png Graphic file (type png)
+<use Imagenes/2.1.a_zscore_config.png>
+Package pdftex.def Info: Imagenes/2.1.a_zscore_config.png  used on input line 43.
+(pdftex.def)             Requested size: 457.80486pt x 276.57112pt.
+<Imagenes/2.1.b_zscore_config.png, id=1679, 945.0507pt x 570.933pt>
+File: Imagenes/2.1.b_zscore_config.png Graphic file (type png)
+<use Imagenes/2.1.b_zscore_config.png>
+Package pdftex.def Info: Imagenes/2.1.b_zscore_config.png  used on input line 52.
+(pdftex.def)             Requested size: 457.80486pt x 276.57112pt.
+ [104 <./Imagenes/2.1.a_zscore_config.png>] [105 <./Imagenes/2.1.b_zscore_config.png>]
+<Imagenes/2.1.c_zscore_config.png, id=1692, 945.0507pt x 570.933pt>
+File: Imagenes/2.1.c_zscore_config.png Graphic file (type png)
+<use Imagenes/2.1.c_zscore_config.png>
+Package pdftex.def Info: Imagenes/2.1.c_zscore_config.png  used on input line 61.
+(pdftex.def)             Requested size: 457.80486pt x 276.57112pt.
+
+Underfull \hbox (badness 1895) in paragraph at lines 62--62
+[][][]|\OT1/cmr/m/n/12 Z-scores de ECRPS para con-fig-u-ra-ciones SE-TAR. Las con-fig-u-ra-ciones
+ []
+
+<Imagenes/3.1_zscore_dist.png, id=1694, 945.0507pt x 570.933pt>
+File: Imagenes/3.1_zscore_dist.png Graphic file (type png)
+<use Imagenes/3.1_zscore_dist.png>
+Package pdftex.def Info: Imagenes/3.1_zscore_dist.png  used on input line 72.
+(pdftex.def)             Requested size: 457.80486pt x 276.57112pt.
+[106 <./Imagenes/2.1.c_zscore_config.png>] [107 <./Imagenes/3.1_zscore_dist.png>]
+<Imagenes/3.1.a_zscore_dist.png, id=1711, 945.0507pt x 570.933pt>
+File: Imagenes/3.1.a_zscore_dist.png Graphic file (type png)
+<use Imagenes/3.1.a_zscore_dist.png>
+Package pdftex.def Info: Imagenes/3.1.a_zscore_dist.png  used on input line 81.
+(pdftex.def)             Requested size: 389.13692pt x 235.08589pt.
+<Imagenes/3.1.b_zscore_dist.png, id=1712, 945.0507pt x 570.933pt>
+File: Imagenes/3.1.b_zscore_dist.png Graphic file (type png)
+<use Imagenes/3.1.b_zscore_dist.png>
+Package pdftex.def Info: Imagenes/3.1.b_zscore_dist.png  used on input line 88.
+(pdftex.def)             Requested size: 389.13692pt x 235.08589pt.
+<Imagenes/3.1.c_zscore_dist.png, id=1713, 945.0507pt x 570.933pt>
+File: Imagenes/3.1.c_zscore_dist.png Graphic file (type png)
+<use Imagenes/3.1.c_zscore_dist.png>
+Package pdftex.def Info: Imagenes/3.1.c_zscore_dist.png  used on input line 95.
+(pdftex.def)             Requested size: 389.13692pt x 235.08589pt.
+<Imagenes/4.1_evolucion_var.png, id=1715, 860.013pt x 498.663pt>
+File: Imagenes/4.1_evolucion_var.png Graphic file (type png)
+<use Imagenes/4.1_evolucion_var.png>
+Package pdftex.def Info: Imagenes/4.1_evolucion_var.png  used on input line 106.
+(pdftex.def)             Requested size: 457.80486pt x 265.44669pt.
+<Imagenes/4.1.a_evolucion_var.png, id=1721, 860.013pt x 498.663pt>
+File: Imagenes/4.1.a_evolucion_var.png Graphic file (type png)
+<use Imagenes/4.1.a_evolucion_var.png>
+Package pdftex.def Info: Imagenes/4.1.a_evolucion_var.png  used on input line 115.
+(pdftex.def)             Requested size: 457.80486pt x 265.44669pt.
+<Imagenes/4.1.b_evolucion_var.png, id=1722, 860.013pt x 498.663pt>
+File: Imagenes/4.1.b_evolucion_var.png Graphic file (type png)
+<use Imagenes/4.1.b_evolucion_var.png>
+Package pdftex.def Info: Imagenes/4.1.b_evolucion_var.png  used on input line 122.
+(pdftex.def)             Requested size: 457.80486pt x 265.44669pt.
+<Imagenes/4.1.c_evolucion_var.png, id=1723, 860.013pt x 498.663pt>
+File: Imagenes/4.1.c_evolucion_var.png Graphic file (type png)
+<use Imagenes/4.1.c_evolucion_var.png>
+Package pdftex.def Info: Imagenes/4.1.c_evolucion_var.png  used on input line 129.
+(pdftex.def)             Requested size: 457.80486pt x 265.44669pt.
+ [108 <./Imagenes/3.1.a_zscore_dist.png>] [109 <./Imagenes/3.1.b_zscore_dist.png> <./Imagenes/3.1.c_zscore_dist.png>] [110 <./Imagenes/4.1_evolucion_var.png>] [111 <./Imagenes/4.1.a_evolucion_var.png>] [112 <./Imagenes/4.1.b_evolucion_var.png>] [113 <./Imagenes/4.1.c_evolucion_var.png>]
+<Imagenes/6.1_robustez_coeficiente_variacion.png, id=1758, 860.013pt x 570.933pt>
+File: Imagenes/6.1_robustez_coeficiente_variacion.png Graphic file (type png)
+<use Imagenes/6.1_robustez_coeficiente_variacion.png>
+Package pdftex.def Info: Imagenes/6.1_robustez_coeficiente_variacion.png  used on input line 143.
+(pdftex.def)             Requested size: 412.02156pt x 273.52202pt.
+ [114 <./Imagenes/6.1_robustez_coeficiente_variacion.png>]
+<Imagenes/6.2_dm_test_hln_bonferroni.png, id=1766, 997.326pt x 817.3737pt>
+File: Imagenes/6.2_dm_test_hln_bonferroni.png Graphic file (type png)
+<use Imagenes/6.2_dm_test_hln_bonferroni.png>
+Package pdftex.def Info: Imagenes/6.2_dm_test_hln_bonferroni.png  used on input line 158.
+(pdftex.def)             Requested size: 457.80486pt x 375.19824pt.
+<Imagenes/6.2.a_dm_test_hln_bonferroni.png, id=1769, 997.326pt x 817.3737pt>
+File: Imagenes/6.2.a_dm_test_hln_bonferroni.png Graphic file (type png)
+<use Imagenes/6.2.a_dm_test_hln_bonferroni.png>
+Package pdftex.def Info: Imagenes/6.2.a_dm_test_hln_bonferroni.png  used on input line 173.
+(pdftex.def)             Requested size: 457.80486pt x 375.19824pt.
+ [115] [116 <./Imagenes/6.2_dm_test_hln_bonferroni.png>] [117 <./Imagenes/6.2.a_dm_test_hln_bonferroni.png>]
+<Imagenes/6.2.b_dm_test_hln_bonferroni.png, id=1788, 997.326pt x 817.3737pt>
+File: Imagenes/6.2.b_dm_test_hln_bonferroni.png Graphic file (type png)
+<use Imagenes/6.2.b_dm_test_hln_bonferroni.png>
+Package pdftex.def Info: Imagenes/6.2.b_dm_test_hln_bonferroni.png  used on input line 182.
+(pdftex.def)             Requested size: 457.80486pt x 375.19824pt.
+ [118 <./Imagenes/6.2.b_dm_test_hln_bonferroni.png>]
+<Imagenes/6.2.c_dm_test_hln_bonferroni.png, id=1795, 997.326pt x 817.3737pt>
+File: Imagenes/6.2.c_dm_test_hln_bonferroni.png Graphic file (type png)
+<use Imagenes/6.2.c_dm_test_hln_bonferroni.png>
+Package pdftex.def Info: Imagenes/6.2.c_dm_test_hln_bonferroni.png  used on input line 191.
+(pdftex.def)             Requested size: 457.80486pt x 375.19824pt.
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [119 <./Imagenes/6.2.c_dm_test_hln_bonferroni.png>]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [120] [121]
+<Imagenes/Sim1/1.1_barras_ecrps_valores.png, id=1817, 867.24pt x 433.62pt>
+File: Imagenes/Sim1/1.1_barras_ecrps_valores.png Graphic file (type png)
+<use Imagenes/Sim1/1.1_barras_ecrps_valores.png>
+Package pdftex.def Info: Imagenes/Sim1/1.1_barras_ecrps_valores.png  used on input line 244.
+(pdftex.def)             Requested size: 457.80486pt x 228.90442pt.
+ [122 <./Imagenes/Sim1/1.1_barras_ecrps_valores.png>]
+<Imagenes/Sim1/1.2_mejora_porcentual_valores.png, id=1825, 722.7pt x 578.16pt>
+File: Imagenes/Sim1/1.2_mejora_porcentual_valores.png Graphic file (type png)
+<use Imagenes/Sim1/1.2_mejora_porcentual_valores.png>
+Package pdftex.def Info: Imagenes/Sim1/1.2_mejora_porcentual_valores.png  used on input line 264.
+(pdftex.def)             Requested size: 412.02156pt x 329.61638pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 285--286
+[]|\OT1/cmr/m/n/10.95 Diferenciaci^^Son
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 286--287
+[]|\OT1/cmr/m/n/10.95 Diferenciaci^^Son
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 287--288
+[]|\OT1/cmr/m/n/10.95 Diferenciaci^^Son
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 288--289
+[]|\OT1/cmr/m/n/10.95 Diferenciaci^^Son
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 289--290
+[]|\OT1/cmr/m/n/10.95 Diferenciaci^^Son
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 290--291
+[]|\OT1/cmr/m/n/10.95 Diferenciaci^^Son
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 291--292
+[]|\OT1/cmr/m/n/10.95 Diferenciaci^^Son
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 292--293
+[]|\OT1/cmr/m/n/10.95 Diferenciaci^^Son
+ []
+
+
+Overfull \hbox (32.65952pt too wide) in paragraph at lines 281--297
+ [][] 
+ []
+
+[123] [124 <./Imagenes/Sim1/1.2_mejora_porcentual_valores.png>]
+<Imagenes/Sim1/3_heatmap_modelo_config.png, id=1838, 867.24pt x 578.16pt>
+File: Imagenes/Sim1/3_heatmap_modelo_config.png Graphic file (type png)
+<use Imagenes/Sim1/3_heatmap_modelo_config.png>
+Package pdftex.def Info: Imagenes/Sim1/3_heatmap_modelo_config.png  used on input line 306.
+(pdftex.def)             Requested size: 457.80486pt x 305.2059pt.
+
+Underfull \hbox (badness 7667) in paragraph at lines 307--307
+[][][]|\OT1/cmr/m/n/12 Mejora por-centual por con-fig-u-raci^^Son ARIMA. Las con-fig-u-ra-ciones
+ []
+
+
+Underfull \hbox (badness 1342) in paragraph at lines 307--307
+\OT1/cmr/m/n/12 ARIMA(2,1,2) y ARIMA(2,1,0) con-cen-tran las may-ores mejo-ras para
+ []
+
+<Imagenes/Sim1/4_heatmap_modelo_dist.png, id=1839, 722.7pt x 578.16pt>
+File: Imagenes/Sim1/4_heatmap_modelo_dist.png Graphic file (type png)
+<use Imagenes/Sim1/4_heatmap_modelo_dist.png>
+Package pdftex.def Info: Imagenes/Sim1/4_heatmap_modelo_dist.png  used on input line 315.
+(pdftex.def)             Requested size: 412.02156pt x 329.61638pt.
+[125] [126 <./Imagenes/Sim1/3_heatmap_modelo_config.png>] [127 <./Imagenes/Sim1/4_heatmap_modelo_dist.png>]
+Overfull \hbox (2.91652pt too wide) in paragraph at lines 330--331
+[]\OT1/cmr/bx/n/12 Sieve Boot-strap es intr^^S^^Pnsecamente ro-busto a no esta-cionar-iedad: \OT1/cmr/m/n/12 Su mecan-
+ []
+
+[128]
+
+LaTeX Warning: Citation 'Box2015' on page 129 undefined on input line 355.
+
+[129]
+<Imagenes/Sim2/0_mejora_global.png, id=1869, 722.7pt x 578.16pt>
+File: Imagenes/Sim2/0_mejora_global.png Graphic file (type png)
+<use Imagenes/Sim2/0_mejora_global.png>
+Package pdftex.def Info: Imagenes/Sim2/0_mejora_global.png  used on input line 376.
+(pdftex.def)             Requested size: 457.80486pt x 366.24532pt.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 381.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 381.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 387.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 387.
+
+[130] [131 <./Imagenes/Sim2/0_mejora_global.png>]
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 393.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\geq' on input line 393.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 393.
+
+<Imagenes/Sim2/2_heatmap_d_vs_modelo.png, id=1882, 1011.78pt x 722.7pt>
+File: Imagenes/Sim2/2_heatmap_d_vs_modelo.png Graphic file (type png)
+<use Imagenes/Sim2/2_heatmap_d_vs_modelo.png>
+Package pdftex.def Info: Imagenes/Sim2/2_heatmap_d_vs_modelo.png  used on input line 406.
+(pdftex.def)             Requested size: 457.80486pt x 327.00948pt.
+
+Overfull \hbox (1.00436pt too wide) in paragraph at lines 415--416
+\OT1/cmr/m/n/12 ciaci^^Son, aunque even-tual-mente pre-sente para $\OML/cmm/m/it/12 d \OMS/cmsy/m/n/12 ^^U \OT1/cmr/m/n/12 5$, es grad-ual y pre-deci-ble, no catastr^^Sofica. 
+ []
+
+[132] [133 <./Imagenes/Sim2/2_heatmap_d_vs_modelo.png>]
+<Imagenes/Sim2/NUEVO_3_heatmap_dm_pvalor.png, id=1895, 950.8323pt x 742.9356pt>
+File: Imagenes/Sim2/NUEVO_3_heatmap_dm_pvalor.png Graphic file (type png)
+<use Imagenes/Sim2/NUEVO_3_heatmap_dm_pvalor.png>
+Package pdftex.def Info: Imagenes/Sim2/NUEVO_3_heatmap_dm_pvalor.png  used on input line 424.
+(pdftex.def)             Requested size: 457.80486pt x 357.70465pt.
+ [134 <./Imagenes/Sim2/NUEVO_3_heatmap_dm_pvalor.png>]
+<Imagenes/Sim2/NUEVO_2_sensibilidad_incremento_d.png, id=1902, 1156.32pt x 578.16pt>
+File: Imagenes/Sim2/NUEVO_2_sensibilidad_incremento_d.png Graphic file (type png)
+<use Imagenes/Sim2/NUEVO_2_sensibilidad_incremento_d.png>
+Package pdftex.def Info: Imagenes/Sim2/NUEVO_2_sensibilidad_incremento_d.png  used on input line 446.
+(pdftex.def)             Requested size: 412.02156pt x 206.01134pt.
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [135]) [136 <./Imagenes/Sim2/NUEVO_2_sensibilidad_incremento_d.png>] [137]
 \openout2 = `Capitulos/Cap5.aux'.
 
  (Capitulos/Cap5.tex
-chapter 4.
+chapter 5.
 
 Overfull \hbox (2.33342pt too wide) in paragraph at lines 7--8
 []\OT1/cmr/m/n/12 Se anal-izan tres con-jun-tos de datos rep-re-sen-ta-tivos de dis-tin-tos do-min-ios: con-sumo el^^Sectrico
@@ -1732,199 +2084,306 @@ Overfull \hbox (2.33342pt too wide) in paragraph at lines 7--8
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [100
+ [138
 
 
 
 
-] [101] [102]
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 85.
-
+] [139] [140]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 (hyperref)                removing `math shift' on input line 85.
 
-[103] [104] [105] [106] [107] [108]
 
-LaTeX Warning: Reference `sec:aplicacion_energia' on page 109 undefined on input line 258.
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 85.
 
-[109]
-<Imagenes/Cap5_elec_serie_original.png, id=1524, 859.2903pt x 484.9317pt>
+[141] [142] [143] [144] [145] [146]
+
+LaTeX Warning: Reference `sec:aplicacion_energia' on page 147 undefined on input line 258.
+
+[147]
+<Imagenes/Cap5_elec_serie_original.png, id=2043, 859.2903pt x 484.9317pt>
 File: Imagenes/Cap5_elec_serie_original.png Graphic file (type png)
 <use Imagenes/Cap5_elec_serie_original.png>
-Package pdftex.def Info: Imagenes/Cap5_elec_serie_original.png  used on input line 291.
+Package pdftex.def Info: Imagenes/Cap5_elec_serie_original.png  used on input line 292.
 (pdftex.def)             Requested size: 325.8519pt x 183.89119pt.
-<Imagenes/Cap5_elec_serie_box_cox.png, id=1525, 859.2903pt x 484.9317pt>
+<Imagenes/Cap5_elec_serie_box_cox.png, id=2044, 859.2903pt x 484.9317pt>
 File: Imagenes/Cap5_elec_serie_box_cox.png Graphic file (type png)
 <use Imagenes/Cap5_elec_serie_box_cox.png>
-Package pdftex.def Info: Imagenes/Cap5_elec_serie_box_cox.png  used on input line 299.
+Package pdftex.def Info: Imagenes/Cap5_elec_serie_box_cox.png  used on input line 300.
 (pdftex.def)             Requested size: 325.8519pt x 183.89119pt.
-<Imagenes/Cap5_elec_serie_trend.png, id=1526, 859.2903pt x 484.9317pt>
+<Imagenes/Cap5_elec_serie_trend.png, id=2045, 859.2903pt x 484.9317pt>
 File: Imagenes/Cap5_elec_serie_trend.png Graphic file (type png)
 <use Imagenes/Cap5_elec_serie_trend.png>
-Package pdftex.def Info: Imagenes/Cap5_elec_serie_trend.png  used on input line 307.
+Package pdftex.def Info: Imagenes/Cap5_elec_serie_trend.png  used on input line 308.
 (pdftex.def)             Requested size: 325.8519pt x 183.89119pt.
 
 
-LaTeX Warning: Float too large for page by 24.0173pt on input line 314.
+LaTeX Warning: Float too large for page by 24.0173pt on input line 315.
 
-[110] [111 <./Imagenes/Cap5_elec_serie_original.png> <./Imagenes/Cap5_elec_serie_box_cox.png> <./Imagenes/Cap5_elec_serie_trend.png>] [112] [113]
-Underfull \hbox (badness 10000) in paragraph at lines 361--361
+[148] [149 <./Imagenes/Cap5_elec_serie_original.png> <./Imagenes/Cap5_elec_serie_box_cox.png> <./Imagenes/Cap5_elec_serie_trend.png>] [150] [151]
+Underfull \hbox (badness 10000) in paragraph at lines 362--362
 []|\OT1/cmr/m/n/10.95 Transformaci^^Son Box-
  []
 
 
-Underfull \hbox (badness 1769) in paragraph at lines 363--364
+Underfull \hbox (badness 1769) in paragraph at lines 364--365
 []|\OT1/cmr/m/n/10.95 Serie esta-cionaria tras pre-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 365--365
+Underfull \hbox (badness 10000) in paragraph at lines 366--366
 []|\OT1/cmr/m/n/10.95 Estructura tem-po-ral
  []
 
 
-Underfull \hbox (badness 4013) in paragraph at lines 365--366
+Underfull \hbox (badness 4013) in paragraph at lines 366--367
 []|\OT1/cmr/m/n/10.95 Dependencia AR de corto
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 367--367
+Underfull \hbox (badness 10000) in paragraph at lines 368--368
 []|\OT1/cmr/m/n/10.95 Estructura tem-po-ral
  []
 
 
-Underfull \hbox (badness 5908) in paragraph at lines 367--367
+Underfull \hbox (badness 5908) in paragraph at lines 368--368
 []|\OT1/cmr/m/n/10.95 Corte prin-ci-pal en lag 1
  []
 
 
-Underfull \hbox (badness 1803) in paragraph at lines 367--368
+Underfull \hbox (badness 1803) in paragraph at lines 368--369
 []|\OT1/cmr/m/n/10.95 Modelo AR(1) con com-po-
  []
 
 
-Underfull \hbox (badness 6658) in paragraph at lines 371--372
+Underfull \hbox (badness 6658) in paragraph at lines 372--373
 []|\OT1/cmr/m/n/10.95 Usar CRPS en lu-gar de
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 375--376
+Underfull \hbox (badness 10000) in paragraph at lines 376--377
 []|\OT1/cmr/m/n/10.95 Par^^Sametro de-caimiento
  []
 
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [114] [115]
-<Imagenes/Cap5_elec_boxplot_crps.png, id=1569, 867.24pt x 433.62pt>
+ [152] [153]
+<Imagenes/Cap5_elec_boxplot_crps.png, id=2088, 867.24pt x 433.62pt>
 File: Imagenes/Cap5_elec_boxplot_crps.png Graphic file (type png)
 <use Imagenes/Cap5_elec_boxplot_crps.png>
-Package pdftex.def Info: Imagenes/Cap5_elec_boxplot_crps.png  used on input line 427.
+Package pdftex.def Info: Imagenes/Cap5_elec_boxplot_crps.png  used on input line 428.
 (pdftex.def)             Requested size: 434.91321pt x 217.45789pt.
 
-Overfull \hbox (0.653pt too wide) in paragraph at lines 432--433
+Overfull \hbox (0.653pt too wide) in paragraph at lines 433--434
 \OT1/cmr/m/n/12 tribu-cionales tem-po-rales, no su-per-aron a sus con-tra-partes no adap-ta-ti-vas (MCPS y LSPM).
  []
 
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [116]
-Overfull \hbox (4.45285pt too wide) in paragraph at lines 438--439
+ [154]
+Overfull \hbox (4.45285pt too wide) in paragraph at lines 439--440
 \OT1/cmr/m/n/12 Para eval-uar si las difer-en-cias ob-ser-vadas en de-sempe~no pre-dic-tivo re-sul-tan es-tad^^S^^Psticamente
  []
 
-[117 <./Imagenes/Cap5_elec_boxplot_crps.png>]
-<Imagenes/Cap5_elec_pit_histograms.png, id=1581, 1084.05pt x 867.24pt>
+[155 <./Imagenes/Cap5_elec_boxplot_crps.png>]
+<Imagenes/Cap5_elec_pit_histograms.png, id=2100, 1084.05pt x 867.24pt>
 File: Imagenes/Cap5_elec_pit_histograms.png Graphic file (type png)
 <use Imagenes/Cap5_elec_pit_histograms.png>
-Package pdftex.def Info: Imagenes/Cap5_elec_pit_histograms.png  used on input line 452.
+Package pdftex.def Info: Imagenes/Cap5_elec_pit_histograms.png  used on input line 453.
 (pdftex.def)             Requested size: 434.91321pt x 347.93527pt.
-<Imagenes/Cap5_elec_reliability.png, id=1583, 578.16pt x 578.16pt>
+<Imagenes/Cap5_elec_reliability.png, id=2102, 578.16pt x 578.16pt>
 File: Imagenes/Cap5_elec_reliability.png Graphic file (type png)
 <use Imagenes/Cap5_elec_reliability.png>
-Package pdftex.def Info: Imagenes/Cap5_elec_reliability.png  used on input line 461.
+Package pdftex.def Info: Imagenes/Cap5_elec_reliability.png  used on input line 462.
 (pdftex.def)             Requested size: 434.91321pt x 434.90694pt.
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [118] [119 <./Imagenes/Cap5_elec_pit_histograms.png>] [120 <./Imagenes/Cap5_elec_reliability.png>] [121]
+ [156] [157 <./Imagenes/Cap5_elec_pit_histograms.png>] [158 <./Imagenes/Cap5_elec_reliability.png>] [159]
 Underfull \vbox (badness 4981) has occurred while \output is active []
 
- [122]
-<Imagenes/Cap5_traffic_serie_original.png, id=1610, 859.2903pt x 484.9317pt>
+ [160]
+<Imagenes/Cap5_traffic_serie_original.png, id=2129, 859.2903pt x 484.9317pt>
 File: Imagenes/Cap5_traffic_serie_original.png Graphic file (type png)
 <use Imagenes/Cap5_traffic_serie_original.png>
-Package pdftex.def Info: Imagenes/Cap5_traffic_serie_original.png  used on input line 513.
+Package pdftex.def Info: Imagenes/Cap5_traffic_serie_original.png  used on input line 515.
 (pdftex.def)             Requested size: 325.8519pt x 183.89119pt.
-<Imagenes/Cap5_traffic_serie_box_cox.png, id=1611, 859.2903pt x 484.9317pt>
+<Imagenes/Cap5_traffic_serie_box_cox.png, id=2130, 859.2903pt x 484.9317pt>
 File: Imagenes/Cap5_traffic_serie_box_cox.png Graphic file (type png)
 <use Imagenes/Cap5_traffic_serie_box_cox.png>
-Package pdftex.def Info: Imagenes/Cap5_traffic_serie_box_cox.png  used on input line 521.
+Package pdftex.def Info: Imagenes/Cap5_traffic_serie_box_cox.png  used on input line 523.
 (pdftex.def)             Requested size: 325.8519pt x 183.89119pt.
-<Imagenes/Cap5_traffic_serie_trend.png, id=1612, 859.2903pt x 484.9317pt>
+<Imagenes/Cap5_traffic_serie_trend.png, id=2131, 859.2903pt x 484.9317pt>
 File: Imagenes/Cap5_traffic_serie_trend.png Graphic file (type png)
 <use Imagenes/Cap5_traffic_serie_trend.png>
-Package pdftex.def Info: Imagenes/Cap5_traffic_serie_trend.png  used on input line 529.
+Package pdftex.def Info: Imagenes/Cap5_traffic_serie_trend.png  used on input line 531.
 (pdftex.def)             Requested size: 325.8519pt x 183.89119pt.
 
 
-LaTeX Warning: Float too large for page by 24.0173pt on input line 536.
+LaTeX Warning: Float too large for page by 24.0173pt on input line 538.
 
 
-Overfull \hbox (2.35152pt too wide) in paragraph at lines 546--547
+Overfull \hbox (2.35152pt too wide) in paragraph at lines 548--549
 \OT1/cmr/m/n/12 Los tests de no lin-eal-i-dad (BDS, McLeod-Li, Tsay) rec-haz-aron con-sis-ten-te-mente la hip^^Sotesis
  []
 
-[123] [124 <./Imagenes/Cap5_traffic_serie_original.png> <./Imagenes/Cap5_traffic_serie_box_cox.png> <./Imagenes/Cap5_traffic_serie_trend.png>]
-Overfull \hbox (63.95447pt too wide) in paragraph at lines 567--582
+[161] [162 <./Imagenes/Cap5_traffic_serie_original.png> <./Imagenes/Cap5_traffic_serie_box_cox.png> <./Imagenes/Cap5_traffic_serie_trend.png>]
+Overfull \hbox (63.95447pt too wide) in paragraph at lines 569--584
  [][] 
  []
 
-<Imagenes/Cap5_traffic_boxplot_crps.png, id=1629, 867.24pt x 433.62pt>
+<Imagenes/Cap5_traffic_boxplot_crps.png, id=2148, 867.24pt x 433.62pt>
 File: Imagenes/Cap5_traffic_boxplot_crps.png Graphic file (type png)
 <use Imagenes/Cap5_traffic_boxplot_crps.png>
-Package pdftex.def Info: Imagenes/Cap5_traffic_boxplot_crps.png  used on input line 590.
+Package pdftex.def Info: Imagenes/Cap5_traffic_boxplot_crps.png  used on input line 592.
 (pdftex.def)             Requested size: 434.91321pt x 217.45789pt.
-[125]
+[163]
 Underfull \vbox (badness 4084) has occurred while \output is active []
 
- [126]
-Overfull \hbox (15.78398pt too wide) in paragraph at lines 612--627
+ [164]
+Overfull \hbox (15.78398pt too wide) in paragraph at lines 614--629
  [][] 
  []
 
-[127 <./Imagenes/Cap5_traffic_boxplot_crps.png>]
-Overfull \hbox (18.6527pt too wide) in paragraph at lines 635--636
+[165 <./Imagenes/Cap5_traffic_boxplot_crps.png>]
+Overfull \hbox (18.6527pt too wide) in paragraph at lines 637--638
 \OT1/cmr/m/n/12 hiben difer-en-cias sig-ni-fica-ti-vas con-tra to-dos los m^^Setodos su-pe-ri-ores, val-i-dando es-tad^^S^^Psticamente
  []
 
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [128]
-<Imagenes/Cap5_traffic_pit_histograms.png, id=1652, 1084.05pt x 867.24pt>
+ [166]
+<Imagenes/Cap5_traffic_pit_histograms.png, id=2171, 1084.05pt x 867.24pt>
 File: Imagenes/Cap5_traffic_pit_histograms.png Graphic file (type png)
 <use Imagenes/Cap5_traffic_pit_histograms.png>
-Package pdftex.def Info: Imagenes/Cap5_traffic_pit_histograms.png  used on input line 643.
+Package pdftex.def Info: Imagenes/Cap5_traffic_pit_histograms.png  used on input line 645.
 (pdftex.def)             Requested size: 434.91321pt x 347.93527pt.
- [129 <./Imagenes/Cap5_traffic_pit_histograms.png>]
-<Imagenes/Cap5_traffic_reliability.png, id=1660, 578.16pt x 578.16pt>
+ [167 <./Imagenes/Cap5_traffic_pit_histograms.png>]
+<Imagenes/Cap5_traffic_reliability.png, id=2179, 578.16pt x 578.16pt>
 File: Imagenes/Cap5_traffic_reliability.png Graphic file (type png)
 <use Imagenes/Cap5_traffic_reliability.png>
-Package pdftex.def Info: Imagenes/Cap5_traffic_reliability.png  used on input line 656.
+Package pdftex.def Info: Imagenes/Cap5_traffic_reliability.png  used on input line 658.
 (pdftex.def)             Requested size: 434.91321pt x 434.90694pt.
- [130] [131 <./Imagenes/Cap5_traffic_reliability.png>] [132]) [133]
+ [168] [169 <./Imagenes/Cap5_traffic_reliability.png>] [170]
+Underfull \vbox (badness 1147) has occurred while \output is active []
+
+ [171]
+<Imagenes/Cap5_exchange_serie_original.png, id=2200, 859.2903pt x 484.9317pt>
+File: Imagenes/Cap5_exchange_serie_original.png Graphic file (type png)
+<use Imagenes/Cap5_exchange_serie_original.png>
+Package pdftex.def Info: Imagenes/Cap5_exchange_serie_original.png  used on input line 715.
+(pdftex.def)             Requested size: 325.8519pt x 183.89119pt.
+<Imagenes/Cap5_exchange_serie_box_cox.png, id=2201, 859.2903pt x 484.9317pt>
+File: Imagenes/Cap5_exchange_serie_box_cox.png Graphic file (type png)
+<use Imagenes/Cap5_exchange_serie_box_cox.png>
+Package pdftex.def Info: Imagenes/Cap5_exchange_serie_box_cox.png  used on input line 723.
+(pdftex.def)             Requested size: 325.8519pt x 183.89119pt.
+<Imagenes/Cap5_exchange_serie_trend.png, id=2202, 859.2903pt x 484.9317pt>
+File: Imagenes/Cap5_exchange_serie_trend.png Graphic file (type png)
+<use Imagenes/Cap5_exchange_serie_trend.png>
+Package pdftex.def Info: Imagenes/Cap5_exchange_serie_trend.png  used on input line 731.
+(pdftex.def)             Requested size: 325.8519pt x 183.89119pt.
+
+
+LaTeX Warning: Float too large for page by 24.0173pt on input line 738.
+
+[172] [173 <./Imagenes/Cap5_exchange_serie_original.png> <./Imagenes/Cap5_exchange_serie_box_cox.png> <./Imagenes/Cap5_exchange_serie_trend.png>]
+Underfull \vbox (badness 1609) has occurred while \output is active []
+
+ [174]
+Overfull \hbox (63.95447pt too wide) in paragraph at lines 777--792
+ [][] 
+ []
+
+[175]
+<Imagenes/Cap5_exchange_boxplot_crps.png, id=2229, 867.24pt x 433.62pt>
+File: Imagenes/Cap5_exchange_boxplot_crps.png Graphic file (type png)
+<use Imagenes/Cap5_exchange_boxplot_crps.png>
+Package pdftex.def Info: Imagenes/Cap5_exchange_boxplot_crps.png  used on input line 800.
+(pdftex.def)             Requested size: 434.91321pt x 217.45789pt.
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [176]
+Underfull \vbox (badness 1137) has occurred while \output is active []
+
+ [177 <./Imagenes/Cap5_exchange_boxplot_crps.png>]
+Overfull \hbox (68.98456pt too wide) in paragraph at lines 824--839
+ [][] 
+ []
+
+[178]
+<Imagenes/Cap5_exchange_pit_histograms.png, id=2246, 1084.05pt x 867.24pt>
+File: Imagenes/Cap5_exchange_pit_histograms.png Graphic file (type png)
+<use Imagenes/Cap5_exchange_pit_histograms.png>
+Package pdftex.def Info: Imagenes/Cap5_exchange_pit_histograms.png  used on input line 857.
+(pdftex.def)             Requested size: 434.91321pt x 347.93527pt.
+ [179] [180 <./Imagenes/Cap5_exchange_pit_histograms.png>]
+<Imagenes/Cap5_exchange_reliability.png, id=2258, 578.16pt x 578.16pt>
+File: Imagenes/Cap5_exchange_reliability.png Graphic file (type png)
+<use Imagenes/Cap5_exchange_reliability.png>
+Package pdftex.def Info: Imagenes/Cap5_exchange_reliability.png  used on input line 872.
+(pdftex.def)             Requested size: 434.91321pt x 434.90694pt.
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [181] [182 <./Imagenes/Cap5_exchange_reliability.png>]
+Underfull \vbox (badness 2970) has occurred while \output is active []
+
+ [183] [184]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [185]
+Overfull \hbox (82.2159pt too wide) in paragraph at lines 929--962
+ [][] 
+ []
+
+[186] [187]
+Overfull \hbox (22.15558pt too wide) in paragraph at lines 970--971
+[]\OT1/cmr/m/n/12 Los mod-e-los de apren-dizaje pro-fundo (DeepAR, EnCQR-LSTM) mostraron mejora monot^^Sonica
+ []
+
+[188] [189] [190]
+Overfull \hbox (13.03055pt too wide) in paragraph at lines 1034--1035
+\OT1/cmr/m/n/12 tremas de masa PIT. Este patr^^Son in-dica que dis-tribu-ciones pre-dic-ti-vas sis-tem^^Saticamente
+ []
+
+[191] [192]
+Overfull \hbox (11.97731pt too wide) in paragraph at lines 1076--1077
+\OT1/cmr/m/n/12 Diebold-Mariano mod-i-fi-cado en-tre mejores mod-e-los. Si difer-en-cias son es-tad^^S^^Psticamente
+ []
+
+[193]
+Overfull \hbox (10.15706pt too wide) in paragraph at lines 1101--1102
+[]\OT1/cmr/m/n/12 La val-i-daci^^Son de cal-i-braci^^Son me-di-ante his-togra-mas PIT debe com-ple-men-tar sis-tem^^Saticamente
+ []
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [194] [195]
+Overfull \hbox (10.82095pt too wide) in paragraph at lines 1129--1130
+[]\OT1/cmr/bx/n/12 Contextos mul-ti-vari-a-dos\OT1/cmr/m/n/12 : Ex-ten-der la eval-u-aci^^Son a pron^^Sostico con-junto de m^^Sultiples
+ []
+
+
+Overfull \hbox (18.58742pt too wide) in paragraph at lines 1131--1132
+\OT1/cmr/m/n/12 para eval-uar la ca-paci-dad de m^^Setodos adap-ta-tivos para de-tec-tar y re-spon-der r^^Sapidamente
+ []
+
+[196]) [197]
 chapter without number
-[134
+[198
 
 
 
 
-] [135] [136]
+] [199] [200]
 Overfull \hbox (6.84508pt too wide) in paragraph at lines 234--234
 [][][]\OT1/cmr/m/n/12 (2022). \OT1/cmr/m/it/12 Al-go-rith-mic Learn-ing in a Ran-dom World\OT1/cmr/m/n/12 . Sec-ond. Cham, Switzer-land: Springer.
  []
@@ -1934,7 +2393,7 @@ Overfull \hbox (7.06361pt too wide) in paragraph at lines 234--234
 \OT1/cmr/m/n/12 tri-bu-tions for Or-der Ful-fill-ment Time Fore-cast-ing". In: \OT1/cmr/m/it/12 arXiv preprint arXiv:2505.17340\OT1/cmr/m/n/12 .
  []
 
-[137] (main.aux (Capitulos/Cap1.aux) (Capitulos/Cap2.aux) (Capitulos/Cap3.aux) (Capitulos/Cap5.aux))
+[201] (main.aux (Capitulos/Cap1.aux) (Capitulos/Cap2.aux) (Capitulos/Cap3.aux) (Capitulos/Cap4.aux) (Capitulos/Cap5.aux))
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2025-12-24>
@@ -1948,17 +2407,17 @@ Package logreq Info: Writing requests to 'main.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 46175 strings out of 467871
- 994174 string characters out of 5418377
- 1955105 words of memory out of 5000000
- 73621 multiletter control sequences out of 15000+600000
+ 46779 strings out of 467871
+ 1009962 string characters out of 5418377
+ 1979930 words of memory out of 5000000
+ 74011 multiletter control sequences out of 15000+600000
  647850 words of font info for 118 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  108i,21n,107p,11301b,2197s stack positions out of 10000i,1000n,20000p,200000b,200000s
  <C:\Users\pleal\AppData\Local\MiKTeX\fonts/pk/ljfour/public/bbm/dpi600\bbm12.pk> <C:\Users\pleal\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm1200.pk><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx8.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmcsc10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi6.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmib10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cmextra/cmmib8.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsl12.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmssbx10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy6.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti12.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmtt10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmtt12.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on main.pdf (151 pages, 2619453 bytes).
+Output written on main.pdf (219 pages, 11470432 bytes).
 PDF statistics:
- 2961 PDF objects out of 2984 (max. 8388607)
- 808 named destinations out of 1000 (max. 500000)
- 2616 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 3896 PDF objects out of 4296 (max. 8388607)
+ 1015 named destinations out of 1200 (max. 500000)
+ 3296 words of extra memory for PDF output out of 10000 (max. 10000000)
 
