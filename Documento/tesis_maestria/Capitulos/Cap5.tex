@@ -400,7 +400,7 @@ El Cuadro~\ref{tab:elec_ranking} presenta el ranking de modelos según su desemp
 
 \begin{table}[htbp]
 \centering
-\caption{Ranking de modelos según desempeño en dataset Electricity. Se reportan media y mediana del CRPS sobre 24 predicciones one-step-ahead. Valores menores indican mejor desempeño.}
+\caption{Ranking de modelos según desempeño en dataset Electricity.}
 \label{tab:elec_ranking}
 \begin{tabular}{clcc}
 \toprule
@@ -451,7 +451,7 @@ La Figura~\ref{fig:elec_pit} presenta los histogramas PIT para todos los modelos
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.95\textwidth]{Imagenes/Cap5_elec_pit_histograms.png}
-    \caption{Histogramas de transformación PIT para todos los modelos en el dataset Electricity. Una distribución uniforme (línea horizontal punteada) indica calibración perfecta. Desviaciones en forma de U sugieren sobreconfianza, mientras que forma de U invertida indica sobredispersión.}
+    \caption{Histogramas de transformación PIT para todos los modelos en el dataset Electricity. }
     \label{fig:elec_pit}
 \end{figure}
 
@@ -460,7 +460,7 @@ Las curvas de confiabilidad, presentadas en la Figura~\ref{fig:elec_reliability}
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.95\textwidth]{Imagenes/Cap5_elec_reliability.png}
-    \caption{Curvas de confiabilidad para los modelos evaluados en el dataset Electricity. La diagonal representa calibración perfecta. Modelos cuyas curvas se mantienen cercanas a la diagonal exhiben intervalos de predicción bien calibrados en todos los niveles de confianza.}
+    \caption{Curvas de confiabilidad para los modelos evaluados en el dataset Electricity. }
     \label{fig:elec_reliability}
 \end{figure}
 
@@ -563,7 +563,7 @@ El Cuadro~\ref{tab:traffic_ranking} presenta el ranking de modelos según desemp
 
 \begin{table}[htbp]
 \centering
-\caption{Ranking de modelos según desempeño en dataset Traffic. Se reportan media y mediana del CRPS, además de métricas de comparación pareada. Valores menores de CRPS indican mejor desempeño.}
+\caption{Ranking de modelos según desempeño en dataset Traffic. }
 \label{tab:traffic_ranking}
 \small
 \begin{tabular}{clcccccc}
@@ -590,7 +590,7 @@ La Figura~\ref{fig:traffic_boxplot_crps} presenta la distribución completa de v
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.95\textwidth]{Imagenes/Cap5_traffic_boxplot_crps.png}
-    \caption{Distribución de valores CRPS por modelo en el conjunto de prueba del dataset Traffic. La caja representa el rango intercuartílico, la línea central indica la mediana, y los puntos individuales muestran valores atípicos. Nótese la mayor dispersión y presencia de valores extremos comparado con el dataset Electricity.}
+    \caption{Distribución de valores CRPS por modelo en el conjunto de prueba del dataset Traffic. }
     \label{fig:traffic_boxplot_crps}
 \end{figure}
 
@@ -608,7 +608,7 @@ El Cuadro~\ref{tab:traffic_dm_tests} presenta los valores p del test de Diebold-
 
 \begin{table}[htbp]
 \centering
-\caption{Matriz de valores p del test de Diebold-Mariano modificado para el dataset Traffic. Valores menores a 0.05 (resaltados en negrita) indican diferencias estadísticamente significativas en capacidad predictiva al nivel de confianza del 95\%.}
+\caption{Matriz de valores p del test de Diebold-Mariano modificado para el dataset Traffic.}
 \label{tab:traffic_dm_tests}
 \scriptsize
 \begin{tabular}{l|ccccccccc}
@@ -643,7 +643,7 @@ La calibración de las distribuciones predictivas se evaluó mediante histograma
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.95\textwidth]{Imagenes/Cap5_traffic_pit_histograms.png}
-    \caption{Histogramas de transformación PIT para todos los modelos en el dataset Traffic. Una distribución uniforme (línea horizontal punteada) indica calibración perfecta. Comparado con Electricity, se observan desviaciones más pronunciadas de uniformidad, reflejando la mayor complejidad de cuantificar incertidumbre en tráfico vehicular.}
+    \caption{Histogramas de transformación PIT para todos los modelos en el dataset Traffic.}
     \label{fig:traffic_pit}
 \end{figure}
 
@@ -656,7 +656,7 @@ La Figura~\ref{fig:traffic_reliability} presenta las curvas de confiabilidad, co
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.95\textwidth]{Imagenes/Cap5_traffic_reliability.png}
-    \caption{Curvas de confiabilidad para los modelos evaluados en el dataset Traffic. La diagonal representa calibración perfecta. Nótese mayor desviación de la diagonal comparado con Electricity, reflejando la dificultad adicional de mantener calibración en series de tráfico con eventos impredecibles.}
+    \caption{Curvas de confiabilidad para los modelos evaluados en el dataset Traffic.}
     \label{fig:traffic_reliability}
 \end{figure}
 
@@ -771,7 +771,7 @@ El Cuadro~\ref{tab:exchange_ranking} presenta el ranking de modelos según desem
 
 \begin{table}[htbp]
 \centering
-\caption{Ranking de modelos según desempeño en dataset Exchange Rate. Se reportan media y mediana del CRPS, además de métricas de comparación pareada. Valores menores de CRPS indican mejor desempeño.}
+\caption{Ranking de modelos según desempeño en dataset Exchange Rate.}
 \label{tab:exchange_ranking}
 \small
 \begin{tabular}{clcccccc}
@@ -798,7 +798,7 @@ La Figura~\ref{fig:exchange_boxplot_crps} presenta la distribución completa de 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.95\textwidth]{Imagenes/Cap5_exchange_boxplot_crps.png}
-    \caption{Distribución de valores CRPS por modelo en el conjunto de prueba del dataset Exchange Rate. La caja representa el rango intercuartílico, la línea central indica la mediana, y los puntos individuales muestran valores atípicos. Nótese la clara separación entre el cluster superior de seis modelos competitivos y el grupo inferior de tres métodos inadecuados para esta serie.}
+    \caption{Distribución de valores CRPS por modelo en el conjunto de prueba del dataset Exchange Rate. }
     \label{fig:exchange_boxplot_crps}
 \end{figure}
 
@@ -818,7 +818,7 @@ El Cuadro~\ref{tab:exchange_dm_tests} presenta los valores p del test de Diebold
 
 \begin{table}[htbp]
 \centering
-\caption{Matriz de valores p del test de Diebold-Mariano modificado para el dataset Exchange Rate. Valores menores a 0.05 (resaltados en negrita) indican diferencias estadísticamente significativas en capacidad predictiva al nivel de confianza del 95\%.}
+\caption{Matriz de valores p del test de Diebold-Mariano modificado para el dataset Exchange Rate. }
 \label{tab:exchange_dm_tests}
 \scriptsize
 \begin{tabular}{l|ccccccccc}
@@ -855,7 +855,7 @@ La calibración de las distribuciones predictivas se evaluó mediante histograma
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.95\textwidth]{Imagenes/Cap5_exchange_pit_histograms.png}
-    \caption{Histogramas de transformación PIT para todos los modelos en el dataset Exchange Rate. Una distribución uniforme (línea horizontal punteada) indica calibración perfecta. La concentración extrema de masa en las colas para varios modelos refleja la dificultad de cuantificar incertidumbre en presencia de heterocedasticidad condicional severa.}
+    \caption{Histogramas de transformación PIT para todos los modelos en el dataset Exchange Rate.}
     \label{fig:exchange_pit}
 \end{figure}
 
@@ -870,7 +870,7 @@ La Figura~\ref{fig:exchange_reliability} presenta las curvas de confiabilidad, c
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.95\textwidth]{Imagenes/Cap5_exchange_reliability.png}
-    \caption{Curvas de confiabilidad para los modelos evaluados en el dataset Exchange Rate. La diagonal representa calibración perfecta. Las trayectorias escalonadas reflejan el tamaño reducido del conjunto de prueba (24 observaciones). Nótese el colapso completo de calibración para EnCQR-LSTM, Block Bootstrapping y AREPD en niveles de confianza altos.}
+    \caption{Curvas de confiabilidad para los modelos evaluados en el dataset Exchange Rate.}
     \label{fig:exchange_reliability}
 \end{figure}
 

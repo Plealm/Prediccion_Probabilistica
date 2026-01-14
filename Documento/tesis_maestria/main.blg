@@ -1,19 +1,18 @@
 [0] Config.pm:328> INFO - This is Biber 2.21
-[0] Config.pm:331> INFO - Logfile is 'main.blg'
-[239] biber-MSWIN64:342> INFO - === 
-[313] Biber.pm:421> INFO - Reading 'main.bcf'
-[582] Biber.pm:1002> INFO - Found 48 citekeys in bib section 0
-[624] Biber.pm:4487> INFO - Processing section 0
-[656] Biber.pm:4678> INFO - Looking for bibtex file 'biblio.bib' for section 0
-[757] bibtex.pm:1713> INFO - LaTeX decoding ...
-[944] bibtex.pm:1519> INFO - Found BibTeX data source 'biblio.bib'
-[1553] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'variable = shifted' with 'variable = non-ignorable'
-[1554] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'normalization = NFD' with 'normalization = prenormalized'
-[1554] Biber.pm:4307> INFO - Sorting list 'nyt/global//global/global/global' of type 'entry' with template 'nyt' and locale 'en-US'
-[1554] Biber.pm:4313> INFO - No sort tailoring available for locale 'en-US'
-[1642] bbl.pm:676> INFO - Writing 'main.bbl' with encoding 'UTF-8'
-[1704] bbl.pm:779> INFO - Output to main.bbl
-[1705] Biber.pm:132> WARN - Duplicate entry key: 'Engle1982' in file 'biblio.bib', skipping ...
-[1705] Biber.pm:132> WARN - Duplicate entry key: 'Harvey1997' in file 'biblio.bib', skipping ...
-[1705] Biber.pm:132> WARN - I didn't find a database entry for 'Box2015' (section 0)
-[1706] Biber.pm:134> INFO - WARNINGS: 3
+[1] Config.pm:331> INFO - Logfile is 'main.blg'
+[168] biber-MSWIN64:342> INFO - === 
+[225] Biber.pm:421> INFO - Reading 'main.bcf'
+[426] Biber.pm:1002> INFO - Found 47 citekeys in bib section 0
+[448] Biber.pm:4487> INFO - Processing section 0
+[465] Biber.pm:4678> INFO - Looking for bibtex file 'biblio.bib' for section 0
+[550] bibtex.pm:1713> INFO - LaTeX decoding ...
+[693] bibtex.pm:1519> INFO - Found BibTeX data source 'biblio.bib'
+[1189] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'variable = shifted' with 'variable = non-ignorable'
+[1189] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'normalization = NFD' with 'normalization = prenormalized'
+[1189] Biber.pm:4307> INFO - Sorting list 'nyt/global//global/global/global' of type 'entry' with template 'nyt' and locale 'en-US'
+[1189] Biber.pm:4313> INFO - No sort tailoring available for locale 'en-US'
+[1273] bbl.pm:676> INFO - Writing 'main.bbl' with encoding 'UTF-8'
+[1322] bbl.pm:779> INFO - Output to main.bbl
+[1322] Biber.pm:132> WARN - Duplicate entry key: 'Engle1982' in file 'biblio.bib', skipping ...
+[1322] Biber.pm:132> WARN - Duplicate entry key: 'Harvey1997' in file 'biblio.bib', skipping ...
+[1323] Biber.pm:134> INFO - WARNINGS: 2

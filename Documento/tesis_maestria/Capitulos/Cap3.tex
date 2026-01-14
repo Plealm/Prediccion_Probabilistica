@@ -1,5 +1,5 @@
 % !TeX root = ../main.tex
-\chapter{Simulación}
+\chapter{Metodología de Simulaciones}
 \label{cap:diseño_simulacion}
 
 Este capítulo describe el diseño experimental desarrollado para evaluar el desempeño de los métodos de pronóstico probabilístico en series temporales. Se presenta la justificación de los escenarios de evaluación, la metodología de simulación empleada y las características específicas de los procesos generadores de datos utilizados.
@@ -39,18 +39,10 @@ El tercer escenario considera modelos autorregresivos de umbral auto-excitados (
 
 La estacionariedad global de un proceso SETAR requiere condiciones específicas sobre los parámetros autorregresivos en cada régimen y la frecuencia de transición entre regímenes. Estas condiciones se discuten en detalle en la Sección~\ref{subsec:setar_stationarity}. Este escenario es particularmente relevante para evaluar la capacidad de los métodos conformales de capturar dinámicas asimétricas y dependientes del estado del sistema.
 
-\subsubsection{Ausencia del Escenario No Lineal No Estacionario}
-
-La combinación de no linealidad y no estacionariedad, aunque teóricamente posible, presenta desafíos metodológicos sustanciales que la excluyen del alcance de este estudio. Los modelos que combinan ambas características (por ejemplo, SETAR con raíces unitarias condicionales o modelos de cambio de régimen con deriva) requieren condiciones de estabilidad extremadamente restrictivas y su caracterización teórica es un área de investigación activa \parencite{Chen2023}.
-
-Más fundamentalmente, la validez teórica de muchos métodos de predicción conformal, incluyendo aquellos basados en el enfoque de Barber et al. \parencite{Barber2023}, asume que el proceso subyacente es al menos localmente estacionario o que las desviaciones de la estacionariedad son graduales y pueden ser capturadas mediante esquemas de ponderación adaptativos. La presencia simultánea de cambios estructurales abruptos (no linealidad) y tendencias estocásticas persistentes (no estacionariedad) violaría estos supuestos fundamentales, invalidando las garantías teóricas de cobertura.
-
-Por estas razones, el presente estudio se enfoca en los tres escenarios anteriores, que permiten una evaluación rigurosa y teóricamente fundamentada del desempeño de los métodos.
-
-\subsection{Estructura del Diseño Factorial}
+\subsection{Estructura del Diseño de Simulación base}
 \label{subsec:diseño_factorial}
 
-El diseño experimental implementa un esquema factorial completo que combina sistemáticamente tres dimensiones de variación para cada uno de los tres escenarios considerados. Esta estructura genera un total de 420 configuraciones únicas de simulación, distribuidas equitativamente entre los escenarios.
+El diseño experimental implementa un esquema completo que combina sistemáticamente tres dimensiones de variación para cada uno de los tres escenarios considerados. Esta estructura genera un total de 420 configuraciones únicas de simulación, distribuidas equitativamente entre los escenarios.
 
 \subsubsection{Dimensión 1: Configuraciones Paramétricas del Proceso}
 
@@ -80,7 +72,7 @@ Se consideran cuatro niveles de varianza $\sigma^2 \in \{0.2, 0.5, 1.0, 3.0\}$ q
 
 \subsubsection{Combinatoria Total}
 
-La combinación factorial de estas tres dimensiones genera:
+La combinación de estas tres dimensiones genera:
 \begin{equation}
 N_{\text{config}} = 7 \text{ modelos} \times 5 \text{ distribuciones} \times 4 \text{ varianzas} = 140 \text{ configuraciones por escenario}
 \end{equation}
@@ -102,8 +94,8 @@ Para cada una de las 420 configuraciones, se implementa el siguiente protocolo d
 
 \item \textbf{Partición Tripartita:} La serie se divide en tres conjuntos disjuntos:
 \begin{itemize}
-\item \textbf{Conjunto de Entrenamiento:} $n_{\text{train}} = 200$ observaciones iniciales utilizadas para la estimación inicial de parámetros y el ajuste de hiperparámetros.
-\item \textbf{Conjunto de Calibración:} $n_{\text{cal}} = 40$ observaciones subsecuentes utilizadas para la calibración de intervalos de predicción y la construcción de distribuciones conformales.
+\item \textbf{Conjunto de Entrenamiento:} $n_{\text{train}} = 200$ observaciones iniciales utilizadas para la estimación inicial de parámetros.
+\item \textbf{Conjunto de Calibración:} $n_{\text{cal}} = 40$ observaciones subsecuentes utilizadas para la calibración de los hiperparametros y la construcción de distribuciones conformales.
 \item \textbf{Conjunto de Prueba:} $n_{\text{test}} = 12$ observaciones finales utilizadas para la evaluación del desempeño predictivo.
 \end{itemize}
 
@@ -118,8 +110,6 @@ Para cada una de las 420 configuraciones, se implementa el siguiente protocolo d
 
 
 \end{enumerate}
-
-Este protocolo garantiza que la evaluación sea tanto rigurosa (mediante la comparación con la distribución verdadera) como realista (mediante el esquema de ventana rodante que refleja la práctica operativa).
 
 \section{Procesos Generadores de Datos}
 \label{sec:procesos_generadores}
@@ -447,7 +437,7 @@ Finalmente, es importante destacar que todas las configuraciones detalladas en l
 
 \section{Modelos predictivos}
 \label{sec:modelos_predictivos}
-Para evaluar la capacidad de cuantificación de la incertidumbre en diversos entornos estocásticos, esta investigación emplea un conjunto heterogéneo de nueve modelos predictivos. Esta selección abarca desde métodos de remuestreo clásicos y propuestas de predicción conformal, hasta arquitecturas de aprendizaje profundo y modelos híbridos de diseño propio. El uso de esta diversidad de enfoques permite contrastar cómo las garantías teóricas de cada familia de modelos se traducen en un rendimiento práctico bajo la métrica ECRPS, especialmente cuando se enfrentan a la ruptura de los supuestos de intercambiabilidad y linealidad.
+Para evaluar la capacidad de cuantificación de la incertidumbre en diversos entornos estocásticos, esta investigación emplea un conjunto heterogéneo de nueve modelos predictivos. Esta selección abarca desde métodos de remuestreo clásicos y propuestas de predicción conformal, hasta arquitecturas de aprendizaje profundo y modelos híbridos. El uso de esta diversidad de enfoques permite contrastar cómo las garantías teóricas de cada familia de modelos se traducen en un rendimiento práctico bajo la métrica ECRPS, especialmente cuando se enfrentan a la ruptura de los supuestos de intercambiabilidad y linealidad.
 
 \subsection{Circular Block Bootstrap (CBB)}
 \label{subsec:CCB}
@@ -631,13 +621,6 @@ La selección del orden óptimo $p^*$ se realiza minimizando el \textbf{ECRPS} (
 \paragraph{Protocolo de Congelamiento}
 Una vez identificado $p^*$ mediante validación, el método ajusta el modelo AR($p^*$) sobre los datos de entrenamiento+calibración y almacena permanentemente los coeficientes $\hat{\phi}^*$ y residuos centrados $\tilde{\epsilon}^*$. Estos parámetros se reutilizan sin re-estimación en toda la fase de prueba rolling, previniendo data leakage y garantizando evaluación rigurosa.
 
-\paragraph{Parámetros Operacionales}
-\begin{itemize}
-    \item \texttt{n\_boot} ($B$): Número de réplicas bootstrap. Por defecto: $B = 1000$.
-    \item \texttt{random\_state}: Semilla para reproducibilidad del generador aleatorio.
-    \item \texttt{verbose}: Control de mensajes diagnósticos durante congelamiento.
-\end{itemize}
-
 
 \subsection{Least Squares Prediction Machine (LSPM)}
 \label{subsec:LSPM}
@@ -747,14 +730,6 @@ Dado que el LSPM es un método conformal teóricamente válido sin hiperparámet
 \paragraph{Protocolo de Congelamiento}
 El método ejecuta una operación crítica: congela $p$ basado en el tamaño del conjunto de entrenamiento+calibración. Este valor congelado $p^*$ se almacena  y se reutiliza en todas las ventanas rolling subsecuentes, garantizando que la dimensionalidad de la matriz de diseño permanezca constante y previniendo data leakage.
 
-\paragraph{Parámetros Operacionales}
-\begin{itemize}
-    \item \texttt{version}: Fijado permanentemente como \texttt{'studentized'}. Es la única versión que garantiza validez conformal sin restricciones adicionales sobre leverage.
-    \item \texttt{random\_state}: Semilla para reproducibilidad del generador aleatorio (usado en muestreo posterior de la CPD si se requiere).
-    \item \texttt{verbose}: Control de mensajes diagnósticos durante congelamiento.
-\end{itemize}
-
-```latex
 
 \subsection{Least Squares Prediction Machine with Weighted Residuals (LSPMW)}
 \label{subsec:LSPMW}
@@ -829,7 +804,7 @@ Contrario a esquemas de congelamiento completo, la implementación mantiene úni
 Este diseño permite que el modelo se adapte continuamente a derivas distributivas, pues los residuos más recientes (calculados con datos actuales) reciben mayor ponderación automáticamente.
 
 \paragraph{Adaptación 3: Protocolo de Congelamiento Parcial}
-El método \texttt{freeze\_hyperparameters()} almacena únicamente:
+El método almacena únicamente:
 \begin{itemize}
     \item \texttt{\_frozen\_rho}: Valor óptimo $\rho^*$ seleccionado por validación
     \item \texttt{\_frozen\_n\_lags}: Orden autorregresivo $p^*$ heredado de LSPM
@@ -873,11 +848,11 @@ n_{\text{eff}} = \frac{1}{\sum_{i=1}^{n-1} \tilde{w}_i^2} \approx \frac{1-\rho}{
 La selección de $\rho^*$ se realiza minimizando el \textbf{ECRPS} (véase \ref{subsec:ecrps}) sobre el conjunto de validación. Para cada candidato $\rho$, se genera la distribución ponderada en cada tiempo de validación mediante muestreo estratificado y se evalúa la calibración predictiva.
 
 \paragraph{Protocolo de Congelamiento Parcial}
-El método \texttt{freeze\_hyperparameters()} ejecuta:
+El método  ejecuta:
 \begin{enumerate}
     \item Congela $p^*$ (número de lags) heredado de la clase base LSPM.
     \item Identifica y almacena $\rho^*$ óptimo del proceso de validación.
-    \item Activa bandera \texttt{\_is\_frozen} para uso de hiperparámetros congelados.
+    \item Activa la bandera para uso de hiperparámetros congelados.
     \item \textit{No congela} valores críticos ni pesos, preservando adaptabilidad temporal.
 \end{enumerate}
 
@@ -889,16 +864,6 @@ Durante la fase de prueba rolling, el método \texttt{fit\_predict()}:
     \item Genera 1000 muestras mediante \texttt{np.random.choice} con probabilidades $\{\tilde{w}_i\}$.
 \end{enumerate}
 
-\paragraph{Parámetros Operacionales}
-\begin{itemize}
-    \item \texttt{n\_samples\_target}: Tamaño de la distribución sintética. Fijado en 1000 para resolución suficiente en cálculo de ECRPS.
-    \item \texttt{n\_lags} ($p$): Heredado de LSPM, determina orden autorregresivo. Congelado como $p = \lfloor n^{1/3} \rfloor$.
-    \item \texttt{random\_state}: Semilla para muestreo estocástico reproducible.
-    \item \texttt{verbose}: Control de mensajes diagnósticos.
-\end{itemize}
-
-\paragraph{Justificación del Diseño Adaptativo}
-El recálculo dinámico de residuos responde a la naturaleza del problema: bajo deriva continua, residuos históricos pierden relevancia predictiva progresivamente. Mientras que congelar $\rho^*$ captura la estructura óptima de decaimiento temporal identificada en validación, mantener los residuos actualizados asegura que la información más reciente sobre el proceso generador de datos se incorpore a cada predicción. Este balance entre estabilidad estructural (hiperparámetros fijos) y adaptabilidad táctica (residuos dinámicos) es la contribución clave de la implementación al marco teórico de \textcite{Barber2023}.
 
 \subsection{Mondrian Conformal Predictive System (MCPS)}
 \label{subsec:MCPS}
@@ -970,7 +935,7 @@ El MCPS es un modelo \textbf{no paramétrico}. No asume forma funcional específ
 
 \subsubsection{De la Teoría a la Práctica}
 
-La implementación del MCPS para series temporales autorregresivas representa una \textbf{contribución metodológica novedosa}, traduciendo el framework teórico—originalmente diseñado para datos independientes en logística \parencite{Ye2025}—hacia contextos con dependencias temporales.
+La implementación del MCPS para series temporales autorregresivas representa una contribución metodológica poco explorada, traduciendo el framework teórico (originalmente diseñado para datos independientes en logística \parencite{Ye2025}) hacia contextos con dependencias temporales.
 
 \paragraph{Adaptaciones Principales}
 
@@ -1007,7 +972,7 @@ Esta heurística, no especificada en \textcite{Bostrom2021}, previene intervalos
 
 \begin{table}[htbp]
 \centering
-\caption{Comparación entre MCPS Teórico y su Implementación para Series Temporales}
+\caption{Comparativa: Teoría vs. Implementación del MCPS}
 \label{tab:mcps_comparison}
 \small
 \begin{tabular}{>{\raggedright\arraybackslash}p{3cm}%
@@ -1031,22 +996,23 @@ Horizonte & Batch (predicciones simultáneas) & Secuencial (rolling forecast) \\
 
 \paragraph{Hiperparámetros Primarios}
 
-\textbf{n\_lags ($p$):} Define el orden del modelo autorregresivo. Controla cuánta memoria temporal incorpora el predictor.
-\begin{itemize}
-    \item \textit{Rango:} $\{5, 10, 15, 20\}$
-\end{itemize}
+Dado el costo computacional de la validación cruzada completa y las restricciones del conjunto de datos, se consideran únicamente dos configuraciones de hiperparámetros:
 
-\textbf{n\_bins ($B$):} Número de particiones Mondrian. Controla la adaptabilidad local versus varianza por tamaño de muestra.
-\begin{itemize}
-    \item \textit{Rango:} $\{5, 10, 15\}$ según \textcite{Bostrom2021}
-    \item \textit{Trade-off:} $B$ pequeño ($\leq 3$) degrada a SCPS; $B$ excesivo ($\geq 20$) fragmenta calibración
-    \item \textit{Tamaño esperado por bin:} $\mathbb{E}[N_c^{\kappa}] = N_c / B$
-\end{itemize}
+\begin{enumerate}
+    \item \textbf{Configuración conservadora:} $p = 10$ rezagos, $B = 8$ bins
+    \item \textbf{Configuración flexible:} $p = 15$ rezagos, $B = 15$ bins
+\end{enumerate}
+
+Estos hiperparámetros controlan aspectos fundamentales del modelo:
+
+\textbf{n\_lags ($p$):} Define el orden del modelo autorregresivo, determinando cuánta memoria temporal incorpora el predictor. La configuración conservadora utiliza $p=10$ mientras que la flexible extiende a $p=15$ para capturar dinámicas de más largo plazo.
+
+\textbf{n\_bins ($B$):} Número de particiones Mondrian que controla la adaptabilidad local del ajuste de conformidad. Según \textcite{Bostrom2021}, valores muy pequeños ($B \leq 3$) degeneran el método a SCPS (sin adaptación local), mientras que valores excesivos ($B \geq 20$) fragmentan la calibración por insuficiencia muestral. La configuración conservadora emplea $B=8$ bins (tamaño esperado por bin: $\mathbb{E}[N_c^{\kappa}] \approx N_c/8$), mientras que la flexible utiliza $B=15$ para mayor adaptabilidad espacial.
 
 
 \paragraph{Optimización de Hiperparámetros}
 
-\textbf{Estrategia de congelamiento:} El método definido entrena el modelo base XGBoost \textbf{una sola vez} sobre los datos de entrenamiento completos, calculando los artefactos necesarios:
+\textbf{Estrategia de congelamiento:} El método definido entrena el modelo base XGBoost una sola vez sobre los datos de entrenamiento completos, calculando los artefactos necesarios:
 
 \begin{itemize}
     \item Predicciones de calibración $\{h(x_j)\}_{j \in \mathcal{D}_c}$
@@ -1056,10 +1022,10 @@ Horizonte & Batch (predicciones simultáneas) & Secuencial (rolling forecast) \\
 
 Estos artefactos se reutilizan en todas las predicciones posteriores sin reentrenamiento, garantizando eficiencia computacional en rolling forecasts.
 
-\textbf{Métrica de optimización:} Los hiperparámetros $(p, B, \text{test\_size})$ se optimizan minimizando el \textbf{Expected Continuous Ranked Probability Score (ECRPS)} sobre un conjunto de validación:
+\textbf{Métrica de optimización:} Los hiperparámetros $(p, B)$ se optimizan minimizando el ECRPS sobre un conjunto de validación:
 
 \begin{equation}
-(p^*, B^*) = \arg\min_{(p,B,s)} \frac{1}{N_{\text{val}}} \sum_{i=1}^{N_{\text{val}}} \text{CRPS}(\mathcal{C}_i^{\kappa^*}, y_i)
+(p^*, B^*) = \arg\min_{(p,B)} \frac{1}{N_{\text{val}}} \sum_{i=1}^{N_{\text{val}}} \text{CRPS}(\mathcal{C}_i^{\kappa^*}, y_i)
 \end{equation}
 
 Esta optimización ocurre en la fase inicial; una vez congelados, los hiperparámetros permanecen fijos durante todo el horizonte de predicción.
@@ -1211,7 +1177,7 @@ Justificación: simplicidad computacional, robustez a shocks transitorios, e int
 \hat{\sigma}_t = \sqrt{\frac{1}{t-2} \sum_{k=1}^{t-1} (y_k - \bar{y}_{1:t-1})^2} \quad \text{para } t < w
 \end{equation}
 
-\textbf{(2) Binning Adaptativo Robusto:} Las series de volatilidad exhiben distribuciones asimétricas con colas pesadas. Se emplea \texttt{pd.qcut} con \texttt{duplicates='drop'}, fusionando automáticamente bins con fronteras colapsadas:
+\textbf{(2) Binning Adaptativo Robusto:} Las series de volatilidad exhiben distribuciones asimétricas con colas pesadas. Se fusionan automáticamente bins con fronteras colapsadas:
 
 \begin{equation}
 B_{\text{vol}}^{\text{efectivo}} = \left|\left\{q_{\text{vol}}^{\lambda} : \lambda = 1, \ldots, B_{\text{vol}}-1\right\}\right| \leq B_{\text{vol}}
@@ -1227,7 +1193,7 @@ Si el binning falla en alguna dimensión, el sistema degrada a MCPS unidimension
 
 Esta representación empírica permite cálculo eficiente de CRPS sin reconstruir CDF continua.
 
-\textbf{(4) Protocolo de Congelamiento Bidimensional:} El método \texttt{freeze\_hyperparameters()} fija simultáneamente:
+\textbf{(4) Protocolo de Congelamiento Bidimensional:} El método  fija simultáneamente:
 
 \begin{itemize}
 \item Parámetros del regressor XGBoost (entrenado una sola vez)
@@ -1240,7 +1206,7 @@ Durante evaluación rolling, para cada punto $t$ se extraen rezagos, se calcula 
 
 \begin{table}[htbp]
 \centering
-\caption{Comparación entre MCPS Estándar y AV-MCPS}
+\caption{Comparativa: MCPS vs. AV-MCPS}
 \label{tab:avmcps_vs_mcps}
 \small
 \begin{tabular}{>{\raggedright\arraybackslash}p{3.5cm}%
@@ -1283,9 +1249,7 @@ El AV-MCPS explota esta estructura mediante estratificación bidimensional, logr
 \textbf{n\_vol\_bins ($B_{\text{vol}}$):} Resolución en dimensión de volatilidad.
 
 
-\textbf{volatility\_window ($w$):} Longitud de ventana rolling para estimación de volatilidad.
 
-\textbf{test\_size:} Proporción del conjunto de calibración.
 
 
 \paragraph{Configuraciones Evaluadas}
@@ -1293,28 +1257,8 @@ El AV-MCPS explota esta estructura mediante estratificación bidimensional, logr
 El espacio de hiperparámetros se limita a dos configuraciones estratégicamente diseñadas:
 
 \textbf{Configuración Conservadora:} $(p=10, B_{\text{pred}}=8, B_{\text{vol}}=3)$
-\begin{itemize}
-    \item \textit{Filosofía:} Prioriza robustez y tamaño de muestra suficiente por celda
-    \item \textit{Número de celdas:} $8 \times 3 = 24$ particiones
-    \end{itemize}
 
 \textbf{Configuración Agresiva:} $(p=15, B_{\text{pred}}=10, B_{\text{vol}}=5)$
-\begin{itemize}
-    \item \textit{Filosofía:} Maximiza adaptabilidad local mediante particionamiento fino
-    \item \textit{Número de celdas:} $10 \times 5 = 50$ particiones
-\end{itemize}
-
-\paragraph{Justificación del Espacio de Búsqueda Restringido}
-
-A diferencia de MCPS y LSPM, el AV-MCPS no explora grillas exhaustivas. Esta decisión se fundamenta en:
-
-\begin{enumerate}
-    \item \textbf{Complejidad combinatoria:} Con 3 hiperparámetros interdependientes, una búsqueda exhaustiva sobre $\{10,15,20\} \times \{6,8,10\} \times \{3,4,5\}$ implicaría 27 evaluaciones por serie. Dado el costo computacional del rolling forecast conformal, esto resulta prohibitivo para el benchmark de 100 series
-    
-    \item \textbf{Trade-off fundamental:} Existe una tensión inherente entre $B_{\text{pred}} \times B_{\text{vol}}$ (que determina localización) y $N_c$ (fijo por serie). Las dos configuraciones representan los extremos del espectro viable: conservadora (celdas grandes, menor varianza) vs agresiva (celdas pequeñas, mayor adaptabilidad)
-    
-    \item \textbf{Evidencia empírica preliminar:} Experimentos piloto sobre un subconjunto de 10 series indicaron que configuraciones intermedias (e.g., $B_{\text{pred}}=8, B_{\text{vol}}=4$) rara vez superaban a los extremos, sugiriendo un comportamiento bimodal del desempeño
-\end{enumerate}
 
 \paragraph{Optimización de Hiperparámetros}
 
@@ -1324,7 +1268,7 @@ La selección entre ambas configuraciones se realiza minimizando \textbf{ECRPS} 
 (p^*, B_{\text{pred}}^*, B_{\text{vol}}^*) = \arg\min_{(p, B_p, B_v) \in \mathcal{H}} \frac{1}{N_{\text{val}}} \sum_{i=1}^{N_{\text{val}}} \text{CRPS}(\mathcal{C}_i^{(\kappa^*,\lambda^*)}, y_i)
 \end{equation}
 
-donde $\mathcal{H} = \{(10,8,3), (15,10,5)\}$ es el conjunto de configuraciones candidatas. Una vez optimizada, la configuración seleccionada se congela mediante \texttt{freeze\_hyperparameters()}, fijando simultáneamente el modelo base XGBoost, los bordes de bins bidimensionales, y los artefactos de calibración.
+donde $\mathcal{H} = \{(10,8,3), (15,10,5)\}$ es el conjunto de configuraciones candidatas. Una vez optimizada, la configuración seleccionada se congela fijando simultáneamente el modelo base XGBoost, los bordes de bins bidimensionales, y los artefactos de calibración.
 
 \paragraph{Parámetros del Modelo Base}
 
@@ -1453,7 +1397,7 @@ La Tabla \ref{tab:deepar_comparison} resume las diferencias metodológicas entre
 
 \begin{table}[htbp]
 \centering
-\caption{Comparación entre DeepAR Original y DeepAR Adaptado}
+\caption{Comparativa: Teoría vs. Implementación de DeepAR}
 \label{tab:deepar_comparison}
 \small
 \begin{tabular}{>{\raggedright\arraybackslash}p{3.5cm}%
@@ -1495,39 +1439,35 @@ La optimización de hiperparámetros explora dos configuraciones estratégicamen
 \textbf{Configuración Ligera:}
 \begin{itemize}
     \item \texttt{hidden\_size}=20, \texttt{n\_lags}=10, \texttt{num\_layers}=1, \texttt{epochs}=25, \texttt{lr}=0.01
-    \item \textit{Filosofía:} Arquitectura compacta que reduce riesgo de sobreajuste
-    \item \textit{Parámetros totales:} Aproximadamente 2,200 parámetros
 \end{itemize}
 
 \textbf{Configuración Profunda:}
 \begin{itemize}
     \item \texttt{hidden\_size}=32, \texttt{n\_lags}=15, \texttt{num\_layers}=2, \texttt{epochs}=30, \texttt{lr}=0.005
-    \item \textit{Filosofía:} Mayor capacidad representacional con regularización implícita vía learning rate reducido
-    \item \textit{Parámetros totales:} Aproximadamente 8,500 parámetros
 \end{itemize}
 
 \paragraph{Protocolo de Optimización}
 
-La selección entre ambas configuraciones se realiza minimizando \textbf{ECRPS (Expected Continuous Ranked Probability Score)} sobre un conjunto de calibración temporal de 40 observaciones posteriores al entrenamiento. Formalmente:
+La selección entre ambas configuraciones se realiza minimizando \textbf{ECRPS} sobre un conjunto de calibración temporal de 40 observaciones posteriores al entrenamiento. Formalmente:
 
 \begin{equation}
-(h^*, p^*, L^*) = \arg\min_{(h, p, L) \in \mathcal{H}} \frac{1}{N_{\text{cal}}} \sum_{i=1}^{N_{\text{cal}}} \text{CRPS}(\hat{F}_i, y_i)
+(h^*, \text{n}_\text{lags}^*, \text{n}_\text{layers}^*, \text{epochs}^*, \text{lr}^*) = \arg\min_{(h, \text{n}_\text{lags}, \text{n}_\text{layers}, \text{epochs}, \text{lr}) \in \mathcal{H}} \frac{1}{N_{\text{cal}}} \sum_{i=1}^{N_{\text{cal}}} \text{CRPS}(\hat{F}_i, y_i)
 \end{equation}
 
 donde $\mathcal{H}$ es el conjunto de configuraciones candidatas y $\hat{F}_i$ es la distribución predictiva empírica generada por muestreo ancestral.
 
 \paragraph{Congelamiento de Hiperparámetros}
 
-Una vez optimizada, la configuración seleccionada se congela mediante el método \texttt{freeze\_hyperparameters()}. Este método:
+Una vez optimizada, la configuración seleccionada se congela:
 
 \begin{enumerate}
     \item Estima los parámetros de normalización: $\mu_{\text{frozen}}, \sigma_{\text{frozen}}$
     \item Entrena la red LSTM hasta convergencia (early stopping)
     \item Almacena los pesos de la red: $\Theta_{\text{frozen}}$
-    \item Establece el flag \texttt{\_is\_frozen = True}
+    \item Establece el flag 
 \end{enumerate}
 
-Durante toda la evaluación rolling window posterior, el método \texttt{fit\_predict} verifica este flag: si es \texttt{True}, omite completamente el entrenamiento y procede directamente a generar predicciones con el modelo existente. Este protocolo garantiza que no haya fuga de información futura y que las métricas de desempeño reflejen la capacidad predictiva genuina del modelo.
+Durante toda la evaluación rolling window posterior, el método verifica este flag: si es \texttt{True}, omite completamente el entrenamiento y procede directamente a generar predicciones con el modelo existente. Este protocolo garantiza que no haya fuga de información futura y que las métricas de desempeño reflejen la capacidad predictiva genuina del modelo.
 
 
 \subsection{Autoregressive Exponentially-weighted Polynomial Distribution (AREPD)}
@@ -1614,7 +1554,7 @@ AREPD es un \textbf{modelo semi-paramétrico}. La componente paramétrica reside
 
 \begin{table}[htbp]
 \centering
-\caption{Comparación Conceptual de AREPD con Métodos Relacionados}
+\caption{Comparativa Conceptual:AREPD vs Modelos Relacionados}
 \label{tab:arepd_conceptual}
 \small
 \begin{tabular}{>{\raggedright\arraybackslash}p{3cm}%
@@ -1632,60 +1572,6 @@ DeepAR & No lineal (LSTM) & Uniforme & Muestreo ancestral \\
 \end{tabular}
 \end{table}
 
-\subsubsection{De la Teoría a la Práctica}
-
-La implementación de AREPD traduce el marco teórico en un sistema predictivo concreto mediante adaptaciones específicas para garantizar estabilidad numérica y validez estadística.
-
-\paragraph{Adaptaciones Principales}
-
-\textbf{(1) Normalización Z-Score Pre-Expansión:} La expansión polinomial es extremadamente sensible a la escala. Si una serie tiene valores en $[100, 200]$, los términos cuadráticos estarán en $[10^4, 4 \times 10^4]$ y los cúbicos en $[10^6, 8 \times 10^6]$, causando inestabilidad numérica. Se aplica normalización Z-score \textbf{antes} de la expansión:
-
-\begin{equation}
-\tilde{Y}_t = \frac{Y_t - \mu_{\text{train}}}{\sigma_{\text{train}} + \epsilon}
-\end{equation}
-
-donde $\epsilon = 10^{-8}$ previene división por cero. Esto garantiza que todos los términos estén aproximadamente en $[-3, 3]$ bajo normalidad. Las predicciones se des-normalizan:
-
-\begin{equation}
-Y_t^{\text{pred}} = \tilde{Y}_t^{\text{pred}} \cdot \sigma_{\text{train}} + \mu_{\text{train}}
-\end{equation}
-
-\textbf{(2) Uso de regresión Ridge:} En lugar de implementar manualmente la solución, se utiliza \texttt{Ridge} de scikit-learn con \texttt{sample\_weight}, proporcionando estabilidad numérica mediante SVD optimizado y manejo robusto de casos extremos. El argumento \texttt{fit\_intercept=False} es crucial porque el término constante ya está incluido como primera columna de $\mathbf{X}$.
-
-\textbf{(3) Protocolo de Congelamiento:} Siguiendo la filosofía unificada de todos los modelos, AREPD congela completamente:
-
-\begin{itemize}
-\item Parámetros de normalización: $\mu_{\text{frozen}}, \sigma_{\text{frozen}}$
-\item Coeficientes del modelo: $\hat{\boldsymbol{\beta}}_{\text{frozen}}$
-\item Distribución predictiva base (predicciones históricas)
-\end{itemize}
-
-Durante evaluación rolling, se normalizan los últimos $p$ valores usando parámetros congelados, se expande polinomialmente, se aplica $\hat{\boldsymbol{\beta}}_{\text{frozen}}$ sin re-estimación, y se retorna la distribución histórica des-normalizada. Este protocolo garantiza ausencia de data leakage.
-
-\textbf{(4) Manejo de Casos Degenerados:} Si $n < 2p$, el modelo degrada a predictor constante $\hat{Y}_{n+1} = \mu_{\text{frozen}}$. Si la matriz es numéricamente singular (número de condición $> 10^{12}$) después de regularización Ridge, se retorna el mismo fallback.
-
-\begin{table}[htbp]
-\centering
-\caption{Comparación entre AREPD Teórico y AREPD Implementado}
-\label{tab:arepd_comparison}
-\small
-\begin{tabular}{>{\raggedright\arraybackslash}p{3.5cm}%
-                >{\raggedright\arraybackslash}p{5cm}%
-                >{\raggedright\arraybackslash}p{5cm}}
-\toprule
-\textbf{Aspecto} & \textbf{AREPD Teórico} & \textbf{Implementación (Esta Tesis)} \\
-\midrule
-Normalización de datos & No especificada & Z-score completo pre-expansión \\
-Implementación Ridge & Solución matricial directa & scikit-learn Ridge con SVD \\
-Manejo de singularidad & Asume matriz bien condicionada & Fallback a predictor constante \\
-Protocolo de evaluación & Re-estimación en cada paso & Congelamiento total para rolling forecast \\
-Selección de $\lambda$ & Validación cruzada sugerida & Valor fijo ($\lambda=0.1$) \\
-Casos degenerados & No considerados & Predictor constante como fallback \\
-Garantías formales & Ninguna (método heurístico) & Sin garantías teóricas \\
-Framework & Matemático puro & NumPy + scikit-learn \\
-\bottomrule
-\end{tabular}
-\end{table}
 
 \subsubsection{Optimización, Parámetros e Hiperparámetros}
 
@@ -1720,27 +1606,21 @@ La optimización explora tres configuraciones estratégicamente diseñadas:
 \textbf{Configuración 1 - Estándar:}
 \begin{itemize}
 \item \texttt{n\_lags}=5, \texttt{rho}=0.95, \texttt{poly\_degree}=2
-\item \textit{Filosofía:} Balance entre complejidad y robustez
-\item \textit{Parámetros:} 11 (1 constante + 5 lineales + 5 cuadráticos)
 \end{itemize}
 
 \textbf{Configuración 2 - Memoria Corta:}
 \begin{itemize}
 \item \texttt{n\_lags}=10, \texttt{rho}=0.90, \texttt{poly\_degree}=2
-\item \textit{Filosofía:} Mayor orden autorregresivo con adaptación rápida
-\item \textit{Parámetros:} 21 (1 constante + 10 lineales + 10 cuadráticos)
 \end{itemize}
 
 \textbf{Configuración 3 - Alta No Linealidad:}
 \begin{itemize}
 \item \texttt{n\_lags}=5, \texttt{rho}=0.98, \texttt{poly\_degree}=3
-\item \textit{Filosofía:} Máxima expresividad no lineal con memoria larga
-\item \textit{Parámetros:} 16 (1 constante + 5 lineales + 5 cuadráticos + 5 cúbicos)
 \end{itemize}
 
 \paragraph{Protocolo de Optimización}
 
-La selección entre configuraciones minimiza \textbf{ECRPS (Expected Continuous Ranked Probability Score)} sobre el conjunto de calibración de 40 observaciones:
+La selección entre configuraciones minimiza \textbf{ECRPS} sobre el conjunto de calibración de 40 observaciones:
 
 \begin{equation}
 (p^*, \rho^*, d^*) = \arg\min_{(p, \rho, d) \in \mathcal{H}} \frac{1}{N_{\text{cal}}} \sum_{i=1}^{N_{\text{cal}}} \text{CRPS}(\hat{F}_i, y_i)
@@ -1750,7 +1630,7 @@ donde $\mathcal{H} = \{(5,0.95,2), (10,0.90,2), (5,0.98,3)\}$ es el conjunto de 
 
 \paragraph{Congelamiento de Hiperparámetros}
 
-Una vez optimizada, la configuración se congela mediante \texttt{freeze\_hyperparameters()}:
+Una vez optimizada, la configuración se congela mediante :
 
 \begin{enumerate}
 \item Estima $\mu_{\text{frozen}}, \sigma_{\text{frozen}}$ sobre datos de entrenamiento
@@ -1871,7 +1751,7 @@ La implementación de EnCQR-LSTM para esta investigación introduce adaptaciones
 
 \begin{table}[htbp]
 \centering
-\caption{Comparación entre teoría y práctica en EnCQR-LSTM}
+\caption{Comparativa: Teoría vs. Implementación de EnCQR-LSTM}
 \label{tab:encqr_theory_vs_practice}
 \small
 \begin{tabular}{>{\raggedright\arraybackslash}p{4cm}%
@@ -1917,16 +1797,10 @@ Complejidad computacional & Alta (múltiples entrenamientos + updates) & Reducid
 Dada la alta complejidad computacional de entrenar ensambles de LSTMs, el espacio de hiperparámetros se limita estratégicamente a dos configuraciones:
 
 \textbf{Configuración 1 (Conservadora):} $(N_x=10, N_u=24, \text{epochs}=20)$
-\begin{itemize}
-\item \textit{Filosofía:} Prioriza eficiencia computacional y convergencia rápida
-\item \textit{Tiempo de entrenamiento:} Bajo ($\sim$10-15 min por ensamble completo)
-\end{itemize}
+
 
 \textbf{Configuración 2 (Estándar):} $(N_x=20, N_u=32, \text{epochs}=25)$
-\begin{itemize}
-\item \textit{Filosofía:} Balance entre expresividad y recursos computacionales
-\item \textit{Tiempo de entrenamiento:} Medio ($\sim$20-30 min por ensamble completo)
-\end{itemize}
+
 
 \paragraph{Optimización y Congelamiento}
 
@@ -1938,7 +1812,7 @@ La selección entre ambas configuraciones se realiza minimizando \textbf{ECRPS} 
 
 donde $\mathcal{H} = \{(10, 24, 20), (20, 32, 25)\}$ y $\mathcal{F}_i$ es la distribución predictiva para la observación $i$.
 
-Una vez optimizada la configuración, se ejecuta el protocolo de congelamiento completo mediante \texttt{freeze\_hyperparameters()}, que fija permanentemente:
+Una vez optimizada la configuración, se ejecuta el protocolo de congelamiento completo mediante , que fija permanentemente:
 
 \begin{itemize}
 \item Los pesos $\{\theta_b\}_{b=1}^{B}$ de los $B$ modelos LSTM
@@ -1974,7 +1848,7 @@ Esta estrategia de optimización restringida permite evaluar el potencial de EnC
 \section{Simulaciones Complementarias}
 \label{sec:simulaciones_complementarias}
 
-Además del diseño factorial principal descrito en la Sección~\ref{sec:diseño_experimental}, se implementaron cinco conjuntos de simulaciones complementarias diseñadas para resolver dilemas metodológicos específicos sobre el preprocesamiento, la persistencia de los datos, la arquitectura de la muestra y la propagación de la incertidumbre en horizontes lejanos. Estas simulaciones abordan preguntas fundamentales que no pueden responderse mediante el diseño principal debido a su estructura particular de ventana rodante a un paso.
+Además del diseño principal descrito en la Sección~\ref{sec:diseño_experimental}, se implementaron cinco conjuntos de simulaciones complementarias diseñadas para resolver dilemas metodológicos específicos sobre el preprocesamiento, la persistencia de los datos, la arquitectura de la muestra y la propagación de la incertidumbre en horizontes lejanos. Estas simulaciones abordan preguntas fundamentales que no pueden responderse mediante el diseño principal debido a su estructura particular de ventana rodante a un paso.
 
 % ----------------------------------------------------------------------------
 \subsection{Simulación 1: Impacto de la Diferenciación en ARIMA ($d=1$)}
@@ -2034,7 +1908,7 @@ A partir de las 7 configuraciones ARMA$(p,q)$ base, se genera el proceso ARIMA$(
 Y_t = \sum_{j=0}^{d-1} \nabla^j W_t, \quad \text{donde } W_t \sim \text{ARMA}(p,q)
 \end{equation}
 
-Con la estructura factorial completa:
+Con la estructura completa:
 \begin{equation}
 N_{\text{config}} = 7 \text{ ARMA} \times 8 \text{ valores de } d \times 5 \text{ distribuciones} \times 4 \text{ varianzas} = 1{,}120 \text{ configuraciones}
 \end{equation}
@@ -2080,7 +1954,7 @@ N=1200 & 996 & 204 & 1{,}200 & 83:17 \\
 
 Esta estructura permite evaluar el efecto del incremento simultáneo de datos de entrenamiento y calibración, manteniendo constante su proporción relativa. Esto aísla el efecto puro del tamaño muestral total sobre la calidad de las distribuciones predictivas.
 
-La estructura factorial completa genera:
+La estructura completa genera:
 \begin{equation}
 \begin{split}
 N_{\text{config}} = & \ 3 \text{ tipos} \times 7 \text{ configs} \times 5 \text{ tamaños} \\
@@ -2123,7 +1997,7 @@ Se fija un presupuesto total de $n_{\text{total}} = 240$ observaciones y se eval
 \end{tabular}
 \end{table}
 
-La estructura factorial completa es:
+La estructura completa es:
 \begin{equation}
 \begin{split}
 N_{\text{config}} = & \ 3 \text{ tipos} \times 7 \text{ configs} \times 5 \text{ proporciones} \\
@@ -2143,7 +2017,7 @@ N_{\text{filas}} = 2{,}100 \times 12 = 25{,}200 \text{ evaluaciones}
 
 \subsubsection{Motivación}
 
-El diseño factorial principal evalúa la predicción a un paso adelante mediante un esquema de ventana rodante, donde el modelo se actualiza con cada nueva observación antes de realizar la siguiente predicción. Sin embargo, muchas aplicaciones prácticas requieren pronósticos para múltiples períodos futuros sin acceso a observaciones intermedias \parencite{Hyndman2021FPP3}. Esta simulación evalúa cómo se degrada la calidad de la distribución predictiva cuando el modelo debe proyectar $h$ pasos hacia adelante de forma recursiva, alimentándose exclusivamente de sus propias predicciones anteriores.
+El diseño principal evalúa la predicción a un paso adelante mediante un esquema de ventana rodante, donde el modelo se actualiza con cada nueva observación antes de realizar la siguiente predicción. Sin embargo, muchas aplicaciones prácticas requieren pronósticos para múltiples períodos futuros sin acceso a observaciones intermedias \parencite{Hyndman2021FPP3}. Esta simulación evalúa cómo se degrada la calidad de la distribución predictiva cuando el modelo debe proyectar $h$ pasos hacia adelante de forma recursiva, alimentándose exclusivamente de sus propias predicciones anteriores.
 
 \subsubsection{Fundamento Metodológico: Predicción Recursiva}
 
@@ -2187,7 +2061,7 @@ Se evalúan únicamente 4 modelos representativos (LSPM, DeepAR, Sieve Bootstrap
 \item \textbf{MCPS:} Método conformal contemporáneo que particiona el espacio de calibración
 \end{itemize}
 
-Para cada tipo de proceso (ARMA, ARIMA, SETAR), la estructura factorial es:
+Para cada tipo de proceso (ARMA, ARIMA, SETAR), la estructura es:
 \begin{equation}
 N_{\text{config}} = 7 \text{ configs} \times 5 \text{ distribuciones} \times 4 \text{ varianzas} = 140 \text{ configuraciones}
 \end{equation}
@@ -2220,7 +2094,7 @@ Esta simulación es particularmente relevante para aplicaciones donde las decisi
 \subsection{Resumen de Evaluaciones Complementarias}
 \label{subsec:resumen_complementarias}
 
-La Tabla~\ref{tab:resumen_complementarias} consolida el alcance total de estos experimentos. El volumen combinado de estas simulaciones complementarias es comparable al del diseño factorial principal, reflejando la importancia de estos aspectos metodológicos para una evaluación comprehensiva.
+La Tabla~\ref{tab:resumen_complementarias} consolida el alcance total de estos experimentos. El volumen combinado de estas simulaciones complementarias es comparable al del diseño principal, reflejando la importancia de estos aspectos metodológicos para una evaluación comprehensiva.
 
 \begin{table}[htbp]
 \centering
@@ -2267,7 +2141,7 @@ Todas las simulaciones complementarias mantienen consistencia metodológica con 
 
 \item \textbf{Modelos evaluados:} Los 9 métodos conformales especificados en la Sección~\ref{sec:modelos_predictivos} (Block Bootstrapping, Sieve Bootstrap, LSPM, LSPMW, AREPD, MCPS, AV-MCPS, DeepAR, EnCQR-LSTM), excepto en la Simulación 5 donde por razones de eficiencia computacional se evalúan únicamente 4 modelos representativos (LSPM, DeepAR, Sieve Bootstrap, MCPS).
 
-\item \textbf{Calibración y ajuste de hiperparámetros:} Cada modelo se optimiza siguiendo un procedimiento de dos etapas. Primero, los hiperparámetros del modelo base se seleccionan mediante validación cruzada temporal en el conjunto de entrenamiento, minimizando el ECRPS en una ventana de validación. Segundo, los parámetros conformales (como el nivel de cobertura o los pesos de calibración) se ajustan usando el conjunto de calibración dedicado. Este procedimiento se describe en detalle en la Sección~\ref{sec:optimizacion_hiperparametros}.
+\item \textbf{Calibración y ajuste de hiperparámetros:} Cada modelo se optimiza siguiendo un procedimiento de dos etapas. Primero, los hiperparámetros del modelo base se seleccionan mediante validación cruzada temporal en el conjunto de entrenamiento, minimizando el ECRPS en una ventana de validación. Segundo, los parámetros conformales (como el nivel de cobertura o los pesos de calibración) se ajustan usando el conjunto de calibración dedicado. 
 
 \item \textbf{Control de reproducibilidad:} Semillas aleatorias fijas y documentadas para cada escenario, con incrementos determinísticos según el índice del escenario ($\text{seed} = \text{seed}_{\text{base}} + \text{id}_{\text{escenario}}$), permitiendo la replicación exacta de todos los experimentos.
 
@@ -2277,7 +2151,7 @@ Todas las simulaciones complementarias mantienen consistencia metodológica con 
     \item \textit{Proyección desde origen fijo} (Simulación 5): El modelo se ajusta una sola vez en $t$ y proyecta recursivamente los horizontes $h \in \{1, 2, \ldots, 12\}$ sin actualización intermedia, propagando la incertidumbre a través de predicciones iteradas.
 \end{itemize}
 
-\item \textbf{Estructura factorial completa:} Todas las simulaciones evalúan las 21 configuraciones de procesos (7 ARMA + 7 ARIMA + 7 SETAR) cruzadas con 5 distribuciones de ruido (normal, uniforme, exponencial, t-student, mezcla) y 4 niveles de varianza (0.2, 0.5, 1.0, 3.0), garantizando cobertura exhaustiva del espacio paramétrico.
+\item \textbf{Estructura completa:} Todas las simulaciones evalúan las 21 configuraciones de procesos (7 ARMA + 7 ARIMA + 7 SETAR) cruzadas con 5 distribuciones de ruido (normal, uniforme, exponencial, t-student, mezcla) y 4 niveles de varianza (0.2, 0.5, 1.0, 3.0), garantizando cobertura exhaustiva del espacio paramétrico.
 \end{itemize}
 
 La uniformidad en estos aspectos fundamentales garantiza que las diferencias observadas en el desempeño sean atribuibles exclusivamente a los factores experimentales bajo estudio (modalidad de diferenciación, orden de integración, tamaño muestral, proporción de calibración, u horizonte de predicción) y no a variaciones en el protocolo de evaluación.

@@ -416,6 +416,58 @@
       \field{pages}{211\bibrangedash 252}
       \range{pages}{42}
     \endentry
+    \entry{Box2015}{book}{}{}
+      \name{author}{4}{ul=2}{%
+        {{un=0,uniquepart=base,hash=d30289ba50f0f7219fb405bc35b8b71c}{%
+           family={Box},
+           familyi={B\bibinitperiod},
+           given={George\bibnamedelimb E.\bibnamedelimi P.},
+           giveni={G\bibinitperiod\bibinitdelim E\bibinitperiod\bibinitdelim P\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=47888ee6b97a184c6a17093aeb509b29}{%
+           family={Jenkins},
+           familyi={J\bibinitperiod},
+           given={Gwilym\bibnamedelima M.},
+           giveni={G\bibinitperiod\bibinitdelim M\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=64798b045379893d750ad3f089861bad}{%
+           family={Reinsel},
+           familyi={R\bibinitperiod},
+           given={Gregory\bibnamedelima C.},
+           giveni={G\bibinitperiod\bibinitdelim C\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=916fd57423e9b7ed0d3ba70c92287892}{%
+           family={Ljung},
+           familyi={L\bibinitperiod},
+           given={Greta\bibnamedelima M.},
+           giveni={G\bibinitperiod\bibinitdelim M\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{location}{1}{%
+        {Hoboken, NJ}%
+      }
+      \list{publisher}{1}{%
+        {John Wiley \& Sons}%
+      }
+      \strng{namehash}{a0d0d6c2fe38b8d3044390964b07b8ca}
+      \strng{fullhash}{73d0cc2792e602f1e990aa353e1752fd}
+      \strng{fullhashraw}{73d0cc2792e602f1e990aa353e1752fd}
+      \strng{bibnamehash}{a0d0d6c2fe38b8d3044390964b07b8ca}
+      \strng{authorbibnamehash}{a0d0d6c2fe38b8d3044390964b07b8ca}
+      \strng{authornamehash}{a0d0d6c2fe38b8d3044390964b07b8ca}
+      \strng{authorfullhash}{73d0cc2792e602f1e990aa353e1752fd}
+      \strng{authorfullhashraw}{73d0cc2792e602f1e990aa353e1752fd}
+      \field{sortinit}{B}
+      \field{sortinithash}{d7095fff47cda75ca2589920aae98399}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{edition}{5}
+      \field{isbn}{978-1-118-67502-1}
+      \field{title}{Time Series Analysis: Forecasting and Control}
+      \field{year}{2015}
+    \endentry
     \entry{BDS1996}{article}{}{}
       \name{author}{4}{}{%
         {{un=0,uniquepart=base,hash=6f5d40c431b42a410b15757c401dc63e}{%
@@ -735,46 +787,6 @@
       \range{pages}{11}
       \verb{doi}
       \verb 10.1080/07350015.1995.10524599
-      \endverb
-    \endentry
-    \entry{GiacominiWhite2006}{article}{}{}
-      \name{author}{2}{}{%
-        {{un=0,uniquepart=base,hash=28ae0007b614e429c7a8c8a85cea0425}{%
-           family={Giacomini},
-           familyi={G\bibinitperiod},
-           given={Raffaella},
-           giveni={R\bibinitperiod},
-           givenun=0}}%
-        {{un=0,uniquepart=base,hash=426e452a5ec8e692f7740ce0d3e3655c}{%
-           family={White},
-           familyi={W\bibinitperiod},
-           given={Halbert},
-           giveni={H\bibinitperiod},
-           givenun=0}}%
-      }
-      \strng{namehash}{448d0811c98157c469c1203c2f0bdfea}
-      \strng{fullhash}{448d0811c98157c469c1203c2f0bdfea}
-      \strng{fullhashraw}{448d0811c98157c469c1203c2f0bdfea}
-      \strng{bibnamehash}{448d0811c98157c469c1203c2f0bdfea}
-      \strng{authorbibnamehash}{448d0811c98157c469c1203c2f0bdfea}
-      \strng{authornamehash}{448d0811c98157c469c1203c2f0bdfea}
-      \strng{authorfullhash}{448d0811c98157c469c1203c2f0bdfea}
-      \strng{authorfullhashraw}{448d0811c98157c469c1203c2f0bdfea}
-      \field{sortinit}{G}
-      \field{sortinithash}{32d67eca0634bf53703493fb1090a2e8}
-      \field{extradatescope}{labelyear}
-      \field{labeldatesource}{}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{journaltitle}{Econometrica}
-      \field{number}{6}
-      \field{title}{Tests of Conditional Predictive Ability}
-      \field{volume}{74}
-      \field{year}{2006}
-      \field{pages}{1545\bibrangedash 1578}
-      \range{pages}{34}
-      \verb{doi}
-      \verb 10.1111/j.1468-0262.2006.00718.x
       \endverb
     \endentry
     \entry{GneitingBalabdaoui2007}{article}{}{}
@@ -1184,6 +1196,46 @@
       \endverb
       \verb{url}
       \verb https://arxiv.org/abs/2202.08756
+      \endverb
+    \endentry
+    \entry{kiefer2005}{article}{}{}
+      \name{author}{2}{}{%
+        {{un=0,uniquepart=base,hash=9db230a71f617bc705c2e6c1dd3fc78b}{%
+           family={Kiefer},
+           familyi={K\bibinitperiod},
+           given={Nicholas\bibnamedelima M.},
+           giveni={N\bibinitperiod\bibinitdelim M\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=1d9abe5b2a70a78f3212b55ed3ad6971}{%
+           family={Vogelsang},
+           familyi={V\bibinitperiod},
+           given={Timothy\bibnamedelima J.},
+           giveni={T\bibinitperiod\bibinitdelim J\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{2866ba2cb85875d8e28633613a1deabd}
+      \strng{fullhash}{2866ba2cb85875d8e28633613a1deabd}
+      \strng{fullhashraw}{2866ba2cb85875d8e28633613a1deabd}
+      \strng{bibnamehash}{2866ba2cb85875d8e28633613a1deabd}
+      \strng{authorbibnamehash}{2866ba2cb85875d8e28633613a1deabd}
+      \strng{authornamehash}{2866ba2cb85875d8e28633613a1deabd}
+      \strng{authorfullhash}{2866ba2cb85875d8e28633613a1deabd}
+      \strng{authorfullhashraw}{2866ba2cb85875d8e28633613a1deabd}
+      \field{sortinit}{K}
+      \field{sortinithash}{c02bf6bff1c488450c352b40f5d853ab}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Econometric Theory}
+      \field{number}{6}
+      \field{title}{A new asymptotic theory for heteroskedasticity-autocorrelation robust tests}
+      \field{volume}{21}
+      \field{year}{2005}
+      \field{pages}{1130\bibrangedash 1164}
+      \range{pages}{35}
+      \verb{doi}
+      \verb 10.1017/S0266466605050565
       \endverb
     \endentry
     \entry{Kingma2015}{article}{}{}
@@ -1918,40 +1970,6 @@
       \verb 10.1109/TAU.1967.1161901
       \endverb
     \endentry
-    \entry{West1996}{article}{}{}
-      \name{author}{1}{}{%
-        {{un=0,uniquepart=base,hash=c9458dd7fe490cece576ba5c37b500fb}{%
-           family={West},
-           familyi={W\bibinitperiod},
-           given={Kenneth\bibnamedelima D.},
-           giveni={K\bibinitperiod\bibinitdelim D\bibinitperiod},
-           givenun=0}}%
-      }
-      \strng{namehash}{c9458dd7fe490cece576ba5c37b500fb}
-      \strng{fullhash}{c9458dd7fe490cece576ba5c37b500fb}
-      \strng{fullhashraw}{c9458dd7fe490cece576ba5c37b500fb}
-      \strng{bibnamehash}{c9458dd7fe490cece576ba5c37b500fb}
-      \strng{authorbibnamehash}{c9458dd7fe490cece576ba5c37b500fb}
-      \strng{authornamehash}{c9458dd7fe490cece576ba5c37b500fb}
-      \strng{authorfullhash}{c9458dd7fe490cece576ba5c37b500fb}
-      \strng{authorfullhashraw}{c9458dd7fe490cece576ba5c37b500fb}
-      \field{sortinit}{W}
-      \field{sortinithash}{4315d78024d0cea9b57a0c6f0e35ed0d}
-      \field{extradatescope}{labelyear}
-      \field{labeldatesource}{}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{journaltitle}{Econometrica}
-      \field{number}{5}
-      \field{title}{Asymptotic Inference about Predictive Ability}
-      \field{volume}{64}
-      \field{year}{1996}
-      \field{pages}{1067\bibrangedash 1084}
-      \range{pages}{18}
-      \verb{doi}
-      \verb 10.2307/2171956
-      \endverb
-    \endentry
     \entry{Ye2025}{article}{}{}
       \name{author}{3}{}{%
         {{un=0,uniquepart=base,hash=dc8d0e21f5c45d58a9e1a18a11f0e3ee}{%
@@ -2027,7 +2045,6 @@
       \range{pages}{23}
     \endentry
   \enddatalist
-  \missing{Box2015}
 \endrefsection
 \endinput
 

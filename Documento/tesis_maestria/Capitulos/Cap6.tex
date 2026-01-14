@@ -1,0 +1,52 @@
+\chapter{Conclusiones}
+\label{cap:conclusiones}
+
+En este capítulo se sintetizan los hallazgos fundamentales derivados de la evaluación de los Sistemas de Predicción Conformal (CPS) y métodos de remuestreo aplicados a series de tiempo. Se discuten las implicaciones de los resultados obtenidos tanto en escenarios controlados como en aplicaciones reales, se exponen las limitaciones del estudio y se proponen rutas de investigación para el desarrollo futuro del área.
+
+\section{Conclusiones del Estudio}
+
+A partir de la evidencia empírica recolectada a través de las simulaciones y las aplicaciones a datos reales, se presentan las siguientes conclusiones:
+
+\begin{itemize}
+    \item \textbf{Inexistencia de un modelo universalmente superior:} El hallazgo central de esta investigación es la confirmación de que no existe un único método de pronóstico probabilístico que domine todos los escenarios. La efectividad de la Predicción Conformal (CP) y el \textit{Bootstrapping} depende críticamente de la alineación entre las capacidades del modelo y las propiedades estructurales de la serie (estacionariedad, linealidad y memoria).
+    
+    \item \textbf{Robustez excepcional del Sieve Bootstrap:} A través de todas las dimensiones evaluadas, el \textit{Sieve Bootstrap} emergió como el método más robusto y consistente. Su capacidad para adaptar automáticamente la complejidad del modelo mediante el filtrado autorregresivo le permitió manejar la no estacionariedad y la memoria larga sin necesidad de preprocesamiento manual, superando incluso a arquitecturas de aprendizaje profundo en regímenes de datos moderados.
+    
+    \item \textbf{Rol crítico de la diferenciación en procesos integrados:} Las simulaciones demostraron que, para la mayoría de los métodos conformales (LSPM, MCPS), la diferenciación es una condición \textit{sine qua non} para evitar el colapso del desempeño en procesos ARIMA. Omitir este paso degrada la precisión hasta en un 90\%, invalidando las garantías de cobertura en presencia de tendencias estocásticas.
+    
+    \item \textbf{Ventajas de la adaptatividad en heterocedasticidad:} Los modelos desarrollados en esta tesis, específicamente el \textbf{AV-MCPS} y el \textbf{LSPMW}, demostraron una superioridad clara en series con volatilidad cambiante (como el tráfico vehicular y tipos de cambio). La incorporación de la volatilidad local como dimensión de particionamiento en el enfoque de Mondrian permite generar intervalos más nítidos y mejor calibrados que los métodos conformales estándar.
+    
+    \item \textbf{Escalabilidad del Aprendizaje Profundo:} Los resultados de \textit{DeepAR} y \textit{EnCQR-LSTM} indican que estas arquitecturas requieren una escala de datos superior a la disponible en este estudio (1,800 observaciones) para superar a los modelos parsimoniosos. No obstante, su mejora relativa al transitar hacia series más complejas sugiere un potencial significativo en contextos de \textit{Big Data} y pronóstico multivariado.
+    
+    \item \textbf{Validación del Protocolo Exploratorio:} Se demostró que un análisis exploratorio exhaustivo (Tests de Tsay, McLeod-Li y Exponente de Hurst) posee un alto poder predictivo sobre el éxito de las familias de modelos. La linealidad en media y la persistencia de la memoria son los mejores predictores para seleccionar entre métodos conformales lineales o adaptativos.
+\end{itemize}
+
+\section{Limitaciones del Estudio}
+
+A pesar del rigor metodológico, se identifican las siguientes limitaciones que delimitan el alcance de los resultados:
+
+\begin{enumerate}
+    \item \textbf{Horizonte de predicción:} La mayor parte del estudio se centró en el pronóstico a un paso adelante ($h=1$). Aunque la simulación de predicción multi-paso reveló patrones de degradación importantes, el comportamiento de las garantías conformales en horizontes muy largos requiere una formalización teórica más profunda.
+    
+    \item \textbf{Restricción Univariada:} El análisis se limitó a series temporales univariadas. Métodos diseñados para explotar información cruzada entre series relacionadas no pudieron desplegar su máxima capacidad representacional.
+    
+    \item \textbf{Tamaño de Muestra Finito:} Con un presupuesto de datos de aproximadamente 2,000 observaciones, el estudio favoreció intrínsecamente a modelos con pocos parámetros. Las conclusiones sobre el desempeño de modelos de redes neuronales podrían variar en regímenes de datos masivos.
+    
+    \item \textbf{Ausencia de quiebres estructurales abruptos:} Los conjuntos de datos reales analizados no presentaron cambios de régimen instantáneos (saltos en el nivel o varianza por eventos exógenos), lo que limitó la evaluación de la velocidad de recuperación de los métodos conformales adaptativos ante choques sistémicos.
+\end{enumerate}
+
+\section{Investigación Futura}
+
+Como extensiones naturales de este trabajo, se proponen las siguientes líneas de investigación:
+
+\begin{itemize}
+    \item \textbf{Extensión a Pronóstico Multivariado:} Desarrollar transductores conformales que incorporen dependencias cruzadas y permitan la construcción de regiones de predicción conjuntas (elipsoides de confianza) para múltiples series relacionadas.
+    
+    \item \textbf{Optimización Bayesiana de Hiperparámetros:} Sustituir la búsqueda en grilla por métodos de optimización basados en procesos gaussianos para explorar de manera más eficiente los espacios de alta dimensión en modelos como el AV-MCPS y EnCQR-LSTM.
+    
+    \item \textbf{Modelos Híbridos Dinámicos:} Investigar ensambles ponderados que combinen la robustez del \textit{Sieve Bootstrap} en la estimación de la media con la precisión del AV-MCPS en la cuantificación de los residuos, adaptando los pesos según el régimen de volatilidad detectado.
+    
+    \item \textbf{Teoría de Consistencia Universal en Series No Estacionarias:} Avanzar en la demostración formal de la consistencia de Vovk para procesos ergódicos bajo condiciones de mezcla fuerte ($\alpha$-mixing), extendiendo el marco teórico de este trabajo hacia una base matemática más general para series de tiempo complejas.
+\end{itemize}
+
+Finalizando, este trabajo reafirma que la Predicción Conformal no es solo una alternativa a los métodos estadísticos tradicionales, sino un marco de trabajo esencial que proporciona la seguridad estadística necesaria para la toma de decisiones bajo incertidumbre en el dinámico dominio de las series temporales.

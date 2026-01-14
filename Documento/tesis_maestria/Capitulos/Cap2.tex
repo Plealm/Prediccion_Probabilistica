@@ -32,18 +32,7 @@ La Figura~\ref{fig:tipos_prediccion} ilustra la diferencia entre una predicción
 
 \subsection{Ventajas del Pronóstico Probabilístico}
 
-El pronóstico probabilístico ofrece múltiples ventajas sobre las predicciones puntuales tradicionales que justifican su adopción creciente en diversas aplicaciones \parencite{Gneiting2014}:
-
-\begin{enumerate}
-\item \textbf{Cuantificación Completa de Incertidumbre:} A diferencia de las predicciones puntuales, que proporcionan únicamente un valor esperado, el pronóstico probabilístico caracteriza la incertidumbre de manera exhaustiva mediante distribuciones de probabilidad. Esto permite a los tomadores de decisiones evaluar tanto la magnitud esperada de un evento como la variabilidad asociada, facilitando una comprensión más profunda de los riesgos y oportunidades \parencite{GneitingRaftery2007}.
-
-\item \textbf{Soporte para Decisiones Óptimas:} En contextos donde las decisiones deben tomarse bajo incertidumbre, como la gestión de inventarios, la planificación de recursos energéticos, o la asignación de capital, las distribuciones predictivas completas son esenciales. Permiten la optimización de funciones de utilidad esperada y la implementación de estrategias que consideren explícitamente el trade-off entre riesgo y recompensa \parencite{Gneiting2014}.
-
-\item \textbf{Evaluación de Eventos Extremos:} Las predicciones puntuales son inherentemente limitadas para caracterizar eventos raros o de cola. El pronóstico probabilístico, en cambio, permite estimar probabilidades de ocurrencia de eventos extremos, información crucial para la gestión de riesgos financieros y la planificación de infraestructura \parencite{Thorarinsdottir2017}.
-
-\item \textbf{Flexibilidad en la Comunicación de Incertidumbre:} Las distribuciones predictivas permiten múltiples formas de comunicación adaptadas a diferentes audiencias: intervalos de predicción, probabilidades de excedencia de umbrales críticos o visualizaciones completas mediante fan charts \parencite{Gneiting2014}.
-
-\end{enumerate}
+El pronóstico probabilístico ofrece múltiples ventajas sobre las predicciones puntuales tradicionales que justifican su adopción creciente en diversas aplicaciones \parencite{Gneiting2014}. A diferencia de las predicciones puntuales que proporcionan únicamente un valor esperado, el pronóstico probabilístico caracteriza la incertidumbre de manera exhaustiva mediante distribuciones de probabilidad completas \parencite{GneitingRaftery2007}. Esto permite a los tomadores de decisiones evaluar tanto la magnitud esperada de un evento como su variabilidad asociada, facilitando la optimización de funciones de utilidad esperada en contextos como gestión de inventarios, planificación energética o asignación de capital, donde las decisiones deben considerar explícitamente el trade-off entre riesgo y recompensa. Además, mientras las predicciones puntuales son inherentemente limitadas para caracterizar eventos raros, las distribuciones predictivas permiten estimar probabilidades de eventos extremos, información crucial para la gestión de riesgos financieros y planificación de infraestructura \parencite{Thorarinsdottir2017}. Finalmente, las distribuciones predictivas ofrecen flexibilidad comunicativa adaptable a diferentes audiencias mediante intervalos de predicción, probabilidades de excedencia de umbrales críticos o visualizaciones completas como fan charts \parencite{Gneiting2014}.
 
 Estas ventajas han motivado la transición hacia pronósticos probabilísticos en campos tan diversos como meteorología, finanzas, energía, epidemiología y gestión de cadenas de suministro \parencite{Gneiting2014, Salinas2020}.
 
@@ -111,20 +100,23 @@ El CRPS posee varias propiedades deseables que explican su amplia adopción en l
 
 \subsection{Expected Continuous Ranked Probability Score (ECRPS)}
 \label{subsec:ecrps}
+El \textit{Expected Continuous Ranked Probability Score} (ECRPS) es una métrica diseñada para cuantificar la discrepancia entre dos distribuciones probabilísticas: una distribución predictiva $F$ generada por un modelo y una distribución verdadera (o teórica) $G$. 
 
-El desempeño predictivo global de una secuencia de $n$ pares pronóstico-observación se cuantifica mediante el \textit{Expected Continuous Ranked Probability Score} (ECRPS), definido como la media aritmética de los CRPS individuales:
+El desempeño predictivo global entre $F$ y $G$ se cuantifica tomando $n$ observaciones de ambas distribuciones, sea $x_i$ una observación de $F$ y $y_i$ una observación de $G$, con esta base se puede definir el ECRPS como:
 
 \begin{equation}
-\text{ECRPS} = \frac{1}{n}\sum_{i=1}^n \text{CRPS}(F_i, y_i)
+\text{ECRPS}(F, G) = \frac{1}{n}\sum_{i=1}^n \text{CRPS}(\vec{x}, y_i) = \frac{1}{n}\sum_{i=1}^n \text{CRPS}(x_i, \vec{y})
 \label{eq:ecrps}
 \end{equation}
 
-El ECRPS hereda todas las propiedades deseables del CRPS y proporciona un resumen numérico único del desempeño predictivo sobre todo el conjunto de evaluación. En particular, la comparación mediante ECRPS permite establecer comparaciones robustas entre diferentes métodos de pronóstico probabilístico.
+\noindent donde $\vec{x} = \{x_1, x_2, \ldots, x_n\}$ y $\vec{y} = \{y_1, y_2, \ldots, y_n\}$ son los conjuntos de observaciones de las distribuciones $F$ y $G$, respectivamente.
+
+El ECRPS hereda todas las propiedades deseables del CRPS, incluyendo su sensibilidad tanto a sesgos sistemáticos como a la calibración probabilística  y proporciona un resumen numérico único del desempeño predictivo sobre todo el conjunto de evaluación. En particular, la metrica ECRPS permite establecer comparaciones entre diferentes métodos de pronóstico probabilístico.
 
 \section{Test de Diebold-Mariano para Comparación de Precisión Predictiva}
 \label{sec:test_diebold_mariano}
 
-La evaluación comparativa de distintas metodologías de pronóstico requiere herramientas estadísticas rigurosas que permitan determinar si las diferencias observadas en el desempeño predictivo son estadísticamente significativas o simplemente producto del azar. El test de Diebold-Mariano \parencite{DieboldMariano1995} constituye uno de los procedimientos más ampliamente utilizados para este propósito, ofreciendo un marco general y flexible para contrastar la hipótesis nula de igual precisión predictiva entre dos métodos de pronóstico competidores.
+La evaluación comparativa de distintas metodologías de pronóstico requiere herramientas estadísticas que permitan determinar si las diferencias observadas en el desempeño predictivo son estadísticamente significativas o simplemente producto del azar. El test de Diebold-Mariano \parencite{DieboldMariano1995} constituye uno de los procedimientos más ampliamente utilizados para este propósito, ofreciendo un marco general y flexible para contrastar la hipótesis nula de igual precisión predictiva entre dos métodos de pronóstico competidores.
 
 \subsection{Formulación del Test}
 
@@ -215,7 +207,7 @@ Los resultados de simulación reportados por Harvey et al. \parencite{Harvey1997
 
 Una alternativa más reciente para abordar las distorsiones de tamaño del test de Diebold-Mariano en muestras pequeñas es el enfoque de \textit{asintótica de suavizado fijo} (fixed-smoothing asymptotics), desarrollado por Coroneo e Iacone \parencite{CoroneoIacone2020}. Este marco teórico reconoce que en aplicaciones prácticas de evaluación de pronósticos, el tamaño muestral $n$ es frecuentemente limitado, haciendo que la aproximación asintótica estándar (que requiere $M/n \to 0$) sea inadecuada.
 
-La idea fundamental es mantener constante la razón entre el parámetro de ancho de banda y el tamaño muestral conforme $n$ aumenta. Formalmente, bajo la \textit{asintótica fixed-b}, se asume que $M/n \to b$ para algún $b \in (0,1]$ fijo. Bajo este régimen asintótico alternativo, el estimador de varianza \eqref{eq:kernel_variance_estimator} ya no es consistente para $\sigma^2$. Sin embargo, Kiefer y Vogelsang (2005) demostraron que el estadístico resultante converge a una distribución no estándar que depende de $b$ y del kernel empleado.
+La idea fundamental es mantener constante la razón entre el parámetro de ancho de banda y el tamaño muestral conforme $n$ aumenta. Formalmente, bajo la \textit{asintótica fixed-b}, se asume que $M/n \to b$ para algún $b \in (0,1]$ fijo. Bajo este régimen asintótico alternativo, el estimador de varianza \eqref{eq:kernel_variance_estimator} ya no es consistente para $\sigma^2$. Sin embargo, Kiefer y Vogelsang (2005) \parencite{kiefer2005} demostraron que el estadístico resultante converge a una distribución no estándar que depende de $b$ y del kernel empleado.
 
 Para el kernel de Bartlett, la distribución límite puede caracterizarse explícitamente, y sus cuantiles pueden aproximarse mediante fórmulas polinomiales. Específicamente, para un test bilateral al 5\% de significancia, el valor crítico $c_\alpha(b)$ satisface:
 \begin{equation}
@@ -230,16 +222,6 @@ Una segunda variante dentro del paradigma de suavizado fijo es la \textit{asint�
 \hat{\sigma}^2_{DAN} = \frac{2\pi}{m}\sum_{j=1}^m I(\lambda_j)
 \end{equation}
 donde $I(\lambda_j)$ denota el periodograma de $d_t$ evaluado en la frecuencia de Fourier $\lambda_j = 2\pi j/n$, y $m$ es un parámetro de truncamiento mantenido fijo conforme $n \to \infty$. Bajo condiciones de regularidad, el estadístico resultante converge a una distribución $t$ con $2m$ grados de libertad \parencite{CoroneoIacone2020}.
-
-\subsection{Consideraciones sobre la Generación de Pronósticos}
-
-Un aspecto metodológico crucial del test de Diebold-Mariano es su tratamiento de los pronósticos como objetos dados o primitivos, sin considerar explícitamente el proceso de estimación de los modelos subyacentes. Esta perspectiva contrasta con marcos alternativos, como el de West (1996) y Clark y McCracken (2001), que desarrollan teoría asintótica específica para pronósticos derivados de modelos paramétricos estimados.
-
-Cuando los pronósticos provienen de modelos con parámetros estimados, la incertidumbre asociada con la estimación puede afectar la distribución del estadístico de prueba. West \parencite{West1996} demostró que, bajo ciertas condiciones, esta incertidumbre de estimación es asintóticamente despreciable si el tamaño de la muestra de entrenamiento $R$ crece mucho más rápido que el tamaño de la muestra de evaluación $P$ (específicamente, si $P/R \to 0$).
-
-Alternativamente, Giacomini y White \parencite{GiacominiWhite2006} proponen un marco donde la incertidumbre de estimación no desaparece asintóticamente (fijando $R < \infty$). Bajo este régimen, el test de Diebold-Mariano permanece válido, pero ahora evalúa el desempeño relativo de \textit{métodos de pronóstico} (incluyendo el procedimiento de estimación) en lugar de \textit{modelos de pronóstico} poblacionales. Este marco es particularmente apropiado cuando el objetivo es comparar estrategias de pronóstico que podrían implementarse en práctica, reconociendo que los modelos deben ser reestimados periódicamente con ventanas de datos finitas.
-
-Para los propósitos de esta investigación, adoptamos la perspectiva de Giacomini y White, interpretando el test de Diebold-Mariano como una herramienta para evaluar el desempeño predictivo de métodos completos de pronóstico, incluyendo tanto la especificación del modelo como el procedimiento de estimación y actualización de parámetros.
 
 \section{Predicción Conformal por Intervalos: El Enfoque IIE}
 \label{sec:prediccion_conformal_intervalos_IIE}
