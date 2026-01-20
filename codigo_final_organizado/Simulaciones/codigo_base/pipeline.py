@@ -4124,3 +4124,325 @@ class Pipeline140_TamanosCrecientes_LSPMW_Only:
         print(f"\n🎉 Completado: {len(all_results)} filas → {excel_filename}\n")
         return df_resultados, df_resumen
     
+# ===========================================================
+# Temporalidad
+# ===========================================================
+
+class SingleScenarioTester:
+    """
+    Clase para probar un único escenario (ARMA, ARIMA o SETAR) y generar
+    un reporte detallado con ECRPS y tiempos de ejecución por predicción.
+    """
+    
+    N_TEST_STEPS = 12
+    N_VALIDATION = 40
+    N_TRAIN = 200
+    
+    def __init__(self, n_boot: int = 1000, seed: int = 42, verbose: bool = True):
+        self.n_boot = n_boot
+        self.seed = seed
+        self.verbose = verbose
+        self.rng = np.random.default_rng(seed)
+    
+    def test_arma_scenario(self, phi: list, theta: list, noise_dist: str, 
+                          variance: float, excel_filename: str = None):
+        """
+        Prueba un escenario ARMA individual.
+        
+        Args:
+            phi: Coeficientes AR
+            theta: Coeficientes MA
+            noise_dist: Distribución del ruido ('normal', 'uniform', etc.)
+            variance: Varianza del ruido
+            excel_filename: Nombre del archivo Excel de salida
+        """
+        config_name = self._get_arma_name(phi, theta)
+        if excel_filename is None:
+            excel_filename = f"test_ARMA_{config_name}_{noise_dist}_V{variance}.xlsx"
+        
+        simulator = ARMASimulation(
+            phi=phi, theta=theta,
+            noise_dist=noise_dist, sigma=np.sqrt(variance), seed=self.seed
+        )
+        
+        return self._run_test(simulator, config_name, noise_dist, variance, 
+                             excel_filename, "ARMA")
+    
+    def test_arima_scenario(self, phi: list, theta: list, noise_dist: str, 
+                           variance: float, excel_filename: str = None):
+        """
+        Prueba un escenario ARIMA individual.
+        
+        Args:
+            phi: Coeficientes AR
+            theta: Coeficientes MA
+            noise_dist: Distribución del ruido
+            variance: Varianza del ruido
+            excel_filename: Nombre del archivo Excel de salida
+        """
+        config_name = self._get_arima_name(phi, theta)
+        if excel_filename is None:
+            excel_filename = f"test_ARIMA_{config_name}_{noise_dist}_V{variance}.xlsx"
+        
+        simulator = ARIMASimulation(
+            phi=phi, theta=theta,
+            noise_dist=noise_dist, sigma=np.sqrt(variance), seed=self.seed
+        )
+        
+        return self._run_test(simulator, config_name, noise_dist, variance, 
+                             excel_filename, "ARIMA")
+    
+    def test_setar_scenario(self, phi_regime1: list, phi_regime2: list, 
+                           threshold: float, delay: int, noise_dist: str, 
+                           variance: float, excel_filename: str = None):
+        """
+        Prueba un escenario SETAR individual.
+        
+        Args:
+            phi_regime1: Coeficientes del régimen 1
+            phi_regime2: Coeficientes del régimen 2
+            threshold: Umbral de cambio de régimen
+            delay: Retardo para el umbral
+            noise_dist: Distribución del ruido
+            variance: Varianza del ruido
+            excel_filename: Nombre del archivo Excel de salida
+        """
+        config_name = f"SETAR(2;{len(phi_regime1)},{len(phi_regime2)})_d{delay}_r{threshold}"
+        if excel_filename is None:
+            excel_filename = f"test_SETAR_{config_name.replace('.', '_')}_{noise_dist}_V{variance}.xlsx"
+        
+        simulator = SETARSimulation(
+            model_type=config_name,
+            phi_regime1=phi_regime1,
+            phi_regime2=phi_regime2,
+            threshold=threshold,
+            delay=delay,
+            noise_dist=noise_dist,
+            sigma=np.sqrt(variance),
+            seed=self.seed
+        )
+        
+        return self._run_test(simulator, config_name, noise_dist, variance, 
+                             excel_filename, "SETAR")
+    
+    def _run_test(self, simulator, config_name: str, noise_dist: str, 
+                  variance: float, excel_filename: str, model_type: str):
+        """Ejecuta el test completo para un escenario."""
+        
+        print(f"\n{'='*70}")
+        print(f"🧪 Probando escenario {model_type}: {config_name}")
+        print(f"   Distribución: {noise_dist} | Varianza: {variance}")
+        print(f"{'='*70}\n")
+        
+        # 1. Generar serie temporal
+        total_len = self.N_TRAIN + self.N_VALIDATION + self.N_TEST_STEPS
+        series, errors = simulator.simulate(n=total_len, burn_in=100)
+        
+        train_data = series[:self.N_TRAIN]
+        val_data = series[self.N_TRAIN : self.N_TRAIN + self.N_VALIDATION]
+        
+        # 2. Configurar modelos
+        models = self._setup_models()
+        
+        # 3. Optimización de hiperparámetros
+        print("⚙️  Optimizando hiperparámetros...")
+        opt_start = time.time()
+        optimizer = TimeBalancedOptimizer(random_state=self.seed, verbose=self.verbose)
+        best_params = optimizer.optimize_all_models(models, train_data, val_data)
+        opt_time = time.time() - opt_start
+        print(f"✅ Optimización completada en {opt_time:.2f}s\n")
+        
+        # 4. Aplicar parámetros óptimos y congelar modelos
+        train_val_full = series[:self.N_TRAIN + self.N_VALIDATION]
+        model_total_times = {}
+        
+        for name, model in models.items():
+            freeze_start = time.time()
+            if name in best_params:
+                for k, v in best_params[name].items():
+                    if hasattr(model, k): 
+                        setattr(model, k, v)
+            if hasattr(model, 'freeze_hyperparameters'):
+                model.freeze_hyperparameters(train_val_full)
+            model_total_times[name] = time.time() - freeze_start
+        
+        # 5. Testing con métricas detalladas
+        print("🔬 Iniciando pruebas en ventana deslizante...\n")
+        results = []
+        
+        for t in range(self.N_TEST_STEPS):
+            print(f"   Paso {t+1}/{self.N_TEST_STEPS}...", end=" ")
+            step_start = time.time()
+            
+            idx = self.N_TRAIN + self.N_VALIDATION + t
+            h_series = series[:idx]
+            h_errors = errors[:idx]
+            
+            # Obtener distribución teórica verdadera
+            true_samples = simulator.get_true_next_step_samples(
+                h_series, h_errors, n_samples=1000
+            )
+            
+            row = {
+                'Paso': t + 1,
+                'Configuración': config_name,
+                'Tipo': model_type,
+                'Distribución': noise_dist,
+                'Varianza': variance,
+                'Valor_Real': series[idx] if idx < len(series) else np.nan
+            }
+            
+            # Evaluar cada modelo
+            for name, model in models.items():
+                model_step_start = time.time()
+                
+                try:
+                    # Predicción
+                    if "Bootstrap" in name:
+                        pred = model.fit_predict(h_series)
+                    else:
+                        pred = model.fit_predict(pd.DataFrame({'valor': h_series}))
+                    
+                    pred_array = np.asarray(pred).flatten()
+                    
+                    # Calcular ECRPS
+                    ecrps_value = ecrps(pred_array, true_samples)
+                    
+                    # Guardar métricas
+                    row[f'{name}_ECRPS'] = ecrps_value
+                    row[f'{name}_Tiempo_s'] = time.time() - model_step_start
+                    
+                    # Acumular tiempo total del modelo
+                    model_total_times[name] += row[f'{name}_Tiempo_s']
+                    
+                except Exception as e:
+                    if self.verbose:
+                        print(f"\n   ⚠️  Error en {name}: {str(e)}")
+                    row[f'{name}_ECRPS'] = np.nan
+                    row[f'{name}_Tiempo_s'] = np.nan
+            
+            results.append(row)
+            print(f"✓ ({time.time() - step_start:.2f}s)")
+        
+        # 6. Agregar fila con tiempos totales
+        total_row = {
+            'Paso': 'TOTAL',
+            'Configuración': config_name,
+            'Tipo': model_type,
+            'Distribución': noise_dist,
+            'Varianza': variance,
+            'Valor_Real': np.nan
+        }
+        
+        for name in models.keys():
+            total_row[f'{name}_ECRPS'] = np.nan
+            total_row[f'{name}_Tiempo_s'] = model_total_times.get(name, np.nan)
+        
+        results.append(total_row)
+        
+        # 7. Crear DataFrame y guardar
+        df = pd.DataFrame(results)
+        
+        # Crear directorio si no existe
+        os.makedirs('test_results', exist_ok=True)
+        filepath = os.path.join('test_results', excel_filename)
+        
+        # Guardar con formato
+        with pd.ExcelWriter(filepath, engine='openpyxl') as writer:
+            df.to_excel(writer, sheet_name='Resultados', index=False)
+            
+            # Agregar hoja de resumen
+            summary = self._create_summary(df, model_total_times, opt_time)
+            summary.to_excel(writer, sheet_name='Resumen', index=False)
+        
+        print(f"\n✅ Resultados guardados en: {filepath}")
+        print(f"\n{'='*70}\n")
+        
+        clear_all_sessions()
+        return df
+    
+    def _create_summary(self, df, model_times, opt_time):
+        """Crea un resumen estadístico de los resultados."""
+        models = [col.replace('_ECRPS', '') for col in df.columns if col.endswith('_ECRPS')]
+        
+        summary_data = []
+        for model in models:
+            ecrps_col = f'{model}_ECRPS'
+            
+            # Filtrar solo pasos de predicción (excluir 'TOTAL')
+            pred_data = df[df['Paso'] != 'TOTAL'][ecrps_col]
+            
+            summary_data.append({
+                'Modelo': model,
+                'ECRPS_Promedio': pred_data.mean(),
+                'ECRPS_Mediana': pred_data.median(),
+                'ECRPS_Std': pred_data.std(),
+                'ECRPS_Min': pred_data.min(),
+                'ECRPS_Max': pred_data.max(),
+                'Tiempo_Total_s': model_times.get(model, np.nan),
+                'Tiempo_Promedio_por_Paso_s': model_times.get(model, np.nan) / self.N_TEST_STEPS
+            })
+        
+        summary_df = pd.DataFrame(summary_data)
+        summary_df = summary_df.sort_values('ECRPS_Promedio')
+        
+        # Agregar fila con tiempo de optimización
+        opt_row = pd.DataFrame([{
+            'Modelo': 'Optimización Hiperparámetros',
+            'ECRPS_Promedio': np.nan,
+            'ECRPS_Mediana': np.nan,
+            'ECRPS_Std': np.nan,
+            'ECRPS_Min': np.nan,
+            'ECRPS_Max': np.nan,
+            'Tiempo_Total_s': opt_time,
+            'Tiempo_Promedio_por_Paso_s': np.nan
+        }])
+        
+        summary_df = pd.concat([opt_row, summary_df], ignore_index=True)
+        
+        return summary_df
+    
+    def _setup_models(self):
+        """Configura todos los modelos a probar."""
+        return {
+            'Block Bootstrapping': CircularBlockBootstrapModel(
+                n_boot=self.n_boot, random_state=self.seed
+            ),
+            'Sieve Bootstrap': SieveBootstrapModel(
+                n_boot=self.n_boot, random_state=self.seed
+            ),
+            'LSPM': LSPM(random_state=self.seed),
+            'LSPMW': LSPMW(rho=0.95, random_state=self.seed),
+            'AREPD': AREPD(n_lags=5, rho=0.93, random_state=self.seed),
+            'MCPS': MondrianCPSModel(n_lags=10, random_state=self.seed),
+            'AV-MCPS': AdaptiveVolatilityMondrianCPS(
+                n_lags=12, random_state=self.seed
+            ),
+            'DeepAR': DeepARModel(
+                hidden_size=16, n_lags=5, epochs=20, 
+                num_samples=self.n_boot, random_state=self.seed,
+                early_stopping_patience=3
+            ),
+            'EnCQR-LSTM': EnCQR_LSTM_Model(
+                n_lags=15, B=3, units=24, epochs=15, 
+                num_samples=self.n_boot, random_state=self.seed
+            )
+        }
+    
+    def _get_arma_name(self, phi, theta):
+        """Genera nombre para configuración ARMA."""
+        p = len(phi)
+        q = len(theta)
+        if p > 0 and q > 0:
+            return f"ARMA({p},{q})"
+        elif p > 0:
+            return f"AR({p})"
+        else:
+            return f"MA({q})"
+    
+    def _get_arima_name(self, phi, theta):
+        """Genera nombre para configuración ARIMA."""
+        p = len(phi)
+        q = len(theta)
+        return f"ARIMA({p},1,{q})"
+
