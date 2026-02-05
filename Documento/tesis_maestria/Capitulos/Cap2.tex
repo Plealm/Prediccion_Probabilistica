@@ -16,9 +16,9 @@ Formalmente, sea $Y_{t+h}$ una variable aleatoria que representa el valor de una
 Gneiting y Raftery explican que el objetivo fundamental del pronóstico probabilístico es maximizar la nitidez de las distribuciones predictivas sujeto a calibración. Estos dos conceptos son fundamentales para entender la calidad de un pronóstico probabilístico \parencite{GneitingRaftery2007, GneitingBalabdaoui2007}:
 
 \begin{itemize}
-\item \textbf{Calibración:} Se refiere a la consistencia estadística entre las distribuciones predictivas y las observaciones. Una predicción está calibrada si las realizaciones son estadísticamente indistinguibles de muestras aleatorias de las distribuciones predictivas \parencite{Thorarinsdottir2017}.
+\item \textbf{Calibración:} Se refiere a la concordancia estadística entre las distribuciones predictivas y las observaciones. Una predicción está calibrada si las realizaciones son estadísticamente indistinguibles de muestras aleatorias de las distribuciones predictivas \parencite{Thorarinsdottir2017}.
 
-\item \textbf{Nitidez:} Se refiere a la concentración de las distribuciones predictivas y es una propiedad exclusiva de los pronósticos. Cuanto más concentradas sean las distribuciones predictivas, mejor, siempre que se mantenga la calibración \parencite{GneitingRaftery2007}.
+\item \textbf{Nitidez (\textit{sharpness}):} Se refiere a la concentración de las distribuciones predictivas y es una propiedad exclusiva de los pronósticos. Cuanto más concentradas sean las distribuciones predictivas, mejor, siempre que se mantenga la calibración \parencite{GneitingRaftery2007}.
 \end{itemize}
 
 La Figura~\ref{fig:tipos_prediccion} ilustra la diferencia entre una predicción puntual, un intervalo de predicción y una distribución predictiva completa.
@@ -32,7 +32,11 @@ La Figura~\ref{fig:tipos_prediccion} ilustra la diferencia entre una predicción
 
 \subsection{Ventajas del Pronóstico Probabilístico}
 
-El pronóstico probabilístico ofrece múltiples ventajas sobre las predicciones puntuales tradicionales que justifican su adopción creciente en diversas aplicaciones \parencite{Gneiting2014}. A diferencia de las predicciones puntuales que proporcionan únicamente un valor esperado, el pronóstico probabilístico caracteriza la incertidumbre de manera exhaustiva mediante distribuciones de probabilidad completas \parencite{GneitingRaftery2007}. Esto permite a los tomadores de decisiones evaluar tanto la magnitud esperada de un evento como su variabilidad asociada, facilitando la optimización de funciones de utilidad esperada en contextos como gestión de inventarios, planificación energética o asignación de capital, donde las decisiones deben considerar explícitamente el trade-off entre riesgo y recompensa. Además, mientras las predicciones puntuales son inherentemente limitadas para caracterizar eventos raros, las distribuciones predictivas permiten estimar probabilidades de eventos extremos, información crucial para la gestión de riesgos financieros y planificación de infraestructura \parencite{Thorarinsdottir2017}. Finalmente, las distribuciones predictivas ofrecen flexibilidad comunicativa adaptable a diferentes audiencias mediante intervalos de predicción, probabilidades de excedencia de umbrales críticos o visualizaciones completas como fan charts \parencite{Gneiting2014}.
+El pronóstico probabilístico ofrece múltiples ventajas sobre las predicciones puntuales tradicionales que justifican su adopción creciente en diversas aplicaciones \parencite{Gneiting2014}. A diferencia de las predicciones puntuales que proporcionan únicamente un valor representativo (típicamente el valor esperado, aunque también puede ser alguna otra estadística de centralidad o de interés para el tomador de decisiones), el pronóstico probabilístico caracteriza la incertidumbre de manera exhaustiva mediante distribuciones de probabilidad completas \parencite{GneitingRaftery2007}. 
+
+Una ventaja fundamental del pronóstico probabilístico sobre los intervalos de predicción es que proporciona la distribución completa en lugar de solo límites de confianza. Mientras que un intervalo de predicción al 95\% indica únicamente un rango donde se espera que caiga el valor futuro, la distribución completa permite evaluar tanto la magnitud esperada de un evento como su variabilidad asociada en cualquier región de interés. Esto facilita la optimización de funciones de utilidad esperada en contextos como gestión de inventarios, planificación energética o asignación de capital, donde las decisiones deben considerar explícitamente el trade-off entre riesgo y recompensa. 
+
+Además, mientras las predicciones puntuales e intervalos de predicción son inherentemente limitados para caracterizar eventos raros, las distribuciones predictivas permiten estimar probabilidades de eventos extremos, información crucial para la gestión de riesgos financieros y planificación de infraestructura \parencite{Thorarinsdottir2017}. Finalmente, las distribuciones predictivas ofrecen flexibilidad comunicativa adaptable a diferentes audiencias mediante intervalos de predicción con diversos niveles de confianza o probabilidades de excedencia de umbrales críticos \parencite{Gneiting2014}.
 
 Estas ventajas han motivado la transición hacia pronósticos probabilísticos en campos tan diversos como meteorología, finanzas, energía, epidemiología y gestión de cadenas de suministro \parencite{Gneiting2014, Salinas2020}.
 
@@ -44,22 +48,24 @@ La evaluación rigurosa del desempeño predictivo es fundamental para comparar m
 \subsection{Reglas de Puntuación Propias}
 \label{subsec:scoring_rules}
 
-Una \textit{regla de puntuación} (scoring rule) es una función $S: \mathcal{F} \times \mathbb{R} \to \mathbb{R} \cup \{\infty\}$ que asigna una penalización numérica $S(F,y)$ a cada par formado por una distribución predictiva $F$ y una observación realizada $y$ \parencite{GneitingRaftery2007}. En nuestra notación, valores más bajos de la puntuación indican mejor desempeño predictivo.
+Una \textit{regla de puntuación} (\textit{scoring rule}) es una función $S: \mathcal{F} \times \mathbb{R} \to \mathbb{R} \cup \{-\infty, \infty\}$ que asigna una penalización numérica $S(F,y)$ a cada par formado por una distribución predictiva $F \in \mathcal{F}$ y una observación realizada $y$ \parencite{GneitingRaftery2007}. En nuestra notación, valores más bajos de la puntuación indican mejor desempeño predictivo.
 
-\subsubsection{Propriety y Strict Propriety}
+\subsubsection{Propiedad (Propriety) y Propiedad estricta (Strict Propriety)}
 
-La \textit{propriety} es una característica fundamental que debe satisfacer toda métrica de evaluación de pronósticos probabilísticos para garantizar que incentive predicciones honestas y bien calibradas \parencite{GneitingRaftery2007}.
+La propiedad (\textit{propriety}) es una característica fundamental que debe satisfacer toda métrica de evaluación de pronósticos probabilísticos para garantizar que incentive predicciones honestas y bien calibradas \parencite{GneitingRaftery2007}.
 
-\textbf{Definición (Regla de Puntuación Proper):} Una regla de puntuación $S$ es \textit{proper} relativa a una clase $\mathcal{F}$ de distribuciones de probabilidad si
+\textbf{Definición (Regla de Puntuación Propia (Proper)):} Una regla de puntuación $S$ es propia relativamente a una clase $\mathcal{F}$ de distribuciones de probabilidad si
 \begin{equation}
 \mathbb{E}_G[S(G, Y)] \leq \mathbb{E}_G[S(F, Y)]
 \label{eq:proper_scoring}
 \end{equation}
 para todas las distribuciones $F, G \in \mathcal{F}$, donde $Y \sim G$ \parencite{GneitingRaftery2007, Thorarinsdottir2017}. 
 
-\textbf{Definición (Regla de Puntuación Strictly Proper):} La regla de puntuación $S$ es \textit{strictly proper} si la desigualdad en \eqref{eq:proper_scoring} se cumple con igualdad únicamente cuando $F = G$ \parencite{GneitingRaftery2007}.
+Intuitivamente, la condición \eqref{eq:proper_scoring} establece que una regla de puntuación propia alcanza su valor mínimo esperado cuando la distribución pronosticada coincide con la distribución verdadera de los datos. En otras palabras, si los datos provienen de $G$, entonces el pronóstico que minimiza la puntuación esperada es precisamente $G$ mismo.
 
-La importancia de la \textit{propriety} radica en que establece un principio de alineación de incentivos: si un pronosticador desea minimizar su puntuación esperada, su mejor estrategia es reportar sinceramente su verdadera distribución predictiva \parencite{GneitingRaftery2007}. 
+\textbf{Definición (Regla de Puntuación estrictamente propia (Strictly Proper)):} La regla de puntuación $S$ es estrictamente propia si la desigualdad en \eqref{eq:proper_scoring} se cumple con igualdad únicamente cuando $F = G$ \parencite{GneitingRaftery2007}.
+
+La importancia de la propiedad estricta radica en que establece un principio de alineación de incentivos: si un pronosticador desea minimizar su puntuación esperada, su mejor estrategia es reportar sinceramente su verdadera distribución predictiva \parencite{GneitingRaftery2007}. 
 
 \subsection{Continuous Ranked Probability Score (CRPS)}
 \label{subsec:crps}
@@ -75,14 +81,14 @@ El CRPS admite varias representaciones matemáticas equivalentes, cada una con s
 \text{CRPS}(F, y) = \int_{-\infty}^{\infty} \left(F(x) - \mathbbm{1}\{y \leq x\}\right)^2 dx
 \label{eq:crps_integral}
 \end{equation}
-donde $F$ es la función de distribución acumulada (FDA) de la distribución predictiva y $y$ es la observación realizada. Esta representación muestra que el CRPS mide el área entre la FDA predictiva y la FDA de la observación \parencite{Thorarinsdottir2017}.
+donde $F$ es la función de distribución acumulada (FDA) de la distribución predictiva y $y$ es la observación realizada. Esta representación muestra que el CRPS es proporcional a el área entre la FDA predictiva y la FDA de la observación \parencite{Thorarinsdottir2017}.
 
 \textbf{Representación basada en esperanzas:} Una forma alternativa, más conveniente para cálculos, está dada por \parencite{GneitingRaftery2007}:
 \begin{equation}
 \text{CRPS}(F, y) = \mathbb{E}_F|X - y| - \frac{1}{2}\mathbb{E}_F|X - X'|
 \label{eq:crps_expectation}
 \end{equation}
-donde $X$ y $X'$ son variables aleatorias independientes con distribución $F$. Esta representación revela una interpretación intuitiva del CRPS: el primer término mide la distancia esperada entre la predicción y la observación, mientras que el segundo término penaliza la dispersión de la distribución predictiva.
+donde $X$ y $X'$ son variables aleatorias independientes con distribución $F$. Esta representación revela una interpretación intuitiva del CRPS: el primer término mide la distancia esperada entre la distribución predictiva, representada por la variable aleatoria X, y la observación; mientras que el segundo término penaliza la dispersión de la distribución predictiva.
 
 \subsubsection{Propiedades del CRPS}
 

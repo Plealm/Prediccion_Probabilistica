@@ -11,41 +11,41 @@
 \contentsline {section}{\numberline {2.1}Pronóstico Probabilístico}{6}{section.2.1}%
 \contentsline {subsection}{\numberline {2.1.1}Definición y Objetivos}{6}{subsection.2.1.1}%
 \contentsline {subsection}{\numberline {2.1.2}Ventajas del Pronóstico Probabilístico}{8}{subsection.2.1.2}%
-\contentsline {section}{\numberline {2.2}Métricas para Evaluación de Pronósticos Probabilísticos}{8}{section.2.2}%
+\contentsline {section}{\numberline {2.2}Métricas para Evaluación de Pronósticos Probabilísticos}{9}{section.2.2}%
 \contentsline {subsection}{\numberline {2.2.1}Reglas de Puntuación Propias}{9}{subsection.2.2.1}%
-\contentsline {subsubsection}{\nonumberline Propriety y Strict Propriety}{9}{subsubsection*.7}%
-\contentsline {subsection}{\numberline {2.2.2}Continuous Ranked Probability Score (CRPS)}{9}{subsection.2.2.2}%
+\contentsline {subsubsection}{\nonumberline Propiedad (Propriety) y Propiedad estricta (Strict Propriety)}{9}{subsubsection*.7}%
+\contentsline {subsection}{\numberline {2.2.2}Continuous Ranked Probability Score (CRPS)}{10}{subsection.2.2.2}%
 \contentsline {subsubsection}{\nonumberline Definiciones y Representaciones}{10}{subsubsection*.8}%
-\contentsline {subsubsection}{\nonumberline Propiedades del CRPS}{10}{subsubsection*.9}%
+\contentsline {subsubsection}{\nonumberline Propiedades del CRPS}{11}{subsubsection*.9}%
 \contentsline {subsection}{\numberline {2.2.3}Expected Continuous Ranked Probability Score (ECRPS)}{11}{subsection.2.2.3}%
-\contentsline {section}{\numberline {2.3}Test de Diebold-Mariano para Comparación de Precisión Predictiva}{11}{section.2.3}%
+\contentsline {section}{\numberline {2.3}Test de Diebold-Mariano para Comparación de Precisión Predictiva}{12}{section.2.3}%
 \contentsline {subsection}{\numberline {2.3.1}Formulación del Test}{12}{subsection.2.3.1}%
 \contentsline {subsection}{\numberline {2.3.2}Distribución Asintótica y Estimación de la Varianza}{13}{subsection.2.3.2}%
 \contentsline {subsection}{\numberline {2.3.3}Modificaciones para Muestras Pequeñas}{14}{subsection.2.3.3}%
 \contentsline {subsection}{\numberline {2.3.4}Enfoque de Asintótica de Suavizado Fijo}{15}{subsection.2.3.4}%
-\contentsline {section}{\numberline {2.4}Predicción Conformal por Intervalos: El Enfoque IIE}{16}{section.2.4}%
-\contentsline {subsection}{\numberline {2.4.1}El Concepto de No-Conformidad}{16}{subsection.2.4.1}%
+\contentsline {section}{\numberline {2.4}Predicción Conformal por Intervalos: El Enfoque IIE}{17}{section.2.4}%
+\contentsline {subsection}{\numberline {2.4.1}El Concepto de No-Conformidad}{17}{subsection.2.4.1}%
 \contentsline {subsection}{\numberline {2.4.2}Protocolo de Construcción de Intervalos}{17}{subsection.2.4.2}%
 \contentsline {section}{\numberline {2.5}Robustez ante la No-Intercambiabilidad: Aproximación de Barber}{18}{section.2.5}%
 \contentsline {subsection}{\numberline {2.5.1}El Gap de Cobertura y Variación Total}{18}{subsection.2.5.1}%
-\contentsline {subsection}{\numberline {2.5.2}Cuantiles Pesados y Decaimiento Temporal}{18}{subsection.2.5.2}%
+\contentsline {subsection}{\numberline {2.5.2}Cuantiles Pesados y Decaimiento Temporal}{19}{subsection.2.5.2}%
 \contentsline {section}{\numberline {2.6}Sistemas de Predicción Conformal (CPS): De Intervalos a Densidades}{19}{section.2.6}%
-\contentsline {subsection}{\numberline {2.6.1}Formalización de la RPD y el Suavizado ($\tau $)}{19}{subsection.2.6.1}%
+\contentsline {subsection}{\numberline {2.6.1}Formalización de la RPD y el Suavizado ($\tau $)}{20}{subsection.2.6.1}%
 \contentsline {subsection}{\numberline {2.6.2}La Máquina de Predicción de Mínimos Cuadrados (LSPM)}{20}{subsection.2.6.2}%
 \contentsline {subsubsection}{\nonumberline Variantes de la LSPM}{20}{subsubsection*.10}%
-\contentsline {section}{\numberline {2.7}Sistemas de Predicción Conformal de Mondrian (MCPS)}{20}{section.2.7}%
+\contentsline {section}{\numberline {2.7}Sistemas de Predicción Conformal de Mondrian (MCPS)}{21}{section.2.7}%
 \contentsline {subsection}{\numberline {2.7.1}Origen y Motivación: Validez Marginal vs. Condicional}{21}{subsection.2.7.1}%
 \contentsline {subsection}{\numberline {2.7.2}La Taxonomía de Mondrian ($\kappa $)}{22}{subsection.2.7.2}%
-\contentsline {subsection}{\numberline {2.7.3}Integración del Algoritmo MCPS}{22}{subsection.2.7.3}%
+\contentsline {subsection}{\numberline {2.7.3}Integración del Algoritmo MCPS}{23}{subsection.2.7.3}%
 \contentsline {section}{\numberline {2.8}Análisis de la Consistencia Universal de Vovk}{23}{section.2.8}%
-\contentsline {subsection}{\numberline {2.8.1}Definición de Consistencia Universal}{23}{subsection.2.8.1}%
+\contentsline {subsection}{\numberline {2.8.1}Definición de Consistencia Universal}{24}{subsection.2.8.1}%
 \contentsline {subsection}{\numberline {2.8.2}Mecanismo de la Demostración: El Enfoque de Histograma}{24}{subsection.2.8.2}%
-\contentsline {subsection}{\numberline {2.8.3}La Distancia de Lévy y la Convergencia Débil}{24}{subsection.2.8.3}%
+\contentsline {subsection}{\numberline {2.8.3}La Distancia de Lévy y la Convergencia Débil}{25}{subsection.2.8.3}%
 \contentsline {subsection}{\numberline {2.8.4}Implicaciones para el LSPM y la Eficiencia}{25}{subsection.2.8.4}%
 \contentsline {section}{\numberline {2.9}Hacia la Consistencia Universal en Series de Tiempo Ergódicas}{25}{section.2.9}%
-\contentsline {subsection}{\numberline {2.9.1}Redefinición del Objetivo de Consistencia}{25}{subsection.2.9.1}%
+\contentsline {subsection}{\numberline {2.9.1}Redefinición del Objetivo de Consistencia}{26}{subsection.2.9.1}%
 \contentsline {subsection}{\numberline {2.9.2}Supuestos Fundamentales del Marco Propuesto}{26}{subsection.2.9.2}%
-\contentsline {subsection}{\numberline {2.9.3}Mecanismo Propuesto: Transductor Conformal por Kernel}{26}{subsection.2.9.3}%
+\contentsline {subsection}{\numberline {2.9.3}Mecanismo Propuesto: Transductor Conformal por Kernel}{27}{subsection.2.9.3}%
 \contentsline {subsection}{\numberline {2.9.4}Discusión y Perspectivas Futuras}{27}{subsection.2.9.4}%
 \contentsline {chapter}{\numberline {3}Metodología de Simulaciones}{28}{chapter.3}%
 \contentsline {section}{\numberline {3.1}Introducción}{28}{section.3.1}%
