@@ -95,7 +95,7 @@ donde $X$ y $X'$ son variables aleatorias independientes con distribución $F$. 
 El CRPS posee varias propiedades deseables que explican su amplia adopción en la literatura \parencite{GneitingRaftery2007, Thorarinsdottir2017}:
 
 \begin{enumerate}
-\item \textbf{Strictly proper:} El CRPS es \textit{strictly proper} relativo a la clase de todas las distribuciones de probabilidad en $\mathbb{R}$ con primer momento finito \parencite{GneitingRaftery2007}.
+\item \textbf{Estrictamente propia:} El CRPS es \textit{estrictamente propia} relativo a la clase de todas las distribuciones de probabilidad en $\mathbb{R}$ con primer momento finito \parencite{GneitingRaftery2007}.
 
 \item \textbf{Unidades consistentes:} El CRPS se expresa en las mismas unidades que la variable pronosticada \parencite{Gneiting2014}.
 
@@ -103,21 +103,36 @@ El CRPS posee varias propiedades deseables que explican su amplia adopción en l
 
 \item \textbf{Sensibilidad dual:} El CRPS evalúa simultáneamente la calibración y la nitidez \parencite{Thorarinsdottir2017}.
 \end{enumerate}
-
 \subsection{Expected Continuous Ranked Probability Score (ECRPS)}
 \label{subsec:ecrps}
-El \textit{Expected Continuous Ranked Probability Score} (ECRPS) es una métrica diseñada para cuantificar la discrepancia entre dos distribuciones probabilísticas: una distribución predictiva $F$ generada por un modelo y una distribución verdadera (o teórica) $G$. 
 
-El desempeño predictivo global entre $F$ y $G$ se cuantifica tomando $n$ observaciones de ambas distribuciones, sea $x_i$ una observación de $F$ y $y_i$ una observación de $G$, con esta base se puede definir el ECRPS como:
+El \textit{Expected Continuous Ranked Probability Score} (ECRPS) extiende el CRPS al caso donde se desea cuantificar la discrepancia entre dos distribuciones probabilísticas completas: una distribución predictiva $F$ y una distribución de referencia $G$.
 
+\subsubsection{Definición del ECRPS}
+
+\textbf{Representación integral:} Siguiendo la forma integral del CRPS, el ECRPS se define como:
 \begin{equation}
-\text{ECRPS}(F, G) = \frac{1}{n}\sum_{i=1}^n \text{CRPS}(\vec{x}, y_i) = \frac{1}{n}\sum_{i=1}^n \text{CRPS}(x_i, \vec{y})
-\label{eq:ecrps}
+\text{ECRPS}(F, G) = \int_{-\infty}^{\infty} \left(F(x) - G(x)\right)^2 dx
+\label{eq:ecrps_integral}
+\end{equation}
+donde $F$ y $G$ son las funciones de distribución acumulada de las distribuciones predictiva y de referencia, respectivamente. Esta representación mide el área cuadrática entre ambas FDAs.
+
+\textbf{Representación basada en esperanzas:} De forma análoga a la ecuación \eqref{eq:crps_expectation}, el ECRPS puede expresarse como:
+\begin{equation}
+\text{ECRPS}(F, G) = \mathbb{E}_{F,G}|X - Y| - \frac{1}{2}\mathbb{E}_F|X - X'| - \frac{1}{2}\mathbb{E}_G|Y - Y'|
+\label{eq:ecrps_expectation}
+\end{equation}
+donde $X, X' \sim F$ son variables aleatorias independientes con distribución $F$, y $Y, Y' \sim G$ son variables aleatorias independientes con distribución $G$. Esta forma revela la estructura del ECRPS: el primer término mide la distancia esperada entre ambas distribuciones, mientras que los dos últimos términos penalizan la dispersión de cada distribución.
+
+\subsubsection{Estimación empírica}
+
+En la práctica, cuando se dispone de muestras $\vec{x} = \{x_1, \ldots, x_n\}$ de $F$ y $\vec{y} = \{y_1, \ldots, y_m\}$ de $G$, el ECRPS puede estimarse mediante:
+\begin{equation}
+\widehat{\text{ECRPS}}(F, G) = \frac{1}{nm}\sum_{i=1}^n\sum_{j=1}^m |x_i - y_j| - \frac{1}{2n^2}\sum_{i=1}^n\sum_{k=1}^n |x_i - x_k| - \frac{1}{2m^2}\sum_{j=1}^m\sum_{\ell=1}^m |y_j - y_\ell|
+\label{eq:ecrps_empirical}
 \end{equation}
 
-\noindent donde $\vec{x} = \{x_1, x_2, \ldots, x_n\}$ y $\vec{y} = \{y_1, y_2, \ldots, y_n\}$ son los conjuntos de observaciones de las distribuciones $F$ y $G$, respectivamente.
-
-El ECRPS hereda todas las propiedades deseables del CRPS, incluyendo su sensibilidad tanto a sesgos sistemáticos como a la calibración probabilística  y proporciona un resumen numérico único del desempeño predictivo sobre todo el conjunto de evaluación. En particular, la metrica ECRPS permite establecer comparaciones entre diferentes métodos de pronóstico probabilístico.
+El ECRPS hereda las propiedades deseables del CRPS, siendo estrictamente propio y sensible tanto a sesgos sistemáticos como a diferencias en la dispersión entre las distribuciones comparadas.
 
 \section{Test de Diebold-Mariano para Comparación de Precisión Predictiva}
 \label{sec:test_diebold_mariano}
@@ -152,7 +167,7 @@ Esta hipótesis establece que la pérdida esperada es idéntica para ambos méto
 
 \subsection{Distribución Asintótica y Estimación de la Varianza}
 
-Bajo condiciones de regularidad que incluyen la estacionariedad débil y la existencia de momentos de orden finito, Diebold y Mariano demuestran que:
+Bajo condiciones de regularidad de procesos temporales que incluyen la estacionariedad débil y la existencia de momentos de orden finito, Diebold y Mariano demuestran que:
 \begin{equation}
 \sqrt{n}\,\bar{d} \xrightarrow{d} N(0, 2\pi f_d(0))
 \end{equation}
@@ -188,7 +203,7 @@ Bajo la hipótesis nula, este estadístico converge en distribución a una norma
 
 \subsection{Modificaciones para Muestras Pequeñas}
 
-A pesar de la solidez teórica del test de Diebold-Mariano bajo asintótica estándar, diversos estudios han documentado distorsiones de tamaño en muestras finitas, particularmente cuando el número de observaciones de pronóstico es limitado. Harvey et al. \parencite{Harvey1997} demostraron mediante simulaciones Monte Carlo que el test original tiende a sobrerrechazar la hipótesis nula (es decir, presenta un tamaño empírico superior al nominal), especialmente para horizontes de pronóstico largos y muestras pequeñas.
+A pesar de la solidez teórica del test de Diebold-Mariano bajo la teoría asintótica estándar, diversos estudios han documentado distorsiones de tamaño en muestras finitas, particularmente cuando el número de observaciones de pronóstico es limitado. Harvey et al. \parencite{Harvey1997} demostraron mediante simulaciones Monte Carlo que el test original tiende a rechazar la hipótesis nula (es decir, presenta un tamaño empírico superior al nominal), especialmente para horizontes de pronóstico largos y muestras pequeñas.
 
 Para abordar estas limitaciones, Harvey et al. proponen una corrección del estadístico que mejora sustancialmente el desempeño en muestras finitas. La modificación se fundamenta en el uso de un estimador aproximadamente insesgado de la varianza de $\bar{d}$. Partiendo de la expresión exacta:
 \begin{equation}
@@ -209,7 +224,7 @@ Adicionalmente, Harvey et al. recomiendan comparar $DM^*$ con valores críticos 
 
 Los resultados de simulación reportados por Harvey et al. \parencite{Harvey1997} indican que el test modificado presenta un tamaño empírico considerablemente más cercano al nominal, especialmente para $n \leq 50$ y horizontes de pronóstico $h \geq 2$. Aunque el test modificado exhibe una ligera pérdida de potencia en comparación con el test original cuando ambos están correctamente calibrados, esta reducción es marginal y ampliamente compensada por la ganancia en confiabilidad inferencial.
 
-\subsection{Enfoque de Asintótica de Suavizado Fijo}
+\subsection{Enfoque de la Teoria Asintótica de Suavizado Fijo}
 
 Una alternativa más reciente para abordar las distorsiones de tamaño del test de Diebold-Mariano en muestras pequeñas es el enfoque de \textit{asintótica de suavizado fijo} (fixed-smoothing asymptotics), desarrollado por Coroneo e Iacone \parencite{CoroneoIacone2020}. Este marco teórico reconoce que en aplicaciones prácticas de evaluación de pronósticos, el tamaño muestral $n$ es frecuentemente limitado, haciendo que la aproximación asintótica estándar (que requiere $M/n \to 0$) sea inadecuada.
 
@@ -229,10 +244,10 @@ Una segunda variante dentro del paradigma de suavizado fijo es la \textit{asint�
 \end{equation}
 donde $I(\lambda_j)$ denota el periodograma de $d_t$ evaluado en la frecuencia de Fourier $\lambda_j = 2\pi j/n$, y $m$ es un parámetro de truncamiento mantenido fijo conforme $n \to \infty$. Bajo condiciones de regularidad, el estadístico resultante converge a una distribución $t$ con $2m$ grados de libertad \parencite{CoroneoIacone2020}.
 
-\section{Predicción Conformal por Intervalos: El Enfoque IIE}
+\section{Predicción Conformal por Intervalos: El Enfoque IID}
 \label{sec:prediccion_conformal_intervalos_IIE}
 
-La predicción conformal clásica, introducida por Vovk et al. \cite{Vovk2005}, se fundamenta en la capacidad de generar conjuntos de predicción $\Gamma^\epsilon$ que garantizan una cobertura de confianza exacta para cualquier nivel de significancia $\epsilon \in (0,1)$. A diferencia de los métodos estadísticos tradicionales que dependen de la asintótica (grandes muestras), la predicción conformal es válida para muestras finitas, siempre que se cumpla el supuesto de intercambiabilidad de los datos.
+La predicción conformal clásica, introducida por Vovk et al. \cite{Vovk2005}, se fundamenta en la capacidad de generar conjuntos de predicción $\Gamma^\epsilon$ que garantizan una cobertura de confianza exacta para cualquier nivel de significancia $\epsilon \in (0,1)$. A diferencia de los métodos estadísticos tradicionales que dependen de la teoría asintótica (grandes muestras), la predicción conformal es válida para muestras finitas, siempre que se cumpla el supuesto de intercambiabilidad de los datos.
 
 \subsection{El Concepto de No-Conformidad}
 
