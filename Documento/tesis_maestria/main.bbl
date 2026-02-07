@@ -709,6 +709,40 @@
       \verb 10.1002/jae.2756
       \endverb
     \endentry
+    \entry{Dawid1984}{article}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=e5f549a6f6f1613a464f18ea3ee6c8fa}{%
+           family={Dawid},
+           familyi={D\bibinitperiod},
+           given={A.\bibnamedelimi Philip},
+           giveni={A\bibinitperiod\bibinitdelim P\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {Wiley}%
+      }
+      \strng{namehash}{e5f549a6f6f1613a464f18ea3ee6c8fa}
+      \strng{fullhash}{e5f549a6f6f1613a464f18ea3ee6c8fa}
+      \strng{fullhashraw}{e5f549a6f6f1613a464f18ea3ee6c8fa}
+      \strng{bibnamehash}{e5f549a6f6f1613a464f18ea3ee6c8fa}
+      \strng{authorbibnamehash}{e5f549a6f6f1613a464f18ea3ee6c8fa}
+      \strng{authornamehash}{e5f549a6f6f1613a464f18ea3ee6c8fa}
+      \strng{authorfullhash}{e5f549a6f6f1613a464f18ea3ee6c8fa}
+      \strng{authorfullhashraw}{e5f549a6f6f1613a464f18ea3ee6c8fa}
+      \field{sortinit}{D}
+      \field{sortinithash}{6f385f66841fb5e82009dc833c761848}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Journal of the Royal Statistical Society. Series A (General)}
+      \field{number}{2}
+      \field{title}{Statistical Theory: The Prequential Approach}
+      \field{volume}{147}
+      \field{year}{1984}
+      \field{pages}{278\bibrangedash 292}
+      \range{pages}{15}
+    \endentry
     \entry{DickeyFuller1979}{article}{}{}
       \name{author}{2}{}{%
         {{un=0,uniquepart=base,hash=f71b803d01236b0fcd2bb3e25e740864}{%
@@ -748,6 +782,52 @@
       \verb{doi}
       \verb 10.2307/2286348
       \endverb
+    \endentry
+    \entry{DieboldGunther1998}{article}{}{}
+      \name{author}{3}{}{%
+        {{un=0,uniquepart=base,hash=15cc2e3b52b5ea2d3045be532376a348}{%
+           family={Diebold},
+           familyi={D\bibinitperiod},
+           given={Francis\bibnamedelima X.},
+           giveni={F\bibinitperiod\bibinitdelim X\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=918339d0949a58560b804ac79ca3379c}{%
+           family={Gunther},
+           familyi={G\bibinitperiod},
+           given={Todd\bibnamedelima A.},
+           giveni={T\bibinitperiod\bibinitdelim A\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=4fa76dce6efe53583a27ac0416b869b1}{%
+           family={Tay},
+           familyi={T\bibinitperiod},
+           given={Anthony\bibnamedelima S.},
+           giveni={A\bibinitperiod\bibinitdelim S\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {Wiley}%
+      }
+      \strng{namehash}{3d9d7f50e2597e4759ecfe85444b242e}
+      \strng{fullhash}{3d9d7f50e2597e4759ecfe85444b242e}
+      \strng{fullhashraw}{3d9d7f50e2597e4759ecfe85444b242e}
+      \strng{bibnamehash}{3d9d7f50e2597e4759ecfe85444b242e}
+      \strng{authorbibnamehash}{3d9d7f50e2597e4759ecfe85444b242e}
+      \strng{authornamehash}{3d9d7f50e2597e4759ecfe85444b242e}
+      \strng{authorfullhash}{3d9d7f50e2597e4759ecfe85444b242e}
+      \strng{authorfullhashraw}{3d9d7f50e2597e4759ecfe85444b242e}
+      \field{sortinit}{D}
+      \field{sortinithash}{6f385f66841fb5e82009dc833c761848}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{International Economic Review}
+      \field{number}{4}
+      \field{title}{Evaluating Density Forecasts with Applications to Financial Risk Management}
+      \field{volume}{39}
+      \field{year}{1998}
+      \field{pages}{863\bibrangedash 883}
+      \range{pages}{21}
     \endentry
     \entry{DieboldMariano1995}{article}{}{}
       \name{author}{2}{}{%
@@ -944,6 +1024,40 @@
       \field{year}{1993}
       \field{pages}{37\bibrangedash 48}
       \range{pages}{12}
+    \endentry
+    \entry{Hamill2001}{article}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=2fc2c82169834a61a44f79ef6605f3e6}{%
+           family={Hamill},
+           familyi={H\bibinitperiod},
+           given={Thomas\bibnamedelima M.},
+           giveni={T\bibinitperiod\bibinitdelim M\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {American Meteorological Society}%
+      }
+      \strng{namehash}{2fc2c82169834a61a44f79ef6605f3e6}
+      \strng{fullhash}{2fc2c82169834a61a44f79ef6605f3e6}
+      \strng{fullhashraw}{2fc2c82169834a61a44f79ef6605f3e6}
+      \strng{bibnamehash}{2fc2c82169834a61a44f79ef6605f3e6}
+      \strng{authorbibnamehash}{2fc2c82169834a61a44f79ef6605f3e6}
+      \strng{authornamehash}{2fc2c82169834a61a44f79ef6605f3e6}
+      \strng{authorfullhash}{2fc2c82169834a61a44f79ef6605f3e6}
+      \strng{authorfullhashraw}{2fc2c82169834a61a44f79ef6605f3e6}
+      \field{sortinit}{H}
+      \field{sortinithash}{23a3aa7c24e56cfa16945d55545109b5}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Monthly Weather Review}
+      \field{number}{3}
+      \field{title}{Interpretation of Rank Histograms for Verifying Ensemble Forecasts}
+      \field{volume}{129}
+      \field{year}{2001}
+      \field{pages}{550\bibrangedash 560}
+      \range{pages}{11}
     \endentry
     \entry{Harvey1997}{article}{}{}
       \name{author}{3}{}{%

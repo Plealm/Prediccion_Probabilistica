@@ -80,6 +80,16 @@
 
 \begin{document}
 
+% ============================================
+% RENOMBRAR FLOTANTES A ESPAÑOL (DESPUÉS DE \begin{document})
+% ============================================
+\renewcommand{\figurename}{Figura}
+\renewcommand{\tablename}{Tabla}
+\renewcommand{\listfigurename}{Lista de Figuras}
+\renewcommand{\listtablename}{Lista de Tablas}
+\renewcommand{\contentsname}{Contenido}
+\renewcommand{\chaptername}{Capítulo}
+
 % ==========================================
 % PRELIMINARES
 % ==========================================
@@ -225,6 +235,11 @@ A mi padre, Antonio Leal, por ser mi apoyo incondicional y por creer en este pro
 \include{Capitulos/Cap6}
 
 
+% ==========================================
+% APÉNDICES
+% ==========================================
+\appendix
+\include{Capitulos/apend1}  
 
 % ==========================================
 % BIBLIOGRAFÍA
@@ -232,5 +247,8 @@ A mi padre, Antonio Leal, por ser mi apoyo incondicional y por creer en este pro
 \backmatter
 
 \printbibliography[title={Bibliografía}, heading=bibintoc]
+
+
+
 
 \end{document}

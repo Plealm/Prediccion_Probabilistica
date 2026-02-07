@@ -1,0 +1,59 @@
+\chapter{Marco Teórico para Consistencia Universal en Series de Tiempo Ergódicas}
+\label{apx:consistencia_ergodica}
+
+Este apéndice presenta el desarrollo conceptual realizado durante la investigación para extender la teoría de consistencia universal de \cite{Vovk2019} del modelo IID a procesos estocásticos dependientes, específicamente series de tiempo ergódicas. Aunque no se llegó a una demostración formal completa, se identificaron los componentes fundamentales que conformarían una prueba futura.
+
+\section{Redefinición del Objetivo de Consistencia}
+
+En el contexto de series de tiempo, el objetivo de un CPS universalmente consistente es que la distribución predictiva generada, $Q_n(y)$, converja débilmente en probabilidad a la verdadera distribución condicional $F_{Y|X}(\cdot|X_{n+1})$. A diferencia del caso IID, aquí la ``consistencia'' implica que el sistema debe ser capaz de aprender la dinámica local y la estructura de dependencia del proceso a medida que la serie evoluciona.
+
+Se plantea que, bajo este régimen, el sistema no solo debe ser asintóticamente válido, sino también \textit{eficiente}, adaptándose a la heterocedasticidad (volatilidad cambiante) intrínseca de los datos secuenciales.
+
+\section{Supuestos Fundamentales del Marco Propuesto}
+
+Para transitar de la teoría de Vovk a procesos dependientes, se han identificado los siguientes supuestos como pilares necesarios para el desarrollo de una prueba de consistencia futura:
+
+\begin{enumerate}
+    \item \textbf{Estacionariedad y Ergodicidad:} Se asume que el proceso $\{Z_t\}$ es estrictamente estacionario y ergódico. Esto garantiza que los promedios temporales observados en la ventana de datos converjan a los promedios del ensamble, permitiendo que el sistema ``aprenda'' de la historia pasada.
+    
+    \item \textbf{Condición de $\alpha$-mixing (Mezcla Fuerte):} Para manejar la dependencia, se requiere que el proceso sea $\alpha$-mixing con coeficientes que decaigan algebraicamente ($\alpha(k) \leq Ck^{-\beta}, \beta > 2$). Este supuesto es crucial para aplicar teoremas límite central y asegurar que las observaciones lejanas en el tiempo sean casi independientes.
+    
+    \item \textbf{Regularidad de Lipschitz:} A diferencia del enfoque de histograma de celdas discretas, aquí se asume que tanto la función de regresión $\mu(x)$ como la distribución de los residuos $G(s|x)$ son Lipschitz continuas respecto al espacio de covariables. Esto asegura que puntos cercanos en el tiempo tengan comportamientos predictivos similares.
+\end{enumerate}
+
+\section{Mecanismo Propuesto: Transductor Conformal por Kernel}
+
+En lugar del enfoque de histogramas anidados de Vovk, este marco propone una arquitectura adaptativa basada en dos componentes:
+
+\begin{itemize}
+    \item \textbf{Ventana Temporal Móvil ($L_n$):} Un mecanismo de truncamiento que selecciona las últimas $L_n$ observaciones. Para alcanzar la consistencia, el tamaño de esta ventana debe crecer con $n$ pero a un ritmo controlado ($L_n \to \infty$, pero $L_n/n \to 0$).
+    \item \textbf{Suavizado Espacial por Kernel ($K, h_n$):} En lugar de asignar pesos uniformes a la celda (como en Mondrian), se propone el uso de pesos de relevancia espacial $w_i = K\left(\frac{d(X_i, X_{n+1})}{h_n}\right)$. Esto permite que el sistema pondere los residuos pasados no solo por su cercanía temporal, sino por su similitud en el espacio de características.
+\end{itemize}
+
+El ancho de banda $h_n$ debe satisfacer condiciones de equilibrio similares a las de Vovk: $h_n \to 0$ (para reducir el sesgo) y $L_n h_n^p \to \infty$ (para asegurar suficientes vecinos dentro de la ventana de kernel, donde $p$ es la dimensión del espacio de características).
+
+\section{Ruta hacia la Demostración de Consistencia}
+
+La convergencia propuesta $\int f \, dQ_n \to \mathbb{E}_P(f | X_{n+1})$ en probabilidad requeriría demostrar dos resultados clave:
+
+\subsection{Convergencia del Sesgo}
+
+Por el teorema de Lévy para martingalas (usado por Vovk en el caso IID), en el contexto ergódico se necesitaría probar que:
+\begin{equation}
+    \mathbb{E}_P(f | \mathcal{K}_{h_n}(X_{n+1})) - \mathbb{E}_P(f | X_{n+1}) \to 0
+\end{equation}
+donde $\mathcal{K}_{h_n}(X_{n+1})$ representa la vecindad kernel de $X_{n+1}$. La regularidad de Lipschitz de $\mathbb{E}_P(f | x)$ garantizaría este resultado.
+
+\subsection{Convergencia de la Varianza}
+
+Utilizando la condición de $\alpha$-mixing, se podría aplicar una ley de los grandes números para procesos dependientes, demostrando que:
+\begin{equation}
+    \frac{1}{N_{h_n}} \sum_{i \in \mathcal{I}_{h_n}} f(Y_i) - \mathbb{E}_P(f | \mathcal{K}_{h_n}(X_{n+1})) \to 0
+\end{equation}
+donde $\mathcal{I}_{h_n}$ es el conjunto de índices en la vecindad kernel y $N_{h_n} = |\mathcal{I}_{h_n}|$.
+
+\section{Discusión y Perspectivas Futuras}
+
+Esta formulación plantea que la convergencia depende del balance entre el sesgo del kernel y la varianza inducida por la dependencia de los datos. Mientras que Vovk utiliza el Teorema de Lévy para martingalas bajo independencia, el análisis en series de tiempo requiere el uso de técnicas de \textit{análisis de sesgo-varianza para estimadores no paramétricos en procesos mixing}.
+
+Es importante notar que este planteamiento se presenta como una \textit{hoja de ruta teórica}. La validación rigurosa de que este transductor conformal ergódico alcanza la consistencia universal bajo cualquier proceso mixing representaría una extensión significativa del trabajo original de Vovk, unificando la robustez de la predicción conformal con la flexibilidad de la estimación no paramétrica para datos secuenciales de alta complejidad. Los experimentos numéricos presentados en los capítulos principales de esta tesis sugieren que la aproximación práctica basada en estos principios produce resultados prometedores, aunque la justificación teórica completa queda como trabajo futuro.

@@ -1,36 +1,38 @@
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {\textbf {3-1}}{\ignorespaces Configuraciones paramétricas para procesos ARMA.}}{36}{table.caption.25}%
-\contentsline {table}{\numberline {\textbf {3-2}}{\ignorespaces Configuraciones paramétricas para procesos ARIMA.}}{39}{table.caption.30}%
-\contentsline {table}{\numberline {\textbf {3-3}}{\ignorespaces Configuraciones paramétricas para procesos SETAR.}}{43}{table.caption.37}%
-\contentsline {table}{\numberline {\textbf {3-4}}{\ignorespaces Comparativa: Teoría vs. Implementación del CBB}}{45}{table.caption.47}%
-\contentsline {table}{\numberline {\textbf {3-5}}{\ignorespaces Comparativa: Teoría vs. Implementación del Sieve Bootstrap}}{49}{table.caption.60}%
-\contentsline {table}{\numberline {\textbf {3-6}}{\ignorespaces Comparativa: Teoría vs. Implementación del LSPM}}{53}{table.caption.75}%
-\contentsline {table}{\numberline {\textbf {3-7}}{\ignorespaces Comparativa: Teoría vs. Implementación del LSPMW}}{57}{table.caption.90}%
-\contentsline {table}{\numberline {\textbf {3-8}}{\ignorespaces Comparativa: Teoría vs. Implementación del MCPS}}{62}{table.caption.103}%
-\contentsline {table}{\numberline {\textbf {3-9}}{\ignorespaces Comparativa: MCPS vs. AV-MCPS}}{68}{table.caption.118}%
-\contentsline {table}{\numberline {\textbf {3-10}}{\ignorespaces Comparativa: Teoría vs. Implementación de DeepAR}}{74}{table.caption.134}%
-\contentsline {table}{\numberline {\textbf {3-11}}{\ignorespaces Comparativa Conceptual:AREPD vs Modelos Relacionados}}{78}{table.caption.147}%
-\contentsline {table}{\numberline {\textbf {3-12}}{\ignorespaces Comparativa: Teoría vs. Implementación de EnCQR-LSTM}}{84}{table.caption.163}%
-\contentsline {table}{\numberline {\textbf {3-13}}{\ignorespaces Tamaños muestrales evaluados con proporción fija}}{89}{table.caption.177}%
-\contentsline {table}{\numberline {\textbf {3-14}}{\ignorespaces Proporciones de calibración evaluadas (N=240 fijo)}}{90}{table.caption.180}%
-\contentsline {table}{\numberline {\textbf {3-15}}{\ignorespaces Resumen de la carga experimental de simulaciones complementarias}}{94}{table.caption.186}%
+\contentsline {table}{\numberline {\textbf {3-1}}{\ignorespaces Configuraciones paramétricas para procesos ARMA.}}{41}{table.caption.26}%
+\contentsline {table}{\numberline {\textbf {3-2}}{\ignorespaces Configuraciones paramétricas para procesos ARIMA.}}{44}{table.caption.31}%
+\contentsline {table}{\numberline {\textbf {3-3}}{\ignorespaces Configuraciones paramétricas para procesos SETAR.}}{48}{table.caption.38}%
+\contentsline {table}{\numberline {\textbf {3-4}}{\ignorespaces Comparativa: Teoría vs. Implementación del CBB}}{50}{table.caption.48}%
+\contentsline {table}{\numberline {\textbf {3-5}}{\ignorespaces Comparativa: Teoría vs. Implementación del Sieve Bootstrap}}{54}{table.caption.61}%
+\contentsline {table}{\numberline {\textbf {3-6}}{\ignorespaces Comparativa: Teoría vs. Implementación del LSPM}}{58}{table.caption.76}%
+\contentsline {table}{\numberline {\textbf {3-7}}{\ignorespaces Comparativa: Teoría vs. Implementación del LSPMW}}{62}{table.caption.91}%
+\contentsline {table}{\numberline {\textbf {3-8}}{\ignorespaces Comparativa: Teoría vs. Implementación del MCPS}}{67}{table.caption.104}%
+\contentsline {table}{\numberline {\textbf {3-9}}{\ignorespaces Comparativa: MCPS vs. AV-MCPS}}{73}{table.caption.119}%
+\contentsline {table}{\numberline {\textbf {3-10}}{\ignorespaces Comparativa: Teoría vs. Implementación de DeepAR}}{79}{table.caption.135}%
+\contentsline {table}{\numberline {\textbf {3-11}}{\ignorespaces Comparativa Conceptual:AREPD vs Modelos Relacionados}}{83}{table.caption.148}%
+\contentsline {table}{\numberline {\textbf {3-12}}{\ignorespaces Comparativa: Teoría vs. Implementación de EnCQR-LSTM}}{89}{table.caption.164}%
+\contentsline {table}{\numberline {\textbf {3-13}}{\ignorespaces Tamaños muestrales evaluados con proporción fija}}{94}{table.caption.178}%
+\contentsline {table}{\numberline {\textbf {3-14}}{\ignorespaces Proporciones de calibración evaluadas (N=240 fijo)}}{95}{table.caption.181}%
+\contentsline {table}{\numberline {\textbf {3-15}}{\ignorespaces Resumen de la carga experimental de simulaciones complementarias}}{99}{table.caption.187}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {\textbf {4-1}}{\ignorespaces Test de Diebold-Mariano: Sin Diferenciación vs Con Diferenciación en ARIMA}}{112}{table.caption.206}%
-\contentsline {table}{\numberline {\textbf {4-2}}{\ignorespaces Significancia estadística de diferencias por tamaño muestral: resumen por método}}{131}{table.caption.224}%
-\contentsline {table}{\numberline {\textbf {4-3}}{\ignorespaces Comparaciones significativas (Bonferroni) por escenario}}{132}{table.caption.226}%
-\contentsline {table}{\numberline {\textbf {4-4}}{\ignorespaces Significancia estadística de diferencias por proporción: resumen por método}}{142}{table.caption.235}%
-\contentsline {table}{\numberline {\textbf {4-5}}{\ignorespaces Comparaciones significativas (Bonferroni) por escenario: efecto de proporción}}{143}{table.caption.237}%
-\contentsline {table}{\numberline {\textbf {4-6}}{\ignorespaces Proporción óptima por método y escenario}}{144}{table.caption.239}%
+\contentsline {table}{\numberline {\textbf {4-1}}{\ignorespaces Test de Diebold-Mariano: Sin Diferenciación vs Con Diferenciación en ARIMA}}{117}{table.caption.207}%
+\contentsline {table}{\numberline {\textbf {4-2}}{\ignorespaces Significancia estadística de diferencias por tamaño muestral: resumen por método}}{136}{table.caption.225}%
+\contentsline {table}{\numberline {\textbf {4-3}}{\ignorespaces Comparaciones significativas (Bonferroni) por escenario}}{137}{table.caption.227}%
+\contentsline {table}{\numberline {\textbf {4-4}}{\ignorespaces Significancia estadística de diferencias por proporción: resumen por método}}{147}{table.caption.236}%
+\contentsline {table}{\numberline {\textbf {4-5}}{\ignorespaces Comparaciones significativas (Bonferroni) por escenario: efecto de proporción}}{148}{table.caption.238}%
+\contentsline {table}{\numberline {\textbf {4-6}}{\ignorespaces Proporción óptima por método y escenario}}{149}{table.caption.240}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {\textbf {5-1}}{\ignorespaces Resumen de características identificadas en el análisis exploratorio del dataset Electricity y sus implicaciones metodológicas.}}{173}{table.caption.291}%
-\contentsline {table}{\numberline {\textbf {5-2}}{\ignorespaces Ranking de modelos según desempeño en dataset Electricity.}}{175}{table.caption.295}%
-\contentsline {table}{\numberline {\textbf {5-3}}{\ignorespaces Ranking de modelos según desempeño en dataset Traffic. }}{184}{table.caption.307}%
-\contentsline {table}{\numberline {\textbf {5-4}}{\ignorespaces Matriz de valores p del test de Diebold-Mariano modificado para el dataset Traffic.}}{187}{table.caption.310}%
-\contentsline {table}{\numberline {\textbf {5-5}}{\ignorespaces Ranking de modelos según desempeño en dataset Exchange Rate.}}{197}{table.caption.320}%
-\contentsline {table}{\numberline {\textbf {5-6}}{\ignorespaces Matriz de valores p del test de Diebold-Mariano modificado para el dataset Exchange Rate. }}{199}{table.caption.323}%
-\contentsline {table}{\numberline {\textbf {5-7}}{\ignorespaces Comparación sistemática de características estructurales y desempeño de modelos a través de los tres datasets evaluados.}}{207}{table.caption.328}%
+\contentsline {table}{\numberline {\textbf {5-1}}{\ignorespaces Resumen de características identificadas en el análisis exploratorio del dataset Electricity y sus implicaciones metodológicas.}}{178}{table.caption.292}%
+\contentsline {table}{\numberline {\textbf {5-2}}{\ignorespaces Ranking de modelos según desempeño en dataset Electricity.}}{180}{table.caption.296}%
+\contentsline {table}{\numberline {\textbf {5-3}}{\ignorespaces Ranking de modelos según desempeño en dataset Traffic. }}{189}{table.caption.308}%
+\contentsline {table}{\numberline {\textbf {5-4}}{\ignorespaces Matriz de valores p del test de Diebold-Mariano modificado para el dataset Traffic.}}{192}{table.caption.311}%
+\contentsline {table}{\numberline {\textbf {5-5}}{\ignorespaces Ranking de modelos según desempeño en dataset Exchange Rate.}}{202}{table.caption.321}%
+\contentsline {table}{\numberline {\textbf {5-6}}{\ignorespaces Matriz de valores p del test de Diebold-Mariano modificado para el dataset Exchange Rate. }}{204}{table.caption.324}%
+\contentsline {table}{\numberline {\textbf {5-7}}{\ignorespaces Comparación sistemática de características estructurales y desempeño de modelos a través de los tres datasets evaluados.}}{212}{table.caption.329}%
 \addvspace {10\p@ }
+\addvspace {10\p@ }
+\def \@chapapp {\appendixname }
 \addvspace {10\p@ }
 \providecommand \tocbasic@end@toc@file {}\tocbasic@end@toc@file 
