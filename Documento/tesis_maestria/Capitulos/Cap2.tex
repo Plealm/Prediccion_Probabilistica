@@ -297,6 +297,25 @@ Una segunda variante dentro del paradigma de suavizado fijo es la \textit{asint�
 donde $I(\lambda_j)$ denota el periodograma de $d_t$ evaluado en la frecuencia de Fourier $\lambda_j = 2\pi j/n$, y $m$ es un parámetro de truncamiento mantenido fijo conforme $n \to \infty$. Bajo condiciones de regularidad, el estadístico resultante converge a una distribución $t$ con $2m$ grados de libertad \parencite{CoroneoIacone2020}.
 
 
+\subsection{Corrección de Bonferroni}
+\label{subsec:bonferroni}
+
+Cuando se realizan comparaciones múltiples entre métodos de pronóstico, surge el problema del error tipo I acumulado: la probabilidad de rechazar erróneamente al menos una hipótesis nula verdadera aumenta con el número de tests realizados. Si se efectúan $K$ comparaciones independientes, cada una al nivel de significancia $\alpha$, la probabilidad de cometer al menos un error tipo I puede alcanzar valores sustancialmente superiores a $\alpha$ \parencite{Dunn1961}.
+
+La corrección de Bonferroni \parencite{Bonferroni1936} constituye el método más conservador y ampliamente utilizado para controlar la tasa de error familiar (Family-Wise Error Rate, FWER), definida como la probabilidad de rechazar incorrectamente al menos una hipótesis nula verdadera entre el conjunto de hipótesis evaluadas. El procedimiento ajusta el nivel de significancia individual de cada test según:
+\begin{equation}
+\alpha_{\text{individual}} = \frac{\alpha_{\text{global}}}{K}
+\label{eq:bonferroni}
+\end{equation}
+donde $\alpha_{\text{global}}$ representa el nivel de significancia deseado para el conjunto completo de comparaciones (típicamente 0.05) y $K$ denota el número total de tests realizados.
+
+Bajo esta corrección, la FWER queda acotada superiormente por $\alpha_{\text{global}}$ mediante la desigualdad de Boole. Específicamente, si $P_i$ representa el valor-p del test $i$-ésimo, la hipótesis nula correspondiente se rechaza únicamente si $P_i \leq \alpha_{\text{global}}/K$. Este ajuste garantiza que:
+\begin{equation}
+\text{FWER} = P\left(\bigcup_{i=1}^K \{\text{rechazar } H_{0,i} | H_{0,i} \text{ verdadera}\}\right) \leq \sum_{i=1}^K P(\text{rechazar } H_{0,i} | H_{0,i} \text{ verdadera}) \leq \alpha_{\text{global}}
+\end{equation}
+
+En el contexto de este trabajo, donde se comparan nueve métodos de pronóstico probabilístico, el número de comparaciones pareadas asciende a $K = \binom{9}{2} = 36$. Aplicando la corrección de Bonferroni con $\alpha_{\text{global}} = 0.05$, cada test de Diebold-Mariano individual se evalúa al nivel $\alpha_{\text{individual}} = 0.05/36 \approx 0.0014$. Si bien este ajuste reduce la potencia estadística de cada test individual, proporciona garantías rigurosas contra conclusiones espurias derivadas de comparaciones múltiples, aspecto fundamental cuando se busca identificar diferencias genuinas en el desempeño predictivo entre metodologías competidoras.
+
 \section{Predicción Conformal por Intervalos: El Enfoque IID}
 \label{sec:prediccion_conformal_intervalos_IIE}
 

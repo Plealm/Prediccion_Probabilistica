@@ -256,6 +256,36 @@
       \field{pages}{7067\bibrangedash 7083}
       \range{pages}{17}
     \endentry
+    \entry{Bonferroni1936}{article}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=409895eb1d7d7f5570c5f71ef50941dc}{%
+           family={Bonferroni},
+           familyi={B\bibinitperiod},
+           given={Carlo},
+           giveni={C\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{409895eb1d7d7f5570c5f71ef50941dc}
+      \strng{fullhash}{409895eb1d7d7f5570c5f71ef50941dc}
+      \strng{fullhashraw}{409895eb1d7d7f5570c5f71ef50941dc}
+      \strng{bibnamehash}{409895eb1d7d7f5570c5f71ef50941dc}
+      \strng{authorbibnamehash}{409895eb1d7d7f5570c5f71ef50941dc}
+      \strng{authornamehash}{409895eb1d7d7f5570c5f71ef50941dc}
+      \strng{authorfullhash}{409895eb1d7d7f5570c5f71ef50941dc}
+      \strng{authorfullhashraw}{409895eb1d7d7f5570c5f71ef50941dc}
+      \field{sortinit}{B}
+      \field{sortinithash}{d7095fff47cda75ca2589920aae98399}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Pubblicazioni del R Istituto Superiore di Scienze Economiche e Commerciali di Firenze}
+      \field{title}{Teoria statistica delle classi e calcolo delle probabilità}
+      \field{volume}{8}
+      \field{year}{1936}
+      \field{pages}{3\bibrangedash 62}
+      \range{pages}{60}
+    \endentry
     \entry{Bontempi2013}{incollection}{}{}
       \name{author}{3}{}{%
         {{un=0,uniquepart=base,hash=3bb195d6ea6db0c1df418e2f92f319fc}{%
@@ -867,6 +897,40 @@
       \range{pages}{11}
       \verb{doi}
       \verb 10.1080/07350015.1995.10524599
+      \endverb
+    \endentry
+    \entry{Dunn1961}{article}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=0b0af97d4f9c67ace0f8c55bd08f9072}{%
+           family={Dunn},
+           familyi={D\bibinitperiod},
+           given={Olive\bibnamedelima Jean},
+           giveni={O\bibinitperiod\bibinitdelim J\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{0b0af97d4f9c67ace0f8c55bd08f9072}
+      \strng{fullhash}{0b0af97d4f9c67ace0f8c55bd08f9072}
+      \strng{fullhashraw}{0b0af97d4f9c67ace0f8c55bd08f9072}
+      \strng{bibnamehash}{0b0af97d4f9c67ace0f8c55bd08f9072}
+      \strng{authorbibnamehash}{0b0af97d4f9c67ace0f8c55bd08f9072}
+      \strng{authornamehash}{0b0af97d4f9c67ace0f8c55bd08f9072}
+      \strng{authorfullhash}{0b0af97d4f9c67ace0f8c55bd08f9072}
+      \strng{authorfullhashraw}{0b0af97d4f9c67ace0f8c55bd08f9072}
+      \field{sortinit}{D}
+      \field{sortinithash}{6f385f66841fb5e82009dc833c761848}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Journal of the American Statistical Association}
+      \field{number}{293}
+      \field{title}{Multiple Comparisons Among Means}
+      \field{volume}{56}
+      \field{year}{1961}
+      \field{pages}{52\bibrangedash 64}
+      \range{pages}{13}
+      \verb{doi}
+      \verb 10.1080/01621459.1961.10482090
       \endverb
     \endentry
     \entry{GneitingBalabdaoui2007}{article}{}{}

@@ -90,7 +90,7 @@ Adicionalmente, considerando que cada configuración se evalúa en un horizonte 
 Para cada una de las 420 configuraciones, se implementa el siguiente protocolo de simulación:
 
 \begin{enumerate}
-\item \textbf{Generación de la Serie:} Se simulan $n_{\text{total}} = 302$ observaciones del proceso especificado, precedidas por un período de burn-in de 50 observaciones que se descartan para eliminar el efecto de las condiciones iniciales. Esto resulta en una serie efectiva de longitud $n = 252$.
+\item \textbf{Generación de la Serie:} Se simulan $n_{\text{total}} = 302$ observaciones del proceso especificado, precedidas por un período de burn-in de 50 observaciones que se descartan para eliminar el efecto de las condiciones iniciales. Esto resulta en una serie efectiva de longitud $n = 252$ lo cual emula condiciones similares a las encontradas en algunas series de distintas frecuencias (21 años de una serie mensual, o aproximadamente 5 años de una serie semanal, o 9 meses de una serie diaria) .
 
 \item \textbf{Partición Tripartita:} La serie se divide en tres conjuntos disjuntos:
 \begin{itemize}
@@ -132,7 +132,7 @@ Utilizando el operador de rezagos $L$ definido por $L^k Y_t = Y_{t-k}$, el proce
 \Phi(L) Y_t = c + \Theta(L) \varepsilon_t
 \label{eq:arma_lag_operator}
 \end{equation}
-donde $\Phi(L) = 1 - \sum_{i=1}^p \phi_i L^i$ es el polinomio autorregresivo y $\Theta(L) = 1 + \sum_{j=1}^q \theta_j L^j$ es el polinomio de media móvil.
+donde $\Phi(L) = 1 - \sum_{i=1}^p \phi_i L^i$ es el polinomio autorregresivo y $\Theta(L) = 1 + \sum_{j=1}^q \theta_j L^j$ es el polinomio de media móvil suponiendo que no hay raíces comunes entre el polinomio $\Phi$ y $\Theta$.
 
 \subsubsection{Condiciones de Estacionariedad e Invertibilidad}
 
@@ -148,7 +148,7 @@ Estas condiciones garantizan que el proceso admite representaciones de Wold (MA$
 
 \subsubsection{Distribución Predictiva Verdadera}
 
-Para un proceso ARMA estacionario e invertible, la distribución del siguiente valor $Y_{n+1}$ condicionada a la historia observada $\mathcal{F}_n = \{Y_1, \ldots, Y_n, \varepsilon_1, \ldots, \varepsilon_n\}$ tiene una forma analítica explícita. Dado que el modelo es lineal, la distribución condicional está completamente caracterizada por su media y varianza condicionales.
+Para un proceso ARMA estacionario e invertible, la distribución del siguiente valor $Y_{n+1}$ condicionada a la historia observada $\mathcal{F}_n = \{Y_1, \ldots, Y_n, \varepsilon_1, \ldots, \varepsilon_n\}$ tiene una forma analítica explícita. Dado que el modelo es lineal, la distribución condicional un paso adelante puede conocerse gracias a la ecuación en diferencias, por medio de la media condicional y la varianza condicional.
 
 La media condicional se obtiene de la ecuación estructural del modelo:
 \begin{equation}
@@ -238,15 +238,15 @@ W_t = Y_t - Y_{t-1}
 
 y su predicción un paso adelante, condicionada a la historia $\mathcal{F}_n = \{Y_1, \ldots, Y_n, \varepsilon_1, \ldots, \varepsilon_n\}$, sigue la distribución ARMA:
 \begin{equation}
+    \label{eq:ARIMA_densidad}
 W_{n+1} \mid \mathcal{F}_n \sim F\left(\mathbb{E}[W_{n+1} \mid \mathcal{F}_n], \sigma^2\right)
 \end{equation}
-
 donde:
 \begin{equation}
 \mathbb{E}[W_{n+1} \mid \mathcal{F}_n] = c + \sum_{i=1}^p \phi_i W_{n+1-i} + \sum_{j=1}^q \theta_j \varepsilon_{n+1-j}
 \label{eq:arima_diff_conditional_mean}
 \end{equation}
-
+La ecuación \ref{eq:ARIMA_densidad} es un paso intermedio crucial, ya que la distribución predictiva verdadera para $Y_{n+1}$ se deriva de esta distribución por la recursividad.
 Segundo, se recupera la predicción en la escala original mediante la relación de integración:
 \begin{equation}
 Y_{n+1} = Y_n + W_{n+1}
@@ -395,7 +395,7 @@ Y_{n+1} \mid \mathcal{F}_n \sim F_j\left(\mathbb{E}[Y_{n+1} \mid \mathcal{F}_n, 
 \label{eq:setar_predictive_distribution}
 \end{equation}
 
-donde $F_j$ es la distribución del ruido en el régimen $j$ y el subíndice $j$ se determina mediante \eqref{eq:setar_regime_determination}.
+donde $F_j$ es la distribución del ruido en el régimen $j$ y el subíndice $j$ se determina mediante \eqref{eq:setar_regime_determination}. Cabe aclarar la recursividad y la ecuación en diferencias son la base para la evaluación de esta distribución, ya que el valor futuro $Y_{n+1}$ depende de valores pasados que a su vez dependen de regímenes anteriores. 
 
 Esta distribución puede evaluarse numéricamente generando una muestra grande de errores futuros específicos del régimen activo:
 \begin{equation}
@@ -435,6 +435,7 @@ Finalmente, es importante destacar que todas las configuraciones detalladas en l
 % Modelos predictivos
 % ===========================================================================
 
+
 \section{Modelos predictivos}
 \label{sec:modelos_predictivos}
 Para evaluar la capacidad de cuantificación de la incertidumbre en diversos entornos estocásticos, esta investigación emplea un conjunto heterogéneo de nueve modelos predictivos. Esta selección abarca desde métodos de remuestreo clásicos y propuestas de predicción conformal, hasta arquitecturas de aprendizaje profundo y modelos híbridos. El uso de esta diversidad de enfoques permite contrastar cómo las garantías teóricas de cada familia de modelos se traducen en un rendimiento práctico bajo la métrica ECRPS, especialmente cuando se enfrentan a la ruptura de los supuestos de intercambiabilidad y linealidad.
@@ -445,12 +446,12 @@ Para evaluar la capacidad de cuantificación de la incertidumbre en diversos ent
 \label{subsec:CCB}
 \paragraph{Explicación Teórica del Modelo}
 
-El método \textit{Circular Block Bootstrap} (CBB), introducido por \textcite{politis1992circular}, representa una evolución metodológica del remuestreo por bloques que aborda una limitación fundamental de los esquemas no circulares como el Moving Block Bootstrap (MBB). Según \textcite{Lahiri2003}, el problema radica en que las observaciones ubicadas en los extremos de la serie temporal $\{X_1, \dots, X_n\}$ aparecen con menor frecuencia en los bloques remuestreados, generando una infra-representación sistemática de los bordes y sesgo en la estimación de varianza.
+El método \textit{Circular Block Bootstrap} (CBB), introducido por \textcite{politis1992circular}, representa una evolución metodológica del remuestreo por bloques que aborda una limitación fundamental de los esquemas no circulares como el Moving Block Bootstrap (MBB). Según \textcite{Lahiri2003}, el problema radica en que las observaciones ubicadas en los extremos de la serie temporal $\{Y_1, \dots, Y_n\}$ aparecen con menor frecuencia en los bloques remuestreados, generando una infra-representación sistemática de los bordes y sesgo en la estimación de varianza.
 
 \subparagraph{Fundamento Teórico}
-El CBB resuelve esta asimetría mediante la \textit{circunscripción} de los datos: la serie temporal se conceptualiza como una estructura circular donde $X_n$ es seguido inmediatamente por $X_1$, permitiendo la continuidad periódica. Formalmente, para una serie de longitud $n$ y bloques de tamaño $l$, se definen exactamente $n$ bloques posibles:
+El CBB resuelve esta asimetría mediante la \textit{circunscripción} de los datos: la serie temporal se conceptualiza como una estructura circular donde $Y_n$ es seguido inmediatamente por $Y_1$, permitiendo la continuidad periódica. Formalmente, para una serie de longitud $n$ y bloques de tamaño $l$, se definen exactamente $n$ bloques posibles:
 \begin{equation}
-B_i = \{X_i, X_{i+1 \bmod n}, \dots, X_{i+l-1 \bmod n}\}, \quad i = 1,\dots,n
+B_i = \{Y_i, Y_{i+1 \bmod n}, \dots, Y_{i+l-1 \bmod n}\}, \quad i = 1,\dots,n
 \end{equation}
 
 donde el operador módulo ($\bmod$) implementa la extensión circular. Esta construcción garantiza que cada observación histórica tiene probabilidad idéntica $1/n$ de ser seleccionada como punto de inicio de un bloque, eliminando el sesgo de borde.
@@ -460,13 +461,13 @@ El procedimiento de generación de muestras bootstrap opera en dos etapas:
 
 \begin{enumerate}
     \item \textbf{Muestreo de puntos de inicio}: Se seleccionan $B$ índices $\{i_1, \dots, i_B\}$ uniformemente de $\{1,\dots,n\}$, donde $B$ es el número de réplicas bootstrap deseadas.
-    \item \textbf{Construcción de bloques circulares}: Cada réplica $X^*_b$ se forma extrayendo el bloque circular iniciado en $i_b$:
+    \item \textbf{Construcción de bloques circulares}: Cada réplica $Y^*_b$ se forma extrayendo el bloque circular iniciado en $i_b$:
     \begin{equation}
-    X^*_b = X_{(i_b + r) \bmod n}, \quad r \in \{0, 1, \dots, l-1\}
+    Y^*_b = Y_{(i_b + r) \bmod n}, \quad r \in \{0, 1, \dots, l-1\}
     \end{equation}
 \end{enumerate}
 
-Para pronóstico un paso adelante, la distribución predictiva se aproxima mediante el conjunto de valores finales de cada bloque: $\{\hat{y}_{t+1}^{(1)}, \dots, \hat{y}_{t+1}^{(B)}\}$, donde $\hat{y}_{t+1}^{(b)} = X^*_b$.
+Para pronóstico un paso adelante, la distribución predictiva se aproxima mediante el conjunto de valores finales de cada bloque: $\{\hat{y}_{t+1}^{(1)}, \dots, \hat{y}_{t+1}^{(B)}\}$, donde $\hat{y}_{t+1}^{(b)} = Y^*_b$.
 
 \subparagraph{Propiedades Estadísticas}
 \textcite{Lahiri2003} establece que bajo condiciones de mixing (dependencia que decae con el tiempo), el estimador CBB de la varianza es consistente cuando $l \to \infty$ y $l/n \to 0$ conforme $n \to \infty$. La equiprobabilidad de selección garantiza distribuciones predictivas mejor calibradas en contextos de dependencia temporal, haciendo al CBB apropiado para series financieras y económicas donde la estructura de autocorrelación es relevante.
@@ -485,7 +486,7 @@ La teoría clásica del CBB \parencite{politis1992circular} genera bloques compl
 Mientras que la teoría requiere especificación manual del tamaño de bloque basado en análisis del proceso estocástico subyacente, la implementación incorpora la heurística automática de \textcite{politis2004automatic}: $l \approx 1.5 \times n^{1/3}$, ademas de otros valores de refencia para balancear eficiencia y captura de dependencia.
 
 \subparagraph{Adaptación 3: Congelamiento Post-Optimización}
-A diferencia de implementaciones estándar que podrían recalcular $l$ en cada paso, el diseño experimental congela el hiperparámetro tras la fase de validación, este congelamiento es crítico para prevenir \textit{data leakage}: re-optimizar en ventanas rolling introduciría información futura en la selección del modelo, violando la evaluación predictiva rigurosa.
+A diferencia de implementaciones estándar que podrían recalcular $l$ en cada paso, el diseño experimental congela el hiperparámetro tras la fase de validación. Este congelamiento es crítico para prevenir \textit{data leakage}: re-optimizar en ventanas rolling introduciría información futura en la selección del modelo, violando la evaluación predictiva rigurosa.
 
 \begin{table}[h]
 \centering
@@ -526,15 +527,15 @@ Una vez identificado el valor óptimo mediante validación, este se congela y se
 El \textit{Sieve Bootstrap}, introducido por \textcite{Buhlmann1997} y analizado en profundidad por \textcite{Lahiri2003}, representa un enfoque alternativo al remuestreo por bloques para series temporales dependientes. En lugar de preservar la dependencia mediante partición física de la serie, el método emplea una aproximación paramétrica para filtrar la estructura de autocorrelación.
 
 \paragraph{Fundamento Teórico}
-El Sieve Bootstrap se fundamenta en el teorema de Wold, que establece que cualquier proceso estocástico estacionario linealmente regular admite una representación autorregresiva de orden infinito, AR($\infty$). Formalmente, para una serie temporal $\{X_t\}$ estacionaria con media $\mu$, existe una representación:
+El Sieve Bootstrap se fundamenta en el teorema de Wold, que establece que cualquier proceso estocástico estacionario linealmente regular admite una representación autorregresiva de orden infinito, AR($\infty$). Formalmente, para una serie temporal $\{Y_t\}$ estacionaria con media $\mu$, existe una representación:
 \begin{equation}
-X_t - \mu = \sum_{j=1}^{\infty} \phi_j (X_{t-j} - \mu) + \epsilon_t
+Y_t - \mu = \sum_{j=1}^{\infty} \phi_j (Y_{t-j} - \mu) + \epsilon_t
 \end{equation}
 donde $\{\epsilon_t\}$ es un proceso de innovaciones i.i.d. con media cero y varianza $\sigma^2$.
 
 En la práctica, esta representación infinita se aproxima mediante un modelo autorregresivo finito AR($p$) donde $p$ crece con el tamaño muestral $n$:
 \begin{equation}
-X_t = \phi_0 + \sum_{j=1}^{p} \phi_j X_{t-j} + \epsilon_t
+Y_t = \phi_0 + \sum_{j=1}^{p} \phi_j Y_{t-j} + \epsilon_t
 \end{equation}
 
 \paragraph{Algoritmo de Remuestreo}
@@ -545,7 +546,7 @@ El procedimiento del Sieve Bootstrap opera en tres etapas secuenciales:
     
     \item \textbf{Extracción de residuos}: Se calculan los residuos del modelo ajustado:
     \begin{equation}
-    \hat{\epsilon}_t = X_t - \hat{\phi}_0 - \sum_{j=1}^{p} \hat{\phi}_j X_{t-j}, \quad t = p+1, \dots, n
+    \hat{\epsilon}_t = Y_t - \hat{\phi}_0 - \sum_{j=1}^{p} \hat{\phi}_j Y_{t-j}, \quad t = p+1, \dots, n
     \end{equation}
     que idealmente deben comportarse como realizaciones i.i.d. Estos residuos se centran: $\tilde{\epsilon}_t = \hat{\epsilon}_t - \bar{\epsilon}$.
     
@@ -554,12 +555,12 @@ El procedimiento del Sieve Bootstrap opera en tres etapas secuenciales:
         \item Se remuestrean con reemplazo los residuos centrados: $\epsilon^*_b \sim \{\tilde{\epsilon}_{p+1}, \dots, \tilde{\epsilon}_n\}$
         \item Se genera la predicción un paso adelante:
         \begin{equation}
-        \hat{X}_{n+1}^{(b)} = \hat{\phi}_0 + \sum_{j=1}^{p} \hat{\phi}_j X_{n+1-j} + \epsilon^*_b
+        \hat{Y}_{n+1}^{(b)} = \hat{\phi}_0 + \sum_{j=1}^{p} \hat{\phi}_j Y_{n+1-j} + \epsilon^*_b
         \end{equation}
     \end{itemize}
 \end{enumerate}
 
-La distribución predictiva empírica está dada por el conjunto $\{\hat{X}_{n+1}^{(1)}, \dots, \hat{X}_{n+1}^{(B)}\}$.
+La distribución predictiva empírica está dada por el conjunto $\{\hat{Y}_{n+1}^{(1)}, \dots, \hat{Y}_{n+1}^{(B)}\}$.
 
 \paragraph{Propiedades de Consistencia}
 \textcite{Buhlmann1997} demuestra que bajo condiciones de regularidad (estacionaridad, ergodicidad, y $p = p_n \to \infty$ con $p_n^3/n \to 0$), el Sieve Bootstrap aproxima consistentemente la distribución del estimador de interés. La clave es que el orden $p$ debe crecer suficientemente para capturar la dependencia, pero no tan rápido como para introducir varianza excesiva por sobreparametrización.
@@ -572,7 +573,7 @@ El Sieve Bootstrap es un método \textbf{semiparamétrico}: utiliza una estructu
 La implementación desarrollada incorpora tres adaptaciones clave para el contexto de pronóstico rolling:
 
 \subparagraph{Adaptación 1: Selección de Orden Basada en Validación}
-Mientras la teoría asintótica sugiere $p \to \infty$ con $n$, la implementación emplea una grilla discreta de órdenes candidatos $p \in \{5, 10, 20\}$ evaluados mediante ECRPS en validación. Esta discretización responde a dos consideraciones prácticas: (i) evitar sobreparametrización en muestras finitas ($n = 200$), y (ii) reducir tiempo computacional frente a búsquedas exhaustivas.
+Mientras la teoría asintótica sugiere $p \to \infty$, la implementación emplea una grilla discreta de órdenes candidatos $p \in \{5, 10, 20\}$ evaluados mediante ECRPS en validación. Esta discretización responde a dos consideraciones prácticas: (i) evitar sobreparametrización en muestras finitas ($n = 200$), y (ii) reducir tiempo computacional frente a búsquedas exhaustivas.
 
 \subparagraph{Adaptación 2: Congelamiento de Parámetros AR}
 La implementación introduce un mecanismo de congelamiento crítico: durante la fase de calibración, se ajusta el modelo AR($p^*$) con orden óptimo $p^*$ sobre los datos de entrenamiento+calibración combinados, almacenando permanentemente:
@@ -597,7 +598,7 @@ donde $\epsilon^*_b$ se muestrea de $\tilde{\epsilon}^*$ con reemplazo.
 \toprule
 \textbf{Aspecto} & \textbf{Teoría Clásica} & \textbf{Implementación} \\
 \midrule
-Orden AR & $p \to \infty$ con $n$ & Grilla discreta $\{5, 10, 20\}$\\
+Orden AR & $p \to \infty$  & Grilla discreta $\{5, 10, 20\}$\\
 Selección de $p$ & Criterios asintóticos & Validación cruzada (ECRPS) \\
 Parámetros $\hat{\phi}$ & Re-estimados en cada muestra & Congelados post-calibración \\
 Residuos & Recalculados dinámicamente & Pool fijo $\tilde{\epsilon}^*$ \\
@@ -669,7 +670,22 @@ B_i = \sqrt{1 - h_{n,n}} + \frac{h_{i,n}}{\sqrt{1 - h_{i,i}}}
 A_i = \frac{\sum_{j=1}^{n-1} h_{j,n} y_j}{\sqrt{1 - h_{n,n}}} + \frac{y_i - \sum_{j=1}^{n-1} h_{i,j} y_j}{\sqrt{1 - h_{i,i}}}
 \end{equation}
 
-El término $A_i$ combina dos componentes: (i) la predicción OLS estándar sobre el punto nuevo, normalizada por su leverage, y (ii) el residuo studentizado del punto $i$ en un ajuste leave-one-out. El término $B_i$ normaliza esta combinación considerando el leverage tanto del punto nuevo ($h_{n,n}$) como del punto histórico ($h_{i,i}$) y su covarianza ($h_{i,n}$).
+El término $A_i$ combina dos componentes: (i) la predicción OLS estándar sobre el punto nuevo, normalizada por su palanca (leverage), y (ii) el residuo studentizado del punto $i$ en un ajuste leave-one-out. El término $B_i$ normaliza esta combinación considerando el leverage tanto del punto nuevo ($h_{n,n}$) como del punto histórico ($h_{i,i}$) y su covarianza ($h_{i,n}$).
+
+Ordenando la secuencia de conformidad $C_1, \ldots, C_{n-1}$ en orden ascendente como $C_{(1)} \leq \cdots \leq C_{(n-1)}$, y definiendo $C_{(0)} := -\infty$ y $C_{(n)} := \infty$, la distribución predictiva se expresa como:
+
+\begin{equation}
+    \bar{\Pi}_n(y) := 
+    \begin{cases}
+        \left[\frac{i'}{n}, \frac{i'+1}{n}\right] & \text{si } y \in (C_{(i)}, C_{(i+1)}) \text{ para } i \in \{0, 1, \ldots, n-1\} \\
+        \left[\frac{i'}{n}, \frac{i''}{n}\right] & \text{si } y = C_{(i)} \text{ para } i \in \{1, \ldots, n-1\}
+    \end{cases}
+\end{equation}
+
+donde $i' := \min\{j : C_{(j)} = C_{(i)}\}$ y $i'' := \max\{j : C_{(j)} = C_{(i)}\}$.
+
+Esta representación explícita revela que la distribución predictiva de la LSPM estudiantizada es una función escalonada con a lo sumo $n-1$ puntos de discontinuidad, cada uno correspondiente a un valor único de los puntajes de conformidad ordenados. El grosor de cada intervalo es igual a $1/n$, excepto en los puntos de empate donde varios puntajes de conformidad coinciden.
+
 
 \subparagraph{Propiedades Estadísticas}
 \textcite{Vovk2022} demuestra que bajo intercambiabilidad, la función de distribución construida mediante estos valores críticos es estadísticamente válida: para cualquier nivel de confianza $\alpha$, el intervalo de predicción conformal tiene cobertura exacta $1-\alpha$ en expectativa sobre la secuencia intercambiable. La studentización es crucial para mantener esta validez incluso cuando $h_{n,n} \to 1$ (leverage extremo del punto de prueba).
@@ -682,9 +698,9 @@ El LSPM es un método \textbf{no paramétrico} basado en distribución-libre (\t
 La implementación desarrollada adapta el marco teórico de Vovk al contexto específico de pronóstico en series temporales:
 
 \subparagraph{Adaptación 1: Construcción Autorregresiva}
-La teoría original asume vectores de características $x_i$ independientes. En series temporales, se construyen objetos dinámicamente mediante retardos: dado $p$ lags, cada observación se transforma en un vector autorregresivo:
+La teoría original asume vectores de características $X_i$ independientes. En series temporales, se construyen objetos dinámicamente mediante retardos: dado $p$ lags, cada observación se transforma en un vector autorregresivo:
 \begin{equation}
-x_t = (y_{t-1}, y_{t-2}, \dots, y_{t-p})^T
+X_t = (Y_{t-1}, Y_{t-2}, \dots, Y_{t-p})^T
 \end{equation}
 
 Esto convierte al LSPM en un predictor conformal autorregresivo AR($p$), donde la matriz de diseño se construye dinámicamente en cada ventana rolling usando los últimos $n$ valores disponibles.
@@ -721,7 +737,7 @@ Valores críticos & Todos los $n-1$ puntos & Solo puntos con $B_i$ válido\\
 \subparagraph{Parámetro Principal: \texttt{n\_lags} ($p$)}
 Define el orden autorregresivo del modelo, controlando cuántos retardos se usan para construir la matriz de diseño. La implementación emplea la heurística:
 \begin{equation}
-p = \max\left(1, \lfloor n^{1/3} \rfloor\right)
+p = \max\left\{1, \lfloor n^{1/3} \rfloor\right\}
 \end{equation}
 
 Esta regla está motivada por consideraciones teóricas de métodos de tamiz (sieve methods) en estadística no paramétrica, donde el número de parámetros $p$ debe crecer con el tamaño muestral $n$ pero a una tasa controlada que preserve consistencia. La tasa $n^{1/3}$ es estándar en la literatura de bootstrap para series temporales \parencite{Buhlmann1997, politis2004automatic}, garantizando que $p \to \infty$ conforme $n \to \infty$, pero manteniendo $p^3/n \to 0$ para evitar sobreajuste. Esta misma tasa aparece en la heurística de longitud de bloque del CBB, reflejando un principio unificado: el número de parámetros debe escalar subcuadráticamente con la muestra. Para $n = 200$, resulta $p \approx 5$ lags, suficiente para capturar autocorrelaciones de corto plazo sin saturar los grados de libertad del modelo OLS subyacente.
@@ -864,7 +880,7 @@ La Tabla \ref{tab:deepar_comparison} resume las diferencias metodológicas entre
 \toprule
 \textbf{Aspecto} & \textbf{DeepAR Original} & \textbf{Implementación (Esta Tesis)} \\
 \midrule
-Contexto de aplicación & Miles de series relacionadas & Serie temporal única (windowing local) \\
+Contexto de aplicación & Miles de series relacionadas & Serie temporal única \\
 Covariables & Múltiples features temporales & Sin covariables externas \\
 Verosimilitud & Gaussiana y Binomial Negativa & Gaussiana únicamente \\
 Normalización & Escalamiento por $\nu_i$ & Z-score completo \\
@@ -960,6 +976,51 @@ donde $i$ indexa los residuos en orden cronológico (de más antiguo a más reci
 
 El peso efectivo del $i$-ésimo residuo decrece exponencialmente conforme retrocedemos en el tiempo, otorgando a la observación más reciente ($i = n-1$) peso $\rho^0 = 1$, y a la más antigua ($i = 1$) peso $\rho^{n-2}$.
 
+
+\subparagraph{Construcción de la Distribución Predictiva Ponderada}
+
+El LSPMW modifica la distribución predictiva del LSPM mediante la introducción de pesos temporales que priorizan observaciones recientes. Partiendo de los valores críticos studentizados $\{C_1, \ldots, C_{n-1}\}$ calculados según las ecuaciones del LSPM base, se asignan pesos geométricos decrecientes:
+
+\begin{equation}
+w_i = \rho^{n-1-i}, \quad i = 1, \ldots, n-1
+\label{eq:lspmw_raw_weights}
+\end{equation}
+
+donde $\rho \in (0, 1]$ es el parámetro de decaimiento temporal. El índice $i$ representa el orden cronológico, con $i=1$ correspondiendo a la observación más antigua y $i=n-1$ a la más reciente. Así, $w_{n-1} = \rho^0 = 1$ (peso máximo para el residuo más reciente) y $w_1 = \rho^{n-2}$ (peso mínimo para el residuo más antiguo).
+
+Para construir una distribución de probabilidad válida, los pesos se normalizan:
+
+\begin{equation}
+\tilde{w}_i = \frac{w_i}{\sum_{j=1}^{n-1} w_j} = \frac{\rho^{n-1-i}}{\sum_{j=1}^{n-1} \rho^{n-1-j}}
+\label{eq:lspmw_normalized_weights}
+\end{equation}
+
+de manera que $\sum_{i=1}^{n-1} \tilde{w}_i = 1$.
+
+La distribución predictiva conformal ponderada se define mediante la función de distribución acumulada empírica ponderada. Ordenando los valores críticos en orden ascendente como $C_{(1)} \leq \cdots \leq C_{(n-1)}$, y definiendo $C_{(0)} := -\infty$ y $C_{(n)} := \infty$, la distribución predictiva se expresa como:
+
+\begin{equation}
+    \bar{\Pi}_n^{\text{LSPMW}}(y) := 
+    \begin{cases}
+        \left[\sum_{j=1}^{i} \tilde{w}_{(j)}, \sum_{j=1}^{i+1} \tilde{w}_{(j)}\right] & \text{si } y \in (C_{(i)}, C_{(i+1)}) \text{ para } i \in \{0, 1, \ldots, n-1\} \\
+        \left[\sum_{j=1}^{i'} \tilde{w}_{(j)}, \sum_{j=1}^{i''} \tilde{w}_{(j)}\right] & \text{si } y = C_{(i)} \text{ para } i \in \{1, \ldots, n-1\}
+    \end{cases}
+    \label{eq:lspmw_predictive_dist}
+\end{equation}
+
+donde $\tilde{w}_{(j)}$ denota el peso normalizado correspondiente al valor crítico ordenado $C_{(j)}$, y en caso de empates, $i' := \min\{j : C_{(j)} = C_{(i)}\}$ y $i'' := \max\{j : C_{(j)} = C_{(i)}\}$.
+
+Esta representación revela que, a diferencia del LSPM uniforme donde cada salto tiene masa $1/n$, el LSPMW asigna saltos de masa variable $\tilde{w}_{(i)}$ dependiendo de la antigüedad temporal del valor crítico correspondiente. El efecto práctico es que valores críticos recientes contribuyen más significativamente a la distribución predictiva, adaptándola a derivas distributivas graduales.
+
+Equivalentemente, la función de distribución acumulada puede expresarse como:
+
+\begin{equation}
+F_{Y_{n+1}}^{\text{LSPMW}}(y) = \sum_{i=1}^{n-1} \tilde{w}_i \cdot \mathbbm{1}\{C_i \leq y\}
+\label{eq:lspmw_cdf}
+\end{equation}
+
+Esta formulación explicita que la distribución es una mezcla finita de distribuciones degeneradas (deltas de Dirac) en los valores críticos, con pesos no uniformes determinados por el esquema de decaimiento geométrico.
+
 \subparagraph{Cuantiles Ponderados}
 Para un nivel de cobertura $\alpha$, el cuantil $(1-\alpha)$ de la distribución ponderada se obtiene mediante:
 \begin{equation}
@@ -967,14 +1028,6 @@ q_{1-\alpha} = \inf\left\{y : \sum_{i: C_i \leq y} \tilde{w}_i \geq 1-\alpha\rig
 \end{equation}
 
 Este cuantil ponderado adapta la región de predicción conforme la distribución subyacente cambia en el tiempo.
-
-\subparagraph{Propiedades de Cobertura}
-\textcite{Barber2023} establecen que bajo deriva Lipschitz-continua con constante $L$, el error de cobertura del predictor ponderado satisface:
-\begin{equation}
-\left|\mathbb{P}(Y_{n+1} \in \hat{C}_{1-\alpha}) - (1-\alpha)\right| \leq O\left(\frac{L}{\rho} + \frac{1}{\sqrt{n_{\text{eff}}}}\right)
-\end{equation}
-
-donde $n_{\text{eff}} = (\sum_i \tilde{w}_i^2)^{-1}$ es el tamaño de muestra efectivo. Esta cota revela el trade-off: $\rho$ pequeño reduce sesgo por deriva ($L/\rho$ disminuye) pero aumenta varianza ($n_{\text{eff}}$ disminuye).
 
 \subparagraph{Clasificación del Modelo}
 El LSPMW es un método \textbf{no paramétrico adaptativo}. Mantiene la propiedad distribution-free del LSPM (no asume forma distribucional de errores) pero introduce un mecanismo de ponderación que adapta la distribución predictiva a cambios temporales sin modelar explícitamente la deriva.
@@ -1102,31 +1155,77 @@ C_j^{\kappa^*} = h(x) + (y_j - h(x_j)), \quad \forall (x_j, y_j) \in \mathcal{D}
 
 Esta formulación es algebraicamente idéntica al SCPS, pero la diferencia crítica reside en que los residuos históricos provienen exclusivamente de casos con comportamiento predictivo similar. Matemáticamente, se estima la distribución condicional $P(\epsilon \mid h(x) \in \text{Bin}_{\kappa})$ localmente, en lugar de globalmente como en SCPS donde se asume $P(\epsilon \mid h(x)) = P(\epsilon)$.
 
-\subparagraph{Construcción de la Distribución Predictiva}
+\subparagraph{Construcción de la Distribución Predictiva Localizada}
 
-Según \textcite{Vovk2022}, el conjunto de scores ordenados $C_{(1)}^{\kappa^*} < C_{(2)}^{\kappa^*} < \cdots < C_{(N_c^{\kappa^*})}^{\kappa^*}$ define una distribución empírica que aproxima la distribución predictiva verdadera. Para cualquier función medible $g$:
+El MCPS construye una distribución predictiva mediante particionamiento adaptativo del espacio de calibración, permitiendo que la incertidumbre varíe según el régimen operativo del modelo. El proceso se articula en tres etapas: particionamiento Mondrian, localización del bin, y generación de scores conformales.
 
-\begin{equation}
-\mathbb{E}[g(Y) \mid x \in \text{Bin}_{\kappa^*}] \approx \frac{1}{N_c^{\kappa^*}} \sum_{j=1}^{N_c^{\kappa^*}} g(C_j^{\kappa^*})
-\end{equation}
+\textbf{Etapa 1: Particionamiento Mondrian del Conjunto de Calibración}
 
-con error que converge a cero cuando $N_c^{\kappa^*} \to \infty$. Esto implica que cualquier estadístico (media, varianza, cuantiles) puede calcularse directamente sobre los scores sin reconstruir una CDF completa.
-
-\subparagraph{Garantías de Cobertura Local}
-
-\textcite{Bostrom2021} demuestran que, bajo intercambiabilidad dentro de cada bin, se logra \textbf{cobertura condicional válida} en cada estrato. Para cualquier nivel $\alpha$:
+Dado un conjunto de calibración $\mathcal{D}_c = \{(x_1, y_1), \ldots, (x_{N_c}, y_{N_c})\}$ y un modelo base entrenado $h: \mathcal{X} \rightarrow \mathbb{R}$, se calculan las predicciones de calibración:
 
 \begin{equation}
-\mathbb{P}\left(Y \in \left[\hat{F}_{\kappa}^{-1}(\alpha/2 \mid x), \hat{F}_{\kappa}^{-1}(1-\alpha/2 \mid x)\right] \,\big|\, x \in \text{Bin}_{\kappa}\right) \geq 1 - \alpha
+\hat{y}_j^{\text{cal}} = h(x_j), \quad j = 1, \ldots, N_c
 \end{equation}
 
-Las bandas de predicción se \textbf{ajustan automáticamente}: regiones donde el modelo es confiable producen intervalos estrechos; regiones con alta variabilidad generan intervalos amplios. Si denotamos $W_{\kappa}(x)$ como el ancho del intervalo:
+El espacio de predicciones se particiona en $B$ bins mediante cuantiles empíricos. Los bordes de los bins se definen como:
 
 \begin{equation}
-W_{\kappa_1}(x_1) \neq W_{\kappa_2}(x_2) \quad \text{si} \quad \text{Var}(\epsilon \mid x \in \text{Bin}_{\kappa_1}) \neq \text{Var}(\epsilon \mid x \in \text{Bin}_{\kappa_2})
+\{\theta_0, \theta_1, \ldots, \theta_B\} \quad \text{donde} \quad \theta_{\kappa} = Q_{\kappa/B}\left(\{\hat{y}_1^{\text{cal}}, \ldots, \hat{y}_{N_c}^{\text{cal}}\}\right)
+\label{eq:mcps_bin_edges}
 \end{equation}
 
-Esta propiedad contrasta con el SCPS, donde $W(x) \approx \text{constante}$ para todo $x$, resultando en sobre-cobertura en regiones de baja incertidumbre o sub-cobertura en regiones de alta incertidumbre.
+con $\theta_0 = -\infty$ y $\theta_B = +\infty$. Cada bin $\kappa \in \{1, \ldots, B\}$ contiene las observaciones de calibración cuyas predicciones satisfacen:
+
+\begin{equation}
+\mathcal{D}_c^{\kappa} = \left\{(x_j, y_j) \in \mathcal{D}_c : \theta_{\kappa-1} \leq \hat{y}_j^{\text{cal}} < \theta_{\kappa}\right\}
+\end{equation}
+
+Esta partición es exhaustiva y mutuamente excluyente: $\bigcup_{\kappa=1}^B \mathcal{D}_c^{\kappa} = \mathcal{D}_c$ y $\mathcal{D}_c^{\kappa} \cap \mathcal{D}_c^{\kappa'} = \emptyset$ para $\kappa \neq \kappa'$.
+
+\textbf{Etapa 2: Localización del Punto de Prueba}
+
+Para un nuevo punto de prueba $x_{\text{test}}$, se obtiene su predicción puntual:
+
+\begin{equation}
+\hat{y}_{\text{test}} = h(x_{\text{test}})
+\end{equation}
+
+El bin correspondiente se determina mediante:
+
+\begin{equation}
+\kappa^* = \min\left\{\kappa \in \{1, \ldots, B\} : \hat{y}_{\text{test}} < \theta_{\kappa}\right\}
+\label{eq:mcps_bin_assignment}
+\end{equation}
+
+Este índice identifica el subconjunto de calibración $\mathcal{D}_c^{\kappa^*}$ que contiene observaciones con comportamiento predictivo similar al punto de prueba.
+
+\textbf{Etapa 3: Generación de Scores Conformales Localizados}
+
+Los scores conformales se calculan exclusivamente sobre el bin localizado $\mathcal{D}_c^{\kappa^*}$. Para cada observación $(x_j, y_j) \in \mathcal{D}_c^{\kappa^*}$, el score conformal es:
+
+\begin{equation}
+C_j^{\kappa^*} = \hat{y}_{\text{test}} + \left(y_j - \hat{y}_j^{\text{cal}}\right), \quad \forall (x_j, y_j) \in \mathcal{D}_c^{\kappa^*}
+\label{eq:mcps_calibration_scores}
+\end{equation}
+
+Esta ecuación translada los residuos de calibración $\epsilon_j^{\text{cal}} = y_j - \hat{y}_j^{\text{cal}}$ hacia el nivel de predicción actual $\hat{y}_{\text{test}}$. La distribución predictiva resultante es:
+
+\begin{equation}
+Y_{\text{test}} \sim \sum_{j: (x_j, y_j) \in \mathcal{D}_c^{\kappa^*}} \frac{1}{N_c^{\kappa^*}} \cdot \delta_{C_j^{\kappa^*}}
+\label{eq:mcps_predictive_dist}
+\end{equation}
+
+donde $N_c^{\kappa^*} = |\mathcal{D}_c^{\kappa^*}|$ es el tamaño del bin localizado, y $\delta_{C_j^{\kappa^*}}$ denota la distribución degenerada (delta de Dirac) en el score conformal $C_j^{\kappa^*}$.
+
+Equivalentemente, la función de distribución acumulada empírica es:
+
+\begin{equation}
+F_{Y_{\text{test}}}^{\text{MCPS}}(y) = \frac{1}{N_c^{\kappa^*}} \sum_{j: (x_j, y_j) \in \mathcal{D}_c^{\kappa^*}} \mathbbm{1}\{C_j^{\kappa^*} \leq y\}
+\label{eq:mcps_cdf}
+\end{equation}
+
+Esta formulación explicita que la distribución predictiva del MCPS es una distribución empírica uniforme sobre el conjunto de scores $\{C_1^{\kappa^*}, \ldots, C_{N_c^{\kappa^*}}^{\kappa^*}\}$, donde cada score tiene probabilidad $1/N_c^{\kappa^*}$ de ser seleccionado.
+
 
 \subparagraph{Naturaleza No Paramétrica}
 
@@ -1273,87 +1372,128 @@ El MCPS estándar asume implícitamente homogeneidad de varianza dentro de cada 
 
 Esta suposición se viola frecuentemente en series temporales con \textbf{heterocedasticidad condicional}, donde la volatilidad de errores varía sistemáticamente: $\text{Var}(\epsilon_t) = \sigma_t^2 \neq \text{constante}$. Dos observaciones con predicciones similares $h(x_i) \approx h(x_j)$ pueden experimentar errores de magnitudes radicalmente diferentes si provienen de regímenes de volatilidad distintos.
 
-\subparagraph{Particionamiento Bidimensional}
+\subparagraph{Construcción de la Distribución Predictiva Bidimensional}
 
-El AV-MCPS propone una partición conjunta basada en dos características:
+El AV-MCPS construye una distribución predictiva mediante particionamiento bidimensional del espacio de calibración, permitiendo que la incertidumbre varíe simultáneamente según el nivel de predicción y el régimen de volatilidad. El proceso se articula en cuatro etapas: particionamiento Mondrian bidimensional, estimación de volatilidad local, localización de la celda, y generación de scores conformales localizados.
 
-\begin{enumerate}
-\item \textbf{Predicción puntual} $h(x_i)$: Captura el nivel esperado de la variable objetivo
-\item \textbf{Volatilidad local} $\sigma_i$: Mide la variabilidad reciente mediante ventana rodante de longitud $w$:
-\begin{equation}
-\sigma_i = \sqrt{\frac{1}{w-1} \sum_{k=i-w}^{i-1} (y_k - \bar{y}_{i,w})^2}
-\end{equation}
-\end{enumerate}
+\textbf{Etapa 1: Particionamiento Mondrian Bidimensional del Conjunto de Calibración}
 
-El conjunto de calibración se particiona en una grilla bidimensional:
+Dado un conjunto de calibración $\mathcal{D}_c = \{(x_1, y_1), \ldots, (x_{N_c}, y_{N_c})\}$ y un modelo base entrenado $h: \mathcal{X} \rightarrow \mathbb{R}$, se calculan las predicciones de calibración:
 
 \begin{equation}
-\mathcal{D}_c = \bigcup_{\kappa=1}^{B_{\text{pred}}} \bigcup_{\lambda=1}^{B_{\text{vol}}} \mathcal{D}_c^{(\kappa,\lambda)}
+\hat{y}_j^{\text{cal}} = h(x_j), \quad j = 1, \ldots, N_c
 \end{equation}
 
-donde cada celda agrupa observaciones que satisfacen simultáneamente:
+Paralelamente, se estima la volatilidad local para cada punto de calibración mediante ventana rodante de longitud $w$:
 
 \begin{equation}
-\mathcal{D}_c^{(\kappa,\lambda)} = \left\{ (x_i, y_i) \in \mathcal{D}_c : 
+\hat{\sigma}_j = \sqrt{\frac{1}{w-1} \sum_{k=j-w}^{j-1} (y_k - \bar{y}_{j,w})^2}, \quad j = w, \ldots, N_c
+\end{equation}
+
+donde $\bar{y}_{j,w} = \frac{1}{w}\sum_{k=j-w}^{j-1} y_k$ es la media local. Para las primeras observaciones ($j < w$), se aplica backfilling usando toda la historia disponible.
+
+El espacio de calibración se particiona según dos dimensiones. Los bordes de bins para la dimensión de predicción se definen como:
+
+\begin{equation}
+\{\theta_0^{\text{pred}}, \theta_1^{\text{pred}}, \ldots, \theta_{B_{\text{pred}}}^{\text{pred}}\} \quad \text{donde} \quad \theta_{\kappa}^{\text{pred}} = Q_{\kappa/B_{\text{pred}}}\left(\{\hat{y}_1^{\text{cal}}, \ldots, \hat{y}_{N_c}^{\text{cal}}\}\right)
+\label{eq:avmcps_pred_edges}
+\end{equation}
+
+Análogamente, los bordes de bins para la dimensión de volatilidad son:
+
+\begin{equation}
+\{\theta_0^{\text{vol}}, \theta_1^{\text{vol}}, \ldots, \theta_{B_{\text{vol}}}^{\text{vol}}\} \quad \text{donde} \quad \theta_{\lambda}^{\text{vol}} = Q_{\lambda/B_{\text{vol}}}\left(\{\hat{\sigma}_1, \ldots, \hat{\sigma}_{N_c}\}\right)
+\label{eq:avmcps_vol_edges}
+\end{equation}
+
+con $\theta_0^{\text{pred}} = \theta_0^{\text{vol}} = -\infty$ y $\theta_{B_{\text{pred}}}^{\text{pred}} = \theta_{B_{\text{vol}}}^{\text{vol}} = +\infty$. 
+
+Cada celda bidimensional $(\kappa, \lambda) \in \{1, \ldots, B_{\text{pred}}\} \times \{1, \ldots, B_{\text{vol}}\}$ contiene las observaciones de calibración que satisfacen simultáneamente:
+
+\begin{equation}
+\mathcal{D}_c^{(\kappa,\lambda)} = \left\{(x_j, y_j) \in \mathcal{D}_c : 
 \begin{aligned}
-&q_{\text{pred}}^{\kappa-1} \leq h(x_i) < q_{\text{pred}}^{\kappa} \\
-&\text{y } q_{\text{vol}}^{\lambda-1} \leq \sigma_i < q_{\text{vol}}^{\lambda}
+&\theta_{\kappa-1}^{\text{pred}} \leq \hat{y}_j^{\text{cal}} < \theta_{\kappa}^{\text{pred}} \\
+&\text{y } \theta_{\lambda-1}^{\text{vol}} \leq \hat{\sigma}_j < \theta_{\lambda}^{\text{vol}}
 \end{aligned}
 \right\}
+\label{eq:avmcps_cell_definition}
 \end{equation}
 
-Esta estratificación genera $B_{\text{pred}} \times B_{\text{vol}}$ celdas, cada una representando un régimen específico de (nivel, volatilidad).
+Esta partición genera $B_{\text{pred}} \times B_{\text{vol}}$ celdas mutuamente excluyentes y exhaustivas: $\bigcup_{\kappa=1}^{B_{\text{pred}}} \bigcup_{\lambda=1}^{B_{\text{vol}}} \mathcal{D}_c^{(\kappa,\lambda)} = \mathcal{D}_c$ y $\mathcal{D}_c^{(\kappa,\lambda)} \cap \mathcal{D}_c^{(\kappa',\lambda')} = \emptyset$ para $(\kappa,\lambda) \neq (\kappa',\lambda')$.
 
-\subparagraph{Cálculo Localizado de Scores}
+\textbf{Etapa 2: Estimación de Volatilidad del Punto de Prueba}
 
-Para un punto de prueba $x_{\text{test}}$, el procedimiento es:
-
-\begin{enumerate}
-\item Calcular predicción $h(x_{\text{test}})$ y volatilidad local $\sigma_{\text{test}}$
-\item Determinar la celda correspondiente $(\kappa^*, \lambda^*)$:
-\begin{equation}
-\kappa^* = \arg\min_{\kappa} \{ \kappa : h(x_{\text{test}}) < q_{\text{pred}}^{\kappa} \}
-\end{equation}
-\begin{equation}
-\lambda^* = \arg\min_{\lambda} \{ \lambda : \sigma_{\text{test}} < q_{\text{vol}}^{\lambda} \}
-\end{equation}
-\item Calcular scores localizados sobre $\mathcal{D}_c^{(\kappa^*,\lambda^*)}$:
-\begin{equation}
-C_i^{(\kappa^*,\lambda^*)} = h(x_{\text{test}}) + (y_i - h(x_i)), \quad \forall (x_i, y_i) \in \mathcal{D}_c^{(\kappa^*,\lambda^*)}
-\end{equation}
-\end{enumerate}
-
-\subparagraph{Garantías de Cobertura Bidimensional}
-
-Bajo intercambiabilidad condicional dentro de cada celda, se preservan las garantías conformales localmente:
+Para un nuevo punto de prueba $x_{\text{test}}$, se obtiene su predicción puntual:
 
 \begin{equation}
-\mathbb{P}\left(Y \in \hat{C}_{\alpha}(x) \,\big|\, x \in \text{Bin}_{\kappa}^{\text{pred}}, \sigma(x) \in \text{Bin}_{\lambda}^{\text{vol}}\right) \geq 1 - \alpha
+\hat{y}_{\text{test}} = h(x_{\text{test}})
 \end{equation}
 
-Esta garantía es más fuerte que la del MCPS, ya que condiciona sobre una partición más fina. Al controlar simultáneamente por nivel y volatilidad, el AV-MCPS logra \textbf{adaptabilidad condicional mejorada}.
-
-\subparagraph{Trade-off: Resolución vs. Tamaño de Muestra}
-
-El número esperado de observaciones por celda es:
+Simultáneamente, se estima su volatilidad local usando la ventana temporal más reciente disponible antes de la predicción:
 
 \begin{equation}
-\mathbb{E}\left[N_c^{(\kappa,\lambda)}\right] = \frac{N_c}{B_{\text{pred}} \times B_{\text{vol}}}
+\hat{\sigma}_{\text{test}} = \sqrt{\frac{1}{w-1} \sum_{k=t-w}^{t-1} (y_k - \bar{y}_{t,w})^2}
 \end{equation}
 
-Aumentar resolución mejora localización pero reduce tamaño de muestra por celda. El AV-MCPS implementa \textbf{fallback jerárquico}:
+donde $t$ denota el índice temporal del punto de prueba.
+
+\textbf{Etapa 3: Localización de la Celda Bidimensional}
+
+La celda correspondiente al punto de prueba se determina mediante doble asignación:
+
+\begin{equation}
+\kappa^* = \min\left\{\kappa \in \{1, \ldots, B_{\text{pred}}\} : \hat{y}_{\text{test}} < \theta_{\kappa}^{\text{pred}}\right\}
+\label{eq:avmcps_pred_bin_assignment}
+\end{equation}
+
+\begin{equation}
+\lambda^* = \min\left\{\lambda \in \{1, \ldots, B_{\text{vol}}\} : \hat{\sigma}_{\text{test}} < \theta_{\lambda}^{\text{vol}}\right\}
+\label{eq:avmcps_vol_bin_assignment}
+\end{equation}
+
+El par $(\kappa^*, \lambda^*)$ identifica el subconjunto de calibración $\mathcal{D}_c^{(\kappa^*,\lambda^*)}$ que contiene observaciones con comportamiento predictivo y régimen de volatilidad similares al punto de prueba.
+
+Dado que la partición bidimensional puede generar celdas con pocas observaciones, se implementa una estrategia de fallback jerárquica:
 
 \begin{equation}
 \mathcal{D}_c^{\text{efectivo}} = 
 \begin{cases}
-\mathcal{D}_c^{(\kappa^*,\lambda^*)} & \text{si } N_c^{(\kappa^*,\lambda^*)} \geq 5 \\
-\mathcal{D}_c^{(\kappa^*, \cdot)} & \text{si } N_c^{(\kappa^*,\lambda^*)} < 5 \text{ y } N_c^{(\kappa^*, \cdot)} \geq 5 \\
+\mathcal{D}_c^{(\kappa^*,\lambda^*)} & \text{si } N_c^{(\kappa^*,\lambda^*)} \geq n_{\text{min}} \\
+\mathcal{D}_c^{(\kappa^*, \cdot)} & \text{si } N_c^{(\kappa^*,\lambda^*)} < n_{\text{min}} \text{ y } N_c^{(\kappa^*, \cdot)} \geq n_{\text{min}} \\
 \mathcal{D}_c & \text{en otro caso}
 \end{cases}
+\label{eq:avmcps_fallback}
 \end{equation}
 
-donde $\mathcal{D}_c^{(\kappa^*, \cdot)} = \bigcup_{\lambda=1}^{B_{\text{vol}}} \mathcal{D}_c^{(\kappa^*,\lambda)}$ representa el bin unidimensional basado solo en predicción.
+donde $\mathcal{D}_c^{(\kappa^*, \cdot)} = \bigcup_{\lambda=1}^{B_{\text{vol}}} \mathcal{D}_c^{(\kappa^*,\lambda)}$ representa el bin marginal basado únicamente en predicción, y $n_{\text{min}} = 5$ es el umbral mínimo de observaciones. Este mecanismo degrada gradualmente la resolución espacial para preservar estabilidad estadística.
 
+\textbf{Etapa 4: Generación de Scores Conformales Localizados}
+
+Los scores conformales se calculan exclusivamente sobre el conjunto efectivo $\mathcal{D}_c^{\text{efectivo}}$. Para cada observación $(x_j, y_j) \in \mathcal{D}_c^{\text{efectivo}}$, el score conformal es:
+
+\begin{equation}
+C_j^{(\kappa^*,\lambda^*)} = \hat{y}_{\text{test}} + \left(y_j - \hat{y}_j^{\text{cal}}\right), \quad \forall (x_j, y_j) \in \mathcal{D}_c^{\text{efectivo}}
+\label{eq:avmcps_calibration_scores}
+\end{equation}
+
+Esta ecuación translada los residuos de calibración $\epsilon_j^{\text{cal}} = y_j - \hat{y}_j^{\text{cal}}$ hacia el nivel de predicción actual $\hat{y}_{\text{test}}$, pero restringiendo exclusivamente a observaciones del mismo régimen bidimensional (nivel, volatilidad). La distribución predictiva resultante es:
+
+\begin{equation}
+Y_{\text{test}} \sim \sum_{j: (x_j, y_j) \in \mathcal{D}_c^{\text{efectivo}}} \frac{1}{N_c^{\text{efectivo}}} \cdot \delta_{C_j^{(\kappa^*,\lambda^*)}}
+\label{eq:avmcps_predictive_dist}
+\end{equation}
+
+donde $N_c^{\text{efectivo}} = |\mathcal{D}_c^{\text{efectivo}}|$ es el tamaño del conjunto efectivo, y $\delta_{C_j^{(\kappa^*,\lambda^*)}}$ denota la distribución degenerada (delta de Dirac) en el score conformal $C_j^{(\kappa^*,\lambda^*)}$.
+
+Equivalentemente, la función de distribución acumulada empírica es:
+
+\begin{equation}
+F_{Y_{\text{test}}}^{\text{AV-MCPS}}(y) = \frac{1}{N_c^{\text{efectivo}}} \sum_{j: (x_j, y_j) \in \mathcal{D}_c^{\text{efectivo}}} \mathbbm{1}\{C_j^{(\kappa^*,\lambda^*)} \leq y\}
+\label{eq:avmcps_cdf}
+\end{equation}
+
+Esta formulación explicita que la distribución predictiva del AV-MCPS es una distribución empírica uniforme sobre el conjunto de scores $\{C_1^{(\kappa^*,\lambda^*)}, \ldots, C_{N_c^{\text{efectivo}}}^{(\kappa^*,\lambda^*)}\}$, donde cada score tiene probabilidad $1/N_c^{\text{efectivo}}$ de ser seleccionado. La diferencia fundamental respecto al MCPS estándar radica en que este conjunto de scores proviene exclusivamente de observaciones que comparten tanto el régimen de nivel como el régimen de volatilidad con el punto de prueba, permitiendo capturar explícitamente la heterocedasticidad condicional de la serie temporal.
 \subparagraph{Naturaleza No Paramétrica}
 
 El AV-MCPS es un modelo \textbf{no paramétrico}. No asume forma funcional para la distribución de errores ni para la relación entre predictores y respuesta. La estratificación bidimensional es completamente libre de distribución, construyéndose enteramente a partir de cuantiles empíricos. La distribución predictiva se genera directamente desde scores conformales sin parámetros poblacionales.
@@ -1541,16 +1681,6 @@ AREPD genera distribuciones predictivas mediante un enfoque \textbf{histórico-e
 \end{enumerate}
 
 Este enfoque difiere fundamentalmente de la predicción conformal estándar. En lugar de ajustar mediante residuos de calibración, AREPD construye una distribución empírica directamente desde predicciones históricas del modelo ajustado, asumiendo que bajo estacionariedad local, estas predicciones son representativas del futuro.
-
-\subparagraph{Garantías de Cobertura}
-
-A diferencia de métodos conformales con garantías formales, AREPD \textbf{no posee garantías teóricas de cobertura bajo intercambiabilidad}. La distribución predictiva se construye asumiendo:
-
-\begin{equation}
-\hat{Y}_t \mid \mathcal{F}_{t-1} \overset{d}{\approx} \hat{Y}_s \mid \mathcal{F}_{s-1} \quad \forall t, s \in \{p+1, \ldots, n\}
-\end{equation}
-
-Esta suposición puede violarse en presencia de no estacionariedad fuerte, heterocedasticidad condicional, o eventos raros no observados durante el entrenamiento.
 
 \subparagraph{Clasificación del Modelo}
 
@@ -1847,19 +1977,70 @@ Esta estrategia de optimización restringida permite evaluar el potencial de EnC
 
 
 
-\subsection{Contribuciones de este trabajo}
+\subsection{Contribuciones de este trabajo en modelación}
+
+El desarrollo de esta investigación ha dado lugar a contribuciones metodológicas que representan extensiones en el dominio de la predicción distribucional en series temporales. Estas contribuciones abarcan desde adaptaciones directas de técnicas establecidas hasta propuestas completamente originales que combinan múltiples paradigmas teóricos.
+
+\subsubsection{Aplicación Directa de LSPM a Series Temporales}
+
+La primera contribución consiste en la aplicación directa del Least Squares Prediction Machine (LSPM), descrito en la Sección~\ref{subsec:LSPM}, al contexto de series temporales autorregresivas. Mientras que el marco teórico original de Vovk se desarrolló para datos intercambiables con vectores de características independientes, este trabajo implementa una transformación dinámica que convierte observaciones temporales consecutivas en objetos autorregresivos mediante ventanas deslizantes de rezagos.
+
+Este enfoque se adoptó para contrastar el desempeño de la LSPM frente al modelo LSPMW, verificando así la eficacia de la alternativa con ponderaciones aplicada, en este caso, a la generación de distribuciones de probabilidad completas.
 
 
-% ============================================================================
-% FALTA
-% ============================================================================
+\subsubsection{Desarrollo de Métodos Conformales Adaptativos: MCPS y AV-MCPS}
 
-\section{Metodo de comparación}
+La segunda contribución consiste en el desarrollo de dos métodos completamente originales inspirados en el paradigma de particionamiento Mondrian: el Mondrian Conformal Predictive System (MCPS) y el Adaptive Volatility Mondrian Conformal Predictive System (AV-MCPS), descritos en las Secciones~\ref{subsec:MCPS} y~\ref{subsec:AV-MCPS} respectivamente. Tomando inspiración del trabajo de Ye et al. sobre aplicaciones logísticas, estos métodos trasladan la lógica de estratificación espacial desde la predicción de intervalos hacia la generación de distribuciones predictivas completas en series temporales.
+
+El MCPS implementa particionamiento unidimensional basado en predicciones puntuales del modelo base, permitiendo que las distribuciones conformales capturen heterocedasticidad local sin asumir formas paramétricas. El AV-MCPS representa una innovación metodológica más profunda al introducir estratificación bidimensional que incorpora volatilidad local como segunda dimensión de heterogeneidad, reconociendo que observaciones con niveles predichos similares pueden exhibir errores de magnitudes radicalmente diferentes bajo regímenes de incertidumbre distintos.
 
 
-% ============================================================================
-% FALTA
-% ============================================================================
+\subsubsection{Método Híbrido AREPD: Expansión Polinomial Ponderada}
+
+La tercera contribución consiste en el desarrollo del Autoregressive Exponentially-weighted Polynomial Distribution (AREPD), descrito en la Sección~\ref{subsec:AREPD}, un método completamente original que sintetiza tres paradigmas: expansión polinomial de características autorregresivas, ponderación exponencial temporal y generación de distribuciones histórico-empíricas. Este enfoque híbrido aborda simultáneamente la necesidad de capturar relaciones no lineales entre valores pasados y futuros, adaptarse a derivas distributivas graduales, y generar distribuciones predictivas sin recurrir a arquitecturas de aprendizaje profundo.
+
+La innovación fundamental radica en la filosofía de "distribución histórico-empírica", donde las predicciones pasadas del modelo ponderado se interpretan directamente como muestras de la distribución predictiva futura. Esta estrategia contrasta con la lógica conformal estándar basada en residuos de calibración, sacrificando garantías teóricas formales a cambio de mayor adaptabilidad y eficiencia computacional bajo el supuesto de estacionariedad local inducida por ponderación exponencial.
+
+
+\subsubsection{Extensión de Métodos de Intervalos hacia Distribuciones Completas}
+
+La cuarta contribución consiste en la extensión sistemática de dos métodos concebidos originalmente para predicción de intervalos hacia la generación de distribuciones predictivas integrales: LSPMW y EnCQR-LSTM, descritos en las Secciones~\ref{subsec:LSPMW} y~\ref{subsec:EnCQR-LSTM} respectivamente. Mientras que sus formulaciones teóricas originales se limitan a caracterizar regiones de predicción con niveles de confianza específicos, este trabajo los reinterpreta como caracterizaciones parciales de distribuciones subyacentes que pueden completarse mediante técnicas de reconstrucción.
+
+
+
+\section{Metodología de Comparación}
+\label{sec:metodologia_comparacion}
+
+La evaluación de los métodos de pronóstico probabilístico propuestos se realiza mediante dos enfoques complementarios: experimentos de simulación controlada y aplicación a datos reales. Cada enfoque requiere adaptaciones específicas tanto en las métricas de evaluación como en los procedimientos de comparación estadística.
+
+\subsection{Evaluación en Escenarios Simulados}
+
+En los experimentos de simulación, se generan series temporales a partir de modelos conocidos (ARMA, ARIMA, SETAR) con parámetros y distribuciones de ruido especificados. Esta configuración controlada permite acceder a la distribución verdadera del siguiente valor $Y_{t+1}$ dado el historial observado mediante muestreo directo del proceso generador.
+
+Para cada escenario de simulación y en cada paso temporal $t$ de la ventana de evaluación, se comparan las distribuciones predictivas generadas por los métodos evaluados contra la distribución teórica verdadera mediante el ECRPS. Específicamente, si $F_A^{(t)}$ denota la distribución predictiva del método $A$ en el paso $t$ y $G^{(t)}$ la distribución verdadera, se calcula $\text{ECRPS}(F_A^{(t)}, G^{(t)})$ según la ecuación \eqref{eq:ecrps_expectation}.
+
+El conjunto completo de escenarios simulados abarca múltiples configuraciones de modelos, distribuciones de ruido y niveles de varianza. Dado que diferentes escenarios presentan escalas heterogéneas, se aplica la normalización mediante Z-score (ecuación \eqref{eq:zscore}) calculando para cada método su desviación respecto a la media y desviación estándar de todos los métodos en ese escenario particular. Esta transformación permite identificar fortalezas y debilidades específicas de cada método según las características del proceso generador.
+
+Para establecer la significancia estadística de las diferencias observadas entre pares de métodos, se emplea el test de Diebold-Mariano modificado (ecuación \eqref{eq:dm_modified}) con corrección para muestras pequeñas propuesta por \cite{Harvey1997}. Los diferenciales de pérdida $d_t = \text{ECRPS}(F_A^{(t)}, G^{(t)}) - \text{ECRPS}(F_B^{(t)}, G^{(t)})$ se calculan para cada paso $t$, y el estadístico resultante se compara contra la distribución $t$ de Student con $(n-1)$ grados de libertad. Dado que se realizan múltiples comparaciones entre los nueve métodos evaluados, se aplica la corrección de Bonferroni al nivel de significancia: si se contrastan $K$ pares de métodos al nivel global $\alpha = 0.05$, cada test individual se realiza al nivel $\alpha/K$ para controlar la tasa de error familiar.
+
+\subsection{Evaluación con Datos Reales}
+
+En aplicaciones con datos reales, como el conjunto de datos Electricity, no se dispone de la distribución verdadera. La evaluación se fundamenta en el CRPS, que compara cada distribución predictiva $F_t$ contra el valor puntual observado $y_t$ según la ecuación \eqref{eq:crps_integral}.
+
+Para cada método evaluado, se calculan los valores $\text{CRPS}(F_t, y_t)$ a lo largo de la ventana de evaluación de $T$ pasos. Las comparaciones entre métodos se realizan mediante el test de Diebold-Mariano, construyendo los diferenciales de pérdida $d_t = \text{CRPS}(F_A^{(t)}, y_t) - \text{CRPS}(F_B^{(t)}, y_t)$ y aplicando la misma corrección de Bonferroni utilizada en escenarios simulados.
+
+El análisis se complementa con dos herramientas diagnósticas aplicadas individualmente a cada método:
+
+\begin{enumerate}
+\item \textbf{Análisis PIT:} Para cada método, se calculan los valores $p_t = F_t(y_t)$ según la ecuación \eqref{eq:pit} y se construye un histograma con los $T$ valores obtenidos. La proximidad del histograma a la distribución uniforme se evalúa visualmente, identificando patrones de descalibración (forma de U indica subdispersión, forma de $\cap$ indica sobredispersión, sesgos indican errores sistemáticos).
+
+\item \textbf{Curvas de Confiabilidad:} Se selecciona un conjunto de umbrales $\{u_1, \ldots, u_K\}$ cubriendo el rango de valores observados. Para cada método y cada umbral $u_k$, se calcula la probabilidad pronosticada promedio $\hat{p}_k = T^{-1}\sum_{t=1}^T F_t(u_k)$ y la frecuencia observada $\bar{o}_k = T^{-1}\sum_{t=1}^T \mathbbm{1}\{y_t \leq u_k\}$. La curva resultante se contrasta visualmente con la diagonal de 45 grados, cuantificando desviaciones mediante el error cuadrático medio entre $\hat{p}_k$ y $\bar{o}_k$.
+\end{enumerate}
+
+Esta metodología integrada proporciona una evaluación comprehensiva que combina precisión puntual (vía CRPS), calibración probabilística (vía PIT y curvas de confiabilidad) y comparaciones estadísticamente rigurosas (vía tests de Diebold-Mariano con corrección de Bonferroni).
+
+
+
 
 
 \section{Simulaciones Complementarias}
@@ -1909,7 +2090,12 @@ Esto genera:
 N_{\text{filas}} = 140 \times 2 \text{ modalidades} \times 12 \text{ pasos} = 3{,}360 \text{ evaluaciones}
 \end{equation}
 
+La distribución predictiva verdadera utilizada como referencia para calcular el ECRPS en esta simulación es idéntica a la descrita en la Sección~\ref{subsec:arima} para procesos ARIMA generales. Independientemente de si el modelo conformal recibe la serie en niveles ($Y_t$) o diferenciada ($\Delta Y_t$), la métrica ECRPS siempre se evalúa comparando la distribución predictiva estimada $\hat{F}_{Y_{t+1}}$ contra la distribución teórica verdadera $F_{Y_{t+1}}$ en el espacio de niveles.
+
+
 % ----------------------------------------------------------------------------
+
+
 \subsection{Simulación 2: Límites de Integración y Persistencia (Multi-D)}
 \label{subsec:sim2_multi_d}
 
@@ -1936,11 +2122,54 @@ Cada configuración se evalúa bajo las dos modalidades (SIN\_DIFF y CON\_DIFF) 
 N_{\text{filas}} = 1{,}120 \times 2 \times 12 = 26{,}880 \text{ evaluaciones}
 \end{equation}
 
+\subsubsection{Distribución Predictiva Verdadera}
+
+La distribución predictiva verdadera para esta simulación se construye mediante un procedimiento de integración múltiple que generaliza el caso $d=1$ descrito en la Sección~\ref{subsec:arima}. Para un proceso ARIMA$(p,d,q)$ con orden de integración arbitrario $d \geq 1$, la distribución de referencia $F_{Y_{t+1}}$ se obtiene en dos etapas fundamentales.
+
+\textbf{Etapa 1: Generación de la distribución base ARMA.} Dado que la serie diferenciada $d$ veces sigue un proceso ARMA estacionario, $W_t = \nabla^d Y_t \sim \text{ARMA}(p,q)$, primero se genera la distribución del siguiente incremento $W_{t+1}$ mediante la estructura ARMA subyacente. Utilizando la historia observada $\mathcal{F}_t$, se calculan muestras:
+
+\begin{equation}
+W_{t+1}^{(b)} = \sum_{i=1}^p \phi_i W_{t+1-i} + \sum_{j=1}^q \theta_j \varepsilon_{t+1-j} + \varepsilon_{t+1}^{(b)}, \quad b = 1, \ldots, B
+\label{eq:multid_arma_samples}
+\end{equation}
+
+donde $\varepsilon_{t+1}^{(b)} \sim F(0, \sigma^2)$ son errores futuros independientes generados según la distribución de ruido especificada.
+
+\textbf{Etapa 2: Integración múltiple hacia el espacio de niveles.} Las muestras $\{W_{t+1}^{(b)}\}$ corresponden a la serie diferenciada $d$ veces. Para recuperar la distribución de $Y_{t+1}$ en el espacio de niveles originales, se aplica un proceso de integración recursiva que invierte las $d$ diferenciaciones sucesivas:
+
+\begin{equation}
+Y_{t+1}^{(b)} = \sum_{k=0}^{d-1} \nabla^k Y_t + W_{t+1}^{(b)}
+\label{eq:multid_integration}
+\end{equation}
+
+Esta fórmula puede expresarse de forma recursiva almacenando los últimos valores en cada nivel de diferenciación $\{\nabla^0 Y_t, \nabla^1 Y_t, \ldots, \nabla^{d-1} Y_t\}$ y aplicando:
+
+\begin{equation}
+\begin{aligned}
+Z^{(0)} &= W_{t+1}^{(b)} \\
+Z^{(k)} &= \nabla^{d-k} Y_t + Z^{(k-1)}, \quad k = 1, \ldots, d \\
+Y_{t+1}^{(b)} &= Z^{(d)}
+\end{aligned}
+\label{eq:multid_recursive_integration}
+\end{equation}
+
+Para el caso particular $d=1$, esta formulación se reduce a $Y_{t+1}^{(b)} = Y_t + W_{t+1}^{(b)}$, recuperando exactamente la ecuación~\eqref{eq:arima_level_samples}. Para $d > 1$, el procedimiento mantiene la misma estructura conceptual pero requiere integración múltiple para capturar la persistencia acumulada en todos los niveles de diferenciación.
+
+La distribución predictiva verdadera resultante es:
+
+\begin{equation}
+F_{Y_{t+1}}^{\text{Multi-D}}(y) = \frac{1}{B} \sum_{b=1}^B \mathbbm{1}\{Y_{t+1}^{(b)} \leq y\}
+\label{eq:multid_true_cdf}
+\end{equation}
+
+
 \subsubsection{Hipótesis}
 
 Se hipotetiza que para $d \geq 4$, el rango explosivo de $Y_t$ desestabilizará a los modelos en modalidad SIN\_DIFF, mientras que la modalidad CON\_DIFF mantendrá estabilidad numérica al operar en el espacio diferenciado acotado.
 
 % ----------------------------------------------------------------------------
+
+
 \subsection{Simulación 3: Efectos del Tamaño Muestral Absoluto}
 \label{subsec:sim3_tamano_muestral}
 
@@ -1986,6 +2215,8 @@ N_{\text{filas}} = 2{,}100 \times 12 = 25{,}200 \text{ evaluaciones}
 \end{equation}
 
 % ----------------------------------------------------------------------------
+
+
 \subsection{Simulación 4: Proporciones de Calibración con Tamaño Fijo}
 \label{subsec:sim4_proporciones}
 
@@ -2029,6 +2260,8 @@ N_{\text{filas}} = 2{,}100 \times 12 = 25{,}200 \text{ evaluaciones}
 \end{equation}
 
 % ----------------------------------------------------------------------------
+
+
 \subsection{Simulación 5: Predicción Multi-paso (Horizonte $h$)}
 \label{subsec:sim5_multi_paso}
 
@@ -2108,6 +2341,8 @@ El protocolo sigue la estructura del diseño principal con las siguientes partic
 Esta simulación es particularmente relevante para aplicaciones donde las decisiones deben tomarse con base en pronósticos de mediano plazo sin posibilidad de actualización frecuente del modelo, como en planeación energética, gestión de inventarios o política monetaria \parencite{Hyndman2021FPP3}.
 
 % ----------------------------------------------------------------------------
+
+
 \subsection{Resumen de Evaluaciones Complementarias}
 \label{subsec:resumen_complementarias}
 
