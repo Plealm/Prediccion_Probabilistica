@@ -439,13 +439,15 @@ Finalmente, es importante destacar que todas las configuraciones detalladas en l
 \label{sec:modelos_predictivos}
 Para evaluar la capacidad de cuantificación de la incertidumbre en diversos entornos estocásticos, esta investigación emplea un conjunto heterogéneo de nueve modelos predictivos. Esta selección abarca desde métodos de remuestreo clásicos y propuestas de predicción conformal, hasta arquitecturas de aprendizaje profundo y modelos híbridos. El uso de esta diversidad de enfoques permite contrastar cómo las garantías teóricas de cada familia de modelos se traducen en un rendimiento práctico bajo la métrica ECRPS, especialmente cuando se enfrentan a la ruptura de los supuestos de intercambiabilidad y linealidad.
 
-\subsection{Circular Block Bootstrap (CBB)}
+\subsection{Modelos tomados de la literatura}
+
+\subsubsection{Circular Block Bootstrap (CBB)}
 \label{subsec:CCB}
-\subsubsection{Explicación Teórica del Modelo}
+\paragraph{Explicación Teórica del Modelo}
 
 El método \textit{Circular Block Bootstrap} (CBB), introducido por \textcite{politis1992circular}, representa una evolución metodológica del remuestreo por bloques que aborda una limitación fundamental de los esquemas no circulares como el Moving Block Bootstrap (MBB). Según \textcite{Lahiri2003}, el problema radica en que las observaciones ubicadas en los extremos de la serie temporal $\{X_1, \dots, X_n\}$ aparecen con menor frecuencia en los bloques remuestreados, generando una infra-representación sistemática de los bordes y sesgo en la estimación de varianza.
 
-\paragraph{Fundamento Teórico}
+\subparagraph{Fundamento Teórico}
 El CBB resuelve esta asimetría mediante la \textit{circunscripción} de los datos: la serie temporal se conceptualiza como una estructura circular donde $X_n$ es seguido inmediatamente por $X_1$, permitiendo la continuidad periódica. Formalmente, para una serie de longitud $n$ y bloques de tamaño $l$, se definen exactamente $n$ bloques posibles:
 \begin{equation}
 B_i = \{X_i, X_{i+1 \bmod n}, \dots, X_{i+l-1 \bmod n}\}, \quad i = 1,\dots,n
@@ -453,7 +455,7 @@ B_i = \{X_i, X_{i+1 \bmod n}, \dots, X_{i+l-1 \bmod n}\}, \quad i = 1,\dots,n
 
 donde el operador módulo ($\bmod$) implementa la extensión circular. Esta construcción garantiza que cada observación histórica tiene probabilidad idéntica $1/n$ de ser seleccionada como punto de inicio de un bloque, eliminando el sesgo de borde.
 
-\paragraph{Algoritmo de Remuestreo}
+\subparagraph{Algoritmo de Remuestreo}
 El procedimiento de generación de muestras bootstrap opera en dos etapas:
 
 \begin{enumerate}
@@ -466,23 +468,23 @@ El procedimiento de generación de muestras bootstrap opera en dos etapas:
 
 Para pronóstico un paso adelante, la distribución predictiva se aproxima mediante el conjunto de valores finales de cada bloque: $\{\hat{y}_{t+1}^{(1)}, \dots, \hat{y}_{t+1}^{(B)}\}$, donde $\hat{y}_{t+1}^{(b)} = X^*_b$.
 
-\paragraph{Propiedades Estadísticas}
+\subparagraph{Propiedades Estadísticas}
 \textcite{Lahiri2003} establece que bajo condiciones de mixing (dependencia que decae con el tiempo), el estimador CBB de la varianza es consistente cuando $l \to \infty$ y $l/n \to 0$ conforme $n \to \infty$. La equiprobabilidad de selección garantiza distribuciones predictivas mejor calibradas en contextos de dependencia temporal, haciendo al CBB apropiado para series financieras y económicas donde la estructura de autocorrelación es relevante.
 
-\paragraph{Clasificación del Modelo}
+\subparagraph{Clasificación del Modelo}
 El CBB es un método \textbf{no paramétrico} puro: no asume ninguna forma funcional para la distribución subyacente de los datos ni estima parámetros poblacionales. La distribución predictiva emerge directamente del remuestreo empírico de la historia observada, preservando las características distribucionales y de dependencia presentes en la muestra sin imponer supuestos estructurales.
 
-\subsubsection{De la Teoría a la Práctica}
+\paragraph{De la Teoría a la Práctica}
 
 La implementación desarrollada introduce tres adaptaciones principales respecto a la formulación teórica estándar:
 
-\paragraph{Adaptación 1: Simplificación del Esquema de Remuestreo}
+\subparagraph{Adaptación 1: Simplificación del Esquema de Remuestreo}
 La teoría clásica del CBB \parencite{politis1992circular} genera bloques completos de longitud $l$ que luego se concatenan para formar series bootstrap de longitud $n$. En contraste, la implementación para pronóstico un paso adelante simplifica el proceso: dado que solo se requiere predecir $\hat{y}_{t+1}$, se muestrea directamente el valor en la posición $(i_b + r) \bmod n$ donde $r = n \bmod l$ representa la posición relativa dentro del último bloque histórico. Esta simplificación reduce la complejidad computacional de $O(Bl)$ a $O(B)$ operaciones de indexación.
 
-\paragraph{Adaptación 2: Selección Automática de $l$}
+\subparagraph{Adaptación 2: Selección Automática de $l$}
 Mientras que la teoría requiere especificación manual del tamaño de bloque basado en análisis del proceso estocástico subyacente, la implementación incorpora la heurística automática de \textcite{politis2004automatic}: $l \approx 1.5 \times n^{1/3}$, ademas de otros valores de refencia para balancear eficiencia y captura de dependencia.
 
-\paragraph{Adaptación 3: Congelamiento Post-Optimización}
+\subparagraph{Adaptación 3: Congelamiento Post-Optimización}
 A diferencia de implementaciones estándar que podrían recalcular $l$ en cada paso, el diseño experimental congela el hiperparámetro tras la fase de validación, este congelamiento es crítico para prevenir \textit{data leakage}: re-optimizar en ventanas rolling introduciría información futura en la selección del modelo, violando la evaluación predictiva rigurosa.
 
 \begin{table}[h]
@@ -500,8 +502,8 @@ Complejidad & $O(Bl)$ para serie completa & $O(B)$ para un pronóstico \\
 \end{tabular}
 \end{table}
 
-\subsubsection{Optimización, Parámetros e Hiperparámetros}
-\paragraph{Hiperparámetro Principal: \texttt{block\_length} ($l$)}
+\paragraph{Optimización, Parámetros e Hiperparámetros}
+\subparagraph{Hiperparámetro Principal: \texttt{block\_length} ($l$)}
 Controla la cantidad de dependencia temporal preservada en las réplicas bootstrap. Su configuración óptima se determina mediante una estrategia de optimización que emplea una búsqueda en grilla. La grilla de valores candidatos para $l$ está definida por las siguientes cuatro opciones, que representan diferentes escalas de dependencia temporal en función del tamaño de muestra $n$:
 
 \begin{enumerate}
@@ -513,13 +515,13 @@ Controla la cantidad de dependencia temporal preservada en las réplicas bootstr
 
 La selección del valor óptimo de $l$ de entre estas cuatro opciones se realiza minimizando el \textbf{CRPS promedio} (ECRPS) sobre un conjunto de validación, conforme a la métrica detallada en la subsección \ref{subsec:ecrps}.
 
-\paragraph{Protocolo de Congelamiento}
+\subparagraph{Protocolo de Congelamiento}
 Una vez identificado el valor óptimo mediante validación, este se congela y se utiliza de manera fija durante la fase de prueba. Esta lógica garantiza que no haya contaminación de información y que el modelo evaluado sea idéntico al seleccionado durante la validación.
 
 
-\subsection{Sieve Bootstrap (SB)}
+\subsubsection{Sieve Bootstrap (SB)}
 \label{subsec:SB}
-\subsubsection{Explicación Teórica del Modelo}
+\paragraph{Explicación Teórica del Modelo}
 
 El \textit{Sieve Bootstrap}, introducido por \textcite{Buhlmann1997} y analizado en profundidad por \textcite{Lahiri2003}, representa un enfoque alternativo al remuestreo por bloques para series temporales dependientes. En lugar de preservar la dependencia mediante partición física de la serie, el método emplea una aproximación paramétrica para filtrar la estructura de autocorrelación.
 
@@ -565,14 +567,14 @@ La distribución predictiva empírica está dada por el conjunto $\{\hat{X}_{n+1
 \paragraph{Clasificación del Modelo}
 El Sieve Bootstrap es un método \textbf{semiparamétrico}: utiliza una estructura paramétrica (el modelo AR) para filtrar la dependencia temporal, pero trata la distribución de los residuos de forma no paramétrica mediante bootstrap empírico. No asume una forma distribucional específica para las innovaciones, solo que sean aproximadamente i.i.d. después del filtrado AR.
 
-\subsubsection{De la Teoría a la Práctica}
+\paragraph{De la Teoría a la Práctica}
 
 La implementación desarrollada incorpora tres adaptaciones clave para el contexto de pronóstico rolling:
 
-\paragraph{Adaptación 1: Selección de Orden Basada en Validación}
+\subparagraph{Adaptación 1: Selección de Orden Basada en Validación}
 Mientras la teoría asintótica sugiere $p \to \infty$ con $n$, la implementación emplea una grilla discreta de órdenes candidatos $p \in \{5, 10, 20\}$ evaluados mediante ECRPS en validación. Esta discretización responde a dos consideraciones prácticas: (i) evitar sobreparametrización en muestras finitas ($n = 200$), y (ii) reducir tiempo computacional frente a búsquedas exhaustivas.
 
-\paragraph{Adaptación 2: Congelamiento de Parámetros AR}
+\subparagraph{Adaptación 2: Congelamiento de Parámetros AR}
 La implementación introduce un mecanismo de congelamiento crítico: durante la fase de calibración, se ajusta el modelo AR($p^*$) con orden óptimo $p^*$ sobre los datos de entrenamiento+calibración combinados, almacenando permanentemente:
 \begin{itemize}
     \item Coeficientes autorregresivos: $\hat{\phi}^* = (\hat{\phi}_0^*, \dots, \hat{\phi}_{p^*}^*)$
@@ -581,7 +583,7 @@ La implementación introduce un mecanismo de congelamiento crítico: durante la 
 
 En cada ventana rolling subsecuente, se reutilizan $\hat{\phi}^*$ y $\tilde{\epsilon}^*$ sin re-estimación, aplicando solo los últimos $p^*$ valores observados para generar la predicción. Esta estrategia previene data leakage y reduce variabilidad numérica.
 
-\paragraph{Adaptación 3: Predicción Secuencial Eficiente}
+\subparagraph{Adaptación 3: Predicción Secuencial Eficiente}
 En lugar de generar series bootstrap completas de longitud $n$ (complejidad $O(Bn)$), la implementación genera directamente predicciones un paso adelante (complejidad $O(B)$): dado el vector de historia reciente $\mathbf{X}_{n-p^*:n} = (X_{n-p^*+1}, \dots, X_n)$, cada predicción se calcula como:
 \begin{equation}
 \hat{X}_{n+1}^{(b)} = \hat{\phi}_0^* + \sum_{j=1}^{p^*} \hat{\phi}_j^* X_{n+1-j} + \epsilon^*_b
@@ -605,9 +607,9 @@ Complejidad & $O(Bn)$ & $O(B)$ \\
 \end{table}
 
 
-\subsubsection{Optimización, Parámetros e Hiperparámetros}
+\paragraph{Optimización, Parámetros e Hiperparámetros}
 
-\paragraph{Hiperparámetro Principal: \texttt{order} ($p$)}
+\subparagraph{Hiperparámetro Principal: \texttt{order} ($p$)}
 Define la profundidad del tamiz autorregresivo, controlando cuánta memoria del proceso se captura. Durante la fase de validación se evalúan tres configuraciones sobre $n_{\text{train}} = 200$:
 \begin{itemize}
     \item $p = 5$ (dependencias de corto plazo, hasta una semana)
@@ -615,25 +617,25 @@ Define la profundidad del tamiz autorregresivo, controlando cuánta memoria del 
     \item $p = 20$ (dependencias extendidas, un mes)
 \end{itemize}
 
-\paragraph{Métrica de Optimización}
+\subparagraph{Métrica de Optimización}
 La selección del orden óptimo $p^*$ se realiza minimizando el \textbf{ECRPS} (véase \ref{subsec:ecrps}) sobre el conjunto de validación. El orden seleccionado es aquel que produce las distribuciones predictivas más calibradas durante la fase de validación.
 
-\paragraph{Protocolo de Congelamiento}
+\subparagraph{Protocolo de Congelamiento}
 Una vez identificado $p^*$ mediante validación, el método ajusta el modelo AR($p^*$) sobre los datos de entrenamiento+calibración y almacena permanentemente los coeficientes $\hat{\phi}^*$ y residuos centrados $\tilde{\epsilon}^*$. Estos parámetros se reutilizan sin re-estimación en toda la fase de prueba rolling, previniendo data leakage y garantizando evaluación rigurosa.
 
 
-\subsection{Least Squares Prediction Machine (LSPM)}
+\subsubsection{Least Squares Prediction Machine (LSPM)}
 \label{subsec:LSPM}
-\subsubsection{Explicación Teórica del Modelo}
+\paragraph{Explicación Teórica del Modelo}
 
 El \textit{Least Squares Prediction Machine} (LSPM), introducido por \textcite{Vovk2022}, representa una evolución de la predicción conformal que trasciende la generación de intervalos de confianza para construir distribuciones predictivas completas. A diferencia de los predictores conformales estándar, el LSPM se define como un Sistema Predictivo Conformal (CPS), cuya salida es una Función de Distribución Predictiva Conformal (CPD).
 
-\paragraph{Fundamento Teórico: Predicción Conformal}
+\subparagraph{Fundamento Teórico: Predicción Conformal}
 La predicción conformal se fundamenta en el principio de intercambiabilidad: dada una secuencia de pares $(x_1, y_1), \dots, (x_{n-1}, y_{n-1})$ y un nuevo objeto $x_n$, se asume que para cualquier etiqueta candidata $y$, la secuencia aumentada $(x_1, y_1), \dots, (x_{n-1}, y_{n-1}), (x_n, y)$ es intercambiable. Bajo este supuesto, se puede construir una distribución predictiva válida sin asumir una forma paramétrica específica para los errores.
 
 El LSPM utiliza mínimos cuadrados ordinarios (OLS) como algoritmo subyacente. La versión más robusta es el \textbf{LSPM Studentizado}, que emplea los elementos diagonales de la matriz de proyección (matriz hat) $\bar{H}$ para normalizar los residuos. Según \textcite{Vovk2022}, esta normalización garantiza que la distribución predictiva sea monótonamente creciente, incluso cuando el nuevo objeto posee alto apalancamiento (\textit{leverage}).
 
-\paragraph{Construcción de la Distribución Predictiva}
+\subparagraph{Construcción de la Distribución Predictiva}
 Para un conjunto de datos aumentado que incluye $n-1$ ejemplos de entrenamiento $(x_1, y_1), \dots, (x_{n-1}, y_{n-1})$ y un nuevo objeto $x_n$ con etiqueta hipotética $y$, se construye la matriz de diseño aumentada:
 \begin{equation}
 \bar{X} = \begin{pmatrix}
@@ -651,7 +653,7 @@ La matriz hat se define como:
 
 donde $h_{i,j}$ denota el elemento en la fila $i$ y columna $j$ de $\bar{H}$.
 
-\paragraph{Valores Críticos Studentizados}
+\subparagraph{Valores Críticos Studentizados}
 La distribución predictiva se construye mediante valores críticos $C_i$ que actúan como puntos de salto de una función escalonada. Para la versión studentizada, según las ecuaciones 7.15 y 7.16 de \textcite{Vovk2022}:
 
 \begin{equation}
@@ -669,17 +671,17 @@ A_i = \frac{\sum_{j=1}^{n-1} h_{j,n} y_j}{\sqrt{1 - h_{n,n}}} + \frac{y_i - \sum
 
 El término $A_i$ combina dos componentes: (i) la predicción OLS estándar sobre el punto nuevo, normalizada por su leverage, y (ii) el residuo studentizado del punto $i$ en un ajuste leave-one-out. El término $B_i$ normaliza esta combinación considerando el leverage tanto del punto nuevo ($h_{n,n}$) como del punto histórico ($h_{i,i}$) y su covarianza ($h_{i,n}$).
 
-\paragraph{Propiedades Estadísticas}
+\subparagraph{Propiedades Estadísticas}
 \textcite{Vovk2022} demuestra que bajo intercambiabilidad, la función de distribución construida mediante estos valores críticos es estadísticamente válida: para cualquier nivel de confianza $\alpha$, el intervalo de predicción conformal tiene cobertura exacta $1-\alpha$ en expectativa sobre la secuencia intercambiable. La studentización es crucial para mantener esta validez incluso cuando $h_{n,n} \to 1$ (leverage extremo del punto de prueba).
 
-\paragraph{Clasificación del Modelo}
+\subparagraph{Clasificación del Modelo}
 El LSPM es un método \textbf{no paramétrico} basado en distribución-libre (\textit{distribution-free}). Aunque utiliza OLS como algoritmo subyacente, no asume ninguna forma distribucional para los errores $\epsilon_i$. La validez estadística proviene únicamente del supuesto de intercambiabilidad, no de supuestos gaussianos o paramétricos sobre los residuos.
 
-\subsubsection{De la Teoría a la Práctica}
+\paragraph{De la Teoría a la Práctica}
 
 La implementación desarrollada adapta el marco teórico de Vovk al contexto específico de pronóstico en series temporales:
 
-\paragraph{Adaptación 1: Construcción Autorregresiva}
+\subparagraph{Adaptación 1: Construcción Autorregresiva}
 La teoría original asume vectores de características $x_i$ independientes. En series temporales, se construyen objetos dinámicamente mediante retardos: dado $p$ lags, cada observación se transforma en un vector autorregresivo:
 \begin{equation}
 x_t = (y_{t-1}, y_{t-2}, \dots, y_{t-p})^T
@@ -687,10 +689,10 @@ x_t = (y_{t-1}, y_{t-2}, \dots, y_{t-p})^T
 
 Esto convierte al LSPM en un predictor conformal autorregresivo AR($p$), donde la matriz de diseño se construye dinámicamente en cada ventana rolling usando los últimos $n$ valores disponibles.
 
-\paragraph{Adaptación 2: Estabilidad Numérica}
+\subparagraph{Adaptación 2: Estabilidad Numérica}
 Para calcular $\bar{H} = \bar{X}(\bar{X}^T\bar{X})^{-1}\bar{X}^T$, la implementación emplea la pseudoinversa de Moore-Penrose en lugar de la inversa estándar. Esta decisión es crítica: series temporales con alta autocorrelación generan matrices $\bar{X}^T\bar{X}$ casi singulares (número de condición alto), causando inestabilidad numérica en la inversión directa. La pseudoinversa provee una solución regularizada que previene errores computacionales.
 
-\paragraph{Adaptación 3: Filtrado de Singularidades}
+\subparagraph{Adaptación 3: Filtrado de Singularidades}
 La teoría requiere que $h_{i,i} < 1$ y $h_{n,n} < 1$ para que los denominadores en $A_i$ y $B_i$ sean no nulos. La implementación incorpora dos mecanismos de seguridad:
 \begin{itemize}
     \item Umbral de tolerancia: Se filtran observaciones con $|1 - h_{i,i}| < 10^{-10}$ o $|1 - h_{n,n}| < 10^{-10}$.
@@ -714,9 +716,9 @@ Valores críticos & Todos los $n-1$ puntos & Solo puntos con $B_i$ válido\\
 \end{tabular}
 \end{table}
 
-\subsubsection{Optimización, Parámetros e Hiperparámetros}
+\paragraph{Optimización, Parámetros e Hiperparámetros}
 
-\paragraph{Parámetro Principal: \texttt{n\_lags} ($p$)}
+\subparagraph{Parámetro Principal: \texttt{n\_lags} ($p$)}
 Define el orden autorregresivo del modelo, controlando cuántos retardos se usan para construir la matriz de diseño. La implementación emplea la heurística:
 \begin{equation}
 p = \max\left(1, \lfloor n^{1/3} \rfloor\right)
@@ -724,20 +726,217 @@ p = \max\left(1, \lfloor n^{1/3} \rfloor\right)
 
 Esta regla está motivada por consideraciones teóricas de métodos de tamiz (sieve methods) en estadística no paramétrica, donde el número de parámetros $p$ debe crecer con el tamaño muestral $n$ pero a una tasa controlada que preserve consistencia. La tasa $n^{1/3}$ es estándar en la literatura de bootstrap para series temporales \parencite{Buhlmann1997, politis2004automatic}, garantizando que $p \to \infty$ conforme $n \to \infty$, pero manteniendo $p^3/n \to 0$ para evitar sobreajuste. Esta misma tasa aparece en la heurística de longitud de bloque del CBB, reflejando un principio unificado: el número de parámetros debe escalar subcuadráticamente con la muestra. Para $n = 200$, resulta $p \approx 5$ lags, suficiente para capturar autocorrelaciones de corto plazo sin saturar los grados de libertad del modelo OLS subyacente.
 
-\paragraph{Métrica de Optimización}
+\subparagraph{Métrica de Optimización}
 Dado que el LSPM es un método conformal teóricamente válido sin hiperparámetros libres (la versión studentizada es la única apropiada según \textcite{Vovk2022}), la optimización se limita a seleccionar $p$ mediante la heurística anterior.
 
-\paragraph{Protocolo de Congelamiento}
+\subparagraph{Protocolo de Congelamiento}
 El método ejecuta una operación crítica: congela $p$ basado en el tamaño del conjunto de entrenamiento+calibración. Este valor congelado $p^*$ se almacena  y se reutiliza en todas las ventanas rolling subsecuentes, garantizando que la dimensionalidad de la matriz de diseño permanezca constante y previniendo data leakage.
 
 
-\subsection{Least Squares Prediction Machine with Weighted Residuals (LSPMW)}
+\subsubsection{DeepAR: Probabilistic Forecasting with Autoregressive Recurrent Networks}
+\label{subsec:DeepAR}
+\paragraph{Explicación Teórica del Modelo}
+
+DeepAR, introducido por \textcite{Salinas2020}, representa un cambio de paradigma en el pronóstico probabilístico de series temporales al trasladar el enfoque desde el modelado individual de cada serie hacia el \textbf{aprendizaje de un modelo global} a partir de múltiples series relacionadas mediante una arquitectura de red neuronal recurrente autorregresiva.
+
+\subparagraph{Fundamento Arquitectónico}
+
+El modelo emplea redes LSTM (Long Short-Term Memory) para procesar secuencias temporales de forma autorregresiva. Para una serie temporal $i$ con valores $z_{i,t}$, DeepAR modela la distribución condicional del futuro dado el pasado:
+
+\begin{equation}
+P(z_{i,t_0:T} \mid z_{i,1:t_0-1}, x_{i,1:T})
+\end{equation}
+
+donde $t_0$ denota el punto de inicio del horizonte de predicción, $z_{i,1:t_0-1}$ representa el rango de condicionamiento, $z_{i,t_0:T}$ los valores futuros, y $x_{i,1:T}$ son covariables conocidas.
+
+La arquitectura factoriza esta distribución mediante el producto de verosimilitudes condicionales:
+
+\begin{equation}
+Q_{\Theta}(z_{i,t_0:T} \mid z_{i,1:t_0-1}, x_{i,1:T}) = \prod_{t=t_0}^{T} Q_{\Theta}(z_{i,t} \mid z_{i,1:t-1}, x_{i,1:T})
+\end{equation}
+
+donde cada factor está parametrizado por la salida de la red recurrente:
+
+\begin{equation}
+Q_{\Theta}(z_{i,t} \mid z_{i,1:t-1}, x_{i,1:T}) = \ell(z_{i,t} \mid \theta(h_{i,t}, \Theta))
+\end{equation}
+
+El estado oculto $h_{i,t}$ se actualiza recursivamente mediante:
+
+\begin{equation}
+h_{i,t} = h(h_{i,t-1}, z_{i,t-1}, x_{i,t}, \Theta)
+\end{equation}
+
+donde $h(\cdot)$ es una función implementada por una red LSTM multicapa con parámetros $\Theta$.
+
+\subparagraph{Naturaleza Autorregresiva}
+
+En cada paso temporal $t$, la red consume como entrada el valor observado del paso anterior $z_{i,t-1}$ junto con las covariables $x_{i,t}$ y el estado oculto previo $h_{i,t-1}$. Durante el entrenamiento, todos los valores $z_{i,t}$ en el rango de predicción son conocidos. Durante la predicción, para $t \geq t_0$, los valores futuros se reemplazan por muestras $\tilde{z}_{i,t} \sim \ell(\cdot \mid \theta(h_{i,t}, \Theta))$ generadas por el propio modelo, que se retroalimentan para calcular el siguiente estado oculto mediante \textit{muestreo ancestral}.
+
+\subparagraph{Modelado Probabilístico}
+
+DeepAR no predice directamente valores futuros, sino los \textbf{parámetros de una distribución de probabilidad} $\theta(h_{i,t})$ sobre valores posibles. Para datos de valores reales, se emplea \textbf{verosimilitud Gaussiana}:
+
+\begin{equation}
+\ell_G(z \mid \mu, \sigma) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{(z-\mu)^2}{2\sigma^2}\right)
+\end{equation}
+
+donde la media $\mu(h_{i,t})$ y desviación estándar $\sigma(h_{i,t})$ se obtienen mediante transformaciones de la salida de la red:
+
+\begin{equation}
+\mu(h_{i,t}) = w_{\mu}^T h_{i,t} + b_{\mu}, \quad \sigma(h_{i,t}) = \log(1 + \exp(w_{\sigma}^T h_{i,t} + b_{\sigma}))
+\end{equation}
+
+Los parámetros $\Theta$ del modelo se aprenden maximizando la log-verosimilitud:
+
+\begin{equation}
+\mathcal{L}(\Theta) = \sum_{i=1}^{N} \sum_{t=1}^{T} \log \ell(z_{i,t} \mid \theta(h_{i,t}, \Theta))
+\end{equation}
+
+Una ventaja fundamental es que el modelo es completamente observable durante el entrenamiento, no requiriendo técnicas de inferencia variacional o métodos de Monte Carlo para aproximar la función objetivo.
+
+\subparagraph{Manejo de Escalas Heterogéneas}
+
+DeepAR introduce un mecanismo de escalamiento que normaliza las entradas y salidas autorregresivas por un factor de escala específico de cada serie $\nu_i$:
+
+\begin{equation}
+\tilde{z}_{i,t} = \frac{z_{i,t}}{\nu_i}, \quad \nu_i = 1 + \frac{1}{t_0} \sum_{t=1}^{t_0} z_{i,t}
+\end{equation}
+
+Los parámetros de la verosimilitud se ajustan correspondientemente:
+
+\begin{equation}
+\mu_{\text{escalado}} = \nu_i \cdot \mu(h_{i,t}), \quad \sigma_{\text{escalado}} = \nu_i \cdot \sigma(h_{i,t})
+\end{equation}
+
+\subparagraph{Generación de Pronósticos Probabilísticos}
+
+La generación de pronósticos se realiza mediante muestreo ancestral, produciendo $B$ trayectorias completas $\{\tilde{z}_{i,t_0:T}^{(b)}\}_{b=1}^{B}$. El conjunto de trayectorias representa una muestra empírica de la distribución predictiva conjunta, preservando las correlaciones temporales aprendidas por el modelo.
+
+\subparagraph{Clasificación del Modelo}
+
+DeepAR es un \textbf{modelo semi-paramétrico}. La componente paramétrica reside en la arquitectura LSTM con parámetros $\Theta$ que deben estimarse, y en la elección de la familia de distribuciones de verosimilitud (Gaussiana, Binomial Negativa). La componente no paramétrica emerge del muestreo ancestral, que genera distribuciones predictivas empíricas sin asumir formas funcionales rígidas para la distribución conjunta multi-paso.
+
+\paragraph{De la Teoría a la Práctica}
+
+La implementación de DeepAR para series temporales univariadas desarrollada en esta investigación traduce el marco teórico autorregresivo a un sistema predictivo concreto mediante adaptaciones específicas al contexto de este estudio.
+
+\subparagraph{Adaptaciones Principales}
+
+\textbf{(1) Simplificación de Covariables:} A diferencia del trabajo original de \textcite{Salinas2020} que asume múltiples covariables $x_{i,t}$, esta implementación \textbf{no utiliza covariables externas}. La arquitectura se reduce a su forma puramente autorregresiva:
+
+\begin{equation}
+h_{i,t} = h(h_{i,t-1}, z_{i,t-1}, \Theta)
+\end{equation}
+
+Esta simplificación elimina la dependencia de información auxiliar, centrando la comparación en la capacidad de extraer patrones de la historia temporal intrínseca.
+
+\textbf{(2) Construcción de Ventanas:} Dado que cada configuración genera una única serie de longitud $n=252$, se emplea \textit{windowing} deslizante para generar múltiples instancias de entrenamiento. Se construyen pares $(X^{(k)}, y^{(k)})$ mediante:
+
+\begin{equation}
+X^{(k)} = [y_k, \ldots, y_{k+p-1}], \quad y^{(k)} = y_{k+p}
+\end{equation}
+
+para $k = 1, \ldots, n_{\text{train}} - p$, generando aproximadamente $n_{\text{train}} - p$ instancias de entrenamiento.
+
+\textbf{(3) Normalización Z-Score:} En lugar del escalamiento por $\nu_i$ del original, se emplea normalización Z-score completa:
+
+\begin{equation}
+\tilde{z}_t = \frac{z_t - \mu_{\text{train}}}{\sigma_{\text{train}} + \epsilon}
+\end{equation}
+
+garantizando que las entradas a la LSTM tengan media cero y varianza unitaria. Las predicciones se des-normalizan mediante la transformación inversa.
+
+\textbf{(4) Early Stopping:} Se reserva el 20\% final de las instancias generadas como conjunto de validación interno. El entrenamiento se detiene si la pérdida de validación no mejora durante un número de épocas de paciencia (típicamente 5), reteniendo los parámetros correspondientes a la época con menor pérdida.
+
+\textbf{(5) Protocolo de Congelamiento:} Para evitar \textit{data leakage} en la evaluación rolling window, el modelo se entrena una única vez sobre $n_{\text{train}} = 200$ observaciones. Los parámetros de normalización $\mu_{\text{frozen}}, \sigma_{\text{frozen}}$ y los pesos de la red $\Theta_{\text{frozen}}$ se congelan completamente. Durante la fase de evaluación rolling, para cada paso $t = 1, \ldots, 12$, se normalizan los últimos $p$ valores observados usando parámetros congelados, se calcula la predicción con $\Theta_{\text{frozen}}$ sin re-entrenamiento, y se des-normalizan las muestras predictivas. Este protocolo previene contaminación de información futura y garantiza validez estadística.
+
+La Tabla \ref{tab:deepar_comparison} resume las diferencias metodológicas entre la implementación original y la adaptación desarrollada.
+
+\begin{table}[htbp]
+\centering
+\caption{Comparativa: Teoría vs. Implementación de DeepAR}
+\label{tab:deepar_comparison}
+\small
+\begin{tabular}{>{\raggedright\arraybackslash}p{3.5cm}%
+                >{\raggedright\arraybackslash}p{5cm}%
+                >{\raggedright\arraybackslash}p{5cm}}
+\toprule
+\textbf{Aspecto} & \textbf{DeepAR Original} & \textbf{Implementación (Esta Tesis)} \\
+\midrule
+Contexto de aplicación & Miles de series relacionadas & Serie temporal única (windowing local) \\
+Covariables & Múltiples features temporales & Sin covariables externas \\
+Verosimilitud & Gaussiana y Binomial Negativa & Gaussiana únicamente \\
+Normalización & Escalamiento por $\nu_i$ & Z-score completo \\
+Muestreo de entrenamiento & Ponderado por velocidad & Uniforme sobre ventanas \\
+Regularización & No especificada & Early stopping con validación interna \\
+Protocolo de evaluación & Modelo único para todas las series & Congelamiento total para rolling forecast \\
+Framework & MXNet & PyTorch \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Optimización, Parámetros e Hiperparámetros}
+
+\subparagraph{Hiperparámetros Arquitectónicos}
+
+\textbf{hidden\_size ($h$):} Dimensionalidad del estado oculto de cada celda LSTM. Controla la capacidad representacional del modelo.
+
+\textbf{n\_lags ($p$):} Número de valores pasados utilizados como entrada autorregresiva. Similar al orden en modelos AR$(p)$.
+
+\textbf{num\_layers ($L$):} Número de capas LSTM apiladas. Valores mayores incrementan el número de parámetros: $\Theta \propto L \times h^2$.
+
+\textbf{epochs ($E$):} Número máximo de pasadas completas sobre el conjunto de entrenamiento. El early stopping típicamente detiene antes de alcanzar este máximo.
+
+\textbf{lr (learning rate):} Controla el tamaño del paso en la actualización de parámetros mediante el optimizador Adam \parencite{Kingma2015}.
+
+\subparagraph{Espacio de Búsqueda}
+
+La optimización de hiperparámetros explora dos configuraciones estratégicamente diseñadas:
+
+\textbf{Configuración Ligera:}
+\begin{itemize}
+    \item \texttt{hidden\_size}=20, \texttt{n\_lags}=10, \texttt{num\_layers}=1, \texttt{epochs}=25, \texttt{lr}=0.01
+\end{itemize}
+
+\textbf{Configuración Profunda:}
+\begin{itemize}
+    \item \texttt{hidden\_size}=32, \texttt{n\_lags}=15, \texttt{num\_layers}=2, \texttt{epochs}=30, \texttt{lr}=0.005
+\end{itemize}
+
+\subparagraph{Protocolo de Optimización}
+
+La selección entre ambas configuraciones se realiza minimizando \textbf{ECRPS} sobre un conjunto de calibración temporal de 40 observaciones posteriores al entrenamiento. Formalmente:
+
+\begin{equation}
+(h^*, \text{n}_\text{lags}^*, \text{n}_\text{layers}^*, \text{epochs}^*, \text{lr}^*) = \arg\min_{(h, \text{n}_\text{lags}, \text{n}_\text{layers}, \text{epochs}, \text{lr}) \in \mathcal{H}} \frac{1}{N_{\text{cal}}} \sum_{i=1}^{N_{\text{cal}}} \text{CRPS}(\hat{F}_i, y_i)
+\end{equation}
+
+donde $\mathcal{H}$ es el conjunto de configuraciones candidatas y $\hat{F}_i$ es la distribución predictiva empírica generada por muestreo ancestral.
+
+\subparagraph{Congelamiento de Hiperparámetros}
+
+Una vez optimizada, la configuración seleccionada se congela:
+
+\begin{enumerate}
+    \item Estima los parámetros de normalización: $\mu_{\text{frozen}}, \sigma_{\text{frozen}}$
+    \item Entrena la red LSTM hasta convergencia (early stopping)
+    \item Almacena los pesos de la red: $\Theta_{\text{frozen}}$
+    \item Establece el flag 
+\end{enumerate}
+
+Durante toda la evaluación rolling window posterior, el método verifica este flag: si es \texttt{True}, omite completamente el entrenamiento y procede directamente a generar predicciones con el modelo existente. Este protocolo garantiza que no haya fuga de información futura y que las métricas de desempeño reflejen la capacidad predictiva genuina del modelo.
+
+
+\subsection{Modelos adaptados de la literatura}
+
+\subsubsection{Least Squares Prediction Machine with Weighted Residuals (LSPMW)}
 \label{subsec:LSPMW}
-\subsubsection{Explicación Teórica del Modelo}
+\paragraph{Explicación Teórica del Modelo}
 
 El \textit{Least Squares Prediction Machine with Weighted Residuals} (LSPMW) constituye una extensión del LSPM diseñada para contextos donde el supuesto de intercambiabilidad se viola por deriva distributiva (\textit{distribution drift}) o no estacionaridad. Esta variante se fundamenta en los desarrollos de \textcite{Barber2023} sobre predicción conformal no intercambiable.
 
-\paragraph{Fundamento Teórico: Cuantiles Ponderados}
+\subparagraph{Fundamento Teórico: Cuantiles Ponderados}
 \textcite{Barber2023} demuestran que cuando la intercambiabilidad falla, la pérdida de cobertura (\textit{coverage gap}) de un predictor conformal puede acotarse mediante la distancia de variación total entre distribuciones. Para mitigar este problema en presencia de deriva temporal, proponen sustituir la distribución empírica uniforme por una distribución empírica ponderada.
 
 Formalmente, dado un conjunto de valores críticos (residuos conformales) $\{C_1, \dots, C_{n-1}\}$ ordenados cronológicamente, se asignan pesos temporales no uniformes $w_i$ que priorizan observaciones recientes. La función de distribución empírica ponderada se define como:
@@ -747,7 +946,7 @@ Formalmente, dado un conjunto de valores críticos (residuos conformales) $\{C_1
 
 donde $\tilde{w}_i = w_i / \sum_{j=1}^{n-1} w_j$ son los pesos normalizados.
 
-\paragraph{Esquema de Decaimiento Geométrico}
+\subparagraph{Esquema de Decaimiento Geométrico}
 Para deriva gradual, \textcite{Barber2023} recomiendan un esquema de decaimiento geométrico:
 \begin{equation}
 w_i = \rho^{n-1-i}, \quad \rho \in (0, 1)
@@ -761,7 +960,7 @@ donde $i$ indexa los residuos en orden cronológico (de más antiguo a más reci
 
 El peso efectivo del $i$-ésimo residuo decrece exponencialmente conforme retrocedemos en el tiempo, otorgando a la observación más reciente ($i = n-1$) peso $\rho^0 = 1$, y a la más antigua ($i = 1$) peso $\rho^{n-2}$.
 
-\paragraph{Cuantiles Ponderados}
+\subparagraph{Cuantiles Ponderados}
 Para un nivel de cobertura $\alpha$, el cuantil $(1-\alpha)$ de la distribución ponderada se obtiene mediante:
 \begin{equation}
 q_{1-\alpha} = \inf\left\{y : \sum_{i: C_i \leq y} \tilde{w}_i \geq 1-\alpha\right\}
@@ -769,7 +968,7 @@ q_{1-\alpha} = \inf\left\{y : \sum_{i: C_i \leq y} \tilde{w}_i \geq 1-\alpha\rig
 
 Este cuantil ponderado adapta la región de predicción conforme la distribución subyacente cambia en el tiempo.
 
-\paragraph{Propiedades de Cobertura}
+\subparagraph{Propiedades de Cobertura}
 \textcite{Barber2023} establecen que bajo deriva Lipschitz-continua con constante $L$, el error de cobertura del predictor ponderado satisface:
 \begin{equation}
 \left|\mathbb{P}(Y_{n+1} \in \hat{C}_{1-\alpha}) - (1-\alpha)\right| \leq O\left(\frac{L}{\rho} + \frac{1}{\sqrt{n_{\text{eff}}}}\right)
@@ -777,14 +976,14 @@ Este cuantil ponderado adapta la región de predicción conforme la distribució
 
 donde $n_{\text{eff}} = (\sum_i \tilde{w}_i^2)^{-1}$ es el tamaño de muestra efectivo. Esta cota revela el trade-off: $\rho$ pequeño reduce sesgo por deriva ($L/\rho$ disminuye) pero aumenta varianza ($n_{\text{eff}}$ disminuye).
 
-\paragraph{Clasificación del Modelo}
+\subparagraph{Clasificación del Modelo}
 El LSPMW es un método \textbf{no paramétrico adaptativo}. Mantiene la propiedad distribution-free del LSPM (no asume forma distribucional de errores) pero introduce un mecanismo de ponderación que adapta la distribución predictiva a cambios temporales sin modelar explícitamente la deriva.
 
-\subsubsection{De la Teoría a la Práctica}
+\paragraph{De la Teoría a la Práctica}
 
 La implementación desarrollada traduce la teoría de \textcite{Barber2023} mediante un esquema de \textbf{muestreo ponderado adaptativo} que recalcula dinámicamente los residuos conformales:
 
-\paragraph{Adaptación 1: Muestreo Ponderado vs. Expansión por Replicación}
+\subparagraph{Adaptación 1: Muestreo Ponderado vs. Expansión por Replicación}
 A diferencia de métodos que pre-computan una distribución expandida, la implementación emplea \textit{muestreo estratificado} en tiempo real. Para generar una distribución predictiva de tamaño $N = 1000$, se ejecuta:
 \begin{equation}
 \tilde{R}_j \sim \text{Categorical}(\{C_1, \dots, C_n\}, \{\tilde{w}_1, \dots, \tilde{w}_n\}), \quad j = 1, \dots, N
@@ -792,7 +991,7 @@ A diferencia de métodos que pre-computan una distribución expandida, la implem
 
 donde cada muestra $\tilde{R}_j$ se extrae de los valores críticos $\{C_i\}$ con probabilidades proporcionales a los pesos normalizados $\tilde{w}_i = w_i / \sum_k w_k$. Este enfoque es matemáticamente equivalente a muestrear de la distribución empírica ponderada $\hat{F}_n(y)$.
 
-\paragraph{Adaptación 2: Recálculo Dinámico de Residuos}
+\subparagraph{Adaptación 2: Recálculo Dinámico de Residuos}
 Contrario a esquemas de congelamiento completo, la implementación mantiene únicamente los hiperparámetros ($\rho^*$, $p^*$) fijos tras calibración. En cada paso del rolling forecast:
 \begin{enumerate}
     \item Se recalculan valores críticos $\{C_1, \dots, C_m\}$ usando la ventana temporal actual.
@@ -803,7 +1002,7 @@ Contrario a esquemas de congelamiento completo, la implementación mantiene úni
 
 Este diseño permite que el modelo se adapte continuamente a derivas distributivas, pues los residuos más recientes (calculados con datos actuales) reciben mayor ponderación automáticamente.
 
-\paragraph{Adaptación 3: Protocolo de Congelamiento Parcial}
+\subparagraph{Adaptación 3: Protocolo de Congelamiento Parcial}
 El método almacena únicamente:
 \begin{itemize}
     \item \texttt{\_frozen\_rho}: Valor óptimo $\rho^*$ seleccionado por validación
@@ -829,9 +1028,9 @@ Congelamiento & No especificado & Solo hiperparámetros ($\rho^*$, $p^*$) \\
 \end{tabular}
 \end{table}
 
-\subsubsection{Optimización, Parámetros e Hiperparámetros}
+\paragraph{Optimización, Parámetros e Hiperparámetros}
 
-\paragraph{Hiperparámetro Principal: \texttt{rho} ($\rho$)}
+\subparagraph{Hiperparámetro Principal: \texttt{rho} ($\rho$)}
 Controla la tasa de decaimiento temporal de los pesos. Durante validación se evalúan valores en el rango $[0.90, 0.99]$:
 \begin{itemize}
     \item $\rho = 0.90$: Adaptación rápida, memoria efectiva $\approx 10$ observaciones
@@ -844,10 +1043,10 @@ El tamaño efectivo de muestra bajo decaimiento geométrico es:
 n_{\text{eff}} = \frac{1}{\sum_{i=1}^{n-1} \tilde{w}_i^2} \approx \frac{1-\rho}{1-\rho^n}
 \end{equation}
 
-\paragraph{Métrica de Optimización}
+\subparagraph{Métrica de Optimización}
 La selección de $\rho^*$ se realiza minimizando el \textbf{ECRPS} (véase \ref{subsec:ecrps}) sobre el conjunto de validación. Para cada candidato $\rho$, se genera la distribución ponderada en cada tiempo de validación mediante muestreo estratificado y se evalúa la calibración predictiva.
 
-\paragraph{Protocolo de Congelamiento Parcial}
+\subparagraph{Protocolo de Congelamiento Parcial}
 El método  ejecuta:
 \begin{enumerate}
     \item Congela $p^*$ (número de lags) heredado de la clase base LSPM.
@@ -865,13 +1064,13 @@ Durante la fase de prueba rolling, el método \texttt{fit\_predict()}:
 \end{enumerate}
 
 
-\subsection{Mondrian Conformal Predictive System (MCPS)}
+\subsubsection{Mondrian Conformal Predictive System (MCPS)}
 \label{subsec:MCPS}
-\subsubsection{Explicación Teórica del Modelo}
+\paragraph{Explicación Teórica del Modelo}
 
 El \textit{Mondrian Conformal Predictive System} (MCPS), formalizado por \textcite{Bostrom2021}, constituye una extensión localmente adaptativa del Sistema Predictivo Conformal estándar (SCPS). A diferencia del SCPS, que asume homogeneidad en la distribución de errores sobre todo el espacio de entrada, el MCPS reconoce que la incertidumbre predictiva varía significativamente según el régimen operativo del modelo. Este enfoque resulta especialmente relevante en aplicaciones reales donde, por ejemplo, predicciones en rangos bajos del modelo pueden exhibir patrones de error distintos a predicciones en rangos altos.
 
-\paragraph{Fundamento: Particionamiento Mondrian}
+\subparagraph{Fundamento: Particionamiento Mondrian}
 
 La innovación central radica en la estrategia de \textbf{particionamiento Mondrian} \parencite{Vovk2005}, que divide el conjunto de calibración $\mathcal{D}_c$ en subconjuntos disjuntos basándose en características compartidas de las predicciones. Sea $h: \mathcal{X} \rightarrow \mathbb{R}$ un modelo de regresión entrenado, y $B \in \mathbb{N}$ el número de bins. Se define una partición:
 
@@ -887,7 +1086,7 @@ Cada subconjunto $\mathcal{D}_c^{\kappa}$ agrupa instancias $(x_j, y_j)$ cuyas p
 
 donde $q_p$ denota el cuantil $p$ de las predicciones $\{h(x_j)\}_{j=1}^{N_c}$. Esta estrategia captura automáticamente heterogeneidad: instancias con predicciones similares comparten probablemente patrones de error similares.
 
-\paragraph{Cálculo Localizado de Scores Conformales}
+\subparagraph{Cálculo Localizado de Scores Conformales}
 
 Para una instancia de prueba $x$ con predicción $h(x)$, se determina su bin correspondiente $\kappa^*$:
 
@@ -903,7 +1102,7 @@ C_j^{\kappa^*} = h(x) + (y_j - h(x_j)), \quad \forall (x_j, y_j) \in \mathcal{D}
 
 Esta formulación es algebraicamente idéntica al SCPS, pero la diferencia crítica reside en que los residuos históricos provienen exclusivamente de casos con comportamiento predictivo similar. Matemáticamente, se estima la distribución condicional $P(\epsilon \mid h(x) \in \text{Bin}_{\kappa})$ localmente, en lugar de globalmente como en SCPS donde se asume $P(\epsilon \mid h(x)) = P(\epsilon)$.
 
-\paragraph{Construcción de la Distribución Predictiva}
+\subparagraph{Construcción de la Distribución Predictiva}
 
 Según \textcite{Vovk2022}, el conjunto de scores ordenados $C_{(1)}^{\kappa^*} < C_{(2)}^{\kappa^*} < \cdots < C_{(N_c^{\kappa^*})}^{\kappa^*}$ define una distribución empírica que aproxima la distribución predictiva verdadera. Para cualquier función medible $g$:
 
@@ -913,7 +1112,7 @@ Según \textcite{Vovk2022}, el conjunto de scores ordenados $C_{(1)}^{\kappa^*} 
 
 con error que converge a cero cuando $N_c^{\kappa^*} \to \infty$. Esto implica que cualquier estadístico (media, varianza, cuantiles) puede calcularse directamente sobre los scores sin reconstruir una CDF completa.
 
-\paragraph{Garantías de Cobertura Local}
+\subparagraph{Garantías de Cobertura Local}
 
 \textcite{Bostrom2021} demuestran que, bajo intercambiabilidad dentro de cada bin, se logra \textbf{cobertura condicional válida} en cada estrato. Para cualquier nivel $\alpha$:
 
@@ -929,15 +1128,15 @@ W_{\kappa_1}(x_1) \neq W_{\kappa_2}(x_2) \quad \text{si} \quad \text{Var}(\epsil
 
 Esta propiedad contrasta con el SCPS, donde $W(x) \approx \text{constante}$ para todo $x$, resultando en sobre-cobertura en regiones de baja incertidumbre o sub-cobertura en regiones de alta incertidumbre.
 
-\paragraph{Naturaleza No Paramétrica}
+\subparagraph{Naturaleza No Paramétrica}
 
 El MCPS es un modelo \textbf{no paramétrico}. No asume forma funcional específica para la distribución de errores ni para la relación entre predictores y respuesta. La distribución predictiva se construye enteramente a partir de datos empíricos mediante el conjunto de scores conformales, sin parámetros poblacionales a estimar. El único modelo subyacente es el regressor base $h(x)$ (que puede ser paramétrico o no), pero la construcción de intervalos conformales es completamente libre de distribución.
 
-\subsubsection{De la Teoría a la Práctica}
+\paragraph{De la Teoría a la Práctica}
 
 La implementación del MCPS para series temporales autorregresivas representa una contribución metodológica poco explorada, traduciendo el framework teórico (originalmente diseñado para datos independientes en logística \parencite{Ye2025}) hacia contextos con dependencias temporales.
 
-\paragraph{Adaptaciones Principales}
+\subparagraph{Adaptaciones Principales}
 
 \textbf{(1) Construcción Dinámica de Features:} Mientras que \textcite{Ye2025} asumen features pre-existentes $x_i$ observables (ubicación, peso, transportista), en series temporales los ``objetos'' se construyen dinámicamente como ventanas deslizantes de $p$ rezagos:
 
@@ -992,9 +1191,9 @@ Horizonte & Batch (predicciones simultáneas) & Secuencial (rolling forecast) \\
 \end{tabular}
 \end{table}
 
-\subsubsection{Optimización, Parámetros e Hiperparámetros}
+\paragraph{Optimización, Parámetros e Hiperparámetros}
 
-\paragraph{Hiperparámetros Primarios}
+\subparagraph{Hiperparámetros Primarios}
 
 Dado el costo computacional de la validación cruzada completa y las restricciones del conjunto de datos, se consideran únicamente dos configuraciones de hiperparámetros:
 
@@ -1010,7 +1209,7 @@ Estos hiperparámetros controlan aspectos fundamentales del modelo:
 \textbf{n\_bins ($B$):} Número de particiones Mondrian que controla la adaptabilidad local del ajuste de conformidad. Según \textcite{Bostrom2021}, valores muy pequeños ($B \leq 3$) degeneran el método a SCPS (sin adaptación local), mientras que valores excesivos ($B \geq 20$) fragmentan la calibración por insuficiencia muestral. La configuración conservadora emplea $B=8$ bins (tamaño esperado por bin: $\mathbb{E}[N_c^{\kappa}] \approx N_c/8$), mientras que la flexible utiliza $B=15$ para mayor adaptabilidad espacial.
 
 
-\paragraph{Optimización de Hiperparámetros}
+\subparagraph{Optimización de Hiperparámetros}
 
 \textbf{Estrategia de congelamiento:} El método definido entrena el modelo base XGBoost una sola vez sobre los datos de entrenamiento completos, calculando los artefactos necesarios:
 
@@ -1030,7 +1229,7 @@ Estos artefactos se reutilizan en todas las predicciones posteriores sin reentre
 
 Esta optimización ocurre en la fase inicial; una vez congelados, los hiperparámetros permanecen fijos durante todo el horizonte de predicción.
 
-\paragraph{Parámetros del Modelo Base}
+\subparagraph{Parámetros del Modelo Base}
 
 El regressor autorregresivo $h: \mathbb{R}^p \rightarrow \mathbb{R}$ se implementa mediante XGBoost \parencite{Chen2016}:
 
@@ -1043,7 +1242,7 @@ El regressor autorregresivo $h: \mathbb{R}^p \rightarrow \mathbb{R}$ se implemen
 
 Esta parametrización conservadora previene captura de ruido, crítico cuando $p$ es grande relativo a $N_{\text{train}}$.
 
-\paragraph{Balance Fundamental}
+\subparagraph{Balance Fundamental}
 
 La selección conjunta define un trade-off:
 
@@ -1058,13 +1257,13 @@ La selección conjunta define un trade-off:
 Para series típicas con $T \approx 1000$, la configuración $(p=10, B=10, \text{test\_size}=0.25)$ resulta en $\sim$25 scores por bin, suficiente para estimación robusta según \textcite{Hyndman1996}.
 
 
-\subsection{Adaptive Volatility Mondrian Conformal Predictive System (AV-MCPS)}
+\subsubsection{Adaptive Volatility Mondrian Conformal Predictive System (AV-MCPS)}
 \label{subsec:AV-MCPS}
-\subsubsection{Explicación Teórica del Modelo}
+\paragraph{Explicación Teórica del Modelo}
 
 El \textit{Adaptive Volatility Mondrian Conformal Predictive System} (AV-MCPS) constituye una extensión metodológica del MCPS estándar desarrollada específicamente para esta investigación, representando una de las contribuciones originales más significativas de la tesis. Mientras que el MCPS de \textcite{Ye2025} particiona el espacio de calibración únicamente según predicciones puntuales $h(x)$, el AV-MCPS introduce una \textbf{estratificación bidimensional} que incorpora explícitamente la volatilidad local como segunda dimensión de heterogeneidad.
 
-\paragraph{Motivación: Límites del Particionamiento Unidimensional}
+\subparagraph{Motivación: Límites del Particionamiento Unidimensional}
 
 El MCPS estándar asume implícitamente homogeneidad de varianza dentro de cada bin de predicción. Formalmente, si $\mathcal{D}_c^{\kappa}$ denota el subconjunto con predicciones en $[q_{\kappa/B}, q_{(\kappa+1)/B})$:
 
@@ -1074,7 +1273,7 @@ El MCPS estándar asume implícitamente homogeneidad de varianza dentro de cada 
 
 Esta suposición se viola frecuentemente en series temporales con \textbf{heterocedasticidad condicional}, donde la volatilidad de errores varía sistemáticamente: $\text{Var}(\epsilon_t) = \sigma_t^2 \neq \text{constante}$. Dos observaciones con predicciones similares $h(x_i) \approx h(x_j)$ pueden experimentar errores de magnitudes radicalmente diferentes si provienen de regímenes de volatilidad distintos.
 
-\paragraph{Particionamiento Bidimensional}
+\subparagraph{Particionamiento Bidimensional}
 
 El AV-MCPS propone una partición conjunta basada en dos características:
 
@@ -1105,7 +1304,7 @@ donde cada celda agrupa observaciones que satisfacen simultáneamente:
 
 Esta estratificación genera $B_{\text{pred}} \times B_{\text{vol}}$ celdas, cada una representando un régimen específico de (nivel, volatilidad).
 
-\paragraph{Cálculo Localizado de Scores}
+\subparagraph{Cálculo Localizado de Scores}
 
 Para un punto de prueba $x_{\text{test}}$, el procedimiento es:
 
@@ -1124,7 +1323,7 @@ C_i^{(\kappa^*,\lambda^*)} = h(x_{\text{test}}) + (y_i - h(x_i)), \quad \forall 
 \end{equation}
 \end{enumerate}
 
-\paragraph{Garantías de Cobertura Bidimensional}
+\subparagraph{Garantías de Cobertura Bidimensional}
 
 Bajo intercambiabilidad condicional dentro de cada celda, se preservan las garantías conformales localmente:
 
@@ -1134,7 +1333,7 @@ Bajo intercambiabilidad condicional dentro de cada celda, se preservan las garan
 
 Esta garantía es más fuerte que la del MCPS, ya que condiciona sobre una partición más fina. Al controlar simultáneamente por nivel y volatilidad, el AV-MCPS logra \textbf{adaptabilidad condicional mejorada}.
 
-\paragraph{Trade-off: Resolución vs. Tamaño de Muestra}
+\subparagraph{Trade-off: Resolución vs. Tamaño de Muestra}
 
 El número esperado de observaciones por celda es:
 
@@ -1155,15 +1354,15 @@ Aumentar resolución mejora localización pero reduce tamaño de muestra por cel
 
 donde $\mathcal{D}_c^{(\kappa^*, \cdot)} = \bigcup_{\lambda=1}^{B_{\text{vol}}} \mathcal{D}_c^{(\kappa^*,\lambda)}$ representa el bin unidimensional basado solo en predicción.
 
-\paragraph{Naturaleza No Paramétrica}
+\subparagraph{Naturaleza No Paramétrica}
 
 El AV-MCPS es un modelo \textbf{no paramétrico}. No asume forma funcional para la distribución de errores ni para la relación entre predictores y respuesta. La estratificación bidimensional es completamente libre de distribución, construyéndose enteramente a partir de cuantiles empíricos. La distribución predictiva se genera directamente desde scores conformales sin parámetros poblacionales.
 
-\subsubsection{De la Teoría a la Práctica}
+\paragraph{De la Teoría a la Práctica}
 
 La implementación del AV-MCPS para series temporales traduce el marco teórico bidimensional en un sistema operativo mediante decisiones de diseño específicas.
 
-\paragraph{Adaptaciones Principales}
+\subparagraph{Adaptaciones Principales}
 
 \textbf{(1) Estimación Rolling de Volatilidad:} Se emplea desviación estándar rolling con ventana fija:
 
@@ -1227,7 +1426,7 @@ Casos de uso óptimos & Heterogeneidad por nivel & Series con volatilidad cambia
 \end{tabular}
 \end{table}
 
-\paragraph{Innovación Metodológica}
+\subparagraph{Innovación Metodológica}
 
 La contribución fundamental es reconocer que \textbf{la volatilidad local predice el error independientemente del nivel}. Si $e_i = |y_i - h(x_i)|$, la hipótesis subyacente es:
 
@@ -1237,8 +1436,8 @@ La contribución fundamental es reconocer que \textbf{la volatilidad local predi
 
 El AV-MCPS explota esta estructura mediante estratificación bidimensional, logrando distribuciones predictivas que se adaptan simultáneamente al \textit{nivel} y al \textit{régimen de incertidumbre}. Esta adaptabilidad dual representa una ventaja teórica significativa, especialmente en series con volatilidad time-varying como procesos financieros, climáticos o epidemiológicos.
 
-\subsubsection{Optimización, Parámetros e Hiperparámetros}
-\paragraph{Hiperparámetros Primarios}
+\paragraph{Optimización, Parámetros e Hiperparámetros}
+\subparagraph{Hiperparámetros Primarios}
 
 \textbf{n\_lags ($p$):} Orden del modelo autorregresivo.
 
@@ -1252,7 +1451,7 @@ El AV-MCPS explota esta estructura mediante estratificación bidimensional, logr
 
 
 
-\paragraph{Configuraciones Evaluadas}
+\subparagraph{Configuraciones Evaluadas}
 
 El espacio de hiperparámetros se limita a dos configuraciones estratégicamente diseñadas:
 
@@ -1260,7 +1459,7 @@ El espacio de hiperparámetros se limita a dos configuraciones estratégicamente
 
 \textbf{Configuración Agresiva:} $(p=15, B_{\text{pred}}=10, B_{\text{vol}}=5)$
 
-\paragraph{Optimización de Hiperparámetros}
+\subparagraph{Optimización de Hiperparámetros}
 
 La selección entre ambas configuraciones se realiza minimizando \textbf{ECRPS} sobre un conjunto de validación temporal. Formalmente:
 
@@ -1270,213 +1469,18 @@ La selección entre ambas configuraciones se realiza minimizando \textbf{ECRPS} 
 
 donde $\mathcal{H} = \{(10,8,3), (15,10,5)\}$ es el conjunto de configuraciones candidatas. Una vez optimizada, la configuración seleccionada se congela fijando simultáneamente el modelo base XGBoost, los bordes de bins bidimensionales, y los artefactos de calibración.
 
-\paragraph{Parámetros del Modelo Base}
+\subparagraph{Parámetros del Modelo Base}
 
 Idénticos a MCPS: XGBoost con 50 árboles, profundidad 3, learning rate 0.1, objetivo \texttt{reg:squarederror}. Esta parametrización conservadora es particularmente crítica en AV-MCPS, donde el conjunto de entrenamiento puede ser más pequeño debido a la fragmentación bidimensional del conjunto de calibración.
 
 
-\subsection{DeepAR: Probabilistic Forecasting with Autoregressive Recurrent Networks}
-\label{subsec:DeepAR}
-\subsubsection{Explicación Teórica del Modelo}
-
-DeepAR, introducido por \textcite{Salinas2020}, representa un cambio de paradigma en el pronóstico probabilístico de series temporales al trasladar el enfoque desde el modelado individual de cada serie hacia el \textbf{aprendizaje de un modelo global} a partir de múltiples series relacionadas mediante una arquitectura de red neuronal recurrente autorregresiva.
-
-\paragraph{Fundamento Arquitectónico}
-
-El modelo emplea redes LSTM (Long Short-Term Memory) para procesar secuencias temporales de forma autorregresiva. Para una serie temporal $i$ con valores $z_{i,t}$, DeepAR modela la distribución condicional del futuro dado el pasado:
-
-\begin{equation}
-P(z_{i,t_0:T} \mid z_{i,1:t_0-1}, x_{i,1:T})
-\end{equation}
-
-donde $t_0$ denota el punto de inicio del horizonte de predicción, $z_{i,1:t_0-1}$ representa el rango de condicionamiento, $z_{i,t_0:T}$ los valores futuros, y $x_{i,1:T}$ son covariables conocidas.
-
-La arquitectura factoriza esta distribución mediante el producto de verosimilitudes condicionales:
-
-\begin{equation}
-Q_{\Theta}(z_{i,t_0:T} \mid z_{i,1:t_0-1}, x_{i,1:T}) = \prod_{t=t_0}^{T} Q_{\Theta}(z_{i,t} \mid z_{i,1:t-1}, x_{i,1:T})
-\end{equation}
-
-donde cada factor está parametrizado por la salida de la red recurrente:
-
-\begin{equation}
-Q_{\Theta}(z_{i,t} \mid z_{i,1:t-1}, x_{i,1:T}) = \ell(z_{i,t} \mid \theta(h_{i,t}, \Theta))
-\end{equation}
-
-El estado oculto $h_{i,t}$ se actualiza recursivamente mediante:
-
-\begin{equation}
-h_{i,t} = h(h_{i,t-1}, z_{i,t-1}, x_{i,t}, \Theta)
-\end{equation}
-
-donde $h(\cdot)$ es una función implementada por una red LSTM multicapa con parámetros $\Theta$.
-
-\paragraph{Naturaleza Autorregresiva}
-
-En cada paso temporal $t$, la red consume como entrada el valor observado del paso anterior $z_{i,t-1}$ junto con las covariables $x_{i,t}$ y el estado oculto previo $h_{i,t-1}$. Durante el entrenamiento, todos los valores $z_{i,t}$ en el rango de predicción son conocidos. Durante la predicción, para $t \geq t_0$, los valores futuros se reemplazan por muestras $\tilde{z}_{i,t} \sim \ell(\cdot \mid \theta(h_{i,t}, \Theta))$ generadas por el propio modelo, que se retroalimentan para calcular el siguiente estado oculto mediante \textit{muestreo ancestral}.
-
-\paragraph{Modelado Probabilístico}
-
-DeepAR no predice directamente valores futuros, sino los \textbf{parámetros de una distribución de probabilidad} $\theta(h_{i,t})$ sobre valores posibles. Para datos de valores reales, se emplea \textbf{verosimilitud Gaussiana}:
-
-\begin{equation}
-\ell_G(z \mid \mu, \sigma) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{(z-\mu)^2}{2\sigma^2}\right)
-\end{equation}
-
-donde la media $\mu(h_{i,t})$ y desviación estándar $\sigma(h_{i,t})$ se obtienen mediante transformaciones de la salida de la red:
-
-\begin{equation}
-\mu(h_{i,t}) = w_{\mu}^T h_{i,t} + b_{\mu}, \quad \sigma(h_{i,t}) = \log(1 + \exp(w_{\sigma}^T h_{i,t} + b_{\sigma}))
-\end{equation}
-
-Los parámetros $\Theta$ del modelo se aprenden maximizando la log-verosimilitud:
-
-\begin{equation}
-\mathcal{L}(\Theta) = \sum_{i=1}^{N} \sum_{t=1}^{T} \log \ell(z_{i,t} \mid \theta(h_{i,t}, \Theta))
-\end{equation}
-
-Una ventaja fundamental es que el modelo es completamente observable durante el entrenamiento, no requiriendo técnicas de inferencia variacional o métodos de Monte Carlo para aproximar la función objetivo.
-
-\paragraph{Manejo de Escalas Heterogéneas}
-
-DeepAR introduce un mecanismo de escalamiento que normaliza las entradas y salidas autorregresivas por un factor de escala específico de cada serie $\nu_i$:
-
-\begin{equation}
-\tilde{z}_{i,t} = \frac{z_{i,t}}{\nu_i}, \quad \nu_i = 1 + \frac{1}{t_0} \sum_{t=1}^{t_0} z_{i,t}
-\end{equation}
-
-Los parámetros de la verosimilitud se ajustan correspondientemente:
-
-\begin{equation}
-\mu_{\text{escalado}} = \nu_i \cdot \mu(h_{i,t}), \quad \sigma_{\text{escalado}} = \nu_i \cdot \sigma(h_{i,t})
-\end{equation}
-
-\paragraph{Generación de Pronósticos Probabilísticos}
-
-La generación de pronósticos se realiza mediante muestreo ancestral, produciendo $B$ trayectorias completas $\{\tilde{z}_{i,t_0:T}^{(b)}\}_{b=1}^{B}$. El conjunto de trayectorias representa una muestra empírica de la distribución predictiva conjunta, preservando las correlaciones temporales aprendidas por el modelo.
-
-\paragraph{Clasificación del Modelo}
-
-DeepAR es un \textbf{modelo semi-paramétrico}. La componente paramétrica reside en la arquitectura LSTM con parámetros $\Theta$ que deben estimarse, y en la elección de la familia de distribuciones de verosimilitud (Gaussiana, Binomial Negativa). La componente no paramétrica emerge del muestreo ancestral, que genera distribuciones predictivas empíricas sin asumir formas funcionales rígidas para la distribución conjunta multi-paso.
-
-\subsubsection{De la Teoría a la Práctica}
-
-La implementación de DeepAR para series temporales univariadas desarrollada en esta investigación traduce el marco teórico autorregresivo a un sistema predictivo concreto mediante adaptaciones específicas al contexto de este estudio.
-
-\paragraph{Adaptaciones Principales}
-
-\textbf{(1) Simplificación de Covariables:} A diferencia del trabajo original de \textcite{Salinas2020} que asume múltiples covariables $x_{i,t}$, esta implementación \textbf{no utiliza covariables externas}. La arquitectura se reduce a su forma puramente autorregresiva:
-
-\begin{equation}
-h_{i,t} = h(h_{i,t-1}, z_{i,t-1}, \Theta)
-\end{equation}
-
-Esta simplificación elimina la dependencia de información auxiliar, centrando la comparación en la capacidad de extraer patrones de la historia temporal intrínseca.
-
-\textbf{(2) Construcción de Ventanas:} Dado que cada configuración genera una única serie de longitud $n=252$, se emplea \textit{windowing} deslizante para generar múltiples instancias de entrenamiento. Se construyen pares $(X^{(k)}, y^{(k)})$ mediante:
-
-\begin{equation}
-X^{(k)} = [y_k, \ldots, y_{k+p-1}], \quad y^{(k)} = y_{k+p}
-\end{equation}
-
-para $k = 1, \ldots, n_{\text{train}} - p$, generando aproximadamente $n_{\text{train}} - p$ instancias de entrenamiento.
-
-\textbf{(3) Normalización Z-Score:} En lugar del escalamiento por $\nu_i$ del original, se emplea normalización Z-score completa:
-
-\begin{equation}
-\tilde{z}_t = \frac{z_t - \mu_{\text{train}}}{\sigma_{\text{train}} + \epsilon}
-\end{equation}
-
-garantizando que las entradas a la LSTM tengan media cero y varianza unitaria. Las predicciones se des-normalizan mediante la transformación inversa.
-
-\textbf{(4) Early Stopping:} Se reserva el 20\% final de las instancias generadas como conjunto de validación interno. El entrenamiento se detiene si la pérdida de validación no mejora durante un número de épocas de paciencia (típicamente 5), reteniendo los parámetros correspondientes a la época con menor pérdida.
-
-\textbf{(5) Protocolo de Congelamiento:} Para evitar \textit{data leakage} en la evaluación rolling window, el modelo se entrena una única vez sobre $n_{\text{train}} = 200$ observaciones. Los parámetros de normalización $\mu_{\text{frozen}}, \sigma_{\text{frozen}}$ y los pesos de la red $\Theta_{\text{frozen}}$ se congelan completamente. Durante la fase de evaluación rolling, para cada paso $t = 1, \ldots, 12$, se normalizan los últimos $p$ valores observados usando parámetros congelados, se calcula la predicción con $\Theta_{\text{frozen}}$ sin re-entrenamiento, y se des-normalizan las muestras predictivas. Este protocolo previene contaminación de información futura y garantiza validez estadística.
-
-La Tabla \ref{tab:deepar_comparison} resume las diferencias metodológicas entre la implementación original y la adaptación desarrollada.
-
-\begin{table}[htbp]
-\centering
-\caption{Comparativa: Teoría vs. Implementación de DeepAR}
-\label{tab:deepar_comparison}
-\small
-\begin{tabular}{>{\raggedright\arraybackslash}p{3.5cm}%
-                >{\raggedright\arraybackslash}p{5cm}%
-                >{\raggedright\arraybackslash}p{5cm}}
-\toprule
-\textbf{Aspecto} & \textbf{DeepAR Original} & \textbf{Implementación (Esta Tesis)} \\
-\midrule
-Contexto de aplicación & Miles de series relacionadas & Serie temporal única (windowing local) \\
-Covariables & Múltiples features temporales & Sin covariables externas \\
-Verosimilitud & Gaussiana y Binomial Negativa & Gaussiana únicamente \\
-Normalización & Escalamiento por $\nu_i$ & Z-score completo \\
-Muestreo de entrenamiento & Ponderado por velocidad & Uniforme sobre ventanas \\
-Regularización & No especificada & Early stopping con validación interna \\
-Protocolo de evaluación & Modelo único para todas las series & Congelamiento total para rolling forecast \\
-Framework & MXNet & PyTorch \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsubsection{Optimización, Parámetros e Hiperparámetros}
-
-\paragraph{Hiperparámetros Arquitectónicos}
-
-\textbf{hidden\_size ($h$):} Dimensionalidad del estado oculto de cada celda LSTM. Controla la capacidad representacional del modelo.
-
-\textbf{n\_lags ($p$):} Número de valores pasados utilizados como entrada autorregresiva. Similar al orden en modelos AR$(p)$.
-
-\textbf{num\_layers ($L$):} Número de capas LSTM apiladas. Valores mayores incrementan el número de parámetros: $\Theta \propto L \times h^2$.
-
-\textbf{epochs ($E$):} Número máximo de pasadas completas sobre el conjunto de entrenamiento. El early stopping típicamente detiene antes de alcanzar este máximo.
-
-\textbf{lr (learning rate):} Controla el tamaño del paso en la actualización de parámetros mediante el optimizador Adam \parencite{Kingma2015}.
-
-\paragraph{Espacio de Búsqueda}
-
-La optimización de hiperparámetros explora dos configuraciones estratégicamente diseñadas:
-
-\textbf{Configuración Ligera:}
-\begin{itemize}
-    \item \texttt{hidden\_size}=20, \texttt{n\_lags}=10, \texttt{num\_layers}=1, \texttt{epochs}=25, \texttt{lr}=0.01
-\end{itemize}
-
-\textbf{Configuración Profunda:}
-\begin{itemize}
-    \item \texttt{hidden\_size}=32, \texttt{n\_lags}=15, \texttt{num\_layers}=2, \texttt{epochs}=30, \texttt{lr}=0.005
-\end{itemize}
-
-\paragraph{Protocolo de Optimización}
-
-La selección entre ambas configuraciones se realiza minimizando \textbf{ECRPS} sobre un conjunto de calibración temporal de 40 observaciones posteriores al entrenamiento. Formalmente:
-
-\begin{equation}
-(h^*, \text{n}_\text{lags}^*, \text{n}_\text{layers}^*, \text{epochs}^*, \text{lr}^*) = \arg\min_{(h, \text{n}_\text{lags}, \text{n}_\text{layers}, \text{epochs}, \text{lr}) \in \mathcal{H}} \frac{1}{N_{\text{cal}}} \sum_{i=1}^{N_{\text{cal}}} \text{CRPS}(\hat{F}_i, y_i)
-\end{equation}
-
-donde $\mathcal{H}$ es el conjunto de configuraciones candidatas y $\hat{F}_i$ es la distribución predictiva empírica generada por muestreo ancestral.
-
-\paragraph{Congelamiento de Hiperparámetros}
-
-Una vez optimizada, la configuración seleccionada se congela:
-
-\begin{enumerate}
-    \item Estima los parámetros de normalización: $\mu_{\text{frozen}}, \sigma_{\text{frozen}}$
-    \item Entrena la red LSTM hasta convergencia (early stopping)
-    \item Almacena los pesos de la red: $\Theta_{\text{frozen}}$
-    \item Establece el flag 
-\end{enumerate}
-
-Durante toda la evaluación rolling window posterior, el método verifica este flag: si es \texttt{True}, omite completamente el entrenamiento y procede directamente a generar predicciones con el modelo existente. Este protocolo garantiza que no haya fuga de información futura y que las métricas de desempeño reflejen la capacidad predictiva genuina del modelo.
-
-
-\subsection{Autoregressive Exponentially-weighted Polynomial Distribution (AREPD)}
+\subsubsection{Autoregressive Exponentially-weighted Polynomial Distribution (AREPD)}
 \label{subsec:AREPD}
-\subsubsection{Explicación Teórica del Modelo}
+\paragraph{Explicación Teórica del Modelo}
 
 El modelo \textit{Autoregressive Exponentially-weighted Polynomial Distribution} (AREPD) representa una contribución metodológica original de esta investigación, desarrollada como una extensión híbrida que combina predicción ponderada temporalmente con expansión polinomial de características autorregresivas. A diferencia de métodos puramente conformales como LSPM que utilizan regresión lineal, AREPD introduce \textbf{transformaciones no lineales polinomiales} de las entradas autorregresivas.
 
-\paragraph{Fundamento Matemático}
+\subparagraph{Fundamento Matemático}
 
 Para una serie temporal $\{Y_t\}_{t=1}^{n}$ con $p$ rezagos y grado polinomial $d$, AREPD construye una matriz de diseño expandida $\mathbf{X} \in \mathbb{R}^{(n-p) \times (1+pd)}$:
 
@@ -1486,7 +1490,7 @@ Para una serie temporal $\{Y_t\}_{t=1}^{n}$ con $p$ rezagos y grado polinomial $
 
 para $i = 1, \ldots, n-p$. Esta expansión permite capturar relaciones cuadráticas, cúbicas o de orden superior entre valores pasados y futuros sin recurrir a arquitecturas de aprendizaje profundo.
 
-\paragraph{Ponderación Exponencial Temporal}
+\subparagraph{Ponderación Exponencial Temporal}
 
 AREPD asigna pesos exponencialmente decrecientes a observaciones históricas:
 
@@ -1502,7 +1506,7 @@ donde $\rho \in (0, 1)$ es el parámetro de decaimiento. Los pesos se normalizan
 
 Por ejemplo, con $\rho = 0.95$, $\tau_{1/2} \approx 13.5$ observaciones.
 
-\paragraph{Estimación mediante Regresión Ridge}
+\subparagraph{Estimación mediante Regresión Ridge}
 
 Los coeficientes se estiman resolviendo el problema de regresión Ridge ponderada:
 
@@ -1525,7 +1529,7 @@ La solución tiene forma cerrada:
 
 donde $\mathbf{W} = \text{diag}(\tilde{w}_1, \ldots, \tilde{w}_{n-p})$ es la matriz diagonal de pesos.
 
-\paragraph{Generación de Distribuciones Predictivas}
+\subparagraph{Generación de Distribuciones Predictivas}
 
 AREPD genera distribuciones predictivas mediante un enfoque \textbf{histórico-empírico}. Para predecir $Y_{n+1}$:
 
@@ -1538,7 +1542,7 @@ AREPD genera distribuciones predictivas mediante un enfoque \textbf{histórico-e
 
 Este enfoque difiere fundamentalmente de la predicción conformal estándar. En lugar de ajustar mediante residuos de calibración, AREPD construye una distribución empírica directamente desde predicciones históricas del modelo ajustado, asumiendo que bajo estacionariedad local, estas predicciones son representativas del futuro.
 
-\paragraph{Garantías de Cobertura}
+\subparagraph{Garantías de Cobertura}
 
 A diferencia de métodos conformales con garantías formales, AREPD \textbf{no posee garantías teóricas de cobertura bajo intercambiabilidad}. La distribución predictiva se construye asumiendo:
 
@@ -1548,7 +1552,7 @@ A diferencia de métodos conformales con garantías formales, AREPD \textbf{no p
 
 Esta suposición puede violarse en presencia de no estacionariedad fuerte, heterocedasticidad condicional, o eventos raros no observados durante el entrenamiento.
 
-\paragraph{Clasificación del Modelo}
+\subparagraph{Clasificación del Modelo}
 
 AREPD es un \textbf{modelo semi-paramétrico}. La componente paramétrica reside en la estructura de regresión Ridge con coeficientes $\hat{\boldsymbol{\beta}}$ que deben estimarse. La componente no paramétrica emerge del uso de la distribución empírica de predicciones históricas sin asumir formas funcionales rígidas para la distribución predictiva.
 
@@ -1573,9 +1577,9 @@ DeepAR & No lineal (LSTM) & Uniforme & Muestreo ancestral \\
 \end{table}
 
 
-\subsubsection{Optimización, Parámetros e Hiperparámetros}
+\paragraph{Optimización, Parámetros e Hiperparámetros}
 
-\paragraph{Hiperparámetros Estructurales}
+\subparagraph{Hiperparámetros Estructurales}
 
 \textbf{n\_lags ($p$):} Número de rezagos incluidos en la matriz de diseño. Con grado $d$, la dimensión del espacio de características es $1 + p \cdot d$. Valores mayores permiten capturar dependencias de largo plazo pero reducen el tamaño del conjunto de entrenamiento e incrementan riesgo de sobreajuste.
 
@@ -1595,11 +1599,11 @@ Número de parámetros: $1 + p \cdot d$. Para $(p,d)=(5,2)$: 11 parámetros; par
 \item $\rho = 0.98$: $\tau_{1/2} \approx 34.3$ observaciones (memoria larga, estabilidad)
 \end{itemize}
 
-\paragraph{Parámetro Fijo}
+\subparagraph{Parámetro Fijo}
 
 \textbf{alpha ($\lambda$):} Parámetro de regularización Ridge, fijo en $\lambda=0.1$. Controla el trade-off sesgo-varianza: valores cercanos a cero aproximan mínimos cuadrados no regularizados, valores grandes contraen coeficientes hacia cero. El valor $\lambda=0.1$ proporciona regularización suave sin sesgo excesivo.
 
-\paragraph{Espacio de Búsqueda}
+\subparagraph{Espacio de Búsqueda}
 
 La optimización explora tres configuraciones estratégicamente diseñadas:
 
@@ -1618,7 +1622,7 @@ La optimización explora tres configuraciones estratégicamente diseñadas:
 \item \texttt{n\_lags}=5, \texttt{rho}=0.98, \texttt{poly\_degree}=3
 \end{itemize}
 
-\paragraph{Protocolo de Optimización}
+\subparagraph{Protocolo de Optimización}
 
 La selección entre configuraciones minimiza \textbf{ECRPS} sobre el conjunto de calibración de 40 observaciones:
 
@@ -1628,7 +1632,7 @@ La selección entre configuraciones minimiza \textbf{ECRPS} sobre el conjunto de
 
 donde $\mathcal{H} = \{(5,0.95,2), (10,0.90,2), (5,0.98,3)\}$ es el conjunto de configuraciones candidatas y $\hat{F}_i$ es la distribución predictiva empírica generada por el método histórico.
 
-\paragraph{Congelamiento de Hiperparámetros}
+\subparagraph{Congelamiento de Hiperparámetros}
 
 Una vez optimizada, la configuración se congela mediante :
 
@@ -1642,13 +1646,13 @@ Una vez optimizada, la configuración se congela mediante :
 Durante toda la evaluación rolling, \texttt{fit\_predict} verifica este flag: si es \texttt{True}, omite entrenamiento y procede directamente a predecir con el modelo existente, garantizando validez estadística sin fuga de información futura.
 
 
-\subsection{Ensemble Conformalized Quantile Regression (EnCQR-LSTM)}
+\subsubsection{Ensemble Conformalized Quantile Regression (EnCQR-LSTM)}
 \label{subsec:EnCQR-LSTM}
-\subsubsection{Explicación Teórica del Modelo}
+\paragraph{Explicación Teórica del Modelo}
 
 El \textit{Ensemble Conformalized Quantile Regression} (EnCQR-LSTM) constituye una síntesis metodológica avanzada que integra tres paradigmas complementarios del aprendizaje estadístico: regresión cuantílica (QR), predicción conformal (CP) y aprendizaje en ensamble. Esta arquitectura híbrida busca heredar simultáneamente la \textbf{adaptabilidad heterocedástica} de QR y las \textbf{garantías formales de cobertura} de CP, superando las limitaciones inherentes de cada enfoque por separado.
 
-\paragraph{Motivación y Limitaciones de Métodos Puros}
+\subparagraph{Motivación y Limitaciones de Métodos Puros}
 
 Los métodos basados únicamente en regresión cuantílica pueden generar intervalos adaptativos cuya amplitud varía localmente con la volatilidad de los datos, pero carecen de garantías formales de cobertura. En la práctica, los intervalos de predicción generados por QR tienden a ser excesivamente confiados (demasiado estrechos), resultando en coberturas empíricas significativamente inferiores al nivel nominal $(1-\alpha)$. \parencite{Jensen2022}
 
@@ -1656,7 +1660,7 @@ Por otra parte, los métodos de predicción conformal estándar garantizan cober
 
 EnCQR-LSTM aborda ambas limitaciones mediante una arquitectura de ensamble que combina estimadores LSTM de regresión cuantílica con un mecanismo de conformalización posterior.
 
-\paragraph{Arquitectura de Ensamble y Regresión Cuantílica}
+\subparagraph{Arquitectura de Ensamble y Regresión Cuantílica}
 
 El método presentado por \cite{Jensen2022} construye un ensamble homogéneo de $B$ modelos LSTM, cada uno entrenado sobre subconjuntos \textbf{disjuntos} del conjunto de entrenamiento $\{(x_i, y_i)\}_{i=1}^{T}$. La partición se define como:
 
@@ -1674,7 +1678,7 @@ Cada modelo LSTM estima simultáneamente múltiples funciones cuantílicas condi
 
 donde $\mathcal{T} = \{0.01, 0.05, 0.10, 0.25, 0.50, 0.75, 0.90, 0.95, 0.99\}$ es el conjunto de cuantiles objetivo, y $\rho_{\tau}(u) = \max(\tau \cdot u, (\tau - 1) \cdot u)$ es la función de pérdida pinball que penaliza asimétricamente los errores según el cuantil objetivo.
 
-\paragraph{Predicción Leave-One-Out y Scores de Conformidad}
+\subparagraph{Predicción Leave-One-Out y Scores de Conformidad}
 
 Una vez entrenados los $B$ modelos, EnCQR construye predicciones leave-one-out (LOO) para cada observación de entrenamiento. Para una observación $i$ en el subconjunto $S_b$, se agregan las predicciones de todos los modelos que no incluyeron esa observación:
 
@@ -1695,7 +1699,7 @@ E_i^{\text{hi}} &= y_i - \hat{q}_{\tau_{\text{hi}}}^{(-i)}(x_i)
 
 Esta formulación asimétrica permite que las distribuciones de errores para los cuantiles inferior y superior tengan formas diferentes, crucial en presencia de asimetría sistemática.
 
-\paragraph{Conformalización y Distribución Predictiva}
+\subparagraph{Conformalización y Distribución Predictiva}
 
 Para una nueva observación $x_{T+1}$, el ensamble completo genera predicciones agregadas que se conformalizan mediante:
 
@@ -1719,11 +1723,11 @@ donde $\phi(\cdot)$ y $\Phi(\cdot)$ son la densidad y distribución acumulada No
 
 Este ajuste garantiza unimodalidad y permite generar $M = 1000$ muestras de la distribución predictiva completa.
 
-\paragraph{Naturaleza del Modelo}
+\subparagraph{Naturaleza del Modelo}
 
 EnCQR-LSTM es un modelo \textbf{semi-paramétrico}. La arquitectura LSTM y la función de pérdida pinball son completamente no paramétricas respecto a la distribución de $Y|X$. Sin embargo, la fase final de ajuste Skew-Normal introduce una componente paramétrica para suavizar la distribución predictiva. No obstante, las garantías de cobertura provienen del mecanismo conformal no paramétrico, no del ajuste distribucional.
 
-\paragraph{Propiedades Teóricas}
+\subparagraph{Propiedades Teóricas}
 
 Bajo el supuesto de que el proceso de error es estacionario y fuertemente mezclante, EnCQR garantiza \parencite{Jensen2022}:
 
@@ -1733,11 +1737,11 @@ Bajo el supuesto de que el proceso de error es estacionario y fuertemente mezcla
 \item \textbf{Robustez ante especificación incorrecta:} Incluso con modelo LSTM mal especificado, la conformalización mantiene cobertura válida
 \end{enumerate}
 
-\subsubsection{De la Teoría a la Práctica}
+\paragraph{De la Teoría a la Práctica}
 
 La implementación de EnCQR-LSTM para esta investigación introduce adaptaciones específicas respecto al marco teórico original, priorizando factibilidad computacional y robustez empírica.
 
-\paragraph{Adaptaciones Principales}
+\subparagraph{Adaptaciones Principales}
 
 \textbf{(1) Tamaño de Ensamble Reducido:} Se utiliza $B=3$ modelos en lugar de $B \geq 5$ como sugiere la literatura. Esta reducción responde al trade-off entre diversidad del ensamble y tamaño de subconjuntos de entrenamiento. Para series de longitud $T \approx 200-500$, $B=3$ genera subconjuntos de $65-165$ observaciones, suficientes para entrenar LSTMs efectivos sin fragmentación excesiva.
 
@@ -1771,9 +1775,9 @@ Complejidad computacional & Alta (múltiples entrenamientos + updates) & Reducid
 \end{tabular}
 \end{table}
 
-\subsubsection{Optimización, Parámetros e Hiperparámetros}
+\paragraph{Optimización, Parámetros e Hiperparámetros}
 
-\paragraph{Hiperparámetros del Modelo}
+\subparagraph{Hiperparámetros del Modelo}
 
 \textbf{n\_lags ($N_x$):} Longitud de ventana temporal de entrada. Define cuántos valores históricos se usan para predecir el siguiente.
 
@@ -1792,7 +1796,7 @@ Complejidad computacional & Alta (múltiples entrenamientos + updates) & Reducid
 \item $\text{num\_samples} = 1000$ (muestras de distribución Skew-Normal)
 \end{itemize}
 
-\paragraph{Espacio de Búsqueda Restringido}
+\subparagraph{Espacio de Búsqueda Restringido}
 
 Dada la alta complejidad computacional de entrenar ensambles de LSTMs, el espacio de hiperparámetros se limita estratégicamente a dos configuraciones:
 
@@ -1802,7 +1806,7 @@ Dada la alta complejidad computacional de entrenar ensambles de LSTMs, el espaci
 \textbf{Configuración 2 (Estándar):} $(N_x=20, N_u=32, \text{epochs}=25)$
 
 
-\paragraph{Optimización y Congelamiento}
+\subparagraph{Optimización y Congelamiento}
 
 La selección entre ambas configuraciones se realiza minimizando \textbf{ECRPS} sobre un conjunto de validación temporal separado. Formalmente:
 
@@ -1822,7 +1826,7 @@ Una vez optimizada la configuración, se ejecuta el protocolo de congelamiento c
 
 Durante la evaluación rolling window, para cada punto de prueba $t = T+1, \ldots, T+T'$, se extrae la ventana de entrada, se normalizan los datos con parámetros congelados, se generan predicciones de los $B$ modelos congelados, se agregan mediante media aritmética, se conformalizan usando scores congelados, se des-normalizan, y se ajusta la distribución Skew-Normal final. Este protocolo garantiza ausencia total de data leakage y evaluación justa comparable con otros métodos.
 
-\paragraph{Justificación del Espacio Reducido}
+\subparagraph{Justificación del Espacio Reducido}
 
 La decisión de limitar el espacio de búsqueda a solo 2 configuraciones se fundamenta en:
 
@@ -1841,9 +1845,22 @@ Esta estrategia de optimización restringida permite evaluar el potencial de EnC
 % ============================================================================
 
 
+
+
+\subsection{Contribuciones de este trabajo}
+
+
 % ============================================================================
-% SIMULACIONES COMPLEMENTARIAS
+% FALTA
 % ============================================================================
+
+\section{Metodo de comparación}
+
+
+% ============================================================================
+% FALTA
+% ============================================================================
+
 
 \section{Simulaciones Complementarias}
 \label{sec:simulaciones_complementarias}

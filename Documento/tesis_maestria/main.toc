@@ -85,342 +85,346 @@
 \contentsline {subsubsection}{\nonumberline Distribución Predictiva Verdadera}{46}{subsubsection*.36}%
 \contentsline {subsubsection}{\nonumberline Configuraciones Paramétricas Evaluadas}{47}{subsubsection*.37}%
 \contentsline {section}{\numberline {3.4}Modelos predictivos}{48}{section.3.4}%
-\contentsline {subsection}{\numberline {3.4.1}Circular Block Bootstrap (CBB)}{48}{subsection.3.4.1}%
-\contentsline {subsubsection}{\nonumberline Explicación Teórica del Modelo}{48}{subsubsection*.39}%
-\contentsline {paragraph}{\nonumberline Fundamento Teórico}{48}{paragraph*.40}%
-\contentsline {paragraph}{\nonumberline Algoritmo de Remuestreo}{49}{paragraph*.41}%
-\contentsline {paragraph}{\nonumberline Propiedades Estadísticas}{49}{paragraph*.42}%
-\contentsline {paragraph}{\nonumberline Clasificación del Modelo}{49}{paragraph*.43}%
-\contentsline {subsubsection}{\nonumberline De la Teoría a la Práctica}{50}{subsubsection*.44}%
-\contentsline {paragraph}{\nonumberline Adaptación 1: Simplificación del Esquema de Remuestreo}{50}{paragraph*.45}%
-\contentsline {paragraph}{\nonumberline Adaptación 2: Selección Automática de $l$}{50}{paragraph*.46}%
-\contentsline {paragraph}{\nonumberline Adaptación 3: Congelamiento Post-Optimización}{50}{paragraph*.47}%
-\contentsline {subsubsection}{\nonumberline Optimización, Parámetros e Hiperparámetros}{51}{subsubsection*.49}%
-\contentsline {paragraph}{\nonumberline Hiperparámetro Principal: \texttt {block\_length} ($l$)}{51}{paragraph*.50}%
-\contentsline {paragraph}{\nonumberline Protocolo de Congelamiento}{51}{paragraph*.51}%
-\contentsline {subsection}{\numberline {3.4.2}Sieve Bootstrap (SB)}{51}{subsection.3.4.2}%
-\contentsline {subsubsection}{\nonumberline Explicación Teórica del Modelo}{51}{subsubsection*.52}%
-\contentsline {paragraph}{\nonumberline Fundamento Teórico}{52}{paragraph*.53}%
-\contentsline {paragraph}{\nonumberline Algoritmo de Remuestreo}{52}{paragraph*.54}%
-\contentsline {paragraph}{\nonumberline Propiedades de Consistencia}{53}{paragraph*.55}%
-\contentsline {paragraph}{\nonumberline Clasificación del Modelo}{53}{paragraph*.56}%
-\contentsline {subsubsection}{\nonumberline De la Teoría a la Práctica}{53}{subsubsection*.57}%
-\contentsline {paragraph}{\nonumberline Adaptación 1: Selección de Orden Basada en Validación}{53}{paragraph*.58}%
-\contentsline {paragraph}{\nonumberline Adaptación 2: Congelamiento de Parámetros AR}{53}{paragraph*.59}%
-\contentsline {paragraph}{\nonumberline Adaptación 3: Predicción Secuencial Eficiente}{54}{paragraph*.60}%
-\contentsline {subsubsection}{\nonumberline Optimización, Parámetros e Hiperparámetros}{54}{subsubsection*.62}%
-\contentsline {paragraph}{\nonumberline Hiperparámetro Principal: \texttt {order} ($p$)}{54}{paragraph*.63}%
-\contentsline {paragraph}{\nonumberline Métrica de Optimización}{54}{paragraph*.64}%
-\contentsline {paragraph}{\nonumberline Protocolo de Congelamiento}{55}{paragraph*.65}%
-\contentsline {subsection}{\numberline {3.4.3}Least Squares Prediction Machine (LSPM)}{55}{subsection.3.4.3}%
-\contentsline {subsubsection}{\nonumberline Explicación Teórica del Modelo}{55}{subsubsection*.66}%
-\contentsline {paragraph}{\nonumberline Fundamento Teórico: Predicción Conformal}{55}{paragraph*.67}%
-\contentsline {paragraph}{\nonumberline Construcción de la Distribución Predictiva}{56}{paragraph*.68}%
-\contentsline {paragraph}{\nonumberline Valores Críticos Studentizados}{56}{paragraph*.69}%
-\contentsline {paragraph}{\nonumberline Propiedades Estadísticas}{56}{paragraph*.70}%
-\contentsline {paragraph}{\nonumberline Clasificación del Modelo}{57}{paragraph*.71}%
-\contentsline {subsubsection}{\nonumberline De la Teoría a la Práctica}{57}{subsubsection*.72}%
-\contentsline {paragraph}{\nonumberline Adaptación 1: Construcción Autorregresiva}{57}{paragraph*.73}%
-\contentsline {paragraph}{\nonumberline Adaptación 2: Estabilidad Numérica}{57}{paragraph*.74}%
-\contentsline {paragraph}{\nonumberline Adaptación 3: Filtrado de Singularidades}{58}{paragraph*.75}%
-\contentsline {subsubsection}{\nonumberline Optimización, Parámetros e Hiperparámetros}{58}{subsubsection*.77}%
-\contentsline {paragraph}{\nonumberline Parámetro Principal: \texttt {n\_lags} ($p$)}{58}{paragraph*.78}%
-\contentsline {paragraph}{\nonumberline Métrica de Optimización}{59}{paragraph*.79}%
-\contentsline {paragraph}{\nonumberline Protocolo de Congelamiento}{59}{paragraph*.80}%
-\contentsline {subsection}{\numberline {3.4.4}Least Squares Prediction Machine with Weighted Residuals (LSPMW)}{59}{subsection.3.4.4}%
-\contentsline {subsubsection}{\nonumberline Explicación Teórica del Modelo}{59}{subsubsection*.81}%
-\contentsline {paragraph}{\nonumberline Fundamento Teórico: Cuantiles Ponderados}{59}{paragraph*.82}%
-\contentsline {paragraph}{\nonumberline Esquema de Decaimiento Geométrico}{60}{paragraph*.83}%
-\contentsline {paragraph}{\nonumberline Cuantiles Ponderados}{60}{paragraph*.84}%
-\contentsline {paragraph}{\nonumberline Propiedades de Cobertura}{60}{paragraph*.85}%
-\contentsline {paragraph}{\nonumberline Clasificación del Modelo}{61}{paragraph*.86}%
-\contentsline {subsubsection}{\nonumberline De la Teoría a la Práctica}{61}{subsubsection*.87}%
-\contentsline {paragraph}{\nonumberline Adaptación 1: Muestreo Ponderado vs. Expansión por Replicación}{61}{paragraph*.88}%
-\contentsline {paragraph}{\nonumberline Adaptación 2: Recálculo Dinámico de Residuos}{61}{paragraph*.89}%
-\contentsline {paragraph}{\nonumberline Adaptación 3: Protocolo de Congelamiento Parcial}{62}{paragraph*.90}%
-\contentsline {subsubsection}{\nonumberline Optimización, Parámetros e Hiperparámetros}{62}{subsubsection*.92}%
-\contentsline {paragraph}{\nonumberline Hiperparámetro Principal: \texttt {rho} ($\rho $)}{62}{paragraph*.93}%
-\contentsline {paragraph}{\nonumberline Métrica de Optimización}{63}{paragraph*.94}%
-\contentsline {paragraph}{\nonumberline Protocolo de Congelamiento Parcial}{63}{paragraph*.95}%
-\contentsline {subsection}{\numberline {3.4.5}Mondrian Conformal Predictive System (MCPS)}{63}{subsection.3.4.5}%
-\contentsline {subsubsection}{\nonumberline Explicación Teórica del Modelo}{63}{subsubsection*.96}%
-\contentsline {paragraph}{\nonumberline Fundamento: Particionamiento Mondrian}{64}{paragraph*.97}%
-\contentsline {paragraph}{\nonumberline Cálculo Localizado de Scores Conformales}{64}{paragraph*.98}%
-\contentsline {paragraph}{\nonumberline Construcción de la Distribución Predictiva}{64}{paragraph*.99}%
-\contentsline {paragraph}{\nonumberline Garantías de Cobertura Local}{65}{paragraph*.100}%
-\contentsline {paragraph}{\nonumberline Naturaleza No Paramétrica}{65}{paragraph*.101}%
-\contentsline {subsubsection}{\nonumberline De la Teoría a la Práctica}{66}{subsubsection*.102}%
-\contentsline {paragraph}{\nonumberline Adaptaciones Principales}{66}{paragraph*.103}%
-\contentsline {subsubsection}{\nonumberline Optimización, Parámetros e Hiperparámetros}{67}{subsubsection*.105}%
-\contentsline {paragraph}{\nonumberline Hiperparámetros Primarios}{67}{paragraph*.106}%
-\contentsline {paragraph}{\nonumberline Optimización de Hiperparámetros}{68}{paragraph*.107}%
-\contentsline {paragraph}{\nonumberline Parámetros del Modelo Base}{68}{paragraph*.108}%
-\contentsline {paragraph}{\nonumberline Balance Fundamental}{69}{paragraph*.109}%
-\contentsline {subsection}{\numberline {3.4.6}Adaptive Volatility Mondrian Conformal Predictive System (AV-MCPS)}{69}{subsection.3.4.6}%
-\contentsline {subsubsection}{\nonumberline Explicación Teórica del Modelo}{69}{subsubsection*.110}%
-\contentsline {paragraph}{\nonumberline Motivación: Límites del Particionamiento Unidimensional}{69}{paragraph*.111}%
-\contentsline {paragraph}{\nonumberline Particionamiento Bidimensional}{70}{paragraph*.112}%
-\contentsline {paragraph}{\nonumberline Cálculo Localizado de Scores}{70}{paragraph*.113}%
-\contentsline {paragraph}{\nonumberline Garantías de Cobertura Bidimensional}{71}{paragraph*.114}%
-\contentsline {paragraph}{\nonumberline Trade-off: Resolución vs. Tamaño de Muestra}{71}{paragraph*.115}%
-\contentsline {paragraph}{\nonumberline Naturaleza No Paramétrica}{71}{paragraph*.116}%
-\contentsline {subsubsection}{\nonumberline De la Teoría a la Práctica}{72}{subsubsection*.117}%
-\contentsline {paragraph}{\nonumberline Adaptaciones Principales}{72}{paragraph*.118}%
-\contentsline {paragraph}{\nonumberline Innovación Metodológica}{73}{paragraph*.120}%
-\contentsline {subsubsection}{\nonumberline Optimización, Parámetros e Hiperparámetros}{74}{subsubsection*.121}%
-\contentsline {paragraph}{\nonumberline Hiperparámetros Primarios}{74}{paragraph*.122}%
-\contentsline {paragraph}{\nonumberline Configuraciones Evaluadas}{74}{paragraph*.123}%
-\contentsline {paragraph}{\nonumberline Optimización de Hiperparámetros}{74}{paragraph*.124}%
-\contentsline {paragraph}{\nonumberline Parámetros del Modelo Base}{74}{paragraph*.125}%
-\contentsline {subsection}{\numberline {3.4.7}DeepAR: Probabilistic Forecasting with Autoregressive Recurrent Networks}{75}{subsection.3.4.7}%
-\contentsline {subsubsection}{\nonumberline Explicación Teórica del Modelo}{75}{subsubsection*.126}%
-\contentsline {paragraph}{\nonumberline Fundamento Arquitectónico}{75}{paragraph*.127}%
-\contentsline {paragraph}{\nonumberline Naturaleza Autorregresiva}{76}{paragraph*.128}%
-\contentsline {paragraph}{\nonumberline Modelado Probabilístico}{76}{paragraph*.129}%
-\contentsline {paragraph}{\nonumberline Manejo de Escalas Heterogéneas}{76}{paragraph*.130}%
-\contentsline {paragraph}{\nonumberline Generación de Pronósticos Probabilísticos}{77}{paragraph*.131}%
-\contentsline {paragraph}{\nonumberline Clasificación del Modelo}{77}{paragraph*.132}%
-\contentsline {subsubsection}{\nonumberline De la Teoría a la Práctica}{77}{subsubsection*.133}%
-\contentsline {paragraph}{\nonumberline Adaptaciones Principales}{77}{paragraph*.134}%
-\contentsline {subsubsection}{\nonumberline Optimización, Parámetros e Hiperparámetros}{78}{subsubsection*.136}%
-\contentsline {paragraph}{\nonumberline Hiperparámetros Arquitectónicos}{78}{paragraph*.137}%
-\contentsline {paragraph}{\nonumberline Espacio de Búsqueda}{79}{paragraph*.138}%
-\contentsline {paragraph}{\nonumberline Protocolo de Optimización}{79}{paragraph*.139}%
-\contentsline {paragraph}{\nonumberline Congelamiento de Hiperparámetros}{80}{paragraph*.140}%
-\contentsline {subsection}{\numberline {3.4.8}Autoregressive Exponentially-weighted Polynomial Distribution (AREPD)}{80}{subsection.3.4.8}%
-\contentsline {subsubsection}{\nonumberline Explicación Teórica del Modelo}{80}{subsubsection*.141}%
-\contentsline {paragraph}{\nonumberline Fundamento Matemático}{80}{paragraph*.142}%
-\contentsline {paragraph}{\nonumberline Ponderación Exponencial Temporal}{81}{paragraph*.143}%
-\contentsline {paragraph}{\nonumberline Estimación mediante Regresión Ridge}{81}{paragraph*.144}%
-\contentsline {paragraph}{\nonumberline Generación de Distribuciones Predictivas}{82}{paragraph*.145}%
-\contentsline {paragraph}{\nonumberline Garantías de Cobertura}{82}{paragraph*.146}%
-\contentsline {paragraph}{\nonumberline Clasificación del Modelo}{82}{paragraph*.147}%
-\contentsline {subsubsection}{\nonumberline Optimización, Parámetros e Hiperparámetros}{83}{subsubsection*.149}%
-\contentsline {paragraph}{\nonumberline Hiperparámetros Estructurales}{83}{paragraph*.150}%
-\contentsline {paragraph}{\nonumberline Parámetro Fijo}{83}{paragraph*.151}%
-\contentsline {paragraph}{\nonumberline Espacio de Búsqueda}{84}{paragraph*.152}%
-\contentsline {paragraph}{\nonumberline Protocolo de Optimización}{84}{paragraph*.153}%
-\contentsline {paragraph}{\nonumberline Congelamiento de Hiperparámetros}{84}{paragraph*.154}%
-\contentsline {subsection}{\numberline {3.4.9}Ensemble Conformalized Quantile Regression (EnCQR-LSTM)}{85}{subsection.3.4.9}%
-\contentsline {subsubsection}{\nonumberline Explicación Teórica del Modelo}{85}{subsubsection*.155}%
-\contentsline {paragraph}{\nonumberline Motivación y Limitaciones de Métodos Puros}{85}{paragraph*.156}%
-\contentsline {paragraph}{\nonumberline Arquitectura de Ensamble y Regresión Cuantílica}{85}{paragraph*.157}%
-\contentsline {paragraph}{\nonumberline Predicción Leave-One-Out y Scores de Conformidad}{86}{paragraph*.158}%
-\contentsline {paragraph}{\nonumberline Conformalización y Distribución Predictiva}{86}{paragraph*.159}%
-\contentsline {paragraph}{\nonumberline Naturaleza del Modelo}{87}{paragraph*.160}%
-\contentsline {paragraph}{\nonumberline Propiedades Teóricas}{87}{paragraph*.161}%
-\contentsline {subsubsection}{\nonumberline De la Teoría a la Práctica}{88}{subsubsection*.162}%
-\contentsline {paragraph}{\nonumberline Adaptaciones Principales}{88}{paragraph*.163}%
-\contentsline {subsubsection}{\nonumberline Optimización, Parámetros e Hiperparámetros}{88}{subsubsection*.165}%
-\contentsline {paragraph}{\nonumberline Hiperparámetros del Modelo}{88}{paragraph*.166}%
-\contentsline {paragraph}{\nonumberline Espacio de Búsqueda Restringido}{89}{paragraph*.167}%
-\contentsline {paragraph}{\nonumberline Optimización y Congelamiento}{90}{paragraph*.168}%
-\contentsline {paragraph}{\nonumberline Justificación del Espacio Reducido}{90}{paragraph*.169}%
-\contentsline {section}{\numberline {3.5}Simulaciones Complementarias}{91}{section.3.5}%
-\contentsline {subsection}{\numberline {3.5.1}Simulación 1: Impacto de la Diferenciación en ARIMA ($d=1$)}{91}{subsection.3.5.1}%
-\contentsline {subsubsection}{\nonumberline Motivación}{91}{subsubsection*.170}%
-\contentsline {subsubsection}{\nonumberline Diseño Experimental}{92}{subsubsection*.171}%
-\contentsline {subsubsection}{\nonumberline Protocolo de Evaluación}{92}{subsubsection*.172}%
-\contentsline {subsection}{\numberline {3.5.2}Simulación 2: Límites de Integración y Persistencia (Multi-D)}{93}{subsection.3.5.2}%
-\contentsline {subsubsection}{\nonumberline Motivación}{93}{subsubsection*.173}%
-\contentsline {subsubsection}{\nonumberline Diseño Experimental}{93}{subsubsection*.174}%
-\contentsline {subsubsection}{\nonumberline Hipótesis}{93}{subsubsection*.175}%
-\contentsline {subsection}{\numberline {3.5.3}Simulación 3: Efectos del Tamaño Muestral Absoluto}{94}{subsection.3.5.3}%
-\contentsline {subsubsection}{\nonumberline Motivación}{94}{subsubsection*.176}%
-\contentsline {subsubsection}{\nonumberline Diseño Experimental}{94}{subsubsection*.177}%
-\contentsline {subsection}{\numberline {3.5.4}Simulación 4: Proporciones de Calibración con Tamaño Fijo}{95}{subsection.3.5.4}%
-\contentsline {subsubsection}{\nonumberline Motivación}{95}{subsubsection*.179}%
-\contentsline {subsubsection}{\nonumberline Diseño Experimental}{95}{subsubsection*.180}%
-\contentsline {subsection}{\numberline {3.5.5}Simulación 5: Predicción Multi-paso (Horizonte $h$)}{96}{subsection.3.5.5}%
-\contentsline {subsubsection}{\nonumberline Motivación}{96}{subsubsection*.182}%
-\contentsline {subsubsection}{\nonumberline Fundamento Metodológico: Predicción Recursiva}{96}{subsubsection*.183}%
-\contentsline {subsubsection}{\nonumberline Generación de Trayectorias Estocásticas}{97}{subsubsection*.184}%
-\contentsline {subsubsection}{\nonumberline Diseño Experimental}{97}{subsubsection*.185}%
-\contentsline {subsubsection}{\nonumberline Protocolo de Evaluación}{98}{subsubsection*.186}%
-\contentsline {subsection}{\numberline {3.5.6}Resumen de Evaluaciones Complementarias}{98}{subsection.3.5.6}%
-\contentsline {subsubsection}{\nonumberline Protocolo Común a Todas las Simulaciones}{98}{subsubsection*.188}%
-\contentsline {chapter}{\numberline {4}Resultados y Análisis de Simulaciones}{101}{chapter.4}%
-\contentsline {section}{\numberline {4.1}Resultados del Diseño Principal}{101}{section.4.1}%
-\contentsline {subsection}{\numberline {4.1.1}Análisis Agregado de Desempeño}{102}{subsection.4.1.1}%
-\contentsline {subsubsection}{\nonumberline Desempeño por Configuración Específica}{103}{subsubsection*.191}%
-\contentsline {subsubsection}{\nonumberline Sensibilidad a la Distribución del Error}{104}{subsubsection*.193}%
-\contentsline {subsubsection}{\nonumberline Efecto de la Varianza del Error}{107}{subsubsection*.196}%
-\contentsline {subsection}{\numberline {4.1.2}Análisis de Robustez y Significancia Estadística}{109}{subsection.4.1.2}%
-\contentsline {subsubsection}{\nonumberline Estabilidad del Desempeño: Coeficiente de Variación}{109}{subsubsection*.199}%
-\contentsline {subsubsection}{\nonumberline Comparaciones Pareadas: Test de Diebold-Mariano}{110}{subsubsection*.201}%
-\contentsline {subsubsection}{\nonumberline Análisis por Escenario: Estacionariedad como Moderador}{111}{subsubsection*.203}%
-\contentsline {subsubsection}{\nonumberline Síntesis de Robustez}{111}{subsubsection*.204}%
-\contentsline {section}{\numberline {4.2}Simulación 1: Impacto de la Diferenciación en Procesos ARIMA}{112}{section.4.2}%
-\contentsline {subsection}{\numberline {4.2.1}Motivación Teórica}{112}{subsection.4.2.1}%
-\contentsline {subsection}{\numberline {4.2.2}Resultados Agregados}{113}{subsection.4.2.2}%
-\contentsline {subsection}{\numberline {4.2.3}Caso Excepcional: Sieve Bootstrap}{114}{subsection.4.2.3}%
-\contentsline {subsection}{\numberline {4.2.4}Análisis de Significancia Estadística}{116}{subsection.4.2.4}%
-\contentsline {subsection}{\numberline {4.2.5}Heterogeneidad por Configuración}{116}{subsection.4.2.5}%
-\contentsline {subsection}{\numberline {4.2.6}Implicaciones Metodológicas}{119}{subsection.4.2.6}%
-\contentsline {section}{\numberline {4.3}Simulación 2: Límites de Integración y Persistencia Extrema}{120}{section.4.3}%
-\contentsline {subsection}{\numberline {4.3.1}Motivación: Persistencia Acumulativa}{120}{subsection.4.3.1}%
-\contentsline {subsection}{\numberline {4.3.2}Diseño Experimental}{121}{subsection.4.3.2}%
-\contentsline {subsection}{\numberline {4.3.3}Resultados: Degradación Sistemática por Orden de Integración}{121}{subsection.4.3.3}%
-\contentsline {subsubsection}{\nonumberline Régimen I: Integración Moderada ($d = 1, 2$)}{121}{subsubsection*.211}%
-\contentsline {subsubsection}{\nonumberline Régimen II: Integración Alta ($d = 3, 4, 5$)}{121}{subsubsection*.212}%
-\contentsline {subsubsection}{\nonumberline Régimen III: Integración Extrema ($d \geq 6$)}{123}{subsubsection*.213}%
-\contentsline {subsection}{\numberline {4.3.4}Análisis de Sensibilidad: Media vs Variabilidad}{123}{subsection.4.3.4}%
-\contentsline {subsection}{\numberline {4.3.5}Significancia Estadística del Efecto de Diferenciación}{124}{subsection.4.3.5}%
-\contentsline {subsection}{\numberline {4.3.6}Implicaciones para la Práctica}{126}{subsection.4.3.6}%
-\contentsline {section}{\numberline {4.4}Simulación 3: Efectos del Tamaño Muestral Absoluto}{127}{section.4.4}%
-\contentsline {subsection}{\numberline {4.4.1}Convergencia Asintótica: Análisis por Z-scores}{127}{subsection.4.4.1}%
-\contentsline {subsubsection}{\nonumberline Patrones Agregados de Convergencia}{127}{subsubsection*.216}%
-\contentsline {subsubsection}{\nonumberline Heterogeneidad por Familia de Procesos}{129}{subsubsection*.218}%
-\contentsline {subsection}{\numberline {4.4.2}Mejora Relativa: Rentabilidad Marginal del Tamaño Muestral}{131}{subsection.4.4.2}%
-\contentsline {subsubsection}{\nonumberline Divergencia entre Familias de Métodos}{132}{subsubsection*.220}%
-\contentsline {subsubsection}{\nonumberline Especificidad por Escenario: Moderadores Estructurales}{133}{subsubsection*.222}%
-\contentsline {subsection}{\numberline {4.4.3}Análisis de Significancia Estadística del Efecto del Tamaño Muestral}{135}{subsection.4.4.3}%
-\contentsline {subsubsection}{\nonumberline Resultados Agregados por Método}{136}{subsubsection*.224}%
-\contentsline {subsubsection}{\nonumberline Análisis Desagregado por Escenario}{137}{subsubsection*.226}%
-\contentsline {subsubsection}{\nonumberline Heterogeneidad en Comparaciones Específicas}{138}{subsubsection*.228}%
-\contentsline {subsubsection}{\nonumberline Implicaciones para el Diseño de Estudios}{138}{subsubsection*.229}%
-\contentsline {section}{\numberline {4.5}Simulación 4: Proporciones de Calibración con Tamaño Fijo}{139}{section.4.5}%
-\contentsline {subsection}{\numberline {4.5.1}Motivación: Trade-off entre Ajuste y Calibración}{139}{subsection.4.5.1}%
-\contentsline {subsection}{\numberline {4.5.2}Resultados Agregados: Patrones de Desempeño por Proporción}{140}{subsection.4.5.2}%
-\contentsline {subsubsection}{\nonumberline Heterogeneidad por Familia de Procesos}{141}{subsubsection*.231}%
-\contentsline {subsection}{\numberline {4.5.3}Análisis de Optimalidad: Z-scores por Proporción}{143}{subsection.4.5.3}%
-\contentsline {subsection}{\numberline {4.5.4}Análisis de Significancia Estadística del Efecto de Proporción}{145}{subsection.4.5.4}%
-\contentsline {subsubsection}{\nonumberline Resultados Agregados: Identificación de Proporciones Óptimas}{145}{subsubsection*.235}%
-\contentsline {subsubsection}{\nonumberline Análisis Desagregado por Escenario}{147}{subsubsection*.237}%
-\contentsline {subsubsection}{\nonumberline Comparaciones Críticas: Identificación de la Proporción Óptima}{148}{subsubsection*.239}%
-\contentsline {subsection}{\numberline {4.5.5}Implicaciones Metodológicas}{149}{subsection.4.5.5}%
-\contentsline {section}{\numberline {4.6}Simulación 5: Degradación en Predicción Multi-paso}{150}{section.4.6}%
-\contentsline {subsection}{\numberline {4.6.1}Resultados Agregados: Patrones de Degradación por Horizonte}{151}{subsection.4.6.1}%
-\contentsline {subsection}{\numberline {4.6.2}Heterogeneidad por Familia de Procesos}{152}{subsection.4.6.2}%
-\contentsline {subsubsection}{\nonumberline Procesos ARMA: Convergencia Gradual hacia un Límite Asintótico}{152}{subsubsection*.243}%
-\contentsline {subsubsection}{\nonumberline Procesos ARIMA: Divergencia Catastrófica sin Diferenciación}{154}{subsubsection*.244}%
-\contentsline {subsubsection}{\nonumberline Procesos SETAR: Estabilidad Inesperada bajo No Linealidad}{155}{subsubsection*.245}%
-\contentsline {subsection}{\numberline {4.6.3}Desempeño Comparativo por Escenario}{155}{subsection.4.6.3}%
-\contentsline {subsection}{\numberline {4.6.4}Interacción Configuración × Horizonte: Heterogeneidad de Degradación}{157}{subsection.4.6.4}%
-\contentsline {subsubsection}{\nonumberline Análisis Agregado: Dispersión Creciente}{157}{subsubsection*.248}%
-\contentsline {subsubsection}{\nonumberline Procesos ARMA: Convergencia Heterogénea}{158}{subsubsection*.249}%
-\contentsline {subsubsection}{\nonumberline Procesos ARIMA: Divergencia Estratificada}{159}{subsubsection*.251}%
-\contentsline {subsubsection}{\nonumberline Procesos SETAR: Estabilidad Multimodal}{161}{subsubsection*.253}%
-\contentsline {subsection}{\numberline {4.6.5}Implicaciones Metodológicas para Aplicaciones de Largo Plazo}{162}{subsection.4.6.5}%
-\contentsline {chapter}{\numberline {5}Aplicaciones a Series de Tiempo Reales}{164}{chapter.5}%
-\contentsline {section}{\numberline {5.1}Metodología de Análisis Exploratorio de Datos}{165}{section.5.1}%
-\contentsline {subsection}{\numberline {5.1.1}Estructura del Protocolo de Análisis}{165}{subsection.5.1.1}%
-\contentsline {subsection}{\numberline {5.1.2}Transformación Box-Cox}{166}{subsection.5.1.2}%
-\contentsline {paragraph}{\nonumberline Estimación del parámetro óptimo:}{166}{paragraph*.255}%
-\contentsline {paragraph}{\nonumberline Criterios de aplicación:}{166}{paragraph*.256}%
-\contentsline {paragraph}{\nonumberline Interpretación:}{166}{paragraph*.257}%
-\contentsline {subsection}{\numberline {5.1.3}Eliminación de Tendencia mediante LOWESS}{167}{subsection.5.1.3}%
-\contentsline {paragraph}{\nonumberline Método LOWESS:}{167}{paragraph*.258}%
-\contentsline {paragraph}{\nonumberline Selección del parámetro $f$:}{167}{paragraph*.259}%
-\contentsline {paragraph}{\nonumberline Validación:}{167}{paragraph*.260}%
-\contentsline {subsection}{\numberline {5.1.4}Análisis de Estacionariedad}{167}{subsection.5.1.4}%
-\contentsline {paragraph}{\nonumberline Función de Autocorrelación (ACF):}{168}{paragraph*.261}%
-\contentsline {paragraph}{\nonumberline Interpretación de la ACF:}{168}{paragraph*.262}%
-\contentsline {paragraph}{\nonumberline Función de Autocorrelación Parcial (PACF):}{168}{paragraph*.263}%
-\contentsline {subsection}{\numberline {5.1.5}Tests de Estacionariedad y Linealidad}{168}{subsection.5.1.5}%
-\contentsline {subsubsection}{\nonumberline Tests de Estacionariedad}{168}{subsubsection*.264}%
-\contentsline {paragraph}{\nonumberline Test de Dickey-Fuller Aumentado (ADF):}{168}{paragraph*.265}%
-\contentsline {paragraph}{\nonumberline Test de Kwiatkowski-Phillips-Schmidt-Shin (KPSS):}{169}{paragraph*.266}%
-\contentsline {paragraph}{\nonumberline Estrategia combinada:}{169}{paragraph*.267}%
-\contentsline {subsubsection}{\nonumberline Tests de Linealidad}{169}{subsubsection*.268}%
-\contentsline {paragraph}{\nonumberline Test BDS:}{169}{paragraph*.269}%
-\contentsline {paragraph}{\nonumberline Test de McLeod-Li:}{169}{paragraph*.270}%
-\contentsline {paragraph}{\nonumberline Test de Tsay:}{170}{paragraph*.271}%
-\contentsline {paragraph}{\nonumberline Exponente de Hurst:}{170}{paragraph*.272}%
-\contentsline {subsection}{\numberline {5.1.6}Diagnóstico de Residuos}{170}{subsection.5.1.6}%
-\contentsline {paragraph}{\nonumberline Test de Jarque-Bera:}{170}{paragraph*.273}%
-\contentsline {paragraph}{\nonumberline Test de Ljung-Box:}{170}{paragraph*.274}%
-\contentsline {paragraph}{\nonumberline Gráficos de diagnóstico:}{171}{paragraph*.275}%
-\contentsline {subsection}{\numberline {5.1.7}Análisis Espectral}{171}{subsection.5.1.7}%
-\contentsline {paragraph}{\nonumberline Periodograma:}{171}{paragraph*.276}%
-\contentsline {paragraph}{\nonumberline Método de Welch:}{171}{paragraph*.277}%
-\contentsline {paragraph}{\nonumberline Implicaciones:}{171}{paragraph*.278}%
-\contentsline {subsection}{\numberline {5.1.8}Síntesis de Hallazgos y Configuración de Modelado}{172}{subsection.5.1.8}%
-\contentsline {paragraph}{\nonumberline Transformaciones necesarias:}{172}{paragraph*.279}%
-\contentsline {paragraph}{\nonumberline Justificación de complejidad del modelo:}{172}{paragraph*.280}%
-\contentsline {paragraph}{\nonumberline Configuración de hiperparámetros:}{172}{paragraph*.281}%
-\contentsline {paragraph}{\nonumberline Selección de métricas de evaluación:}{172}{paragraph*.282}%
-\contentsline {subsection}{\numberline {5.1.9}Aplicación del Protocolo}{173}{subsection.5.1.9}%
-\contentsline {section}{\numberline {5.2}Serie de Consumo Eléctrico: Dataset Electricity}{173}{section.5.2}%
-\contentsline {subsection}{\numberline {5.2.1}Descripción del Problema y Contexto}{173}{subsection.5.2.1}%
-\contentsline {subsection}{\numberline {5.2.2}Resultados del Análisis Exploratorio}{173}{subsection.5.2.2}%
-\contentsline {subsubsection}{\nonumberline Transformación de Estabilización de Varianza}{174}{subsubsection*.283}%
-\contentsline {subsubsection}{\nonumberline Eliminación de Tendencia}{174}{subsubsection*.285}%
-\contentsline {subsubsection}{\nonumberline Validación de Estacionariedad}{174}{subsubsection*.286}%
-\contentsline {subsubsection}{\nonumberline Evaluación de No Linealidad}{176}{subsubsection*.287}%
-\contentsline {subsubsection}{\nonumberline Diagnóstico de Distribución de Residuos}{176}{subsubsection*.288}%
-\contentsline {subsubsection}{\nonumberline Análisis Espectral}{177}{subsubsection*.289}%
-\contentsline {subsubsection}{\nonumberline Implicaciones para la Estrategia de Modelado}{177}{subsubsection*.290}%
-\contentsline {subsubsection}{\nonumberline Síntesis del Análisis Exploratorio}{178}{subsubsection*.291}%
-\contentsline {subsection}{\numberline {5.2.3}Configuración Experimental}{179}{subsection.5.2.3}%
-\contentsline {subsubsection}{\nonumberline Partición de Datos}{179}{subsubsection*.293}%
-\contentsline {subsubsection}{\nonumberline Horizonte de Predicción}{179}{subsubsection*.294}%
-\contentsline {subsection}{\numberline {5.2.4}Resultados}{179}{subsection.5.2.4}%
-\contentsline {subsubsection}{\nonumberline Desempeño Predictivo Global}{179}{subsubsection*.295}%
-\contentsline {subsubsection}{\nonumberline Comparación Estadística Formal}{181}{subsubsection*.298}%
-\contentsline {subsubsection}{\nonumberline Análisis de Calibración Distribucional}{182}{subsubsection*.299}%
-\contentsline {subsection}{\numberline {5.2.5}Síntesis del Estudio del Dataset Electricity}{185}{subsection.5.2.5}%
-\contentsline {subsubsection}{\nonumberline Recomendaciones para la Práctica}{185}{subsubsection*.302}%
-\contentsline {section}{\numberline {5.3}Serie de Tráfico Vial: Dataset Traffic}{186}{section.5.3}%
-\contentsline {subsection}{\numberline {5.3.1}Descripción del Problema y Contexto}{186}{subsection.5.3.1}%
-\contentsline {subsection}{\numberline {5.3.2}Resultados del Análisis Exploratorio}{186}{subsection.5.3.2}%
-\contentsline {subsubsection}{\nonumberline Transformación de Estabilización de Varianza}{187}{subsubsection*.303}%
-\contentsline {subsubsection}{\nonumberline Eliminación de Tendencia y Validación de Estacionariedad}{187}{subsubsection*.305}%
-\contentsline {subsubsection}{\nonumberline Evaluación de No Linealidad y Distribución}{187}{subsubsection*.306}%
-\contentsline {subsection}{\numberline {5.3.3}Configuración Experimental}{189}{subsection.5.3.3}%
-\contentsline {subsection}{\numberline {5.3.4}Resultados}{189}{subsection.5.3.4}%
-\contentsline {subsubsection}{\nonumberline Desempeño Predictivo Global}{189}{subsubsection*.307}%
-\contentsline {subsubsection}{\nonumberline Análisis de Significancia Estadística}{191}{subsubsection*.310}%
-\contentsline {subsubsection}{\nonumberline Análisis de Calibración Distribucional}{192}{subsubsection*.312}%
-\contentsline {subsection}{\numberline {5.3.5}Síntesis del Estudio del Dataset Traffic}{194}{subsection.5.3.5}%
-\contentsline {subsubsection}{\nonumberline Recomendaciones para la Práctica}{196}{subsubsection*.315}%
-\contentsline {section}{\numberline {5.4}Serie de Tipo de Cambio: Dataset Exchange Rate}{197}{section.5.4}%
-\contentsline {subsection}{\numberline {5.4.1}Descripción del Problema y Contexto}{197}{subsection.5.4.1}%
-\contentsline {subsection}{\numberline {5.4.2}Resultados del Análisis Exploratorio}{197}{subsection.5.4.2}%
-\contentsline {subsubsection}{\nonumberline Transformación de Estabilización de Varianza}{198}{subsubsection*.316}%
-\contentsline {subsubsection}{\nonumberline Eliminación de Tendencia y Validación de Estacionariedad}{198}{subsubsection*.318}%
-\contentsline {subsubsection}{\nonumberline Evaluación de No Linealidad y Distribución}{200}{subsubsection*.319}%
-\contentsline {subsection}{\numberline {5.4.3}Configuración Experimental}{201}{subsection.5.4.3}%
-\contentsline {subsection}{\numberline {5.4.4}Resultados}{201}{subsection.5.4.4}%
-\contentsline {subsubsection}{\nonumberline Desempeño Predictivo Global}{201}{subsubsection*.320}%
-\contentsline {subsubsection}{\nonumberline Análisis de Significancia Estadística}{203}{subsubsection*.323}%
-\contentsline {subsubsection}{\nonumberline Análisis de Calibración Distribucional}{205}{subsubsection*.325}%
-\contentsline {subsection}{\numberline {5.4.5}Síntesis del Estudio del Dataset Exchange Rate}{209}{subsection.5.4.5}%
-\contentsline {subsubsection}{\nonumberline Recomendaciones para la Práctica}{210}{subsubsection*.328}%
-\contentsline {section}{\numberline {5.5}Conclusiones Generales de las Aplicaciones}{211}{section.5.5}%
-\contentsline {subsection}{\numberline {5.5.1}Síntesis Comparativa de Resultados}{212}{subsection.5.5.1}%
-\contentsline {subsubsection}{\nonumberline Reordenamiento Dramático del Ranking}{213}{subsubsection*.330}%
-\contentsline {subsubsection}{\nonumberline Patrones de Efectividad Metodológica}{213}{subsubsection*.331}%
-\contentsline {paragraph}{\nonumberline Régimen 1: Dominancia de Métodos Lineales (Electricity)}{213}{paragraph*.332}%
-\contentsline {paragraph}{\nonumberline Régimen 2: Ventaja de Adaptatividad No Paramétrica (Traffic)}{214}{paragraph*.333}%
-\contentsline {paragraph}{\nonumberline Régimen 3: Convergencia Multimodal (Exchange Rate)}{214}{paragraph*.334}%
-\contentsline {subsection}{\numberline {5.5.2}Lecciones Metodológicas Fundamentales}{214}{subsection.5.5.2}%
-\contentsline {subsubsection}{\nonumberline Inexistencia de un Modelo Universalmente Superior}{214}{subsubsection*.335}%
-\contentsline {subsubsection}{\nonumberline Rol Crítico del Preprocesamiento}{215}{subsubsection*.336}%
-\contentsline {subsubsection}{\nonumberline Adaptatividad Confiere Robustez pero No Garantiza Superioridad}{215}{subsubsection*.337}%
-\contentsline {subsubsection}{\nonumberline Aprendizaje Profundo Requiere Escala y Complejidad Adecuadas}{216}{subsubsection*.338}%
-\contentsline {subsubsection}{\nonumberline Calibración y Precisión Generalmente Correlacionan}{216}{subsubsection*.339}%
-\contentsline {subsection}{\numberline {5.5.3}Protocolo de Análisis Exploratorio como Fundamento}{217}{subsection.5.5.3}%
-\contentsline {subsection}{\numberline {5.5.4}Implicaciones para Aplicaciones Prácticas}{218}{subsection.5.5.4}%
-\contentsline {subsubsection}{\nonumberline Estrategia de Selección de Modelos}{218}{subsubsection*.340}%
-\contentsline {subsubsection}{\nonumberline Configuración de Hiperparámetros}{219}{subsubsection*.341}%
-\contentsline {subsubsection}{\nonumberline Métricas de Evaluación}{219}{subsubsection*.342}%
-\contentsline {subsection}{\numberline {5.5.5}Limitaciones y Direcciones Futuras}{220}{subsection.5.5.5}%
-\contentsline {subsubsection}{\nonumberline Limitaciones del Estudio}{220}{subsubsection*.343}%
-\contentsline {subsubsection}{\nonumberline Direcciones de Investigación Futura}{221}{subsubsection*.344}%
-\contentsline {subsection}{\numberline {5.5.6}Síntesis Final}{222}{subsection.5.5.6}%
-\contentsline {chapter}{\numberline {6}Conclusiones}{224}{chapter.6}%
-\contentsline {section}{\numberline {6.1}Conclusiones del Estudio}{224}{section.6.1}%
-\contentsline {section}{\numberline {6.2}Limitaciones del Estudio}{225}{section.6.2}%
-\contentsline {section}{\numberline {6.3}Investigación Futura}{226}{section.6.3}%
-\contentsline {chapter}{\numberline {A}Marco Teórico para Consistencia Universal en Series de Tiempo Ergódicas}{227}{appendix.A}%
-\contentsline {section}{\numberline {A.1}Redefinición del Objetivo de Consistencia}{227}{section.A.1}%
-\contentsline {section}{\numberline {A.2}Supuestos Fundamentales del Marco Propuesto}{227}{section.A.2}%
-\contentsline {section}{\numberline {A.3}Mecanismo Propuesto: Transductor Conformal por Kernel}{228}{section.A.3}%
-\contentsline {section}{\numberline {A.4}Ruta hacia la Demostración de Consistencia}{229}{section.A.4}%
-\contentsline {subsection}{\numberline {A.4.1}Convergencia del Sesgo}{229}{subsection.A.4.1}%
-\contentsline {subsection}{\numberline {A.4.2}Convergencia de la Varianza}{229}{subsection.A.4.2}%
-\contentsline {section}{\numberline {A.5}Discusión y Perspectivas Futuras}{229}{section.A.5}%
+\contentsline {subsection}{\numberline {3.4.1}Modelos tomados de la literatura}{48}{subsection.3.4.1}%
+\contentsline {subsubsection}{\nonumberline Circular Block Bootstrap (CBB)}{48}{subsubsection*.39}%
+\contentsline {paragraph}{\nonumberline Explicación Teórica del Modelo}{48}{paragraph*.40}%
+\contentsline {subparagraph}{\nonumberline Fundamento Teórico}{48}{subparagraph*.41}%
+\contentsline {subparagraph}{\nonumberline Algoritmo de Remuestreo}{49}{subparagraph*.42}%
+\contentsline {subparagraph}{\nonumberline Propiedades Estadísticas}{49}{subparagraph*.43}%
+\contentsline {subparagraph}{\nonumberline Clasificación del Modelo}{49}{subparagraph*.44}%
+\contentsline {paragraph}{\nonumberline De la Teoría a la Práctica}{50}{paragraph*.45}%
+\contentsline {subparagraph}{\nonumberline Adaptación 1: Simplificación del Esquema de Remuestreo}{50}{subparagraph*.46}%
+\contentsline {subparagraph}{\nonumberline Adaptación 2: Selección Automática de $l$}{50}{subparagraph*.47}%
+\contentsline {subparagraph}{\nonumberline Adaptación 3: Congelamiento Post-Optimización}{50}{subparagraph*.48}%
+\contentsline {paragraph}{\nonumberline Optimización, Parámetros e Hiperparámetros}{50}{paragraph*.50}%
+\contentsline {subparagraph}{\nonumberline Hiperparámetro Principal: \texttt {block\_length} ($l$)}{51}{subparagraph*.51}%
+\contentsline {subparagraph}{\nonumberline Protocolo de Congelamiento}{51}{subparagraph*.52}%
+\contentsline {subsubsection}{\nonumberline Sieve Bootstrap (SB)}{51}{subsubsection*.53}%
+\contentsline {paragraph}{\nonumberline Explicación Teórica del Modelo}{51}{paragraph*.54}%
+\contentsline {paragraph}{\nonumberline Fundamento Teórico}{51}{paragraph*.55}%
+\contentsline {paragraph}{\nonumberline Algoritmo de Remuestreo}{52}{paragraph*.56}%
+\contentsline {paragraph}{\nonumberline Propiedades de Consistencia}{53}{paragraph*.57}%
+\contentsline {paragraph}{\nonumberline Clasificación del Modelo}{53}{paragraph*.58}%
+\contentsline {paragraph}{\nonumberline De la Teoría a la Práctica}{53}{paragraph*.59}%
+\contentsline {subparagraph}{\nonumberline Adaptación 1: Selección de Orden Basada en Validación}{53}{subparagraph*.60}%
+\contentsline {subparagraph}{\nonumberline Adaptación 2: Congelamiento de Parámetros AR}{53}{subparagraph*.61}%
+\contentsline {subparagraph}{\nonumberline Adaptación 3: Predicción Secuencial Eficiente}{54}{subparagraph*.62}%
+\contentsline {paragraph}{\nonumberline Optimización, Parámetros e Hiperparámetros}{54}{paragraph*.64}%
+\contentsline {subparagraph}{\nonumberline Hiperparámetro Principal: \texttt {order} ($p$)}{54}{subparagraph*.65}%
+\contentsline {subparagraph}{\nonumberline Métrica de Optimización}{54}{subparagraph*.66}%
+\contentsline {subparagraph}{\nonumberline Protocolo de Congelamiento}{54}{subparagraph*.67}%
+\contentsline {subsubsection}{\nonumberline Least Squares Prediction Machine (LSPM)}{55}{subsubsection*.68}%
+\contentsline {paragraph}{\nonumberline Explicación Teórica del Modelo}{55}{paragraph*.69}%
+\contentsline {subparagraph}{\nonumberline Fundamento Teórico: Predicción Conformal}{55}{subparagraph*.70}%
+\contentsline {subparagraph}{\nonumberline Construcción de la Distribución Predictiva}{55}{subparagraph*.71}%
+\contentsline {subparagraph}{\nonumberline Valores Críticos Studentizados}{56}{subparagraph*.72}%
+\contentsline {subparagraph}{\nonumberline Propiedades Estadísticas}{56}{subparagraph*.73}%
+\contentsline {subparagraph}{\nonumberline Clasificación del Modelo}{56}{subparagraph*.74}%
+\contentsline {paragraph}{\nonumberline De la Teoría a la Práctica}{57}{paragraph*.75}%
+\contentsline {subparagraph}{\nonumberline Adaptación 1: Construcción Autorregresiva}{57}{subparagraph*.76}%
+\contentsline {subparagraph}{\nonumberline Adaptación 2: Estabilidad Numérica}{57}{subparagraph*.77}%
+\contentsline {subparagraph}{\nonumberline Adaptación 3: Filtrado de Singularidades}{57}{subparagraph*.78}%
+\contentsline {paragraph}{\nonumberline Optimización, Parámetros e Hiperparámetros}{58}{paragraph*.80}%
+\contentsline {subparagraph}{\nonumberline Parámetro Principal: \texttt {n\_lags} ($p$)}{58}{subparagraph*.81}%
+\contentsline {subparagraph}{\nonumberline Métrica de Optimización}{58}{subparagraph*.82}%
+\contentsline {subparagraph}{\nonumberline Protocolo de Congelamiento}{58}{subparagraph*.83}%
+\contentsline {subsubsection}{\nonumberline DeepAR: Probabilistic Forecasting with Autoregressive Recurrent Networks}{59}{subsubsection*.84}%
+\contentsline {paragraph}{\nonumberline Explicación Teórica del Modelo}{59}{paragraph*.85}%
+\contentsline {subparagraph}{\nonumberline Fundamento Arquitectónico}{59}{subparagraph*.86}%
+\contentsline {subparagraph}{\nonumberline Naturaleza Autorregresiva}{59}{subparagraph*.87}%
+\contentsline {subparagraph}{\nonumberline Modelado Probabilístico}{60}{subparagraph*.88}%
+\contentsline {subparagraph}{\nonumberline Manejo de Escalas Heterogéneas}{60}{subparagraph*.89}%
+\contentsline {subparagraph}{\nonumberline Generación de Pronósticos Probabilísticos}{61}{subparagraph*.90}%
+\contentsline {subparagraph}{\nonumberline Clasificación del Modelo}{61}{subparagraph*.91}%
+\contentsline {paragraph}{\nonumberline De la Teoría a la Práctica}{61}{paragraph*.92}%
+\contentsline {subparagraph}{\nonumberline Adaptaciones Principales}{61}{subparagraph*.93}%
+\contentsline {paragraph}{\nonumberline Optimización, Parámetros e Hiperparámetros}{62}{paragraph*.95}%
+\contentsline {subparagraph}{\nonumberline Hiperparámetros Arquitectónicos}{62}{subparagraph*.96}%
+\contentsline {subparagraph}{\nonumberline Espacio de Búsqueda}{63}{subparagraph*.97}%
+\contentsline {subparagraph}{\nonumberline Protocolo de Optimización}{63}{subparagraph*.98}%
+\contentsline {subparagraph}{\nonumberline Congelamiento de Hiperparámetros}{64}{subparagraph*.99}%
+\contentsline {subsection}{\numberline {3.4.2}Modelos adaptados de la literatura}{64}{subsection.3.4.2}%
+\contentsline {subsubsection}{\nonumberline Least Squares Prediction Machine with Weighted Residuals (LSPMW)}{64}{subsubsection*.100}%
+\contentsline {paragraph}{\nonumberline Explicación Teórica del Modelo}{64}{paragraph*.101}%
+\contentsline {subparagraph}{\nonumberline Fundamento Teórico: Cuantiles Ponderados}{64}{subparagraph*.102}%
+\contentsline {subparagraph}{\nonumberline Esquema de Decaimiento Geométrico}{65}{subparagraph*.103}%
+\contentsline {subparagraph}{\nonumberline Cuantiles Ponderados}{65}{subparagraph*.104}%
+\contentsline {subparagraph}{\nonumberline Propiedades de Cobertura}{66}{subparagraph*.105}%
+\contentsline {subparagraph}{\nonumberline Clasificación del Modelo}{66}{subparagraph*.106}%
+\contentsline {paragraph}{\nonumberline De la Teoría a la Práctica}{66}{paragraph*.107}%
+\contentsline {subparagraph}{\nonumberline Adaptación 1: Muestreo Ponderado vs. Expansión por Replicación}{66}{subparagraph*.108}%
+\contentsline {subparagraph}{\nonumberline Adaptación 2: Recálculo Dinámico de Residuos}{66}{subparagraph*.109}%
+\contentsline {subparagraph}{\nonumberline Adaptación 3: Protocolo de Congelamiento Parcial}{67}{subparagraph*.110}%
+\contentsline {paragraph}{\nonumberline Optimización, Parámetros e Hiperparámetros}{67}{paragraph*.112}%
+\contentsline {subparagraph}{\nonumberline Hiperparámetro Principal: \texttt {rho} ($\rho $)}{67}{subparagraph*.113}%
+\contentsline {subparagraph}{\nonumberline Métrica de Optimización}{68}{subparagraph*.114}%
+\contentsline {subparagraph}{\nonumberline Protocolo de Congelamiento Parcial}{68}{subparagraph*.115}%
+\contentsline {subsubsection}{\nonumberline Mondrian Conformal Predictive System (MCPS)}{68}{subsubsection*.116}%
+\contentsline {paragraph}{\nonumberline Explicación Teórica del Modelo}{68}{paragraph*.117}%
+\contentsline {subparagraph}{\nonumberline Fundamento: Particionamiento Mondrian}{69}{subparagraph*.118}%
+\contentsline {subparagraph}{\nonumberline Cálculo Localizado de Scores Conformales}{69}{subparagraph*.119}%
+\contentsline {subparagraph}{\nonumberline Construcción de la Distribución Predictiva}{70}{subparagraph*.120}%
+\contentsline {subparagraph}{\nonumberline Garantías de Cobertura Local}{70}{subparagraph*.121}%
+\contentsline {subparagraph}{\nonumberline Naturaleza No Paramétrica}{70}{subparagraph*.122}%
+\contentsline {paragraph}{\nonumberline De la Teoría a la Práctica}{71}{paragraph*.123}%
+\contentsline {subparagraph}{\nonumberline Adaptaciones Principales}{71}{subparagraph*.124}%
+\contentsline {paragraph}{\nonumberline Optimización, Parámetros e Hiperparámetros}{72}{paragraph*.126}%
+\contentsline {subparagraph}{\nonumberline Hiperparámetros Primarios}{72}{subparagraph*.127}%
+\contentsline {subparagraph}{\nonumberline Optimización de Hiperparámetros}{73}{subparagraph*.128}%
+\contentsline {subparagraph}{\nonumberline Parámetros del Modelo Base}{73}{subparagraph*.129}%
+\contentsline {subparagraph}{\nonumberline Balance Fundamental}{74}{subparagraph*.130}%
+\contentsline {subsubsection}{\nonumberline Adaptive Volatility Mondrian Conformal Predictive System (AV-MCPS)}{74}{subsubsection*.131}%
+\contentsline {paragraph}{\nonumberline Explicación Teórica del Modelo}{74}{paragraph*.132}%
+\contentsline {subparagraph}{\nonumberline Motivación: Límites del Particionamiento Unidimensional}{74}{subparagraph*.133}%
+\contentsline {subparagraph}{\nonumberline Particionamiento Bidimensional}{75}{subparagraph*.134}%
+\contentsline {subparagraph}{\nonumberline Cálculo Localizado de Scores}{75}{subparagraph*.135}%
+\contentsline {subparagraph}{\nonumberline Garantías de Cobertura Bidimensional}{76}{subparagraph*.136}%
+\contentsline {subparagraph}{\nonumberline Trade-off: Resolución vs. Tamaño de Muestra}{76}{subparagraph*.137}%
+\contentsline {subparagraph}{\nonumberline Naturaleza No Paramétrica}{76}{subparagraph*.138}%
+\contentsline {paragraph}{\nonumberline De la Teoría a la Práctica}{76}{paragraph*.139}%
+\contentsline {subparagraph}{\nonumberline Adaptaciones Principales}{77}{subparagraph*.140}%
+\contentsline {subparagraph}{\nonumberline Innovación Metodológica}{78}{subparagraph*.142}%
+\contentsline {paragraph}{\nonumberline Optimización, Parámetros e Hiperparámetros}{78}{paragraph*.143}%
+\contentsline {subparagraph}{\nonumberline Hiperparámetros Primarios}{79}{subparagraph*.144}%
+\contentsline {subparagraph}{\nonumberline Configuraciones Evaluadas}{79}{subparagraph*.145}%
+\contentsline {subparagraph}{\nonumberline Optimización de Hiperparámetros}{79}{subparagraph*.146}%
+\contentsline {subparagraph}{\nonumberline Parámetros del Modelo Base}{79}{subparagraph*.147}%
+\contentsline {subsubsection}{\nonumberline Autoregressive Exponentially-weighted Polynomial Distribution (AREPD)}{79}{subsubsection*.148}%
+\contentsline {paragraph}{\nonumberline Explicación Teórica del Modelo}{79}{paragraph*.149}%
+\contentsline {subparagraph}{\nonumberline Fundamento Matemático}{80}{subparagraph*.150}%
+\contentsline {subparagraph}{\nonumberline Ponderación Exponencial Temporal}{80}{subparagraph*.151}%
+\contentsline {subparagraph}{\nonumberline Estimación mediante Regresión Ridge}{80}{subparagraph*.152}%
+\contentsline {subparagraph}{\nonumberline Generación de Distribuciones Predictivas}{81}{subparagraph*.153}%
+\contentsline {subparagraph}{\nonumberline Garantías de Cobertura}{81}{subparagraph*.154}%
+\contentsline {subparagraph}{\nonumberline Clasificación del Modelo}{81}{subparagraph*.155}%
+\contentsline {paragraph}{\nonumberline Optimización, Parámetros e Hiperparámetros}{82}{paragraph*.157}%
+\contentsline {subparagraph}{\nonumberline Hiperparámetros Estructurales}{82}{subparagraph*.158}%
+\contentsline {subparagraph}{\nonumberline Parámetro Fijo}{83}{subparagraph*.159}%
+\contentsline {subparagraph}{\nonumberline Espacio de Búsqueda}{83}{subparagraph*.160}%
+\contentsline {subparagraph}{\nonumberline Protocolo de Optimización}{83}{subparagraph*.161}%
+\contentsline {subparagraph}{\nonumberline Congelamiento de Hiperparámetros}{83}{subparagraph*.162}%
+\contentsline {subsubsection}{\nonumberline Ensemble Conformalized Quantile Regression (EnCQR-LSTM)}{84}{subsubsection*.163}%
+\contentsline {paragraph}{\nonumberline Explicación Teórica del Modelo}{84}{paragraph*.164}%
+\contentsline {subparagraph}{\nonumberline Motivación y Limitaciones de Métodos Puros}{84}{subparagraph*.165}%
+\contentsline {subparagraph}{\nonumberline Arquitectura de Ensamble y Regresión Cuantílica}{84}{subparagraph*.166}%
+\contentsline {subparagraph}{\nonumberline Predicción Leave-One-Out y Scores de Conformidad}{85}{subparagraph*.167}%
+\contentsline {subparagraph}{\nonumberline Conformalización y Distribución Predictiva}{86}{subparagraph*.168}%
+\contentsline {subparagraph}{\nonumberline Naturaleza del Modelo}{86}{subparagraph*.169}%
+\contentsline {subparagraph}{\nonumberline Propiedades Teóricas}{86}{subparagraph*.170}%
+\contentsline {paragraph}{\nonumberline De la Teoría a la Práctica}{87}{paragraph*.171}%
+\contentsline {subparagraph}{\nonumberline Adaptaciones Principales}{87}{subparagraph*.172}%
+\contentsline {paragraph}{\nonumberline Optimización, Parámetros e Hiperparámetros}{87}{paragraph*.174}%
+\contentsline {subparagraph}{\nonumberline Hiperparámetros del Modelo}{88}{subparagraph*.175}%
+\contentsline {subparagraph}{\nonumberline Espacio de Búsqueda Restringido}{89}{subparagraph*.176}%
+\contentsline {subparagraph}{\nonumberline Optimización y Congelamiento}{89}{subparagraph*.177}%
+\contentsline {subparagraph}{\nonumberline Justificación del Espacio Reducido}{89}{subparagraph*.178}%
+\contentsline {subsection}{\numberline {3.4.3}Contribuciones de este trabajo}{90}{subsection.3.4.3}%
+\contentsline {section}{\numberline {3.5}Metodo de comparación}{90}{section.3.5}%
+\contentsline {section}{\numberline {3.6}Simulaciones Complementarias}{90}{section.3.6}%
+\contentsline {subsection}{\numberline {3.6.1}Simulación 1: Impacto de la Diferenciación en ARIMA ($d=1$)}{91}{subsection.3.6.1}%
+\contentsline {subsubsection}{\nonumberline Motivación}{91}{subsubsection*.179}%
+\contentsline {subsubsection}{\nonumberline Diseño Experimental}{91}{subsubsection*.180}%
+\contentsline {subsubsection}{\nonumberline Protocolo de Evaluación}{91}{subsubsection*.181}%
+\contentsline {subsection}{\numberline {3.6.2}Simulación 2: Límites de Integración y Persistencia (Multi-D)}{92}{subsection.3.6.2}%
+\contentsline {subsubsection}{\nonumberline Motivación}{92}{subsubsection*.182}%
+\contentsline {subsubsection}{\nonumberline Diseño Experimental}{92}{subsubsection*.183}%
+\contentsline {subsubsection}{\nonumberline Hipótesis}{93}{subsubsection*.184}%
+\contentsline {subsection}{\numberline {3.6.3}Simulación 3: Efectos del Tamaño Muestral Absoluto}{93}{subsection.3.6.3}%
+\contentsline {subsubsection}{\nonumberline Motivación}{93}{subsubsection*.185}%
+\contentsline {subsubsection}{\nonumberline Diseño Experimental}{93}{subsubsection*.186}%
+\contentsline {subsection}{\numberline {3.6.4}Simulación 4: Proporciones de Calibración con Tamaño Fijo}{94}{subsection.3.6.4}%
+\contentsline {subsubsection}{\nonumberline Motivación}{94}{subsubsection*.188}%
+\contentsline {subsubsection}{\nonumberline Diseño Experimental}{94}{subsubsection*.189}%
+\contentsline {subsection}{\numberline {3.6.5}Simulación 5: Predicción Multi-paso (Horizonte $h$)}{95}{subsection.3.6.5}%
+\contentsline {subsubsection}{\nonumberline Motivación}{95}{subsubsection*.191}%
+\contentsline {subsubsection}{\nonumberline Fundamento Metodológico: Predicción Recursiva}{95}{subsubsection*.192}%
+\contentsline {subsubsection}{\nonumberline Generación de Trayectorias Estocásticas}{96}{subsubsection*.193}%
+\contentsline {subsubsection}{\nonumberline Diseño Experimental}{96}{subsubsection*.194}%
+\contentsline {subsubsection}{\nonumberline Protocolo de Evaluación}{97}{subsubsection*.195}%
+\contentsline {subsection}{\numberline {3.6.6}Resumen de Evaluaciones Complementarias}{98}{subsection.3.6.6}%
+\contentsline {subsubsection}{\nonumberline Protocolo Común a Todas las Simulaciones}{98}{subsubsection*.197}%
+\contentsline {chapter}{\numberline {4}Resultados y Análisis de Simulaciones}{100}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Resultados del Diseño Principal}{100}{section.4.1}%
+\contentsline {subsection}{\numberline {4.1.1}Análisis Agregado de Desempeño}{101}{subsection.4.1.1}%
+\contentsline {subsubsection}{\nonumberline Desempeño por Configuración Específica}{102}{subsubsection*.200}%
+\contentsline {subsubsection}{\nonumberline Sensibilidad a la Distribución del Error}{103}{subsubsection*.202}%
+\contentsline {subsubsection}{\nonumberline Efecto de la Varianza del Error}{106}{subsubsection*.205}%
+\contentsline {subsection}{\numberline {4.1.2}Análisis de Robustez y Significancia Estadística}{108}{subsection.4.1.2}%
+\contentsline {subsubsection}{\nonumberline Estabilidad del Desempeño: Coeficiente de Variación}{108}{subsubsection*.208}%
+\contentsline {subsubsection}{\nonumberline Comparaciones Pareadas: Test de Diebold-Mariano}{109}{subsubsection*.210}%
+\contentsline {subsubsection}{\nonumberline Análisis por Escenario: Estacionariedad como Moderador}{110}{subsubsection*.212}%
+\contentsline {subsubsection}{\nonumberline Síntesis de Robustez}{110}{subsubsection*.213}%
+\contentsline {section}{\numberline {4.2}Simulación 1: Impacto de la Diferenciación en Procesos ARIMA}{111}{section.4.2}%
+\contentsline {subsection}{\numberline {4.2.1}Motivación Teórica}{111}{subsection.4.2.1}%
+\contentsline {subsection}{\numberline {4.2.2}Resultados Agregados}{112}{subsection.4.2.2}%
+\contentsline {subsection}{\numberline {4.2.3}Caso Excepcional: Sieve Bootstrap}{113}{subsection.4.2.3}%
+\contentsline {subsection}{\numberline {4.2.4}Análisis de Significancia Estadística}{115}{subsection.4.2.4}%
+\contentsline {subsection}{\numberline {4.2.5}Heterogeneidad por Configuración}{115}{subsection.4.2.5}%
+\contentsline {subsection}{\numberline {4.2.6}Implicaciones Metodológicas}{118}{subsection.4.2.6}%
+\contentsline {section}{\numberline {4.3}Simulación 2: Límites de Integración y Persistencia Extrema}{119}{section.4.3}%
+\contentsline {subsection}{\numberline {4.3.1}Motivación: Persistencia Acumulativa}{119}{subsection.4.3.1}%
+\contentsline {subsection}{\numberline {4.3.2}Diseño Experimental}{120}{subsection.4.3.2}%
+\contentsline {subsection}{\numberline {4.3.3}Resultados: Degradación Sistemática por Orden de Integración}{120}{subsection.4.3.3}%
+\contentsline {subsubsection}{\nonumberline Régimen I: Integración Moderada ($d = 1, 2$)}{120}{subsubsection*.220}%
+\contentsline {subsubsection}{\nonumberline Régimen II: Integración Alta ($d = 3, 4, 5$)}{120}{subsubsection*.221}%
+\contentsline {subsubsection}{\nonumberline Régimen III: Integración Extrema ($d \geq 6$)}{122}{subsubsection*.222}%
+\contentsline {subsection}{\numberline {4.3.4}Análisis de Sensibilidad: Media vs Variabilidad}{122}{subsection.4.3.4}%
+\contentsline {subsection}{\numberline {4.3.5}Significancia Estadística del Efecto de Diferenciación}{123}{subsection.4.3.5}%
+\contentsline {subsection}{\numberline {4.3.6}Implicaciones para la Práctica}{125}{subsection.4.3.6}%
+\contentsline {section}{\numberline {4.4}Simulación 3: Efectos del Tamaño Muestral Absoluto}{126}{section.4.4}%
+\contentsline {subsection}{\numberline {4.4.1}Convergencia Asintótica: Análisis por Z-scores}{126}{subsection.4.4.1}%
+\contentsline {subsubsection}{\nonumberline Patrones Agregados de Convergencia}{126}{subsubsection*.225}%
+\contentsline {subsubsection}{\nonumberline Heterogeneidad por Familia de Procesos}{128}{subsubsection*.227}%
+\contentsline {subsection}{\numberline {4.4.2}Mejora Relativa: Rentabilidad Marginal del Tamaño Muestral}{130}{subsection.4.4.2}%
+\contentsline {subsubsection}{\nonumberline Divergencia entre Familias de Métodos}{131}{subsubsection*.229}%
+\contentsline {subsubsection}{\nonumberline Especificidad por Escenario: Moderadores Estructurales}{132}{subsubsection*.231}%
+\contentsline {subsection}{\numberline {4.4.3}Análisis de Significancia Estadística del Efecto del Tamaño Muestral}{134}{subsection.4.4.3}%
+\contentsline {subsubsection}{\nonumberline Resultados Agregados por Método}{135}{subsubsection*.233}%
+\contentsline {subsubsection}{\nonumberline Análisis Desagregado por Escenario}{136}{subsubsection*.235}%
+\contentsline {subsubsection}{\nonumberline Heterogeneidad en Comparaciones Específicas}{137}{subsubsection*.237}%
+\contentsline {subsubsection}{\nonumberline Implicaciones para el Diseño de Estudios}{137}{subsubsection*.238}%
+\contentsline {section}{\numberline {4.5}Simulación 4: Proporciones de Calibración con Tamaño Fijo}{138}{section.4.5}%
+\contentsline {subsection}{\numberline {4.5.1}Motivación: Trade-off entre Ajuste y Calibración}{138}{subsection.4.5.1}%
+\contentsline {subsection}{\numberline {4.5.2}Resultados Agregados: Patrones de Desempeño por Proporción}{139}{subsection.4.5.2}%
+\contentsline {subsubsection}{\nonumberline Heterogeneidad por Familia de Procesos}{140}{subsubsection*.240}%
+\contentsline {subsection}{\numberline {4.5.3}Análisis de Optimalidad: Z-scores por Proporción}{142}{subsection.4.5.3}%
+\contentsline {subsection}{\numberline {4.5.4}Análisis de Significancia Estadística del Efecto de Proporción}{144}{subsection.4.5.4}%
+\contentsline {subsubsection}{\nonumberline Resultados Agregados: Identificación de Proporciones Óptimas}{144}{subsubsection*.244}%
+\contentsline {subsubsection}{\nonumberline Análisis Desagregado por Escenario}{146}{subsubsection*.246}%
+\contentsline {subsubsection}{\nonumberline Comparaciones Críticas: Identificación de la Proporción Óptima}{147}{subsubsection*.248}%
+\contentsline {subsection}{\numberline {4.5.5}Implicaciones Metodológicas}{148}{subsection.4.5.5}%
+\contentsline {section}{\numberline {4.6}Simulación 5: Degradación en Predicción Multi-paso}{149}{section.4.6}%
+\contentsline {subsection}{\numberline {4.6.1}Resultados Agregados: Patrones de Degradación por Horizonte}{150}{subsection.4.6.1}%
+\contentsline {subsection}{\numberline {4.6.2}Heterogeneidad por Familia de Procesos}{151}{subsection.4.6.2}%
+\contentsline {subsubsection}{\nonumberline Procesos ARMA: Convergencia Gradual hacia un Límite Asintótico}{151}{subsubsection*.252}%
+\contentsline {subsubsection}{\nonumberline Procesos ARIMA: Divergencia Catastrófica sin Diferenciación}{153}{subsubsection*.253}%
+\contentsline {subsubsection}{\nonumberline Procesos SETAR: Estabilidad Inesperada bajo No Linealidad}{154}{subsubsection*.254}%
+\contentsline {subsection}{\numberline {4.6.3}Desempeño Comparativo por Escenario}{154}{subsection.4.6.3}%
+\contentsline {subsection}{\numberline {4.6.4}Interacción Configuración × Horizonte: Heterogeneidad de Degradación}{156}{subsection.4.6.4}%
+\contentsline {subsubsection}{\nonumberline Análisis Agregado: Dispersión Creciente}{156}{subsubsection*.257}%
+\contentsline {subsubsection}{\nonumberline Procesos ARMA: Convergencia Heterogénea}{157}{subsubsection*.258}%
+\contentsline {subsubsection}{\nonumberline Procesos ARIMA: Divergencia Estratificada}{158}{subsubsection*.260}%
+\contentsline {subsubsection}{\nonumberline Procesos SETAR: Estabilidad Multimodal}{160}{subsubsection*.262}%
+\contentsline {subsection}{\numberline {4.6.5}Implicaciones Metodológicas para Aplicaciones de Largo Plazo}{161}{subsection.4.6.5}%
+\contentsline {chapter}{\numberline {5}Aplicaciones a Series de Tiempo Reales}{163}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Metodología de Análisis Exploratorio de Datos}{164}{section.5.1}%
+\contentsline {subsection}{\numberline {5.1.1}Estructura del Protocolo de Análisis}{164}{subsection.5.1.1}%
+\contentsline {subsection}{\numberline {5.1.2}Transformación Box-Cox}{165}{subsection.5.1.2}%
+\contentsline {paragraph}{\nonumberline Estimación del parámetro óptimo:}{165}{paragraph*.264}%
+\contentsline {paragraph}{\nonumberline Criterios de aplicación:}{165}{paragraph*.265}%
+\contentsline {paragraph}{\nonumberline Interpretación:}{165}{paragraph*.266}%
+\contentsline {subsection}{\numberline {5.1.3}Eliminación de Tendencia mediante LOWESS}{166}{subsection.5.1.3}%
+\contentsline {paragraph}{\nonumberline Método LOWESS:}{166}{paragraph*.267}%
+\contentsline {paragraph}{\nonumberline Selección del parámetro $f$:}{166}{paragraph*.268}%
+\contentsline {paragraph}{\nonumberline Validación:}{166}{paragraph*.269}%
+\contentsline {subsection}{\numberline {5.1.4}Análisis de Estacionariedad}{166}{subsection.5.1.4}%
+\contentsline {paragraph}{\nonumberline Función de Autocorrelación (ACF):}{167}{paragraph*.270}%
+\contentsline {paragraph}{\nonumberline Interpretación de la ACF:}{167}{paragraph*.271}%
+\contentsline {paragraph}{\nonumberline Función de Autocorrelación Parcial (PACF):}{167}{paragraph*.272}%
+\contentsline {subsection}{\numberline {5.1.5}Tests de Estacionariedad y Linealidad}{167}{subsection.5.1.5}%
+\contentsline {subsubsection}{\nonumberline Tests de Estacionariedad}{167}{subsubsection*.273}%
+\contentsline {paragraph}{\nonumberline Test de Dickey-Fuller Aumentado (ADF):}{167}{paragraph*.274}%
+\contentsline {paragraph}{\nonumberline Test de Kwiatkowski-Phillips-Schmidt-Shin (KPSS):}{168}{paragraph*.275}%
+\contentsline {paragraph}{\nonumberline Estrategia combinada:}{168}{paragraph*.276}%
+\contentsline {subsubsection}{\nonumberline Tests de Linealidad}{168}{subsubsection*.277}%
+\contentsline {paragraph}{\nonumberline Test BDS:}{168}{paragraph*.278}%
+\contentsline {paragraph}{\nonumberline Test de McLeod-Li:}{168}{paragraph*.279}%
+\contentsline {paragraph}{\nonumberline Test de Tsay:}{169}{paragraph*.280}%
+\contentsline {paragraph}{\nonumberline Exponente de Hurst:}{169}{paragraph*.281}%
+\contentsline {subsection}{\numberline {5.1.6}Diagnóstico de Residuos}{169}{subsection.5.1.6}%
+\contentsline {paragraph}{\nonumberline Test de Jarque-Bera:}{169}{paragraph*.282}%
+\contentsline {paragraph}{\nonumberline Test de Ljung-Box:}{169}{paragraph*.283}%
+\contentsline {paragraph}{\nonumberline Gráficos de diagnóstico:}{170}{paragraph*.284}%
+\contentsline {subsection}{\numberline {5.1.7}Análisis Espectral}{170}{subsection.5.1.7}%
+\contentsline {paragraph}{\nonumberline Periodograma:}{170}{paragraph*.285}%
+\contentsline {paragraph}{\nonumberline Método de Welch:}{170}{paragraph*.286}%
+\contentsline {paragraph}{\nonumberline Implicaciones:}{170}{paragraph*.287}%
+\contentsline {subsection}{\numberline {5.1.8}Síntesis de Hallazgos y Configuración de Modelado}{171}{subsection.5.1.8}%
+\contentsline {paragraph}{\nonumberline Transformaciones necesarias:}{171}{paragraph*.288}%
+\contentsline {paragraph}{\nonumberline Justificación de complejidad del modelo:}{171}{paragraph*.289}%
+\contentsline {paragraph}{\nonumberline Configuración de hiperparámetros:}{171}{paragraph*.290}%
+\contentsline {paragraph}{\nonumberline Selección de métricas de evaluación:}{171}{paragraph*.291}%
+\contentsline {subsection}{\numberline {5.1.9}Aplicación del Protocolo}{172}{subsection.5.1.9}%
+\contentsline {section}{\numberline {5.2}Serie de Consumo Eléctrico: Dataset Electricity}{172}{section.5.2}%
+\contentsline {subsection}{\numberline {5.2.1}Descripción del Problema y Contexto}{172}{subsection.5.2.1}%
+\contentsline {subsection}{\numberline {5.2.2}Resultados del Análisis Exploratorio}{172}{subsection.5.2.2}%
+\contentsline {subsubsection}{\nonumberline Transformación de Estabilización de Varianza}{173}{subsubsection*.292}%
+\contentsline {subsubsection}{\nonumberline Eliminación de Tendencia}{173}{subsubsection*.294}%
+\contentsline {subsubsection}{\nonumberline Validación de Estacionariedad}{173}{subsubsection*.295}%
+\contentsline {subsubsection}{\nonumberline Evaluación de No Linealidad}{175}{subsubsection*.296}%
+\contentsline {subsubsection}{\nonumberline Diagnóstico de Distribución de Residuos}{175}{subsubsection*.297}%
+\contentsline {subsubsection}{\nonumberline Análisis Espectral}{176}{subsubsection*.298}%
+\contentsline {subsubsection}{\nonumberline Implicaciones para la Estrategia de Modelado}{176}{subsubsection*.299}%
+\contentsline {subsubsection}{\nonumberline Síntesis del Análisis Exploratorio}{177}{subsubsection*.300}%
+\contentsline {subsection}{\numberline {5.2.3}Configuración Experimental}{178}{subsection.5.2.3}%
+\contentsline {subsubsection}{\nonumberline Partición de Datos}{178}{subsubsection*.302}%
+\contentsline {subsubsection}{\nonumberline Horizonte de Predicción}{178}{subsubsection*.303}%
+\contentsline {subsection}{\numberline {5.2.4}Resultados}{178}{subsection.5.2.4}%
+\contentsline {subsubsection}{\nonumberline Desempeño Predictivo Global}{178}{subsubsection*.304}%
+\contentsline {subsubsection}{\nonumberline Comparación Estadística Formal}{180}{subsubsection*.307}%
+\contentsline {subsubsection}{\nonumberline Análisis de Calibración Distribucional}{181}{subsubsection*.308}%
+\contentsline {subsection}{\numberline {5.2.5}Síntesis del Estudio del Dataset Electricity}{184}{subsection.5.2.5}%
+\contentsline {subsubsection}{\nonumberline Recomendaciones para la Práctica}{184}{subsubsection*.311}%
+\contentsline {section}{\numberline {5.3}Serie de Tráfico Vial: Dataset Traffic}{185}{section.5.3}%
+\contentsline {subsection}{\numberline {5.3.1}Descripción del Problema y Contexto}{185}{subsection.5.3.1}%
+\contentsline {subsection}{\numberline {5.3.2}Resultados del Análisis Exploratorio}{185}{subsection.5.3.2}%
+\contentsline {subsubsection}{\nonumberline Transformación de Estabilización de Varianza}{186}{subsubsection*.312}%
+\contentsline {subsubsection}{\nonumberline Eliminación de Tendencia y Validación de Estacionariedad}{186}{subsubsection*.314}%
+\contentsline {subsubsection}{\nonumberline Evaluación de No Linealidad y Distribución}{186}{subsubsection*.315}%
+\contentsline {subsection}{\numberline {5.3.3}Configuración Experimental}{188}{subsection.5.3.3}%
+\contentsline {subsection}{\numberline {5.3.4}Resultados}{188}{subsection.5.3.4}%
+\contentsline {subsubsection}{\nonumberline Desempeño Predictivo Global}{188}{subsubsection*.316}%
+\contentsline {subsubsection}{\nonumberline Análisis de Significancia Estadística}{190}{subsubsection*.319}%
+\contentsline {subsubsection}{\nonumberline Análisis de Calibración Distribucional}{191}{subsubsection*.321}%
+\contentsline {subsection}{\numberline {5.3.5}Síntesis del Estudio del Dataset Traffic}{193}{subsection.5.3.5}%
+\contentsline {subsubsection}{\nonumberline Recomendaciones para la Práctica}{195}{subsubsection*.324}%
+\contentsline {section}{\numberline {5.4}Serie de Tipo de Cambio: Dataset Exchange Rate}{196}{section.5.4}%
+\contentsline {subsection}{\numberline {5.4.1}Descripción del Problema y Contexto}{196}{subsection.5.4.1}%
+\contentsline {subsection}{\numberline {5.4.2}Resultados del Análisis Exploratorio}{196}{subsection.5.4.2}%
+\contentsline {subsubsection}{\nonumberline Transformación de Estabilización de Varianza}{197}{subsubsection*.325}%
+\contentsline {subsubsection}{\nonumberline Eliminación de Tendencia y Validación de Estacionariedad}{197}{subsubsection*.327}%
+\contentsline {subsubsection}{\nonumberline Evaluación de No Linealidad y Distribución}{199}{subsubsection*.328}%
+\contentsline {subsection}{\numberline {5.4.3}Configuración Experimental}{200}{subsection.5.4.3}%
+\contentsline {subsection}{\numberline {5.4.4}Resultados}{200}{subsection.5.4.4}%
+\contentsline {subsubsection}{\nonumberline Desempeño Predictivo Global}{200}{subsubsection*.329}%
+\contentsline {subsubsection}{\nonumberline Análisis de Significancia Estadística}{202}{subsubsection*.332}%
+\contentsline {subsubsection}{\nonumberline Análisis de Calibración Distribucional}{204}{subsubsection*.334}%
+\contentsline {subsection}{\numberline {5.4.5}Síntesis del Estudio del Dataset Exchange Rate}{208}{subsection.5.4.5}%
+\contentsline {subsubsection}{\nonumberline Recomendaciones para la Práctica}{209}{subsubsection*.337}%
+\contentsline {section}{\numberline {5.5}Conclusiones Generales de las Aplicaciones}{210}{section.5.5}%
+\contentsline {subsection}{\numberline {5.5.1}Síntesis Comparativa de Resultados}{211}{subsection.5.5.1}%
+\contentsline {subsubsection}{\nonumberline Reordenamiento Dramático del Ranking}{212}{subsubsection*.339}%
+\contentsline {subsubsection}{\nonumberline Patrones de Efectividad Metodológica}{212}{subsubsection*.340}%
+\contentsline {paragraph}{\nonumberline Régimen 1: Dominancia de Métodos Lineales (Electricity)}{212}{paragraph*.341}%
+\contentsline {paragraph}{\nonumberline Régimen 2: Ventaja de Adaptatividad No Paramétrica (Traffic)}{213}{paragraph*.342}%
+\contentsline {paragraph}{\nonumberline Régimen 3: Convergencia Multimodal (Exchange Rate)}{213}{paragraph*.343}%
+\contentsline {subsection}{\numberline {5.5.2}Lecciones Metodológicas Fundamentales}{213}{subsection.5.5.2}%
+\contentsline {subsubsection}{\nonumberline Inexistencia de un Modelo Universalmente Superior}{213}{subsubsection*.344}%
+\contentsline {subsubsection}{\nonumberline Rol Crítico del Preprocesamiento}{214}{subsubsection*.345}%
+\contentsline {subsubsection}{\nonumberline Adaptatividad Confiere Robustez pero No Garantiza Superioridad}{214}{subsubsection*.346}%
+\contentsline {subsubsection}{\nonumberline Aprendizaje Profundo Requiere Escala y Complejidad Adecuadas}{215}{subsubsection*.347}%
+\contentsline {subsubsection}{\nonumberline Calibración y Precisión Generalmente Correlacionan}{215}{subsubsection*.348}%
+\contentsline {subsection}{\numberline {5.5.3}Protocolo de Análisis Exploratorio como Fundamento}{216}{subsection.5.5.3}%
+\contentsline {subsection}{\numberline {5.5.4}Implicaciones para Aplicaciones Prácticas}{217}{subsection.5.5.4}%
+\contentsline {subsubsection}{\nonumberline Estrategia de Selección de Modelos}{217}{subsubsection*.349}%
+\contentsline {subsubsection}{\nonumberline Configuración de Hiperparámetros}{218}{subsubsection*.350}%
+\contentsline {subsubsection}{\nonumberline Métricas de Evaluación}{218}{subsubsection*.351}%
+\contentsline {subsection}{\numberline {5.5.5}Limitaciones y Direcciones Futuras}{219}{subsection.5.5.5}%
+\contentsline {subsubsection}{\nonumberline Limitaciones del Estudio}{219}{subsubsection*.352}%
+\contentsline {subsubsection}{\nonumberline Direcciones de Investigación Futura}{220}{subsubsection*.353}%
+\contentsline {subsection}{\numberline {5.5.6}Síntesis Final}{221}{subsection.5.5.6}%
+\contentsline {chapter}{\numberline {6}Conclusiones}{223}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Conclusiones del Estudio}{223}{section.6.1}%
+\contentsline {section}{\numberline {6.2}Limitaciones del Estudio}{224}{section.6.2}%
+\contentsline {section}{\numberline {6.3}Investigación Futura}{225}{section.6.3}%
+\contentsline {chapter}{\numberline {A}Marco Teórico para Consistencia Universal en Series de Tiempo Ergódicas}{226}{appendix.A}%
+\contentsline {section}{\numberline {A.1}Redefinición del Objetivo de Consistencia}{226}{section.A.1}%
+\contentsline {section}{\numberline {A.2}Supuestos Fundamentales del Marco Propuesto}{226}{section.A.2}%
+\contentsline {section}{\numberline {A.3}Mecanismo Propuesto: Transductor Conformal por Kernel}{227}{section.A.3}%
+\contentsline {section}{\numberline {A.4}Ruta hacia la Demostración de Consistencia}{228}{section.A.4}%
+\contentsline {subsection}{\numberline {A.4.1}Convergencia del Sesgo}{228}{subsection.A.4.1}%
+\contentsline {subsection}{\numberline {A.4.2}Convergencia de la Varianza}{228}{subsection.A.4.2}%
+\contentsline {section}{\numberline {A.5}Discusión y Perspectivas Futuras}{228}{section.A.5}%
 \def \@chapapp {\appendixname }
-\contentsline {chapter}{\nonumberline Bibliografía}{231}{chapter*.345}%
+\contentsline {chapter}{\nonumberline Bibliografía}{230}{chapter*.354}%
 \providecommand \tocbasic@end@toc@file {}\tocbasic@end@toc@file 
