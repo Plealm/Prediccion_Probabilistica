@@ -19,37 +19,38 @@ La Figura~\ref{fig:desempeno_escenario} cuantifica el ECRPS promedio por escenar
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.8\textwidth]{Imagenes/rendimiento_por_escenario.png}
+\includegraphics[width=\textwidth]{Imagenes/rendimiento_por_escenario.png}
 \caption{ECRPS promedio por escenario.}
 \label{fig:desempeno_escenario}
 \end{figure}
+
 Los modelos están ordenados por su desempeño en ARIMA (barras grises). El ranking por escenario evidencia que Block Bootstrapping y AREPD, experimentan degradación severa en ARIMA (ECRPS $>$ 10), superando por amplio margen a métodos como Sieve Bootstrap (ECRPS $0.55 - 0.62$ en todos los escenarios) y DeepAR (ECRPS $\approx$ 0.57--4.33). En el escenario SETAR, los métodos convergen hacia un desempeño más homogéneo (ECRPS $\approx$ 0.63--0.70).
 
 
-La Figura~\ref{fig:ecrps_general_config} presenta los puntajes Z del ECRPS promedio para cada modelo evaluado en las 21 configuraciones paramétricas (7 por escenario). Los puntajes Z permiten comparar el desempeño relativo estandarizado, donde valores negativos indican un rendimiento superior al promedio y valores positivos señalan un desempeño inferior.
+La Figura~\ref{fig:ecrps_general_config} presenta los puntajes Z por modelo (fila) del ECRPS promedio para cada modelo evaluado en las 21 configuraciones paramétricas (7 por escenario). Los puntajes Z permiten comparar el desempeño relativo estandarizado, donde valores negativos indican un rendimiento superior al promedio y valores positivos señalan un desempeño inferior.
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.8\textwidth]{Imagenes/2.1_zscore_config.png}
+\includegraphics[width=\textwidth]{Imagenes/2.1_zscore_config.png}
 \caption{Z-scores de ECRPS por configuración. }
 \label{fig:ecrps_general_config}
 \end{figure}
 
-Los resultados agregados revelan tres hallazgos principales. Primero, los métodos Sieve Bootstrap, LSPM y LSPMW exhiben la mayor estabilidad, alcanzando puntajes Z maximos a 3. Segundo, se observa una marcada heterogeneidad en el desempeño según la configuración: la columna ARIMA(2,1,2) concentra los valores Z más elevados (rojo intenso) para prácticamente todos los métodos, sugiriendo que esta parametrización particular representa un desafío sistemático. Tercero, los métodos LSPM y LSPMW muestran un patrón bimodal, con excelente desempeño en configuraciones ARMA pero deterioro en configuraciones ARIMA específicas.
+Los resultados agregados revelan tres hallazgos principales. Primero, los métodos Sieve Bootstrap, LSPM y LSPMW exhiben la mayor estabilidad, alcanzando puntajes Z maximos a 3. Segundo, se observa una marcada heterogeneidad en el desempeño según la configuración: la columna ARIMA(2,1,2) concentra los valores Z más elevados (rojo intenso) para prácticamente todos los métodos, sugiriendo que esta parametrización particular representa un desafío sistemático. Tercero, los métodos LSPM y LSPMW muestran un patrón contrastante, con excelente desempeño en configuraciones ARMA pero deterioro en configuraciones ARIMA específicas.
 
 \subsubsection{Desempeño por Configuración Específica}
 Las Figuras~\ref{fig:ecrps_arma}--\ref{fig:ecrps_setar} desagregan los resultados por escenario, revelando patrones de especializaci\'on seg\'un la estructura del proceso generador. En procesos ARMA (Figura~\ref{fig:ecrps_arma}), se identifica una jerarqu\'ia clara de dificultad: el proceso ARMA(2,1) constituye el escenario m\'as desafiante para la mayor\'ia de m\'etodos (con excepci\'on de Sieve Bootstrap), mientras que MA(2) emerge como el m\'as favorable. Los modelos LSPM, LSPMW y Sieve Bootstrap demuestran robustez consistente a lo largo de todas las configuraciones ARMA, con desempe\~no particularmente destacado en AR(1), un proceso que plantea dificultades considerables para los m\'etodos restantes. En procesos ARIMA (Figura~\ref{fig:ecrps_arima}), se observa una degradaci\'on progresiva en la mayor\'ia de los modelos a medida que aumenta la complejidad de la configuraci\'on: LSPM, LSPMW, MCPS, AV-MCPS, DeepAR, EnCQR-LSTM, AREPD y Block Bootstrapping alcanzan Z-scores altos ($>$2.0, rojo intenso) en ARIMA(2,1,2), sugiriendo colapso en escenarios no estacionarios complejos. Sieve Bootstrap destaca por su estabilidad, con Z-scores consistentes y bajos (de -1.47 a 1.24, predominantemente verde y amarillo). DeepAR muestra robustez moderada en configuraciones simples (Z-scores $\approx$ -0.5, verde), pero se deteriora en las m\'as avanzadas. Los procesos SETAR (Figura~\ref{fig:ecrps_setar}) presentan un desaf\'io diferente: las configuraciones SETAR-2 y SETAR-4 (que incorporan cambios de r\'egimen m\'as abruptos) generan dificultades uniformes (Z-scores positivos) para todos los m\'etodos excepto Sieve Bootstrap. Configuraciones con transiciones suaves (SETAR-1, SETAR-3, SETAR-5) permiten un desempe\~no m\'as equilibrado.
 
 \begin{figure}[htbp]
 \centering
-\begin{subfigure}[b]{0.48\textwidth}
+\begin{subfigure}[b]{\textwidth}
     \centering
     \includegraphics[width=\textwidth]{Imagenes/2.1.a_zscore_config.png}
     \caption{Procesos ARMA}
     \label{fig:ecrps_arma}
 \end{subfigure}
 \hfill
-\begin{subfigure}[b]{0.48\textwidth}
+\begin{subfigure}[b]{\textwidth}
     \centering
     \includegraphics[width=\textwidth]{Imagenes/2.1.b_zscore_config.png}
     \caption{Procesos ARIMA}
@@ -58,7 +59,7 @@ Las Figuras~\ref{fig:ecrps_arma}--\ref{fig:ecrps_setar} desagregan los resultado
 
 \vspace{0.5cm}
 
-\begin{subfigure}[b]{0.48\textwidth}
+\begin{subfigure}[b]{\textwidth}
     \centering
     \includegraphics[width=\textwidth]{Imagenes/2.1.c_zscore_config.png}
     \caption{Procesos SETAR}
@@ -75,7 +76,7 @@ La Figura~\ref{fig:ecrps_distribucion} examina el efecto de la distribución en 
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.8\textwidth]{Imagenes/3.1_zscore_dist.png}
+\includegraphics[width=\textwidth]{Imagenes/3.1_zscore_dist.png}
 \caption{Z-scores de ECRPS por distribución.}
 \label{fig:ecrps_distribucion}
 \end{figure}
@@ -84,14 +85,14 @@ Las Figuras~\ref{fig:dist_arma}--\ref{fig:dist_setar} desagregan los resultados 
 
 \begin{figure}[htbp]
 \centering
-\begin{subfigure}[b]{0.48\textwidth}
+\begin{subfigure}[b]{\textwidth}
     \centering
     \includegraphics[width=\textwidth]{Imagenes/3.1.a_zscore_dist.png}
     \caption{Procesos ARMA}
     \label{fig:dist_arma}
 \end{subfigure}
 \hfill
-\begin{subfigure}[b]{0.48\textwidth}
+\begin{subfigure}[b]{\textwidth}
     \centering
     \includegraphics[width=\textwidth]{Imagenes/3.1.b_zscore_dist.png}
     \caption{Procesos ARIMA}
@@ -100,7 +101,7 @@ Las Figuras~\ref{fig:dist_arma}--\ref{fig:dist_setar} desagregan los resultados 
 
 \vspace{0.5cm}
 
-\begin{subfigure}[b]{0.48\textwidth}
+\begin{subfigure}[b]{\textwidth}
     \centering
     \includegraphics[width=\textwidth]{Imagenes/3.1.c_zscore_dist.png}
     \caption{Procesos SETAR}
@@ -118,7 +119,7 @@ La Figura~\ref{fig:varianza_general} cuantifica la evolución del ECRPS conforme
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.8\textwidth]{Imagenes/4.1_evolucion_var.png}
+\includegraphics[width=\textwidth]{Imagenes/4.1_evolucion_var.png}
 \caption{ECRPS promedio en función de la varianza.}
 \label{fig:varianza_general}
 \end{figure}
@@ -126,7 +127,7 @@ La Figura~\ref{fig:varianza_general} cuantifica la evolución del ECRPS conforme
 Las Figuras~\ref{fig:var_arma}--\ref{fig:var_setar} revelan que este comportamiento es altamente dependiente del escenario. En ARMA (Figura~\ref{fig:var_arma}), todos los m\'etodos mantienen crecimiento controlado con pendientes similares. En ARIMA (Figura~\ref{fig:var_arima}), Block Bootstrapping y AREPD experimentan crecimiento explosivo para $\sigma^2 = 3.0$ (ECRPS $>$ 20), mientras que Sieve Bootstrap permanece estable (ECRPS $<$ 2). En SETAR (Figura~\ref{fig:var_setar}), el crecimiento se homogeniza nuevamente, sugiriendo que la no linealidad estacionaria aten\'ua las diferencias inducidas por la varianza del ruido.
 \begin{figure}[htbp]
 \centering
-\begin{subfigure}[b]{0.5\textwidth}
+\begin{subfigure}[b]{\textwidth}
     \centering
     \includegraphics[width=\textwidth]{Imagenes/4.1.a_evolucion_var.png}
     \caption{Procesos ARMA}
@@ -135,7 +136,7 @@ Las Figuras~\ref{fig:var_arma}--\ref{fig:var_setar} revelan que este comportamie
 
 \vspace{0.3cm}
 
-\begin{subfigure}[b]{0.5\textwidth}
+\begin{subfigure}[b]{\textwidth}
     \centering
     \includegraphics[width=\textwidth]{Imagenes/4.1.b_evolucion_var.png}
     \caption{Procesos ARIMA}
@@ -144,7 +145,7 @@ Las Figuras~\ref{fig:var_arma}--\ref{fig:var_setar} revelan que este comportamie
 
 \vspace{0.3cm}
 
-\begin{subfigure}[b]{0.5\textwidth}
+\begin{subfigure}[b]{\textwidth}
     \centering
     \includegraphics[width=\textwidth]{Imagenes/4.1.c_evolucion_var.png}
     \caption{Procesos SETAR}
@@ -164,7 +165,7 @@ La Figura~\ref{fig:robustez_cv} cuantifica la estabilidad del desempeño de cada
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.8\textwidth]{Imagenes/6.1_robustez_coeficiente_variacion.png}
+\includegraphics[width=\textwidth]{Imagenes/6.1_robustez_coeficiente_variacion.png}
 \caption{Coeficiente de variación del ECRPS por modelo.}
 \label{fig:robustez_cv}
 \end{figure}
@@ -179,7 +180,7 @@ La Figura~\ref{fig:dm_general} presenta los resultados del test de Diebold-Maria
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.8\textwidth]{Imagenes/6.2_dm_test_hln_bonferroni.png}
+\includegraphics[width=\textwidth]{Imagenes/6.2_dm_test_hln_bonferroni.png}
 \caption{Test de Diebold-Mariano modificado con corrección de Bonferroni.}
 \label{fig:dm_general}
 \end{figure}
