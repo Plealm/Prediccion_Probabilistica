@@ -2021,14 +2021,19 @@ Para cada escenario de simulación y en cada paso temporal $t$ de la ventana de 
 
 El conjunto completo de escenarios simulados abarca múltiples configuraciones de modelos, distribuciones de ruido y niveles de varianza. Dado que diferentes escenarios presentan escalas heterogéneas, se aplica la normalización mediante Z-score (ecuación \eqref{eq:zscore}) calculando para cada método su desviación respecto a la media y desviación estándar de todos los métodos en ese escenario particular. Esta transformación permite identificar fortalezas y debilidades específicas de cada método según las características del proceso generador.
 
-Para establecer la significancia estadística de las diferencias observadas entre pares de métodos, se emplea el test de Diebold-Mariano modificado (ecuación \eqref{eq:dm_modified}) con corrección para muestras pequeñas propuesta por \cite{Harvey1997}. Los diferenciales de pérdida $d_t = \text{ECRPS}(F_A^{(t)}, G^{(t)}) - \text{ECRPS}(F_B^{(t)}, G^{(t)})$ se calculan para cada paso $t$, y el estadístico resultante se compara contra la distribución $t$ de Student con $(n-1)$ grados de libertad. Dado que se realizan múltiples comparaciones entre los nueve métodos evaluados, se aplica la corrección de Bonferroni al nivel de significancia: si se contrastan $K$ pares de métodos al nivel global $\alpha = 0.05$, cada test individual se realiza al nivel $\alpha/K$ para controlar la tasa de error familiar.
+Para establecer la significancia estadística de las diferencias observadas entre pares de métodos, se emplea el test de Diebold-Mariano modificado (ecuación \eqref{eq:dm_modified}) con la corrección para muestras pequeñas propuesta por \cite{Harvey1997}. Para cada escenario, se calculan los diferenciales de pérdida $d_t = \text{ECRPS}(F_A^{(t)}, G^{(t)}) - \text{ECRPS}(F_B^{(t)}, G^{(t)})$ utilizando los $h=12$ horizontes de pronóstico, y el estadístico resultante se compara contra la distribución $t$ de Student con $(h-1)$ grados de libertad.
+
+Dado que se realizan múltiples comparaciones entre los nueve métodos evaluados, se aplica la corrección de Bonferroni al nivel de significancia: si se contrastan $K$ pares de métodos al nivel global $\alpha = 0.05$, cada test individual se realiza al nivel $\alpha/K$ para controlar la tasa de error tipo I familiar. Este procedimiento genera un $p$-valor para cada combinación de escenario y par de modelos.
+
+Para facilitar la interpretación de los resultados, se construyen matrices de resumen $n \times n$ (donde $n$ es el número de modelos) que reportan dos métricas: (i) el porcentaje de escenarios en los que el modelo de la fila supera significativamente al modelo de la columna, y (ii) el porcentaje de escenarios en los que el ECRPS promedio del modelo de la fila es menor que el del modelo de la columna. 
+
+En escenarios con características adicionales (e.g., orden de diferenciación $d$, tamaño muestral, proporción de datos), el análisis se desagrega mediante matrices $n \times m$, donde $m$ representa el número de niveles de la característica evaluada. Cada celda de estas matrices presenta el porcentaje de escenarios en los que el modelo correspondiente alcanza significancia estadística en ese nivel específico, junto con su ECRPS promedio.
+
 
 \subsection{Evaluación con Datos Reales}
 
 En aplicaciones con datos reales, como el conjunto de datos Electricity, no se dispone de la distribución verdadera. La evaluación se fundamenta en el CRPS, que compara cada distribución predictiva $F_t$ contra el valor puntual observado $y_t$ según la ecuación \eqref{eq:crps_integral}.
-
-Para cada método evaluado, se calculan los valores $\text{CRPS}(F_t, y_t)$ a lo largo de la ventana de evaluación de $T$ pasos. Las comparaciones entre métodos se realizan mediante el test de Diebold-Mariano, construyendo los diferenciales de pérdida $d_t = \text{CRPS}(F_A^{(t)}, y_t) - \text{CRPS}(F_B^{(t)}, y_t)$ y aplicando la misma corrección de Bonferroni utilizada en escenarios simulados.
-
+Para cada método evaluado, se calculan los valores $\text{CRPS}(F_t, y_t)$ a lo largo de la ventana de evaluación de $T$ pasos. Las comparaciones entre métodos se realizan mediante el test de Diebold-Mariano modificado, donde los diferenciales de pérdida $d_t = \text{CRPS}(F_A^{(t)}, y_t) - \text{CRPS}(F_B^{(t)}, y_t)$ para $t = 1, \ldots, T$ constituyen las observaciones pareadas del test. El estadístico resultante se compara contra la distribución $t$ de Student con $(T-1)$ grados de libertad, aplicando la misma corrección de Bonferroni utilizada en los escenarios simulados para controlar la tasa de error tipo I en comparaciones múltiples.
 El análisis se complementa con dos herramientas diagnósticas aplicadas individualmente a cada método:
 
 \begin{enumerate}

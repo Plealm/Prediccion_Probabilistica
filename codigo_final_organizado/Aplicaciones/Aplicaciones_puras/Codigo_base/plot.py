@@ -1,5 +1,4 @@
 import matplotlib.pyplot as plt
-from matplotlib.offsetbox import AnchoredText
 import numpy as np
 import seaborn as sns
 import pandas as pd
@@ -109,18 +108,19 @@ def generate_validation_report(predictions_dict, output_folder, output_prefix, m
 # 2. GRAFICACIÓN TIPO A: 24 SUBPLOTS VERTICALES
 # ==============================================================================
 def plot_type_a_vertical_stack(group_name, models_to_plot, predictions_dict, df_results, 
-                               model_colors, output_folder, output_prefix):
+                               model_colors, output_folder, output_prefix, max_steps=6):
     """
-    Genera una imagen ultra-alta con 24 filas x 1 columna.
+    Genera una imagen con máximo max_steps filas x 1 columna.
+    Muestra texto en español y parche de color junto al CRPS de cada modelo.
     """
-    steps = sorted(predictions_dict.keys())[:24] 
+    steps = sorted(predictions_dict.keys())[:max_steps]
     n_steps = len(steps)
     
-    fig, axes = plt.subplots(nrows=n_steps, ncols=1, figsize=(10, 2.5 * n_steps), constrained_layout=True)
+    fig, axes = plt.subplots(nrows=n_steps, ncols=1, figsize=(10, 3.2 * n_steps), constrained_layout=True)
     
     if n_steps == 1: axes = [axes]
     
-    fig.suptitle(f"Evolución Paso a Paso - {group_name}", fontsize=20, fontweight='bold', y=1.002)
+    fig.suptitle(f"Evolución Paso a Paso - {group_name}", fontsize=18, fontweight='bold', y=1.002)
 
     for i, t in enumerate(steps):
         ax = axes[i]
@@ -130,7 +130,6 @@ def plot_type_a_vertical_stack(group_name, models_to_plot, predictions_dict, df_
         preds_dict = data['predictions']
         
         crps_row = df_results.loc[df_results['Paso'] == step_num].iloc[0]
-        legend_labels = []
 
         vals_step = [true_val]
         for m in models_to_plot:
@@ -151,31 +150,45 @@ def plot_type_a_vertical_stack(group_name, models_to_plot, predictions_dict, df_
             p = p[np.isfinite(p)]
             color = model_colors.get(m, 'gray')
             
-            crps_val = crps_row[m]
-            crps_txt = f"{crps_val:.3f}" if pd.notna(crps_val) else "NaN"
-
             if len(p) > 1 and np.var(p) > 0:
                 try:
-                    sns.kdeplot(p, fill=True, color=color, alpha=0.2, ax=ax, linewidth=2)
+                    sns.kdeplot(p, fill=True, color=color, alpha=0.25, ax=ax, linewidth=2)
                 except:
-                    ax.hist(p, bins=30, density=True, color=color, alpha=0.2)
-            
-            legend_labels.append(f"{m}: {crps_txt}")
+                    ax.hist(p, bins=30, density=True, color=color, alpha=0.25)
 
         ax.axvline(true_val, color='black', linestyle='--', linewidth=2, label='Real')
         
-        ax.set_title(f"Step {step_num} | Real: {true_val:.2f}", fontsize=12, fontweight='bold', loc='right')
+        ax.set_title(f"Paso {step_num} | Real: {true_val:.4f}", fontsize=12, fontweight='bold', loc='right')
         ax.set_ylabel("Densidad")
         ax.grid(True, alpha=0.3)
-        
-        full_txt = "CRPS:\n" + "\n".join(legend_labels)
-        at = AnchoredText(full_txt, prop=dict(size=9), frameon=True, loc='upper left')
-        at.patch.set_alpha(0.8)
-        ax.add_artist(at)
+
+        # ── Caja de CRPS con parche de color por modelo ──────────────────
+        from matplotlib.patches import Patch
+        legend_handles = [Patch(facecolor='none', edgecolor='none', label='CRPS:')]
+        for m in models_to_plot:
+            if m not in preds_dict:
+                continue
+            crps_val = crps_row[m]
+            crps_txt = f"{crps_val:.4f}" if pd.notna(crps_val) else "NaN"
+            color = model_colors.get(m, 'gray')
+            legend_handles.append(
+                Patch(facecolor=color, edgecolor='gray', alpha=0.7, label=f"{m}: {crps_txt}")
+            )
+
+        legend = ax.legend(
+            handles=legend_handles,
+            loc='upper left',
+            fontsize=8.5,
+            framealpha=0.88,
+            edgecolor='#aaaaaa',
+            handlelength=1.2,
+            handleheight=0.9,
+            borderpad=0.6,
+        )
 
     safe_name = group_name.replace(" ", "_").replace("+", "_plus_")
     filename = os.path.join(output_folder, f"{output_prefix}_TypeA_{safe_name}.png")
-    plt.savefig(filename, bbox_inches='tight')
+    plt.savefig(filename, bbox_inches='tight', dpi=150)
     plt.close()
 
 # ==============================================================================
@@ -415,26 +428,92 @@ def run_advanced_statistics(df_results, output_folder, h=1):
             'CRPS_Median': df_results[m1].median()
         })
 
-    # Guardar Heatmap HLN-DM
+    # Guardar Heatmap HLN-DM de superioridad
     fig, ax = plt.subplots(figsize=(12, 10))
     sns.heatmap(matriz_dm, annot=True, fmt='.0f', cmap='RdYlGn', center=0,
                 xticklabels=modelos, yticklabels=modelos, 
-                cbar_kws={'label': '1=Fila Gana, -1=Fila Pierde'}, ax=ax)
-    ax.set_title(f"Matriz de Superioridad Significativa (HLN-DM Test, N={len(df_results)}, α={alpha_bonf:.4f})", 
-                 fontsize=12)
+                cbar_kws={'label': '1 = Fila superior  |  -1 = Fila inferior'}, ax=ax,
+                linewidths=0.5, linecolor='#cccccc')
+    ax.set_title(
+        f"Matriz de Superioridad Significativa – Test HLN-DM\n"
+        f"N = {len(df_results)} pasos  |  α Bonferroni = {alpha_bonf:.5f}  ({n_comparisons:.0f} comparaciones)",
+        fontsize=12, pad=14
+    )
+    ax.set_xlabel("Modelo columna (referencia)", fontsize=11)
+    ax.set_ylabel("Modelo fila (evaluado)", fontsize=11)
+    plt.xticks(rotation=40, ha='right', fontsize=10)
+    plt.yticks(rotation=0, fontsize=10)
     plt.tight_layout()
-    plt.savefig(os.path.join(analysis_dir, "HLN_DM_Superiority_Matrix.png"), dpi=300)
+    plt.savefig(os.path.join(analysis_dir, "HLN_DM_Superiority_Matrix.png"), dpi=300, bbox_inches='tight')
     plt.close()
 
-    # Guardar Heatmap de P-valores
-    fig, ax = plt.subplots(figsize=(12, 10))
-    sns.heatmap(matriz_pvals, annot=True, fmt='.3f', cmap='RdYlGn_r', 
-                xticklabels=modelos, yticklabels=modelos,
-                cbar_kws={'label': 'P-valor'}, ax=ax, vmin=0, vmax=0.1)
-    ax.set_title(f"Matriz de P-valores (HLN-DM Test)", fontsize=12)
+    # ── Heatmap mejorado de P-valores DM ──────────────────────────────────────
+    fig, ax = plt.subplots(figsize=(13, 11))
+
+    # Máscara para la diagonal (siempre NaN / no aplica)
+    mask_diag = np.eye(n_models, dtype=bool)
+
+    # Anotaciones: p-valor + asterisco de significancia
+    annot_matrix = np.empty((n_models, n_models), dtype=object)
+    for r in range(n_models):
+        for c in range(n_models):
+            if r == c:
+                annot_matrix[r, c] = "—"
+            else:
+                pv = matriz_pvals[r, c]
+                if np.isnan(pv):
+                    annot_matrix[r, c] = "NaN"
+                elif pv < alpha_bonf:
+                    annot_matrix[r, c] = f"{pv:.3f}\n***"
+                elif pv < 0.05:
+                    annot_matrix[r, c] = f"{pv:.3f}\n*"
+                else:
+                    annot_matrix[r, c] = f"{pv:.3f}"
+
+    # Colormap inverso: rojo = p muy bajo (diferencia significativa), verde = p alto
+    cmap_pvals = sns.color_palette("RdYlGn_r", as_cmap=True)
+    
+    # Para la diagonal usamos valor NaN → gris neutro
+    pval_plot = matriz_pvals.copy().astype(float)
+    np.fill_diagonal(pval_plot, np.nan)
+
+    sns.heatmap(
+        pval_plot,
+        annot=annot_matrix,
+        fmt='',
+        cmap=cmap_pvals,
+        xticklabels=modelos,
+        yticklabels=modelos,
+        ax=ax,
+        vmin=0,
+        vmax=0.10,
+        linewidths=0.5,
+        linecolor='#cccccc',
+        cbar_kws={'label': 'P-valor (DM)'},
+        mask=mask_diag,
+    )
+
+    # Rellenar diagonal con color gris
+    for idx in range(n_models):
+        ax.add_patch(plt.Rectangle((idx, idx), 1, 1, fill=True,
+                                   color='#d0d0d0', transform=ax.transData))
+        ax.text(idx + 0.5, idx + 0.5, "—", ha='center', va='center',
+                fontsize=10, color='#555555')
+
+    ax.set_title(
+        f"Heatmap de P-valores – Test Diebold-Mariano (HLN)\n"
+        f"α Bonferroni = {alpha_bonf:.5f}  |  N = {len(df_results)} pasos\n"
+        f"*** p < α_Bonf  |  * p < 0.05",
+        fontsize=12, pad=14
+    )
+    ax.set_xlabel("Modelo columna (referencia)", fontsize=11)
+    ax.set_ylabel("Modelo fila (evaluado)", fontsize=11)
+    plt.xticks(rotation=40, ha='right', fontsize=10)
+    plt.yticks(rotation=0, fontsize=10)
     plt.tight_layout()
-    plt.savefig(os.path.join(analysis_dir, "HLN_DM_Pvalues_Matrix.png"), dpi=300)
+    plt.savefig(os.path.join(analysis_dir, "HLN_DM_Pvalues_Matrix.png"), dpi=300, bbox_inches='tight')
     plt.close()
+    print(f"   ✓ Heatmap p-valores DM guardado: {os.path.join(analysis_dir, 'HLN_DM_Pvalues_Matrix.png')}")
 
     # Guardar Excel Ranking
     df_rank = pd.DataFrame(ranking_data).sort_values('Score_Neto', ascending=False)
@@ -467,7 +546,7 @@ def run_advanced_statistics(df_results, output_folder, h=1):
     
     sns.boxplot(data=df_results[sorted_models_by_med], orient='h', palette='viridis')
     plt.title("Distribución de CRPS por Modelo (Ordenado por Mediana)")
-    plt.xlabel("CRPS Value")
+    plt.xlabel("CRPS")
     plt.tight_layout()
     plt.savefig(os.path.join(analysis_dir, "CRPS_Distribution_Boxplot.png"), dpi=300)
     plt.close()
@@ -532,36 +611,41 @@ def visualize_predictions(pipeline, series_index=0, output_prefix="dataset",
     print(f"  💾 Excel guardado: {excel_name}")
 
     # 3. Definir Grupos para Gráficas
-    mean_scores = df_results[model_names].mean().sort_values()
+    mean_scores = df_results[model_names].median().sort_values()
+    
     sorted_models = mean_scores.index.tolist()
     
     top_3_best = sorted_models[:3]
     top_3_worst = sorted_models[-3:]
     top_2_best_plus_worst = sorted_models[:2] + [sorted_models[-1]]
 
-    print("\n  📸 Generando Imágenes Tipo A (Vertical Stack 24 Pasos)...")
+    print("\n  📸 Generando Imágenes Tipo A (Vertical Stack, máx. 6 Pasos)...")
     
-    # A1. Individuales (9 imágenes)
+    # A1. Individuales (9 imágenes, máx. 6 pasos)
     for model in model_names:
         plot_type_a_vertical_stack(
-            group_name=f"Model_{model}",
+            group_name=f"Modelo_{model}",
             models_to_plot=[model],
             predictions_dict=predictions_dict,
             df_results=df_results,
             model_colors=color_map,
             output_folder=output_folder,
-            output_prefix=output_prefix
+            output_prefix=output_prefix,
+            max_steps=6
         )
     
-    # A2. Comparativas (3 imágenes)
-    plot_type_a_vertical_stack("Top3_Mejores", top_3_best, predictions_dict, df_results, 
-                               color_map, output_folder, output_prefix)
+    # A2. Comparativas (3 imágenes, máx. 6 pasos)
+    # ① Los tres mejores modelos
+    plot_type_a_vertical_stack("Top3_Mejores", top_3_best, predictions_dict, df_results,
+                               color_map, output_folder, output_prefix, max_steps=6)
     
-    plot_type_a_vertical_stack("Top3_Peores", top_3_worst, predictions_dict, df_results, 
-                               color_map, output_folder, output_prefix)
+    # ② Los dos mejores modelos
+    plot_type_a_vertical_stack("Top2_Mejores", sorted_models[:2], predictions_dict, df_results,
+                               color_map, output_folder, output_prefix, max_steps=6)
     
-    plot_type_a_vertical_stack("VS_Top2Mejor_1Peor", top_2_best_plus_worst, predictions_dict, df_results, 
-                               color_map, output_folder, output_prefix)
+    # ③ El peor modelo
+    plot_type_a_vertical_stack("Peor_Modelo", [sorted_models[-1]], predictions_dict, df_results,
+                               color_map, output_folder, output_prefix, max_steps=6)
 
     print("\n  📸 Generando Imágenes Tipo B (Corte Transversal Pasos 1, 8, 16, 24)...")
     target_steps = [1, 8, 16, 24]
@@ -580,7 +664,10 @@ def visualize_predictions(pipeline, series_index=0, output_prefix="dataset",
     run_advanced_statistics(df_results, output_folder, h=forecast_horizon)
 
     print(f"\n✨ Visualización completada.")
-    print(f"   - Tipo A: 12 imágenes (24 subplots verticales).")
-    print(f"   - Tipo B: 4 imágenes.")
-    print(f"   - Diagnóstico: PIT/Reliability.")
+    print(f"   - Tipo A: imágenes individuales + comparativas (máx. 6 pasos).")
+    print(f"      · Top 3 mejores modelos")
+    print(f"      · Top 2 mejores modelos")
+    print(f"      · Peor modelo")
+    print(f"   - Tipo B: 4 imágenes (corte transversal por paso).")
+    print(f"   - Diagnóstico: PIT / Reliability.")
     print(f"   - Análisis: Carpeta 'Analisis' con Rankings y Heatmaps (HLN-DM).")

@@ -4,7 +4,7 @@
 
 En este capítulo se presentan los resultados de la aplicación de los Sistemas de Predicción Conformal y métodos probabilísticos desarrollados en el Capítulo~\ref{cap:diseño_simulacion} a series de tiempo reales. El objetivo es evaluar el desempeño empírico de las metodologías propuestas en escenarios con características no estacionarias, dependencia temporal compleja y heterocedasticidad condicional, tal como se anticipa en aplicaciones prácticas de pronóstico.
 
-Se analizan tres conjuntos de datos representativos de distintos dominios: consumo eléctrico horario, flujo vehicular y demanda de energía residencial. Para cada aplicación, se realiza un análisis exploratorio exhaustivo que permite caracterizar las propiedades estadísticas de la serie, seguido de la estimación de distribuciones predictivas mediante los nueve métodos implementados. La evaluación se fundamenta en las métricas discutidas en la Sección~\ref{sec:metricas_evaluacion}, con énfasis en el Continuous Ranked Probability Score (CRPS) como medida de calidad predictiva global, y en pruebas de calibración probabilística mediante los histogramas PIT (Probability Integral Transform) y las curvas de confiabilidad (Reliability Diagrams).
+Se analizan tres conjuntos de datos representativos de distintos dominios: consumo eléctrico horario, flujo vehicular y demanda de energía residencial. Para cada aplicación, se realiza un análisis exploratorio exhaustivo que permite caracterizar las propiedades estadísticas de la serie, seguido de la estimación de distribuciones predictivas mediante los nueve métodos implementados. La evaluación se fundamenta en las métricas discutidas en la Sección~\ref{sec:metricas_evaluacion}, con énfasis en el CRPS como medida de calidad predictiva global, y en pruebas de calibración probabilística mediante los histogramas PIT (Probability Integral Transform) y las curvas de confiabilidad (Reliability Diagrams).
 
 La comparación estadística entre métodos se realiza mediante el test de Diebold-Mariano modificado (Sección~\ref{sec:test_diebold_mariano}), permitiendo establecer si las diferencias observadas en el desempeño predictivo son estadísticamente significativas o atribuibles a variabilidad muestral. Este enfoque riguroso permite identificar qué familias de modelos (ya sean basados en bootstrap, predicción conformal clásica, enfoques de Mondrian adaptativos, o arquitecturas de aprendizaje profundo) son más apropiadas para cada contexto aplicado.
 
@@ -34,7 +34,7 @@ Las subsecciones siguientes detallan cada una de estas etapas, especificando los
 \subsection{Transformación Box-Cox}
 \label{subsec:eda_boxcox}
 
-La heterocedasticidad estructural ---varianza que cambia sistemáticamente con el nivel de la serie--- viola supuestos clave de muchos métodos estadísticos, incluyendo la predicción conformal basada en intercambiabilidad. Para abordar este problema, se aplica la transformación de Box-Cox \parencite{BoxCox1964}:
+La heterocedasticidad estructural (varianza que cambia sistemáticamente con el nivel de la serie) viola supuestos clave de muchos métodos estadísticos, incluyendo la predicción conformal basada en intercambiabilidad. Para abordar este problema, se aplica la transformación de Box-Cox si toda la serie toma valores positivos\parencite{BoxCox1964}:
 
 \begin{equation}
 y_t^{(\lambda)} = \begin{cases}
@@ -117,78 +117,166 @@ Se grafican los valores $\hat{\rho}(k)$ para $k = 1, 2, \ldots, K$ junto con ban
 \label{subsec:eda_tests}
 
 Se implementa una batería completa de tests estadísticos para validar supuestos fundamentales de los modelos predictivos.
-
 \subsubsection{Tests de Estacionariedad}
 
-\paragraph{Test de Dickey-Fuller Aumentado (ADF):} El test ADF \parencite{DickeyFuller1979} evalúa la hipótesis nula de presencia de raíz unitaria (no estacionariedad):
+\paragraph{Test de Dickey-Fuller Aumentado (ADF):}
+El test ADF \parencite{DickeyFuller1979} parte del modelo autorregresivo aumentado:
 \begin{equation}
-H_0: \text{La serie tiene raíz unitaria (no es estacionaria)}
+\Delta y_t = \alpha + \beta t + \gamma y_{t-1} + \sum_{j=1}^{p} \delta_j \Delta y_{t-j} + \varepsilon_t
+\end{equation}
+donde el parámetro de interés es $\gamma$. El sistema completo de hipótesis es:
+\begin{equation}
+H_0: \gamma = 0 \quad \text{(raíz unitaria, serie no estacionaria)}
+\end{equation}
+\begin{equation}
+H_1: \gamma < 0 \quad \text{(serie estacionaria, alternativa de una cola)}
 \end{equation}
 
-Un $p$-valor menor a 0.05 lleva a rechazar $H_0$, concluyendo estacionariedad.
+La hipótesis alternativa es \textit{unilateral}: solo se contempla $\gamma < 0$, es decir, reversión estacionaria. Un proceso explosivo ($\gamma > 0$) no es distinguible de la raíz unitaria bajo este contraste, lo que constituye una limitación conocida del test. Un $p$-valor menor a 0.05 lleva a rechazar $H_0$, concluyendo que la serie es estacionaria. En la implementación utilizada (\texttt{adf.test} del paquete \texttt{tseries} en R), el test incluye constante y se selecciona automáticamente el orden de rezagos $p$ mediante el criterio de información de Akaike.
 
-\paragraph{Test de Kwiatkowski-Phillips-Schmidt-Shin (KPSS):} El test KPSS \parencite{KPSS1992} invierte la lógica del ADF, evaluando:
+\paragraph{Test de Kwiatkowski-Phillips-Schmidt-Shin (KPSS):}
+El test KPSS \parencite{KPSS1992} invierte la lógica del ADF descomponiendo la serie como:
 \begin{equation}
-H_0: \text{La serie es estacionaria}
+y_t = \xi t + r_t + \varepsilon_t, \quad r_t = r_{t-1} + u_t, \quad u_t \sim \text{i.i.d.}(0, \sigma_u^2)
+\end{equation}
+donde $r_t$ es un paseo aleatorio. El sistema de hipótesis es:
+\begin{equation}
+H_0: \sigma_u^2 = 0 \quad \text{(serie estacionaria, componente aleatorio degenerado)}
+\end{equation}
+\begin{equation}
+H_1: \sigma_u^2 > 0 \quad \text{(serie no estacionaria, raíz unitaria presente)}
 \end{equation}
 
-No rechazar $H_0$ ($p > 0.05$) apoya la estacionariedad.
+La hipótesis alternativa es \textit{unilateral superior}: la no estacionariedad se entiende únicamente como integración de orden 1, no como proceso explosivo. El estadístico KPSS se construye sobre los residuos parciales acumulados de la regresión de $y_t$ sobre determinísticos:
+\begin{equation}
+\hat{\eta} = \frac{1}{n^2} \sum_{t=1}^{n} \hat{S}_t^2 \Big/ \hat{\sigma}^2_\varepsilon
+\end{equation}
+donde $\hat{S}_t = \sum_{i=1}^{t} \hat{\varepsilon}_i$ es la suma parcial de residuos. No rechazar $H_0$ ($p > 0.05$) apoya la estacionariedad.
 
-\paragraph{Estrategia combinada:} Se busca la configuración ideal:
+\paragraph{Estrategia combinada ADF-KPSS:}
+Dado que los dos tests tienen hipótesis nulas opuestas y alternativas unilaterales distintas, su uso conjunto permite cuatro configuraciones interpretativas:
 \begin{itemize}
-\item \textbf{ADF rechazado} ($p < 0.05$): Evidencia contra raíz unitaria.
-\item \textbf{KPSS no rechazado} ($p > 0.05$): Evidencia a favor de estacionariedad.
+    \item \textbf{ADF rechazado + KPSS no rechazado} ($p_{\text{ADF}} < 0.05$, $p_{\text{KPSS}} > 0.05$): Evidencia consistente de estacionariedad. Configuración ideal buscada.
+    \item \textbf{ADF no rechazado + KPSS rechazado} ($p_{\text{ADF}} > 0.05$, $p_{\text{KPSS}} < 0.05$): Evidencia consistente de no estacionariedad.
+    \item \textbf{Ambos rechazados}: Los tests son contradictorios; posible presencia de raíz unitaria fraccional o quiebres estructurales.
+    \item \textbf{Ninguno rechazado}: Los tests son contradictorios; la muestra puede ser insuficiente para distinguir entre ambas hipótesis.
 \end{itemize}
+Cabe destacar que ninguno de los dos tests cubre la hipótesis de proceso explosivo ($\gamma > 0$ o raíz mayor que 1). Sin embargo, dado el contexto de la serie analizada, esta posibilidad no es relevante.
 
+% ─────────────────────────────────────────────────────────────────────────────
 \subsubsection{Tests de Linealidad}
 
-La presencia de estructura no lineal justifica el uso de métodos más sofisticados que modelos ARMA lineales.
+La presencia de estructura no lineal justifica el uso de métodos más sofisticados que los modelos ARMA lineales.
 
-\paragraph{Test BDS:} El test BDS (Brock-Dechert-Scheinkman) \parencite{BDS1996} evalúa la hipótesis nula de independencia idéntica:
+\paragraph{Test BDS:}
+El test BDS \parencite{BDS1996} evalúa si los residuos de un modelo ajustado son independientes e idénticamente distribuidos. El sistema de hipótesis es:
 \begin{equation}
-H_0: \{\varepsilon_t\} \text{ son i.i.d. después de ajustar un modelo lineal}
+H_0: \{\varepsilon_t\} \text{ son i.i.d.}
+\end{equation}
+\begin{equation}
+H_1: \{\varepsilon_t\} \text{ presentan alguna forma de dependencia (lineal o no lineal)}
 \end{equation}
 
-Rechazo de $H_0$ ($p < 0.05$) indica dependencia no lineal no capturada por modelos lineales.
-
-\paragraph{Test de McLeod-Li:} El test de McLeod-Li \parencite{McLeodLi1983} aplica el test de Ljung-Box a los residuos al cuadrado $\varepsilon_t^2$ para detectar efectos ARCH (heterocedasticidad condicional):
+La hipótesis alternativa es \textit{omnidireccional}: el test no discrimina entre dependencia lineal residual, heterocedasticidad condicional o no linealidad determinista; detecta cualquier desviación de la i.i.d. El estadístico se construye sobre la integral de correlación $C_{m,n}(\varepsilon)$, que mide la fracción de pares de vectores de embedding $m$-dimensional que se encuentran a distancia menor que $\varepsilon$:
 \begin{equation}
-Q_{\text{LB}}^{(2)}(K) = n(n+2) \sum_{k=1}^{K} \frac{\hat{\rho}_k^{(2)}}{n-k}
+W_{m,n} = \frac{\sqrt{n}\left[C_{m,n}(\varepsilon) - C_{1,n}(\varepsilon)^m\right]}{\sigma_m(\varepsilon)} \xrightarrow{d} \mathcal{N}(0,1)
+\end{equation}
+Rechazo de $H_0$ ($p < 0.05$) indica dependencia no lineal no capturada por modelos lineales. En la implementación utilizada se empleó $m = 2$ y $\varepsilon = 0.5\,\hat{\sigma}$.
+
+\paragraph{Test de McLeod-Li:}
+El test de McLeod-Li \parencite{McLeodLi1983} aplica el estadístico de Ljung-Box sobre los residuos al cuadrado $\hat{\varepsilon}_t^2$ para detectar efectos ARCH. El sistema de hipótesis es:
+\begin{equation}
+H_0: \rho_k^{(2)} = 0 \;\forall\, k = 1,\ldots,K \quad \text{(no hay autocorrelación en } \hat{\varepsilon}_t^2\text{)}
+\end{equation}
+\begin{equation}
+H_1: \exists\, k \leq K \text{ tal que } \rho_k^{(2)} \neq 0 \quad \text{(heterocedasticidad condicional presente)}
+\end{equation}
+
+La hipótesis alternativa es \textit{bilateral en los rezagos}: cualquier autocorrelación en los cuadrados, positiva o negativa, lleva al rechazo. El estadístico es:
+\begin{equation}
+Q_{\text{LB}}^{(2)}(K) = n(n+2) \sum_{k=1}^{K} \frac{\hat{\rho}_k^{(2)}}{n-k} \sim \chi^2(K)
 \label{eq:mcleod_li}
 \end{equation}
+Rechazo ($p < 0.05$) implica varianza condicional no constante (agrupamiento de volatilidad), justificando el uso de distribuciones predictivas adaptativas. Se utilizó $K = 24$ rezagos.
 
-Rechazo ($p < 0.05$) implica varianza condicional no constante (clustering de volatilidad), justificando distribuciones predictivas adaptativas.
+\paragraph{Test de Tsay:}
+El test de Tsay \parencite{Tsay1986} evalúa si términos de interacción no lineal tienen poder explicativo sobre los residuos de un ajuste lineal. El sistema de hipótesis es:
+\begin{equation}
+H_0: \text{La estructura condicional de } y_t \text{ es lineal en sus rezagos}
+\end{equation}
+\begin{equation}
+H_1: \text{Existen interacciones cuadráticas o cruzadas significativas entre rezagos}
+\end{equation}
 
-\paragraph{Test de Tsay:} El test de Tsay \parencite{Tsay1986} evalúa la significancia de términos de interacción no lineal. Un $R^2$ significativo indica presencia de no linealidad cuadrática.
+La hipótesis alternativa es \textit{específica en la forma}: la no linealidad contemplada es de tipo polinómico de orden 2 (cuadrados e interacciones cruzadas de rezagos), no formas arbitrarias. El test procede en dos etapas: primero se ajusta un modelo AR lineal y se obtienen residuos $\hat{u}_t$; luego se regresa $\hat{u}_t^2$ sobre el conjunto expandido de regresores no lineales y se evalúa la significancia conjunta mediante un estadístico $F$. Un $p$-valor menor a 0.05 indica presencia de no linealidad cuadrática. En la implementación utilizada se fijó \texttt{lag = 1}, \texttt{order = 3}.
 
-\paragraph{Exponente de Hurst:} El exponente de Hurst $H$ \parencite{Hurst1951} cuantifica la memoria de largo alcance:
+\paragraph{Exponente de Hurst:}
+El exponente de Hurst $H$ \parencite{Hurst1951}, estimado mediante el método de rango reescalado (R/S), cuantifica la memoria de largo alcance de la serie. No constituye un contraste formal de hipótesis con $p$-valor, sino un índice continuo con la siguiente interpretación:
+\begin{equation}
+\mathbb{E}\left[\frac{R(n)}{S(n)}\right] \propto n^H
+\end{equation}
 \begin{itemize}
-\item $H \approx 0.5$: Proceso de memoria corta (random walk).
-\item $H > 0.5$: Persistencia (tendencias se mantienen).
-\item $H < 0.5$: Anti-persistencia (reversión a la media).
+    \item $H = 0.5$: Proceso sin memoria (random walk o ruido blanco).
+    \item $H > 0.5$: Persistencia; las tendencias pasadas tienen mayor probabilidad de continuar.
+    \item $H < 0.5$: Anti-persistencia; reversión a la media más frecuente que en un proceso aleatorio.
 \end{itemize}
-
-Valores $H > 0.5$ sugieren que métodos adaptativos con ponderación geométrica pueden capturar mejor la dinámica predictiva.
+Valores $H > 0.5$ sugieren que modelos con memoria explícita de largo plazo, como las redes LSTM, pueden capturar mejor la dinámica que modelos de ventana corta. Se utilizó \texttt{max\_lag = 50} en la estimación.
 
 \subsection{Diagnóstico de Residuos}
 \label{subsec:eda_diagnostico_residuos}
 
 Tras remover tendencia, los residuos ideales deben aproximarse a ruido blanco: secuencia de variables aleatorias independientes e idénticamente distribuidas.
 
-\paragraph{Test de Jarque-Bera:} El test de Jarque-Bera \parencite{JarqueBera1987} evalúa normalidad mediante:
+\paragraph{Test de Jarque-Bera:}
+El test de Jarque-Bera \parencite{JarqueBera1987} contrasta la hipótesis nula de normalidad
+de los residuos comparando simultáneamente la asimetría y la curtosis de la distribución
+empírica con los valores teóricos gaussianos. El sistema completo de hipótesis es:
+\begin{align}
+H_0 &: S = 0 \;\text{ y }\; K = 3 \quad \text{(distribución normal)}\\
+H_1 &: S \neq 0 \;\text{ o }\; K \neq 3 \quad \text{(asimetría o curtosis incompatibles con normalidad)}
+\end{align}
+La hipótesis alternativa es \textit{bilateral y compuesta}: el test rechaza tanto distribuciones
+leptocúrticas ($K > 3$, colas pesadas) como platicúrticas ($K < 3$, colas ligeras), y tanto
+asimetría positiva como negativa. El estadístico conjunto es:
 \begin{equation}
-JB = \frac{n}{6} \left( S^2 + \frac{(K-3)^2}{4} \right) \sim \chi^2_2
+JB = \frac{n}{6} \left( S^2 + \frac{(K-3)^2}{4} \right) \xrightarrow{d} \chi^2_2
 \label{eq:jarque_bera}
 \end{equation}
-donde $S$ es el coeficiente de asimetría y $K$ es la curtosis. Rechazo de $H_0$ indica colas más pesadas que la distribución normal (leptocurtosis), justificando métodos no paramétricos (CPS).
+donde $n$ es el tamaño muestral, $S = \hat{\mu}_3 / \hat{\sigma}^3$ es el coeficiente de
+asimetría muestral y $K = \hat{\mu}_4 / \hat{\sigma}^4$ es la curtosis muestral. Los 2 grados
+de libertad corresponden a los dos momentos contrastados de forma conjunta. Un $p$-valor menor
+a 0.05 lleva a rechazar $H_0$, indicando que los residuos presentan colas más pesadas que la
+gaussiana (leptocurtosis) o asimetría significativa; ambas condiciones justifican el abandono
+de métricas cuadráticas como el MSE en favor de métricas basadas en distribuciones predictivas
+completas como el CRPS o la \textit{Quantile Loss}.
 
-\paragraph{Test de Ljung-Box:} El test de Ljung-Box \parencite{LjungBox1978} contrasta independencia de los residuos:
+\paragraph{Test de Ljung-Box:}
+El test de Ljung-Box \parencite{LjungBox1978} es una extensión del test de Box-Pierce
+que corrige el sesgo en muestras finitas. Contrasta la hipótesis
+nula de que los primeros $K$ rezagos de la función de autocorrelación son conjuntamente nulos.
+El sistema completo de hipótesis es:
+\begin{align}
+H_0 &: \rho_1 = \rho_2 = \cdots = \rho_K = 0
+      \quad \text{(residuos no correlacionados, ruido blanco)}\\
+H_1 &: \exists\, k \leq K \text{ tal que } \rho_k \neq 0
+      \quad \text{(autocorrelación presente en algún rezago)}
+\end{align}
+La hipótesis alternativa es \textit{bilateral en cada rezago y conjunta en todos}:
+el test no discrimina entre autocorrelación positiva ($\rho_k > 0$, inercia) o negativa
+($\rho_k < 0$, oscilación), ni especifica en qué rezago particular reside la dependencia.
+El estadístico, con corrección de muestra finita respecto a Box-Pierce, es:
 \begin{equation}
-Q_{\text{LB}}(K) = n(n+2) \sum_{k=1}^{K} \frac{\hat{\rho}_k^2}{n-k} \sim \chi^2_K
+Q_{\text{LB}}(K) = n(n+2) \sum_{k=1}^{K} \frac{\hat{\rho}_k^2}{n-k} \;\sim\; \chi^2_K
 \label{eq:ljung_box}
 \end{equation}
-
-Rechazo indica autocorrelación residual, lo cual es esperado en esta etapa ya que los modelos predictivos están diseñados para capturar esta estructura.
+donde $\hat{\rho}_k$ es la autocorrelación muestral en el rezago $k$ y los $K$ grados de
+libertad reflejan los rezagos contrastados conjuntamente. En la implementación utilizada se
+fijó $K = 24$, lo que permite detectar dependencias en ciclos de hasta dos años bajo
+frecuencia mensual. Rechazo de $H_0$ ($p < 0.05$) indica que la serie no es ruido blanco:
+queda estructura temporal sistemática que los modelos predictivos (ARIMA, LSTM) están
+diseñados para capturar. En la etapa de diagnóstico exploratorio previo al modelado, la
+presencia de autocorrelación residual es un resultado esperado y deseable, pues confirma
+que existe señal predictiva aprovechable.
 
 \paragraph{Gráficos de diagnóstico:}
 \begin{itemize}
@@ -224,41 +312,43 @@ Los picos en $I(\omega_k)$ identifican las frecuencias dominantes. Para series h
 \item Covariables temporales relevantes para LSPM/MCPS.
 \end{itemize}
 
-\subsection{Síntesis de Hallazgos y Configuración de Modelado}
-\label{subsec:eda_sintesis_metodologia}
-
-La etapa final del protocolo consiste en sintetizar los hallazgos y traducirlos en decisiones concretas de configuración para los modelos predictivos.
-
-\paragraph{Transformaciones necesarias:} Se documenta si se requiere transformación Box-Cox (valor óptimo de $\lambda$) y eliminación de tendencia (parámetro $f$ de LOWESS).
-
-\paragraph{Justificación de complejidad del modelo:} Los tests de linealidad fundamentan la selección de familias de modelos:
-\begin{itemize}
-\item \textbf{BDS rechazado}: Justifica LSTM, EnCQR-LSTM sobre ARMA puro.
-\item \textbf{McLeod-Li rechazado}: Justifica distribuciones predictivas adaptativas (LSPMW, AV-MCPS) y uso de CRPS como métrica principal.
-\item \textbf{Exponente de Hurst $> 0.5$}: Sugiere ventaja de métodos con ponderación exponencial.
-\end{itemize}
-
-\paragraph{Configuración de hiperparámetros:} Los hallazgos informan:
-\begin{itemize}
-\item \textbf{Longitud de bloque en CBB}: Se fija en el período estacional dominante identificado espectralmente.
-\item \textbf{Orden AR en Sieve Bootstrap}: Se determina mediante AIC o corte de PACF.
-\item \textbf{Parámetro de decaimiento $\rho$ en LSPMW/AV-MCPS}: Se calibra considerando el exponente de Hurst.
-\end{itemize}
-
-\paragraph{Selección de métricas de evaluación:} La presencia de heterocedasticidad y no normalidad confirma que el CRPS es la métrica principal de evaluación, complementada con histogramas PIT y curvas de confiabilidad para validar calibración probabilística.
-
 \subsection{Aplicación del Protocolo}
 \label{subsec:eda_aplicacion}
 
-En las secciones subsecuentes, se aplica sistemáticamente este protocolo a tres conjuntos de datos representativos:
+El protocolo de análisis exploratorio descrito en las secciones precedentes se aplica
+de forma sistemática a cada serie temporal estudiada en este capítulo. Su ejecución
+rigurosa cumple dos propósitos complementarios: por un lado, caracterizar las
+propiedades estadísticas relevantes de cada serie (estacionariedad, linealidad,
+memoria, distribución de residuos); por otro, contextualizar el comportamiento de
+los modelos predictivos frente a dinámicas temporales con características
+sustancialmente distintas entre sí.
+
+Es importante señalar que los modelos reciben la serie original sin ningún tipo de
+preprocesamiento o transformación previa. Esta decisión es deliberada: se busca
+evaluar las capacidades predictivas de cada modelo ante la complejidad inherente
+de los datos reales, sin que el tratamiento de la serie distorsione la comparación.
+El análisis exploratorio cumple entonces una función diagnóstica y de caracterización,
+no de intervención sobre los datos.
+
+En las secciones subsecuentes, se aplica este protocolo a tres conjuntos de datos
+con perfiles estadísticos contrastantes:
 
 \begin{enumerate}
-\item \textbf{Dataset Electricity} (Sección~\ref{sec:aplicacion_electricidad}): Consumo eléctrico horario de cliente residencial.
-\item \textbf{Dataset Traffic} (Sección~\ref{sec:aplicacion_trafico}): Flujo vehicular en autopista urbana.
-\item \textbf{Dataset Energy} (Sección~\ref{sec:aplicacion_energia}): Demanda de energía residencial agregada.
+    \item \textbf{Dataset Electricity}
+          (Sección~\ref{sec:aplicacion_electricidad}):
+          consumo eléctrico horario de un cliente residencial.
+    \item \textbf{Dataset Traffic}
+          (Sección~\ref{sec:aplicacion_trafico}):
+          flujo vehicular horario en una autopista urbana.
+    \item \textbf{Dataset Exchange Rate}
+          (Sección~\ref{sec:aplicacion_exchange}):
+          tasas de cambio horarias entre pares de divisas.
 \end{enumerate}
 
-Para cada aplicación, se presentan: resumen de hallazgos del EDA, configuración específica de modelos, resultados de desempeño predictivo, comparación estadística, y análisis de calibración probabilística.
+Para cada conjunto de datos se presentan: los hallazgos del análisis exploratorio,
+la configuración específica de los modelos, los resultados de desempeño predictivo,
+la comparación estadística entre métodos, y el análisis de calibración probabilística.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Electricidad
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -326,6 +416,14 @@ El análisis de la función de autocorrelación (ACF) reveló un patrón de deca
 
 Por su parte, la función de autocorrelación parcial (PACF) mostró un corte significativo en el rezago 1 con correlación parcial de 0.598, seguido de valores mucho menores en rezagos superiores. Los siguientes picos relevantes aparecen en los rezagos 25, 145, 2, 97 y 167 con correlaciones parciales de -0.126, -0.121, 0.116, -0.101 y 0.097 respectivamente. Este patrón sugiere que un modelo autorregresivo de orden bajo, complementado con variables estacionales, podría capturar adecuadamente la estructura lineal de dependencia temporal.
 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{Imagenes/Cap5_elec_acf_pacf.png}
+    \caption{Funciones de autocorrelación y autocorrelación parcial para la serie de consumo eléctrico.}
+    \label{fig:acf_pacf_electricity}
+\end{figure}
+
+
 \subsubsection{Evaluación de No Linealidad}
 
 La aplicación de múltiples tests de no linealidad proporcionó evidencia robusta de estructura no lineal en la serie. El test BDS (Brock-Dechert-Scheinkman) rechazó la hipótesis nula de independencia e identidad distribucional con un valor p inferior a 0.001, indicando la presencia de dependencias temporales complejas no capturables por modelos lineales simples. El test de McLeod-Li, aplicado sobre los residuos al cuadrado, también produjo un valor p menor a 0.001, evidenciando efectos ARCH (Autoregressive Conditional Heteroskedasticity) significativos. Adicionalmente, el test de Tsay para no linealidad cuadrática arrojó un valor p inferior a 0.01, confirmando la presencia de componentes cuadráticas en la función de dependencia temporal.
@@ -383,7 +481,7 @@ Persistencia & Exponente Hurst: 0.62 & Parámetro decaimiento LSPMW: $\rho = 0.9
 
 \subsubsection{Partición de Datos}
 
-La serie de 2160 observaciones se dividió siguiendo el esquema implementado en el código experimental. El conjunto de prueba se fijó en 24 observaciones (correspondientes a un día completo de predicciones horarias). Del resto de datos disponibles (2136 observaciones), se asignó el 15\% al conjunto de validación, resultando en aproximadamente 320 observaciones, mientras que el 85\% restante (aproximadamente 1816 observaciones) conformó el conjunto de entrenamiento. 
+La serie de 2160 observaciones original (sin el pre-procesamiento) se dividió siguiendo el esquema implementado en el código experimental. El conjunto de prueba se fijó en 24 observaciones (correspondientes a un día completo de predicciones horarias). Del resto de datos disponibles (2136 observaciones), se asignó el 15\% al conjunto de validación, resultando en aproximadamente 320 observaciones, mientras que el 85\% restante (aproximadamente 1816 observaciones) conformó el conjunto de entrenamiento. 
 
 Esta configuración garantiza que el conjunto de entrenamiento capture múltiples ciclos semanales completos (más de 10 semanas) para el ajuste inicial de parámetros, mientras que el conjunto de validación proporciona suficientes datos para una optimización robusta de hiperparámetros. El conjunto de prueba, aunque más reducido, permite evaluar el desempeño en un horizonte operativo realista de un día completo.
 
@@ -419,14 +517,24 @@ El Cuadro~\ref{tab:elec_ranking} presenta el ranking de modelos según su desemp
 \end{tabular}
 \end{table}
 
-Los tres modelos superiores (LSPM, MCPS y Sieve Bootstrap) exhiben medianas de CRPS notablemente cercanas entre sí (1.497, 1.508 y 1.514 respectivamente), con diferencias inferiores al 1.2\%. Este resultado valida la hipótesis de que modelos lineales con residuos adecuadamente estudentizados, tras aplicar las transformaciones identificadas en el análisis exploratorio, logran capturar eficientemente la estructura de dependencia temporal dominante en esta serie. La proximidad en desempeño sugiere que las transformaciones aplicadas lograron simplificar satisfactoriamente la dinámica subyacente.
+
+
+Los tres modelos superiores (LSPM, MCPS y Sieve Bootstrap) exhiben medianas de CRPS notablemente cercanas entre sí (1.497, 1.508 y 1.514 respectivamente), con diferencias inferiores al 1.2\%. Este resultado valida la hipótesis de que modelos lineales con residuos adecuadamente estudentizados, tras aplicar las transformaciones identificadas en el análisis exploratorio, logran capturar eficientemente la estructura de dependencia temporal dominante en esta serie. La proximidad en desempeño sugiere que las transformaciones aplicadas lograron simplificar satisfactoriamente la dinámica subyacente. Las densidades de estos tres modelos en los seis primeros pasos se puede visualizar en
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.7\textwidth]{Imagenes/electricity_serie_0_TypeA_Top3_Mejores}
+    \caption{Distribución de las densidades de los tres mejores modelos en los primeros seis pasos del dataset Electricity.}
+    \label{fig:elec_distr}
+\end{figure}
+
 
 La Figura~\ref{fig:elec_boxplot_crps} presenta la distribución completa de los valores CRPS para cada modelo a lo largo de las 24 predicciones. La visualización mediante diagramas de caja permite apreciar no solo las medianas (línea central), sino también la dispersión y presencia de valores atípicos en el desempeño de cada método. Los tres modelos superiores muestran dispersiones compactas y medianas bajas, mientras que los modelos en posiciones inferiores exhiben mayor variabilidad y medianas más elevadas.
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.95\textwidth]{Imagenes/Cap5_elec_boxplot_crps.png}
-    \caption{Distribución de valores CRPS por modelo en el conjunto de prueba del dataset Electricity. La caja representa el rango intercuartílico (IQR), la línea central indica la mediana, y los puntos individuales muestran valores atípicos.}
+    \includegraphics[width=\textwidth]{Imagenes/Cap5_elec_boxplot_crps.png}
+    \caption{Distribución de valores CRPS por modelo en el conjunto de prueba del dataset Electricity.}
     \label{fig:elec_boxplot_crps}
 \end{figure}
 
@@ -436,11 +544,22 @@ Los modelos de aprendizaje profundo (DeepAR y EnCQR-LSTM) alcanzaron desempeño 
 
 \subsubsection{Comparación Estadística Formal}
 
-Para evaluar si las diferencias observadas en desempeño predictivo resultan estadísticamente significativas, se aplicó el test de Diebold-Mariano modificado entre los tres mejores modelos. Este test, diseñado específicamente para comparar capacidad predictiva en horizontes de corto plazo, considera la correlación serial presente en las diferencias de errores de pronóstico.
+Para evaluar si las diferencias observadas en desempeño predictivo resultan estadísticamente significativas, se aplicó el test de Diebold-Mariano modificado con corrección de Bonferroni entre todos los modelos evaluados. Este test, equipado con asintótica de suavizado fijo (fixed-smoothing asymptotics), resulta más robusto en muestras pequeñas que el test DM estándar, manteniendo buen desempeño asintótico.
 
-Las comparaciones pareadas produjeron los siguientes resultados. La comparación LSPM versus MCPS arrojó un valor p de 0.301, no permitiendo rechazar la hipótesis nula de igual capacidad predictiva. La comparación LSPM versus Sieve Bootstrap resultó en $p = 0.365$, nuevamente sin evidencia de diferencia significativa. Finalmente, la comparación MCPS versus Sieve Bootstrap produjo $p = 0.320$, confirmando la indistinguibilidad estadística. En conjunto, estos resultados indican que los tres modelos superiores poseen capacidad predictiva estadísticamente equivalente en esta serie particular.
+La Figura \ref{fig:hln_dm_pvalues} presenta la matriz completa de p-valores para las 36 comparaciones pareadas realizadas. Dado el número de comparaciones múltiples, se aplicó corrección de Bonferroni ($\alpha_{\text{Bonf}} = 0.05/36 = 0.00139$), resultando en un umbral de significancia altamente conservador. Las celdas en tonos rojizos indican p-valores bajos (evidencia de diferencia significativa), mientras que tonos verdosos señalan p-valores altos (modelos estadísticamente indistinguibles). Los asteriscos denotan significancia: *** para $p < \alpha_{\text{Bonf}}$ y * para $p < 0.05$.
 
-Esta homogeneidad de desempeño sugiere que, para series con características similares a Electricity (estacionalidad estable, ausencia de quiebres estructurales), múltiples enfoques metodológicos bien configurados convergen hacia soluciones óptimas de desempeño comparable. La clave reside en la correcta aplicación del protocolo de preprocesamiento guiado por el análisis exploratorio, más que en la sofisticación algorítmica del modelo empleado.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{Imagenes/Cap5_elec_HLN_DM_Pvalues_Matrix.png}
+    \caption{Matriz de p-valores del test Diebold-Mariano modificado (HLN) para el dataset Electricity.}
+    \label{fig:hln_dm_pvalues}
+\end{figure}
+
+Los resultados revelan patrones notables. Las comparaciones entre los tres modelos superiores (LSPM, MCPS, Sieve Bootstrap) muestran p-valores sustancialmente superiores al umbral de Bonferroni: LSPM vs MCPS ($p = 0.301$), LSPM vs Sieve Bootstrap ($p = 0.365$), y MCPS vs Sieve Bootstrap ($p = 0.320$). Ninguna de estas comparaciones alcanza significancia estadística, confirmando que los modelos líderes poseen capacidad predictiva estadísticamente equivalente para esta serie particular.
+
+En contraste, se observan algunas diferencias estadísticamente significativas al nivel $p < 0.05$ (aunque no sobreviven la corrección de Bonferroni) entre modelos de rendimiento dispar. Por ejemplo, Block Bootstrapping vs MCPS ($p = 0.065$) y DeepAR vs MCPS ($p = 0.079$) muestran tendencias hacia diferenciación, aunque no concluyentes bajo el criterio conservador adoptado.
+
+Esta homogeneidad de desempeño entre los modelos superiores sugiere que, para series con características similares a Electricity (estacionalidad estable, ausencia de quiebres estructurales, baja volatilidad), múltiples enfoques metodológicos bien configurados convergen hacia soluciones óptimas de desempeño comparable. La clave reside en la correcta aplicación del protocolo de preprocesamiento guiado por el análisis exploratorio y en la optimización rigurosa de hiperparámetros, más que en la sofisticación algorítmica del modelo empleado. Este hallazgo refuerza la importancia del diseño experimental y la validación cruzada en aplicaciones de predicción probabilística.
 
 \subsubsection{Análisis de Calibración Distribucional}
 
@@ -541,11 +660,18 @@ La Figura~\ref{fig:transformaciones_traffic} presenta la evolución de la serie 
 
 Se aplicó suavizado LOWESS con parámetro de ancho de banda $f = 0.05$ para remover la componente de tendencia suave. Las pruebas estadísticas confirmaron el logro de estacionariedad tras las transformaciones aplicadas. El test aumentado de Dickey-Fuller arrojó un valor p inferior a 0.01, rechazando la presencia de raíz unitaria. El test KPSS produjo un valor p superior a 0.10, consistente con la hipótesis de estacionariedad. 
 
-El análisis de la función de autocorrelación reveló una estructura de dependencia temporal más compleja que en Electricity. Se observaron picos significativos en múltiplos de 24 horas, confirmando estacionalidad diaria, aunque con correlaciones moderadas que sugieren mayor aleatoriedad en los patrones de tráfico comparado con el consumo eléctrico residencial. La función de autocorrelación parcial mostró un patrón de decaimiento más irregular, consistente con una estructura autorregresiva de orden variable que justifica el uso de métodos adaptativos.
+El análisis de la función de autocorrelación reveló una estructura de dependencia temporal más compleja que en Electricity, como se aprecia en la Figura~\ref{fig:traffic_acf_pacf}. Se observaron picos significativos en múltiplos de 24 horas (marcados con líneas verticales naranjas en 24h, 168h y 336h), confirmando estacionalidad diaria y semanal, aunque con correlaciones moderadas que sugieren mayor aleatoriedad en los patrones de tráfico comparado con el consumo eléctrico residencial. La función de autocorrelación parcial mostró un patrón de decaimiento más irregular, consistente con una estructura autorregresiva de orden variable que justifica el uso de métodos adaptativos.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth]{Imagenes/Cap5_traffic_acf_pacf.png}
+    \caption{Funciones de autocorrelación (ACF) y autocorrelación parcial (PACF) para la serie de tráfico transformada.}
+    \label{fig:traffic_acf_pacf}
+\end{figure}
 
 \subsubsection{Evaluación de No Linealidad y Distribución}
 
-Los tests de no linealidad (BDS, McLeod-Li, Tsay) rechazaron consistentemente la hipótesis de estructura lineal simple con valores p inferiores a 0.01. El exponente de Hurst estimado fue $H = 0.58$, indicando persistencia leve pero menor que el $H = 0.62$ observado en Electricity. Este valor más cercano a 0.5 es consistente con la naturaleza más impredecible del tráfico vehicular, donde eventos aleatorios (accidentes, condiciones climáticas) introducen mayor estocasticidad.
+Los tests de no linealidad (BDS, McLeod-Li, Tsay) rechazaron consistentemente la hipótesis de estructura lineal simple con valores p inferiores a 0.01. El exponente de Hurst estimado fue $\hat{H} = 0.58$, indicando persistencia leve pero menor que el $\hat{H} = 0.62$ observado en Electricity. Este valor más cercano a 0.5 es consistente con la naturaleza más impredecible del tráfico vehicular, donde eventos aleatorios (accidentes, condiciones climáticas) introducen mayor estocasticidad.
 
 El test de Jarque-Bera rechazó normalidad de residuos ($p < 0.001$), evidenciando leptocurtosis y justificando nuevamente el uso de CRPS como métrica de evaluación robusta. La presencia de colas pesadas es más pronunciada que en Electricity, reflejando la mayor frecuencia de eventos extremos en el tráfico urbano.
 
@@ -563,7 +689,7 @@ El Cuadro~\ref{tab:traffic_ranking} presenta el ranking de modelos según desemp
 
 \begin{table}[htbp]
 \centering
-\caption{Ranking de modelos según desempeño en dataset Traffic. }
+\caption{Ranking de modelos según desempeño en dataset Traffic.}
 \label{tab:traffic_ranking}
 \small
 \begin{tabular}{clcccccc}
@@ -590,7 +716,7 @@ La Figura~\ref{fig:traffic_boxplot_crps} presenta la distribución completa de v
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.95\textwidth]{Imagenes/Cap5_traffic_boxplot_crps.png}
-    \caption{Distribución de valores CRPS por modelo en el conjunto de prueba del dataset Traffic. }
+    \caption{Distribución de valores CRPS por modelo en el conjunto de prueba del dataset Traffic.}
     \label{fig:traffic_boxplot_crps}
 \end{figure}
 
@@ -602,39 +728,43 @@ Los modelos de aprendizaje profundo (DeepAR y EnCQR-LSTM) muestran mejora relati
 
 El deterioro pronunciado de LSPM (rango 5, CRPS mediana 0.00371) representa el hallazgo más revelador. El modelo que dominó en Electricity (rango 1, mediana 1.497) exhibe aquí desempeño mediocre, evidenciando que su efectividad está condicionada a series con estructura lineal fuerte tras transformaciones. La naturaleza más compleja y menos predecible del tráfico excede las capacidades de este enfoque lineal simple con residuos estudentizados.
 
-\subsubsection{Análisis de Significancia Estadística}
+La Figura~\ref{fig:traffic_top3_evolucion} ilustra la evolución paso a paso de las distribuciones predictivas para los tres mejores modelos durante los primeros seis pasos de pronóstico. Cada panel muestra las densidades predictivas superpuestas junto con el valor real observado (línea vertical discontinua negra). Los valores de CRPS, presentados mediante parches de color en la leyenda de cada panel, cuantifican la precisión predictiva en cada paso.
 
-El Cuadro~\ref{tab:traffic_dm_tests} presenta los valores p del test de Diebold-Mariano modificado para todas las comparaciones pareadas entre modelos. Este análisis exhaustivo permite identificar diferencias estadísticamente significativas en capacidad predictiva.
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=0.7\textwidth]{Imagenes/traffic_TypeA_Top3_Mejores.png}
+    \caption{Evolución de las distribuciones predictivas para los tres mejores modelos en Traffic durante los primeros 6 pasos de pronóstico.}
+    \label{fig:traffic_top3_evolucion}
+\end{figure}
 
-\begin{table}[htbp]
-\centering
-\caption{Matriz de valores p del test de Diebold-Mariano modificado para el dataset Traffic.}
-\label{tab:traffic_dm_tests}
-\scriptsize
-\begin{tabular}{l|ccccccccc}
-\toprule
-& \textbf{BB} & \textbf{SB} & \textbf{LSPM} & \textbf{LSPMW} & \textbf{AREPD} & \textbf{MCPS} & \textbf{AV-MCPS} & \textbf{DeepAR} & \textbf{EnCQR} \\
-\midrule
-\textbf{Block Boot.} & --- & \textbf{0.002} & \textbf{0.005} & 0.913 & 0.892 & \textbf{0.003} & \textbf{0.004} & \textbf{0.001} & \textbf{0.004} \\
-\textbf{Sieve Boot.} & \textbf{0.002} & --- & \textbf{0.030} & \textbf{0.019} & \textbf{0.001} & 0.253 & 0.371 & 0.223 & \textbf{0.026} \\
-\textbf{LSPM} & \textbf{0.005} & \textbf{0.030} & --- & \textbf{0.041} & \textbf{0.002} & 0.115 & 0.084 & 0.350 & 0.133 \\
-\textbf{LSPMW} & 0.913 & \textbf{0.019} & \textbf{0.041} & --- & 0.986 & \textbf{0.027} & \textbf{0.029} & \textbf{0.018} & \textbf{0.029} \\
-\textbf{AREPD} & 0.892 & \textbf{0.001} & \textbf{0.002} & 0.986 & --- & \textbf{0.002} & \textbf{0.002} & \textbf{0.003} & \textbf{0.001} \\
-\textbf{MCPS} & \textbf{0.003} & 0.253 & 0.115 & \textbf{0.027} & \textbf{0.002} & --- & 0.389 & 0.524 & 0.732 \\
-\textbf{AV-MCPS} & \textbf{0.004} & 0.371 & 0.084 & \textbf{0.029} & \textbf{0.002} & 0.389 & --- & 0.381 & 0.293 \\
-\textbf{DeepAR} & \textbf{0.001} & 0.223 & 0.350 & \textbf{0.018} & \textbf{0.003} & 0.524 & 0.381 & --- & 0.757 \\
-\textbf{EnCQR-LSTM} & \textbf{0.004} & \textbf{0.026} & 0.133 & \textbf{0.029} & \textbf{0.001} & 0.732 & 0.293 & 0.757 & --- \\
-\bottomrule
-\end{tabular}
-\end{table}
+Los paneles revelan consistencia notable en la calidad predictiva de los tres métodos superiores. En los pasos 1-3, las distribuciones predictivas de Sieve Bootstrap (amarillo) y AV-MCPS (naranja) se concentran estrechamente alrededor del valor real, con valores CRPS consistentemente inferiores a 0.004. MCPS (gris) exhibe dispersiones ligeramente mayores pero mantiene centrado adecuado. En los pasos 4-6, se observa incremento moderado en la dispersión para todos los modelos, reflejando el aumento natural de incertidumbre predictiva con el horizonte, aunque los tres métodos mantienen capacidad de concentrar masa probabilística cerca del valor observado.
 
-El análisis de significancia revela patrones importantes que contrastan con los observados en Electricity. En Electricity, los tres mejores modelos (LSPM, MCPS, Sieve Bootstrap) exhibieron desempeño estadísticamente indistinguible con valores p superiores a 0.30 en todas las comparaciones pareadas. En Traffic, el panorama es más heterogéneo.
+Esta visualización confirma que la superioridad de Sieve Bootstrap y AV-MCPS no es meramente un artefacto del promedio global de CRPS, sino que se manifiesta consistentemente paso a paso. La habilidad de estos modelos para generar distribuciones predictivas concentradas indica que capturan efectivamente la estructura de dependencia temporal del tráfico vehicular, incluso ante la mayor estocasticidad inherente a este dominio.
 
-Sieve Bootstrap supera significativamente a LSPM ($p = 0.030$), LSPMW ($p = 0.019$), AREPD ($p = 0.001$) y EnCQR-LSTM ($p = 0.026$), consolidando su ventaja como método superior. Sin embargo, no muestra diferencias significativas contra MCPS ($p = 0.253$), AV-MCPS ($p = 0.371$) y DeepAR ($p = 0.223$). Esta ausencia de diferencias significativas entre los tres métodos superiores según victorias (Sieve Bootstrap, DeepAR, EnCQR-LSTM) y otros modelos de complejidad comparable (AV-MCPS, MCPS) sugiere que múltiples enfoques logran capturar adecuadamente la estructura compleja del tráfico cuando incorporan suficiente flexibilidad.
+\subsubsection{Comparación Estadística Formal}
 
-LSPM muestra diferencias significativas contra Sieve Bootstrap ($p = 0.030$), LSPMW ($p = 0.041$) y AREPD ($p = 0.002$), confirmando su deterioro relativo. Particularmente revelador es que LSPM no muestra diferencias significativas contra MCPS ($p = 0.115$), AV-MCPS ($p = 0.084$) ni contra los modelos de aprendizaje profundo (DeepAR: $p = 0.350$, EnCQR-LSTM: $p = 0.133$). Este patrón sugiere que LSPM sufre específicamente en esta serie por su simplicidad estructural, pero no es significativamente peor que otros enfoques cuando estos tampoco logran capturar completamente la complejidad del tráfico.
+Para evaluar si las diferencias observadas en desempeño predictivo resultan estadísticamente significativas, se aplicó el test de Diebold-Mariano modificado con corrección de Bonferroni entre todos los modelos evaluados. Este test, equipado con asintótica de suavizado fijo (fixed-smoothing asymptotics), resulta más robusto en muestras pequeñas que el test DM estándar, manteniendo buen desempeño asintótico.
 
-Los tres modelos en las posiciones inferiores (LSPMW, Block Bootstrapping, AREPD) exhiben diferencias significativas contra todos los métodos superiores, validando estadísticamente su peor desempeño. Particularmente, AREPD muestra valores p menores a 0.003 contra todos los modelos excepto LSPMW ($p = 0.986$) y Block Bootstrapping ($p = 0.892$), confirmando su inadecuación para esta serie. La falta de diferencias significativas entre estos tres modelos peores ($p > 0.89$) indica que todos fallan de manera similar ante la complejidad del tráfico.
+La Figura~\ref{fig:traffic_hln_dm_pvalues} presenta la matriz completa de p-valores para las 36 comparaciones pareadas realizadas. Dado el número de comparaciones múltiples, se aplicó corrección de Bonferroni ($\alpha_{\text{Bonf}} = 0.05/36 = 0.00139$), resultando en un umbral de significancia altamente conservador. Las celdas en tonos verdosos indican p-valores bajos (evidencia de diferencia significativa), mientras que tonos rojizos señalan p-valores altos (modelos estadísticamente indistinguibles). Los asteriscos denotan significancia: *** para $p < \alpha_{\text{Bonf}}$ y * para $p < 0.05$.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{Imagenes/Cap5_traffic_HLN_DM_Pvalues_Matrix.png}
+    \caption{Matriz de p-valores del test Diebold-Mariano modificado (HLN) para el dataset Traffic.}
+    \label{fig:traffic_hln_dm_pvalues}
+\end{figure}
+
+El análisis de significancia revela patrones importantes que contrastan con los observados en Electricity. En Electricity, los tres mejores modelos (LSPM, MCPS, Sieve Bootstrap) exhibieron desempeño estadísticamente indistinguible con valores p superiores a 0.30 en todas las comparaciones pareadas. En Traffic, el panorama es más heterogéneo y revela diferenciación estadística más pronunciada.
+
+Sieve Bootstrap supera significativamente ($p < 0.05$) a LSPM ($p = 0.030$), LSPMW ($p = 0.124$, tendencia), AREPD ($p = 0.001$***) y EnCQR-LSTM ($p = 0.018$*), consolidando su ventaja como método superior. Sin embargo, no muestra diferencias significativas contra MCPS ($p = 0.253$), AV-MCPS ($p = 0.371$) y DeepAR ($p = 0.223$), confirmando que estos cuatro métodos poseen capacidad predictiva estadísticamente equivalente a nivel $\alpha = 0.05$.
+
+AV-MCPS, a pesar de su excelente mediana de CRPS (0.00170), no supera significativamente a ningún otro modelo salvo los tres peores (Block Bootstrapping: $p = 0.004$*, AREPD: $p = 0.002$*, LSPMW: $p = 0.029$*). Sus comparaciones contra Sieve Bootstrap ($p = 0.371$), MCPS ($p = 0.389$), DeepAR ($p = 0.381$) y EnCQR-LSTM ($p = 0.259$) revelan equivalencia estadística, sugiriendo que varios métodos de complejidad comparable capturan adecuadamente la estructura del tráfico.
+
+LSPM muestra diferencias significativas contra Sieve Bootstrap ($p = 0.030$*), LSPMW ($p = 0.389$, no significativo) y AREPD ($p = 0.002$*), confirmando su deterioro relativo. Particularmente revelador es que LSPM no muestra diferencias significativas contra MCPS ($p = 0.115$), AV-MCPS ($p = 0.084$) ni contra los modelos de aprendizaje profundo (DeepAR: $p = 0.350$, EnCQR-LSTM: $p = 0.131$). Este patrón indica que LSPM sufre específicamente por su simplicidad estructural pero no es significativamente peor que otros enfoques cuando estos tampoco logran capturar completamente la complejidad.
+
+Los tres modelos en las posiciones inferiores (LSPMW, Block Bootstrapping, AREPD) exhiben diferencias significativas contra la mayoría de métodos superiores, validando estadísticamente su peor desempeño. Particularmente notable es que AREPD muestra valores p menores a 0.003*** contra todos los modelos excepto LSPMW ($p = 0.003$*) y Block Bootstrapping ($p = 0.892$), confirmando su inadecuación severa para esta serie. El parámetro de descuento estimado $\hat{\rho} = 0.95$ en AREPD resulta excesivamente conservador para la mayor volatilidad del tráfico, causando suavizado excesivo que elimina variabilidad predictiva informativa.
+
+La ausencia de diferencias significativas entre los cuatro métodos superiores (Sieve Bootstrap, AV-MCPS, MCPS, DeepAR) con p-valores consistentemente superiores a 0.22 sugiere que, para series complejas como Traffic, múltiples enfoques metodológicos distintos alcanzan niveles comparables de efectividad siempre que incorporen suficiente flexibilidad estructural. Este hallazgo contrasta con Electricity, donde la homogeneidad se concentraba en tres métodos específicos (LSPM, MCPS, Sieve Bootstrap), evidenciando que la complejidad del dominio amplía el conjunto de métodos viables.
 
 \subsubsection{Análisis de Calibración Distribucional}
 
@@ -649,7 +779,7 @@ La calibración de las distribuciones predictivas se evaluó mediante histograma
 
 Sieve Bootstrap y AV-MCPS produjeron distribuciones PIT aproximadamente uniformes, confirmando buena calibración. Este resultado es consistente con su desempeño superior en términos de CRPS y valida que ambos métodos no solo generan predicciones precisas sino también correctamente calibradas. DeepAR y EnCQR-LSTM mostraron ligera forma de U, indicando sobreconfianza leve pero no severa. Esta tendencia fue menos pronunciada que en Electricity, sugiriendo que la mayor complejidad de Traffic obliga a estos modelos a generar distribuciones predictivas más conservadoras.
 
-LSPM exhibió desviaciones más pronunciadas de uniformidad, con forma de U invertida indicando sobredispersión. Este patrón contrasta con su calibración adecuada en Electricity, evidenciando que cuando el modelo subyacente es inadecuado (estructura lineal simple ante dinámica compleja), los intervalos predictivos resultantes tienden a sobreestimar la incertidumbre real. Los modelos en posiciones inferiores (LSPMW, Block Bootstrapping, AREPD) mostraron patrones erráticos sin forma definida, consistente con su incapacidad para capturar la estructura de dependencia temporal.
+LSPM exhibió desviaciones más pronunciadas de uniformidad, con forma de U invertida indicando sobredispersión. Este patrón contrasta con su calibración adecuada en Electricity, evidenciando que cuando el modelo subyacente es inadecuado (estructura lineal simple ante dinámica compleja), los intervalos predictivos resultantes tienden a sobreestimar la incertidumbre real. Los modelos en posiciones inferiores (LSPMW con $\hat{\rho} = 0.95$, Block Bootstrapping, AREPD con $\hat{\rho} = 0.95$) mostraron patrones erráticos sin forma definida, consistente con su incapacidad para capturar la estructura de dependencia temporal.
 
 La Figura~\ref{fig:traffic_reliability} presenta las curvas de confiabilidad, comparando frecuencias empíricas de cobertura contra niveles nominales para el rango 10\%-90\%. Los patrones observados corroboran y amplían los hallazgos de los histogramas PIT.
 
@@ -684,8 +814,6 @@ En segundo lugar, considerar AV-MCPS como alternativa especialmente cuando exist
 En tercer lugar, los métodos de aprendizaje profundo (DeepAR, EnCQR-LSTM) merecen consideración cuando el tamaño de muestra es suficientemente grande y existe capacidad computacional adecuada. Aunque no dominaron en este experimento con aproximadamente 1800 observaciones, su mejora relativa respecto a Electricity sugiere que pueden explotar efectivamente la complejidad adicional en datos de tráfico. Con muestras mayores (decenas de miles de observaciones), estos métodos podrían superar a alternativas más parsimoniosas.
 
 Finalmente, evitar la aplicación acrítica de modelos lineales simples (LSPM) en series con estructura compleja o patrones irregulares. El deterioro pronunciado de LSPM en Traffic, tanto en precisión como en calibración, demuestra que simplicidad y parsimonia no garantizan efectividad cuando la realidad subyacente excede las capacidades representacionales del modelo. La selección de modelos debe guiarse primordialmente por las características identificadas en el análisis exploratorio, no por consideraciones de simplicidad algorítmica.
-
-
 \section{Serie de Tipo de Cambio: Dataset Exchange Rate}
 \label{sec:aplicacion_exchange}
 
@@ -694,18 +822,18 @@ Finalmente, evitar la aplicación acrítica de modelos lineales simples (LSPM) e
 
 El pronóstico de tipos de cambio constituye un problema fundamental en economía financiera y gestión de riesgos cambiarios. La predicción precisa de fluctuaciones en tasas de cambio permite a instituciones financieras, corporaciones multinacionales e inversionistas tomar decisiones informadas sobre cobertura de riesgo cambiario, arbitraje y estrategias de inversión internacional.
 
-El dataset \textit{Exchange Rate} contiene observaciones horarias de tasas de cambio entre pares de divisas. Para este estudio se utilizó una serie temporal de 2160 observaciones horarias, equivalente a aproximadamente 90 días de operación continua en mercados de divisas. Esta ventana temporal proporciona cobertura suficiente para capturar la dinámica característica de los mercados cambiarios, incluyendo volatilidad intradiaria, efectos de noticias macroeconómicas y cambios de régimen asociados a intervenciones de bancos centrales.
+El dataset \textit{Exchange Rate} contiene observaciones diarias de tasas de cambio entre pares de divisas. Para este estudio se utilizó una serie temporal de 1825 observaciones diarias, equivalente a aproximadamente 5 años de operación continua en mercados de divisas. Esta ventana temporal proporciona cobertura suficiente para capturar la dinámica característica de los mercados cambiarios, incluyendo ciclos económicos, efectos de noticias macroeconómicas y cambios de régimen asociados a intervenciones de bancos centrales.
 
 \subsection{Resultados del Análisis Exploratorio}
 \label{subsec:exchange_eda_resultados}
 
-La aplicación del protocolo de análisis exploratorio reveló características estructurales que contrastan marcadamente con los datasets Electricity y Traffic, evidenciando propiedades únicas de series financieras de alta frecuencia.
+La aplicación del protocolo de análisis exploratorio reveló características estructurales que contrastan marcadamente con los datasets Electricity y Traffic, evidenciando propiedades únicas de series financieras.
 
 \subsubsection{Transformación de Estabilización de Varianza}
 
-El parámetro óptimo de la transformación Box-Cox, estimado mediante el método de Guerrero, resultó en $\hat{\lambda} = 1.9999$. Este valor extraordinariamente cercano a 2 indica que prácticamente no se requiere transformación para estabilizar la varianza. A diferencia de Electricity ($\lambda = 0.4821$) y Traffic ($\lambda = 0.0512$), que exhibían relaciones no lineales sustanciales entre media y varianza, Exchange Rate muestra homocedasticidad relativa en su estructura de primer orden.
+El parámetro óptimo de la transformación Box-Cox, estimado mediante el método de Guerrero, resultó en $\hat{\lambda} = 1.9999$. Este valor extraordinariamente cercano a 2 indica que prácticamente no se requiere transformación para estabilizar la varianza. A diferencia de Electricity ($\hat{\lambda} = 0.4821$) y Traffic ($\hat{\lambda} = 0.0512$), que exhibían relaciones no lineales sustanciales entre media y varianza, Exchange Rate muestra homocedasticidad relativa en su estructura de primer orden.
 
-La Figura~\ref{fig:transformaciones_exchange} presenta la evolución de la serie a través de las etapas de transformación. El panel superior muestra la serie original de tipo de cambio con fluctuaciones características de mercados financieros de alta frecuencia. El panel central exhibe la serie tras la aplicación de la transformación Box-Cox, donde la similitud con la serie original confirma la ausencia de necesidad de transformación no lineal fuerte. El panel inferior presenta la serie transformada tras la eliminación de tendencia mediante LOWESS, revelando la componente estocástica con sus propiedades de memoria larga.
+La Figura~\ref{fig:transformaciones_exchange} presenta la evolución de la serie a través de las etapas de transformación. El panel superior muestra la serie original de tipo de cambio con fluctuaciones características de mercados financieros. El panel central exhibe la serie tras la aplicación de la transformación Box-Cox, donde la similitud con la serie original confirma la ausencia de necesidad de transformación no lineal fuerte. El panel inferior presenta la serie transformada tras la eliminación de tendencia mediante LOWESS, revelando la componente estocástica con sus propiedades de memoria larga.
 
 \begin{figure}[p]
     \centering
@@ -741,11 +869,18 @@ La Figura~\ref{fig:transformaciones_exchange} presenta la evolución de la serie
 
 Se aplicó suavizado LOWESS con parámetro de ancho de banda $f = 0.05$ para remover la componente de tendencia suave. Las pruebas estadísticas confirmaron el logro de estacionariedad tras las transformaciones aplicadas. El test aumentado de Dickey-Fuller arrojó un valor p de 0.01, rechazando la presencia de raíz unitaria. El test KPSS produjo un valor p de 0.10, consistente con la hipótesis de estacionariedad.
 
-El análisis de la función de autocorrelación reveló una estructura de dependencia temporal radicalmente diferente a las observadas en Electricity y Traffic. La autocorrelación en el primer lag alcanzó $\rho_1 = 0.890$, valor extraordinariamente alto que evidencia persistencia extrema característica de series financieras con memoria larga. Las autocorrelaciones decayeron gradualmente pero permanecieron significativas hasta lags muy distantes: $\rho_2 = 0.797$, $\rho_3 = 0.695$, $\rho_4 = 0.604$, $\rho_5 = 0.515$. Este patrón de decaimiento hiperbólico contrasta con el decaimiento geométrico típico de procesos autorregresivos estacionarios de orden bajo.
+El análisis de la función de autocorrelación reveló una estructura de dependencia temporal radicalmente diferente a las observadas en Electricity y Traffic, como se aprecia en la Figura~\ref{fig:exchange_acf_pacf}. La autocorrelación en el primer lag alcanzó $\hat{\rho}_1 = 0.890$, valor extraordinariamente alto que evidencia persistencia extrema característica de series financieras con memoria larga. Las autocorrelaciones decayeron gradualmente pero permanecieron significativas hasta lags muy distantes: $\hat{\rho}_2 = 0.797$, $\hat{\rho}_3 = 0.695$, $\hat{\rho}_4 = 0.604$, $\hat{\rho}_5 = 0.515$. Este patrón de decaimiento hiperbólico contrasta con el decaimiento geométrico típico de procesos autorregresivos estacionarios de orden bajo.
 
-Notablemente, emergieron picos negativos significativos en lags correspondientes a ciclos diurnos: lag 21 ($\rho_{21} = -0.241$), lag 20 ($\rho_{20} = -0.239$), lag 22 ($\rho_{22} = -0.233$), lag 24 ($\rho_{24} = -0.203$). Esta estructura sugiere reversión a la media con periodicidad aproximada de un día, fenómeno consistente con ciclos de cierre y apertura de mercados financieros globales. El análisis del periodograma identificó el pico dominante en período de 51.20 horas, validando la presencia de componentes cíclicas superiores al día natural.
+Notablemente, emergieron picos negativos significativos en lags correspondientes a ciclos de aproximadamente 30, 90, 180 y 360 días (marcados con líneas verticales naranjas), reflejando estacionalidad mensual, trimestral, semestral y anual característica de series macroeconómicas. Esta estructura sugiere reversión a la media con periodicidades múltiples asociadas a ciclos económicos y eventos recurrentes en mercados financieros globales.
 
-La función de autocorrelación parcial mostró un pico dominante en lag 1 ($\phi_{11} = 0.890$) seguido de coeficientes parciales pequeños y dispersos en lags superiores. Este patrón sugiere que, aunque la autocorrelación simple exhibe persistencia larga, gran parte de esta dependencia se captura mediante un proceso autorregresivo de orden relativamente bajo, con efectos residuales de memoria larga.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth]{Imagenes/Cap5_exchange_acf_pacf.png}
+    \caption{Funciones de autocorrelación (ACF) y autocorrelación parcial (PACF) para la serie de tipo de cambio transformada.}
+    \label{fig:exchange_acf_pacf}
+\end{figure}
+
+La función de autocorrelación parcial mostró un pico dominante en lag 1 ($\hat{\phi}_{11} = 0.890$) seguido de coeficientes parciales pequeños y dispersos en lags superiores. Este patrón sugiere que, aunque la autocorrelación simple exhibe persistencia larga, gran parte de esta dependencia se captura mediante un proceso autorregresivo de orden relativamente bajo, con efectos residuales de memoria larga.
 
 \subsubsection{Evaluación de No Linealidad y Distribución}
 
@@ -753,14 +888,14 @@ La batería de tests de no linealidad produjo resultados mixtos que distinguen E
 
 El test ARCH-LM confirmó heterocedasticidad condicional ($p < 0.00001$), validando la necesidad de métodos que capturen volatilidad cambiante en el tiempo. Esta combinación de hallazgos (linealidad en media, no linealidad en varianza) es característica de mercados financieros eficientes donde la predicción del nivel es difícil pero la predicción de volatilidad es tractable.
 
-El exponente de Hurst estimado fue $H = 0.933$, valor extraordinariamente elevado que indica memoria larga extrema. Este $H$ sustancialmente mayor que los observados en Electricity ($H = 0.62$) y Traffic ($H = 0.58$) evidencia que shocks en el tipo de cambio tienen efectos persistentes que decaen muy lentamente. La interpretación financiera es que tendencias cambiarias tienden a mantenerse por períodos prolongados, fenómeno documentado extensamente en la literatura de finanzas bajo el término \textit{momentum} o persistencia de tendencias.
+El exponente de Hurst estimado fue $\hat{H} = 0.933$, valor extraordinariamente elevado que indica memoria larga extrema. Este $\hat{H}$ sustancialmente mayor que los observados en Electricity ($\hat{H} = 0.62$) y Traffic ($\hat{H} = 0.58$) evidencia que shocks en el tipo de cambio tienen efectos persistentes que decaen muy lentamente. La interpretación financiera es que tendencias cambiarias tienden a mantenerse por períodos prolongados, fenómeno documentado extensamente en la literatura de finanzas bajo el término \textit{momentum} o persistencia de tendencias.
 
 El test de Jarque-Bera rechazó normalidad de residuos ($p < 0.001$), evidenciando leptocurtosis característica de retornos financieros. Las colas pesadas reflejan la mayor frecuencia de eventos extremos (movimientos bruscos) comparado con una distribución gaussiana, justificando el uso de CRPS como métrica robusta que penaliza adecuadamente errores en las colas de la distribución predictiva.
 
 \subsection{Configuración Experimental}
 \label{subsec:exchange_configuracion}
 
-La partición de datos siguió el mismo esquema que en Electricity y Traffic. El conjunto de prueba se fijó en 24 observaciones (24 horas de operación), mientras que del resto de datos (2136 observaciones), el 15\% se asignó a validación ($\approx$320 observaciones) y el 85\% a entrenamiento ($\approx$1816 observaciones). El horizonte de predicción se mantuvo en $h = 1$ paso adelante (una hora futura), permitiendo comparaciones directas entre los tres datasets.
+La partición de datos siguió el mismo esquema que en Electricity y Traffic. El conjunto de prueba se fijó en 30 observaciones (30 días de operación), mientras que del resto de datos (1795 observaciones), el 15\% se asignó a validación ($\approx$269 observaciones) y el 85\% a entrenamiento ($\approx$1526 observaciones). El horizonte de predicción se mantuvo en $h = 1$ paso adelante (un día futuro), permitiendo comparaciones directas entre los tres datasets.
 
 \subsection{Resultados}
 \label{subsec:exchange_resultados}
@@ -791,18 +926,18 @@ El Cuadro~\ref{tab:exchange_ranking} presenta el ranking de modelos según desem
 \end{tabular}
 \end{table}
 
-El hallazgo más notable es la ausencia de un ganador claro en las posiciones superiores. Los seis primeros modelos obtuvieron idénticos registros de victorias (3), derrotas (0) y empates (5), indicando desempeño prácticamente indistinguible en términos de comparaciones pareadas directas. LSPMW exhibió la mejor mediana de CRPS (0.00254), seguido cercanamente por LSPM (0.00262), DeepAR (0.00263) y Sieve Bootstrap (0.00288). Esta compresión de medianas en un rango estrecho ($\Delta = 0.00034$) contrasta marcadamente con la dispersión observada en Traffic.
+El hallazgo más notable es la ausencia de un ganador claro en las posiciones superiores. Los seis primeros modelos obtuvieron idénticos registros de victorias (3), derrotas (0) y empates (5), indicando desempeño prácticamente indistinguible en términos de comparaciones pareadas directas. LSPMW (con $\hat{\rho} = 0.95$) exhibió la mejor mediana de CRPS (0.00254), seguido cercanamente por LSPM (0.00262), DeepAR (0.00263) y Sieve Bootstrap (0.00288). Esta compresión de medianas en un rango estrecho ($\Delta = 0.00034$) contrasta marcadamente con la dispersión observada en Traffic.
 
-La Figura~\ref{fig:exchange_boxplot_crps} presenta la distribución completa de valores CRPS para cada modelo a lo largo de las 24 predicciones horarias. La visualización revela dos grupos claramente diferenciados: un cluster superior de seis modelos con dispersiones compactas y medianas bajas, y un grupo inferior de tres modelos (AREPD, EnCQR-LSTM, Block Bootstrapping) con valores CRPS superiores en un orden de magnitud.
+La Figura~\ref{fig:exchange_boxplot_crps} presenta la distribución completa de valores CRPS para cada modelo a lo largo de las 30 predicciones diarias. La visualización revela dos grupos claramente diferenciados: un cluster superior de seis modelos con dispersiones compactas y medianas bajas, y un grupo inferior de tres modelos (AREPD con $\hat{\rho} = 0.95$, EnCQR-LSTM, Block Bootstrapping) con valores CRPS superiores en un orden de magnitud.
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.95\textwidth]{Imagenes/Cap5_exchange_boxplot_crps.png}
-    \caption{Distribución de valores CRPS por modelo en el conjunto de prueba del dataset Exchange Rate. }
+    \includegraphics[width=\textwidth]{Imagenes/Cap5_exchange_boxplot_crps.png}
+    \caption{Distribución de valores CRPS por modelo en el conjunto de prueba del dataset Exchange Rate.}
     \label{fig:exchange_boxplot_crps}
 \end{figure}
 
-El desempeño competitivo de LSPM y LSPMW en Exchange Rate, contrastando con su deterioro en Traffic, valida la hipótesis de que estos métodos lineales son apropiados cuando la media condicional exhibe estructura autorregresiva dominante. El test de Tsay, que no rechazó linealidad en media ($p = 0.966$), anticipó correctamente este resultado. La capacidad de LSPMW para adaptarse a heterocedasticidad mediante ponderación temporal explica su ligera ventaja sobre LSPM estándar.
+El desempeño competitivo de LSPM y LSPMW en Exchange Rate, contrastando con su deterioro en Traffic, valida la hipótesis de que estos métodos lineales son apropiados cuando la media condicional exhibe estructura autorregresiva dominante. El test de Tsay, que no rechazó linealidad en media ($p = 0.966$), anticipó correctamente este resultado. La capacidad de LSPMW para adaptarse a heterocedasticidad mediante ponderación temporal con parámetro $\hat{\rho} = 0.95$ explica su ligera ventaja sobre LSPM estándar.
 
 Sieve Bootstrap mantuvo desempeño robusto, ocupando el primer lugar por victorias totales aunque con mediana ligeramente superior a LSPMW. Su capacidad para seleccionar automáticamente el orden autorregresivo óptimo mediante AIC resultó valiosa en este contexto de memoria larga donde el orden efectivo del proceso puede ser sustancial.
 
@@ -810,43 +945,46 @@ Los métodos de predicción conformal (MCPS y AV-MCPS) exhibieron medianas signi
 
 DeepAR mostró mejora sustancial comparado con su desempeño en Electricity, alcanzando mediana comparable a LSPM. Este resultado sugiere que la estructura de memoria larga y dependencia no lineal en varianza proporciona señales que arquitecturas recurrentes pueden explotar efectivamente.
 
-El colapso de tres modelos (AREPD, EnCQR-LSTM, Block Bootstrapping) con valores CRPS en el rango 0.064-0.072 representa el hallazgo más revelador. Estos métodos, que mostraron desempeño variable pero generalmente competitivo en datasets previos, fracasan completamente en Exchange Rate. AREPD, diseñado para capturar dinámicas multivariadas, no puede explotar esta capacidad en el contexto univariado del experimento. EnCQR-LSTM exhibe el peor desempeño entre los métodos de aprendizaje profundo, sugiriendo que su arquitectura de cuantiles conformales introduce rigidez inadecuada para la heterocedasticidad extrema de series cambiarias. Block Bootstrapping estándar, sin mecanismos adaptativos, no captura adecuadamente la estructura de dependencia de largo alcance.
+El colapso de tres modelos (AREPD con $\hat{\rho} = 0.95$, EnCQR-LSTM, Block Bootstrapping) con valores CRPS en el rango 0.064-0.072 representa el hallazgo más revelador. Estos métodos, que mostraron desempeño variable pero generalmente competitivo en datasets previos, fracasan completamente en Exchange Rate. AREPD, diseñado para capturar dinámicas multivariadas, no puede explotar esta capacidad en el contexto univariado del experimento. EnCQR-LSTM exhibe el peor desempeño entre los métodos de aprendizaje profundo, sugiriendo que su arquitectura de cuantiles conformales introduce rigidez inadecuada para la heterocedasticidad extrema de series cambiarias. Block Bootstrapping estándar, sin mecanismos adaptativos, no captura adecuadamente la estructura de dependencia de largo alcance.
 
-\subsubsection{Análisis de Significancia Estadística}
+La Figura~\ref{fig:exchange_top3_evolucion} ilustra la evolución paso a paso de las distribuciones predictivas para los tres mejores modelos (LSPMW, LSPM, DeepAR) durante los primeros seis pasos de pronóstico. Cada panel muestra las densidades predictivas superpuestas junto con el valor real observado (línea vertical discontinua negra). Los valores de CRPS, presentados mediante parches de color en la leyenda de cada panel, cuantifican la precisión predictiva en cada paso.
 
-El Cuadro~\ref{tab:exchange_dm_tests} presenta los valores p del test de Diebold-Mariano modificado para todas las comparaciones pareadas entre modelos. Este análisis exhaustivo revela patrones que confirman la naturaleza única del dataset Exchange Rate.
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=0.7\textwidth]{Imagenes/Exchange_Series_0_TypeA_Top3_Mejores.png}
+    \caption{Evolución de las distribuciones predictivas para los tres mejores modelos en Exchange Rate durante los primeros 6 pasos de pronóstico.}
+    \label{fig:exchange_top3_evolucion}
+\end{figure}
 
-\begin{table}[htbp]
-\centering
-\caption{Matriz de valores p del test de Diebold-Mariano modificado para el dataset Exchange Rate. }
-\label{tab:exchange_dm_tests}
-\scriptsize
-\begin{tabular}{l|ccccccccc}
-\toprule
-& \textbf{BB} & \textbf{SB} & \textbf{LSPM} & \textbf{LSPMW} & \textbf{AREPD} & \textbf{MCPS} & \textbf{AV-MCPS} & \textbf{DeepAR} & \textbf{EnCQR} \\
-\midrule
-\textbf{Block Boot.} & --- & \textbf{0.000001} & \textbf{0.000001} & \textbf{0.000002} & \textbf{0.000003} & \textbf{0.000048} & \textbf{0.000049} & \textbf{0.000001} & \textbf{0.006873} \\
-\textbf{Sieve Boot.} & \textbf{0.000001} & --- & 0.139235 & 0.095862 & \textbf{0.000002} & \textbf{0.006570} & \textbf{0.009737} & 0.302832 & \textbf{0.000000} \\
-\textbf{LSPM} & \textbf{0.000001} & 0.139235 & --- & \textbf{0.020129} & \textbf{0.000002} & \textbf{0.011396} & \textbf{0.021224} & 0.502422 & \textbf{0.000000} \\
-\textbf{LSPMW} & \textbf{0.000002} & 0.095862 & \textbf{0.020129} & --- & \textbf{0.000002} & \textbf{0.012882} & \textbf{0.024574} & 0.313739 & \textbf{0.000000} \\
-\textbf{AREPD} & \textbf{0.000003} & \textbf{0.000002} & \textbf{0.000002} & \textbf{0.000002} & --- & \textbf{0.000077} & \textbf{0.000079} & \textbf{0.000001} & 0.053251 \\
-\textbf{MCPS} & \textbf{0.000048} & \textbf{0.006570} & \textbf{0.011396} & \textbf{0.012882} & \textbf{0.000077} & --- & 0.600375 & \textbf{0.011897} & \textbf{0.000026} \\
-\textbf{AV-MCPS} & \textbf{0.000049} & \textbf{0.009737} & \textbf{0.021224} & \textbf{0.024574} & \textbf{0.000079} & 0.600375 & --- & \textbf{0.016858} & \textbf{0.000027} \\
-\textbf{DeepAR} & \textbf{0.000001} & 0.302832 & 0.502422 & 0.313739 & \textbf{0.000001} & \textbf{0.011897} & \textbf{0.016858} & --- & \textbf{0.000000} \\
-\textbf{EnCQR-LSTM} & \textbf{0.006873} & \textbf{0.000000} & \textbf{0.000000} & \textbf{0.000000} & 0.053251 & \textbf{0.000026} & \textbf{0.000027} & \textbf{0.000000} & --- \\
-\bottomrule
-\end{tabular}
-\end{table}
+Los paneles revelan convergencia notable de los tres métodos superiores en términos de ubicación y dispersión de las distribuciones predictivas. En los pasos 1-3, LSPMW (rosa), LSPM (gris) y DeepAR (rojo) generan densidades prácticamente superpuestas, todas concentradas estrechamente alrededor del valor real. Los valores CRPS en estos pasos iniciales permanecen en el rango 0.0037-0.0178, confirmando precisión predictiva comparable.
 
-El análisis de significancia revela un patrón notable: los cuatro modelos superiores (Sieve Bootstrap, DeepAR, LSPM, LSPMW) no exhiben diferencias estadísticamente significativas entre sí. Las comparaciones pareadas arrojan valores p sustancialmente superiores al umbral de 0.05: Sieve Bootstrap vs. LSPM ($p = 0.139$), Sieve Bootstrap vs. LSPMW ($p = 0.096$), Sieve Bootstrap vs. DeepAR ($p = 0.303$), LSPM vs. DeepAR ($p = 0.502$), LSPMW vs. DeepAR ($p = 0.314$). La única excepción es LSPM vs. LSPMW ($p = 0.020$), donde la adaptatividad del segundo genera ventaja estadísticamente significativa pero de magnitud práctica modesta.
+En los pasos 4-6, se observa ligero incremento en la dispersión predictiva para los tres modelos, reflejando acumulación natural de incertidumbre con el horizonte de pronóstico. Sin embargo, las distribuciones mantienen centrado adecuado y continúan capturando el valor observado dentro de sus regiones de alta densidad. LSPMW exhibe valores CRPS ligeramente menores en los pasos 4-6 (0.0066-0.0068) comparado con LSPM (0.0066-0.0068) y DeepAR (0.0040-0.0088), validando la ventaja marginal de la ponderación temporal adaptativa en horizontes más distantes.
+
+Esta visualización confirma que la convergencia de métodos metodológicamente dispares (regresión lineal ponderada, bootstrap no paramétrico, redes neuronales recurrentes) hacia desempeño prácticamente idéntico no es artefacto estadístico sino reflejo genuino de estructura subyacente con dominancia autorregresiva lineal. La memoria larga extrema ($\hat{H} = 0.933$) combinada con linealidad en media ($p_{\text{Tsay}} = 0.966$) define un régimen donde múltiples enfoques competentes convergen hacia soluciones óptimas similares.
+
+
+\subsubsection{Comparación Estadística Formal}
+
+Para evaluar si las diferencias observadas en desempeño predictivo resultan estadísticamente significativas, se aplicó el test de Diebold-Mariano modificado con corrección de Bonferroni entre todos los modelos evaluados. Este test, equipado con asintótica de suavizado fijo (fixed-smoothing asymptotics), resulta más robusto en muestras pequeñas que el test DM estándar, manteniendo buen desempeño asintótico.
+
+La Figura~\ref{fig:exchange_hln_dm_pvalues} presenta la matriz completa de p-valores para las 36 comparaciones pareadas realizadas. Dado el número de comparaciones múltiples, se aplicó corrección de Bonferroni ($\alpha_{\text{Bonf}} = 0.05/36 = 0.00139$), resultando en un umbral de significancia altamente conservador. Las celdas en tonos verdosos indican p-valores bajos (evidencia de diferencia significativa), mientras que tonos rojizos señalan p-valores altos (modelos estadísticamente indistinguibles). Los asteriscos denotan significancia: *** para $p < \alpha_{\text{Bonf}}$ y * para $p < 0.05$.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{Imagenes/Cap5_exchange_HLN_DM_Pvalues_Matrix.png}
+    \caption{Matriz de p-valores del test Diebold-Mariano modificado (HLN) para el dataset Exchange Rate.}
+    \label{fig:exchange_hln_dm_pvalues}
+\end{figure}
+
+El análisis de significancia revela un patrón notable: los cuatro modelos superiores (Sieve Bootstrap, DeepAR, LSPM, LSPMW) no exhiben diferencias estadísticamente significativas entre sí al nivel $\alpha = 0.05$. Las comparaciones pareadas arrojan valores p sustancialmente superiores al umbral convencional: Sieve Bootstrap vs. LSPM ($p = 0.139$), Sieve Bootstrap vs. LSPMW ($p = 0.096$), Sieve Bootstrap vs. DeepAR ($p = 0.303$), LSPM vs. DeepAR ($p = 0.502$), LSPMW vs. DeepAR ($p = 0.314$). La única excepción es LSPM vs. LSPMW ($p = 0.020$*), donde la adaptatividad del segundo genera ventaja estadísticamente significativa pero de magnitud práctica modesta ($\Delta_{\text{mediana}} = 0.00008$).
 
 Este patrón contrasta con Electricity, donde los tres mejores modelos exhibieron indistinguibilidad estadística pero con mayor dispersión de valores p (rango 0.30-0.99), y con Traffic, donde Sieve Bootstrap mostró superioridad significativa sobre varios competidores. En Exchange Rate, la convergencia de múltiples metodologías dispares (bootstrap no paramétrico, aprendizaje profundo, predicción conformal lineal) hacia desempeño estadísticamente equivalente sugiere que todos capturan exitosamente la estructura autorregresiva lineal dominante identificada en el análisis exploratorio.
 
-MCPS y AV-MCPS, aunque estadísticamente indistinguibles entre sí ($p = 0.600$), son significativamente inferiores a los cuatro métodos superiores. Las comparaciones contra Sieve Bootstrap arrojan $p = 0.007$ (MCPS) y $p = 0.010$ (AV-MCPS). Este resultado valida que, aunque ambos métodos conformales permanecen en el cluster superior de seis modelos, su desempeño es detectablemente inferior cuando se controla apropiadamente por autocorrelación temporal en el test de Diebold-Mariano.
+MCPS y AV-MCPS, aunque estadísticamente indistinguibles entre sí ($p = 0.600$), son significativamente inferiores a los cuatro métodos superiores. Las comparaciones contra Sieve Bootstrap arrojan $p = 0.007$** (MCPS) y $p = 0.010$* (AV-MCPS). Contra LSPM: $p = 0.011$* (MCPS) y $p = 0.021$* (AV-MCPS). Este resultado valida que, aunque ambos métodos conformales permanecen en el cluster superior de seis modelos, su desempeño es detectablemente inferior cuando se controla apropiadamente por autocorrelación temporal en el test de Diebold-Mariano.
 
-Los tres modelos en las posiciones inferiores exhiben diferencias significativas contra todos los métodos superiores, con valores p típicamente menores a 0.001. EnCQR-LSTM muestra valores p extremadamente bajos ($p < 0.000001$) contra los cuatro mejores modelos, confirmando su inadecuación severa para esta serie. Notablemente, AREPD y EnCQR-LSTM no muestran diferencias significativas entre sí ($p = 0.053$), indicando que ambos fallan de manera similar.
+Los tres modelos en las posiciones inferiores exhiben diferencias altamente significativas contra todos los métodos superiores, con valores p típicamente menores a 0.001***. EnCQR-LSTM muestra valores p extremadamente bajos ($p < 0.000001$***) contra los cuatro mejores modelos, confirmando su inadecuación severa para esta serie. Notablemente, AREPD y EnCQR-LSTM no muestran diferencias significativas entre sí ($p = 0.207$), indicando que ambos fallan de manera similar ante la estructura de memoria larga y heterocedasticidad condicional.
 
-Block Bootstrapping, con valores p en el rango $10^{-6}$ contra todos los modelos superiores, representa el peor desempeño. Este resultado evidencia que el bootstrap en bloques estándar, sin selección adaptativa de longitud de bloque ni mecanismos para capturar memoria larga, es completamente inadecuado para series con $H = 0.933$. El contraste con Sieve Bootstrap, que adaptivamente selecciona el orden autorregresivo óptimo, valida la importancia crítica de la adaptatividad en series financieras de alta frecuencia.
+Block Bootstrapping, con valores p menores a $10^{-6}$*** contra todos los modelos superiores, representa el peor desempeño. Este resultado evidencia que el bootstrap en bloques estándar, sin selección adaptativa de longitud de bloque ni mecanismos para capturar memoria larga, es completamente inadecuado para series con $\hat{H} = 0.933$. El contraste con Sieve Bootstrap, que adaptivamente selecciona el orden autorregresivo óptimo, valida la importancia crítica de la adaptatividad en series financieras.
 
 \subsubsection{Análisis de Calibración Distribucional}
 
@@ -859,11 +997,11 @@ La calibración de las distribuciones predictivas se evaluó mediante histograma
     \label{fig:exchange_pit}
 \end{figure}
 
-Los cuatro modelos superiores (Sieve Bootstrap, DeepAR, LSPM, LSPMW) exhibieron patrones PIT relativamente uniformes, aunque con desviaciones más pronunciadas que las observadas en Electricity. Sieve Bootstrap y LSPM mostraron distribuciones con ligera forma de U, indicando sobreconfianza leve en predicciones centrales pero captura razonable de eventos en las colas. LSPMW exhibió uniformidad mejorada comparado con LSPM, validando que la ponderación temporal adaptativa no solo mejora precisión sino también calibración. DeepAR produjo la distribución PIT más uniforme entre los métodos de aprendizaje profundo, consistente con su diseño explícito para modelar distribuciones predictivas completas.
+Los cuatro modelos superiores (Sieve Bootstrap, DeepAR, LSPM, LSPMW) exhibieron patrones PIT relativamente uniformes, aunque con desviaciones más pronunciadas que las observadas en Electricity. Sieve Bootstrap y LSPM mostraron distribuciones con ligera forma de U, indicando sobreconfianza leve en predicciones centrales pero captura razonable de eventos en las colas. LSPMW (con $\hat{\rho} = 0.95$) exhibió uniformidad mejorada comparado con LSPM, validando que la ponderación temporal adaptativa no solo mejora precisión sino también calibración. DeepAR produjo la distribución PIT más uniforme entre los métodos de aprendizaje profundo, consistente con su diseño explícito para modelar distribuciones predictivas completas.
 
 MCPS y AV-MCPS mostraron patrones PIT con mayor concentración en valores extremos (cercanos a 0 y 1), indicando tendencia a generar distribuciones predictivas demasiado conservadoras. Este fenómeno es consistente con la naturaleza de predicción conformal, que construye intervalos con garantías de cobertura marginal pero puede producir regiones excesivamente amplias cuando la hipótesis de intercambiabilidad es fuertemente violada.
 
-Los tres modelos en posiciones inferiores exhibieron colapso de calibración severo. EnCQR-LSTM mostró concentración extrema de masa PIT en el rango 0.9-1.0, con densidad superior a 40 en este intervalo. Este patrón indica subestimación sistemática y severa del verdadero valor, generando distribuciones predictivas desplazadas hacia valores menores que las observaciones reales. AREPD mostró concentración bilateral en las colas (0-0.1 y 0.9-1.0), reflejando inestabilidad en la ubicación de la distribución predictiva. Block Bootstrapping exhibió concentración extrema en la cola derecha, evidenciando sesgo sistemático hacia valores predichos menores que las observaciones.
+Los tres modelos en posiciones inferiores exhibieron colapso de calibración severo. EnCQR-LSTM mostró concentración extrema de masa PIT en el rango 0.9-1.0, con densidad superior a 40 en este intervalo. Este patrón indica subestimación sistemática y severa del verdadero valor, generando distribuciones predictivas desplazadas hacia valores menores que las observaciones reales. AREPD (con $\hat{\rho} = 0.95$) mostró concentración bilateral en las colas (0-0.1 y 0.9-1.0), reflejando inestabilidad en la ubicación de la distribución predictiva. Block Bootstrapping exhibió concentración extrema en la cola derecha, evidenciando sesgo sistemático hacia valores predichos menores que las observaciones.
 
 La Figura~\ref{fig:exchange_reliability} presenta las curvas de confiabilidad, comparando frecuencias empíricas de cobertura contra niveles nominales para el rango 10\%-90\%. Los patrones observados corroboran los hallazgos de los histogramas PIT pero revelan información adicional sobre el comportamiento en diferentes niveles de confianza.
 
@@ -874,7 +1012,7 @@ La Figura~\ref{fig:exchange_reliability} presenta las curvas de confiabilidad, c
     \label{fig:exchange_reliability}
 \end{figure}
 
-Los cuatro modelos superiores mantuvieron trayectorias relativamente cercanas a la diagonal de calibración perfecta, aunque con mayor variabilidad que en datasets previos debido al tamaño reducido del conjunto de prueba. Sieve Bootstrap y LSPMW mostraron las curvas más próximas a la diagonal en niveles de confianza intermedios (30\%-70\%), validando su capacidad para generar intervalos predictivos con coberturas empíricas consistentes con las nominales. DeepAR exhibió ligera sobrecober tura en niveles bajos (10\%-30\%) pero convergió hacia la diagonal en niveles altos, patrón consistente con su ligera sobreconfianza observada en el histograma PIT.
+Los cuatro modelos superiores mantuvieron trayectorias relativamente cercanas a la diagonal de calibración perfecta, aunque con mayor variabilidad que en datasets previos debido al tamaño reducido del conjunto de prueba (30 observaciones). Sieve Bootstrap y LSPMW mostraron las curvas más próximas a la diagonal en niveles de confianza intermedios (30\%-70\%), validando su capacidad para generar intervalos predictivos con coberturas empíricas consistentes con las nominales. DeepAR exhibió ligera sobrecobertura en niveles bajos (10\%-30\%) pero convergió hacia la diagonal en niveles altos, patrón consistente con su ligera sobreconfianza observada en el histograma PIT.
 
 MCPS y AV-MCPS mostraron curvas que permanecieron por encima de la diagonal en la mayoría de niveles, confirmando su tendencia a generar intervalos excesivamente conservadores. Sin embargo, en niveles de confianza muy altos (>80\%), estas curvas se acercaron a la diagonal, indicando que las regiones predictivas conformales capturan adecuadamente eventos extremos incluso cuando son subóptimas para predicciones centrales.
 
@@ -885,13 +1023,13 @@ Los tres modelos inferiores exhibieron colapso completo de calibración. EnCQR-L
 
 El análisis del dataset Exchange Rate reveló un panorama competitivo radicalmente diferente a los observados en Electricity y Traffic, validando la importancia crítica de alinear metodología con características estructurales de cada serie. El hallazgo central es la convergencia de múltiples enfoques metodológicos dispares hacia desempeño estadísticamente equivalente cuando la serie subyacente exhibe estructura autorregresiva lineal dominante con memoria larga.
 
-La combinación de características—linealidad en media condicional ($p_{\text{Tsay}} = 0.966$), heterocedasticidad en varianza condicional ($p_{\text{McLeod-Li}} < 0.00001$), memoria larga extrema ($H = 0.933$)—define un régimen donde métodos con capacidades complementarias alcanzan efectividad comparable. LSPM y LSPMW capitalizan la estructura lineal mediante regresión autorregresiva eficiente. Sieve Bootstrap adapta flexiblemente el orden del modelo sin imponer restricciones paramétricas. DeepAR explota la heterocedasticidad mediante su arquitectura recurrente con distribuciones de salida parametrizadas.
+La combinación de características—linealidad en media condicional ($p_{\text{Tsay}} = 0.966$), heterocedasticidad en varianza condicional ($p_{\text{McLeod-Li}} < 0.00001$), memoria larga extrema ($\hat{H} = 0.933$)—define un régimen donde métodos con capacidades complementarias alcanzan efectividad comparable. LSPM y LSPMW capitalizan la estructura lineal mediante regresión autorregresiva eficiente. Sieve Bootstrap adapta flexiblemente el orden del modelo sin imponer restricciones paramétricas. DeepAR explota la heterocedasticidad mediante su arquitectura recurrente con distribuciones de salida parametrizadas.
 
-El deterioro pronunciado de EnCQR-LSTM, AREPD y Block Bootstrapping evidencia que ciertas arquitecturas son fundamentalmente inadecuadas para series financieras de alta frecuencia. EnCQR-LSTM, que combina cuantiles conformales con redes LSTM, introduce rigidez en la estimación de distribuciones predictivas que resulta contraproducente cuando la volatilidad condicional cambia drásticamente. AREPD, diseñado para contextos multivariados, no puede explotar su capacidad en el contexto univariado experimental. Block Bootstrapping estándar, sin mecanismos adaptativos para seleccionar longitud de bloque en presencia de memoria larga, genera muestras bootstrap que no preservan adecuadamente la estructura de dependencia temporal.
+El deterioro pronunciado de EnCQR-LSTM, AREPD (con $\hat{\rho} = 0.95$) y Block Bootstrapping evidencia que ciertas arquitecturas son fundamentalmente inadecuadas para series financieras. EnCQR-LSTM, que combina cuantiles conformales con redes LSTM, introduce rigidez en la estimación de distribuciones predictivas que resulta contraproducente cuando la volatilidad condicional cambia drásticamente. AREPD, diseñado para contextos multivariados, no puede explotar su capacidad en el contexto univariado experimental. Block Bootstrapping estándar, sin mecanismos adaptativos para seleccionar longitud de bloque en presencia de memoria larga, genera muestras bootstrap que no preservan adecuadamente la estructura de dependencia temporal.
 
 La naturaleza de series financieras, caracterizada por eficiencia informacional que dificulta predicción de niveles pero permite modelado de volatilidad, se refleja en los valores absolutos de CRPS. Las medianas del cluster superior (0.00254-0.00288) son comparables a las observadas en Electricity (1.497-1.791) y Traffic (0.00170-0.00288) cuando se normalizan por la escala de cada serie, indicando que la dificultad intrínseca de predicción probabilística es similar una vez controladas las características estructurales específicas.
 
-El análisis exhaustivo de significancia estadística reveló que el poder discriminatorio del test de Diebold-Mariano es suficiente para detectar diferencias sutiles (LSPM vs. LSPMW: $p = 0.020$, $\Delta_{\text{mediana}} = 0.00008$) mientras confirma equivalencia cuando las diferencias son aleatorias (Sieve Bootstrap vs. DeepAR: $p = 0.303$, $\Delta_{\text{mediana}} = 0.00025$). Este balance valida la robustez del protocolo de evaluación comparativa implementado.
+El análisis exhaustivo de significancia estadística reveló que el poder discriminatorio del test de Diebold-Mariano es suficiente para detectar diferencias sutiles (LSPM vs. LSPMW: $p = 0.020$*, $\Delta_{\text{mediana}} = 0.00008$) mientras confirma equivalencia cuando las diferencias son aleatorias (Sieve Bootstrap vs. DeepAR: $p = 0.303$, $\Delta_{\text{mediana}} = 0.00025$). Este balance valida la robustez del protocolo de evaluación comparativa implementado.
 
 La evaluación de calibración distribucional reveló que desempeño superior en CRPS generalmente se acompaña de mejor calibración, aunque la relación presenta excepciones importantes. LSPMW exhibió tanto la mejor mediana de CRPS como calibración PIT particularmente uniforme, validando que adaptatividad temporal mejora simultáneamente precisión y confiabilidad. MCPS y AV-MCPS, con CRPS significativamente peores que los cuatro métodos superiores, mantuvieron calibración razonable aunque conservadora, demostrando que las garantías teóricas de predicción conformal se traducen en cobertura empírica adecuada incluso cuando la precisión puntual es subóptima.
 
@@ -901,7 +1039,7 @@ El colapso de calibración en los tres modelos inferiores tiene implicaciones pr
 
 Para series de tipo de cambio o contextos similares con memoria larga, heterocedasticidad condicional y estructura lineal en media, se recomiendan las siguientes estrategias metodológicas.
 
-En primer lugar, considerar LSPMW como método predeterminado cuando existe evidencia de memoria larga ($H > 0.8$) y heterocedasticidad condicional confirmada mediante tests ARCH-LM. Su capacidad para adaptar ponderación temporal a cambios en volatilidad, combinada con simplicidad computacional y calibración robusta, lo torna particularmente atractivo para implementaciones en tiempo real donde la latencia computacional es crítica. La ventaja estadísticamente significativa sobre LSPM estándar ($p = 0.020$) justifica la complejidad adicional mínima de mantener pesos exponenciales.
+En primer lugar, considerar LSPMW (con parámetro $\hat{\rho}$ típicamente en rango 0.90-0.99) como método predeterminado cuando existe evidencia de memoria larga ($\hat{H} > 0.8$) y heterocedasticidad condicional confirmada mediante tests ARCH-LM. Su capacidad para adaptar ponderación temporal a cambios en volatilidad, combinada con simplicidad computacional y calibración robusta, lo torna particularmente atractivo para implementaciones en tiempo real donde la latencia computacional es crítica. La ventaja estadísticamente significativa sobre LSPM estándar ($p = 0.020$*) justifica la complejidad adicional mínima de mantener pesos exponenciales.
 
 En segundo lugar, cuando el tamaño de muestra es suficientemente grande ($n > 1000$) y existe capacidad computacional adecuada, DeepAR merece consideración seria. Su desempeño estadísticamente indistinguible de LSPMW ($p = 0.314$) pero con CRPS media ligeramente mayor sugiere que, con más datos de entrenamiento, podría superar a métodos más parsimoniosos mediante explotación de patrones sutiles en heterocedasticidad condicional. Para instituciones financieras con infraestructura de aprendizaje profundo establecida, la inversión en desarrollo de modelos DeepAR puede justificarse por su escalabilidad a contextos multivariados.
 
@@ -910,244 +1048,3 @@ En tercer lugar, Sieve Bootstrap constituye una opción robusta cuando se priori
 En cuarto lugar, evitar categóricamente modelos que exhibieron colapso de calibración (EnCQR-LSTM, Block Bootstrapping estándar, AREPD en contexto univariado). El deterioro de dos órdenes de magnitud en CRPS comparado con métodos superiores, combinado con distribuciones predictivas sistemáticamente mal calibradas, los torna inadecuados para cualquier aplicación práctica en mercados financieros. Instituciones que utilicen estos métodos en otros contextos deben validar exhaustivamente su desempeño antes de aplicarlos a series cambiarias.
 
 Finalmente, reconocer que la estructura de series financieras—caracterizada por eficiencia informacional, heterocedasticidad condicional y memoria larga—favorece enfoques que balancean simplicidad estructural (linealidad en media) con flexibilidad en captura de volatilidad (ponderación adaptativa o modelado paramétrico de varianza condicional). Métodos excesivamente complejos que intentan capturar no linealidad en media (donde no existe) o excesivamente simples que ignoran heterocedasticidad (que sí existe) fallarán consistentemente. La selección de modelos debe guiarse por diagnósticos exploratorios específicos—particularmente tests de Tsay (linealidad en media), McLeod-Li (heterocedasticidad) y estimación del exponente de Hurst (memoria larga)—más que por consideraciones genéricas de complejidad algorítmica o preferencias metodológicas a priori.
-
-\section{Conclusiones Generales de las Aplicaciones}
-\label{sec:conclusiones_aplicaciones}
-
-El análisis comparativo exhaustivo de tres series temporales con características estructurales marcadamente diferentes—Electricity (consumo eléctrico residencial), Traffic (flujo vehicular urbano) y Exchange Rate (tipo de cambio)—ha permitido extraer conclusiones metodológicas fundamentales sobre la aplicación práctica de sistemas de predicción probabilística y conformal. Esta sección sintetiza los hallazgos transversales, identifica patrones recurrentes, y formula recomendaciones generales para la selección y configuración de modelos en aplicaciones de pronóstico operacional.
-
-\subsection{Síntesis Comparativa de Resultados}
-\label{subsec:sintesis_comparativa}
-
-El Cuadro~\ref{tab:comparacion_global_datasets} presenta una comparación sistemática de las características estructurales clave identificadas mediante el protocolo de análisis exploratorio, junto con el ranking de los tres mejores modelos en cada contexto.
-
-\begin{table}[htbp]
-\centering
-\caption{Comparación sistemática de características estructurales y desempeño de modelos a través de los tres datasets evaluados.}
-\label{tab:comparacion_global_datasets}
-\small
-\begin{tabular}{lccc}
-\toprule
-\textbf{Característica} & \textbf{Electricity} & \textbf{Traffic} & \textbf{Exchange Rate} \\
-\midrule
-\multicolumn{4}{l}{\textit{Propiedades Estructurales}} \\
-\midrule
-Box-Cox $\lambda$ & $-0.1181$ & 0.0512 & 1.9999 \\
-Interpretación & Transform. logarítmica & Transform. logarítmica & Sin transformación \\
-Exponente Hurst & 0.62 & 0.58 & 0.93 \\
-Memoria & Larga & Moderada & Extrema \\
-Test BDS ($p$-valor) & $< 0.001$ & $< 0.01$ & $< 0.00001$ \\
-Test McLeod-Li ($p$-valor) & $< 0.001$ & $< 0.01$ & $< 0.00001$ \\
-Test Tsay ($p$-valor) & $< 0.01$ & $< 0.01$ & 0.966 \\
-Interpretación Tsay & No lineal & No lineal & Lineal en media \\
-Estacionalidad dominante & Semanal (168h) & Diaria (24h) & $\sim$51h \\
-Jarque-Bera ($p$-valor) & $< 0.001$ & $< 0.001$ & $< 0.001$ \\
-\midrule
-\multicolumn{4}{l}{\textit{Ranking de Modelos (Top 3 por Mediana CRPS)}} \\
-\midrule
-Rango 1 & LSPM (1.497) & Sieve Bootstrap (0.00171) & LSPMW (0.00254) \\
-Rango 2 & MCPS (1.508) & AV-MCPS (0.00170) & LSPM (0.00262) \\
-Rango 3 & Sieve Bootstrap (1.514) & DeepAR (0.00247) & DeepAR (0.00263) \\
-\midrule
-Significancia Top 3 & Indistinguibles & Parcialmente distintos & Indistinguibles \\
-Rango $p$-valores & $p > 0.30$ & $p \in [0.019, 0.371]$ & $p \in [0.096, 0.502]$ \\
-\midrule
-\multicolumn{4}{l}{\textit{Modelos con Peor Desempeño}} \\
-\midrule
-Peor modelo & AREPD (2.259) & AREPD (0.01107) & Block Bootstrap (0.07225) \\
-Segundo peor & Block Bootstrap (2.337) & Block Bootstrap (0.01054) & EnCQR-LSTM (0.06764) \\
-Tercero peor & LSPMW (2.550) & LSPMW (0.01119) & AREPD (0.06564) \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsubsection{Reordenamiento Dramático del Ranking}
-
-El hallazgo más notable es el reordenamiento dramático del ranking de modelos a través de los tres contextos. LSPM, que dominó en Electricity (rango 1, mediana 1.497) con desempeño estadísticamente indistinguible de MCPS y Sieve Bootstrap, experimentó deterioro pronunciado en Traffic (rango 5, mediana 0.00371) pero recuperó competitividad en Exchange Rate (rango 3, mediana 0.00262). Sieve Bootstrap exhibió desempeño robusto y consistente, ocupando rango 3 en Electricity y rango 1 en Traffic y Exchange Rate, validando su capacidad para adaptar flexiblemente la complejidad del modelo a diferentes estructuras de dependencia temporal.
-
-Los métodos adaptativos (AV-MCPS, LSPMW) mostraron efectividad dependiente del contexto. En Electricity, donde la dinámica subyacente es estable sin cambios distribucionales abruptos, estos métodos no superaron a sus contrapartes no adaptativas. En Traffic, caracterizado por mayor variabilidad temporal y eventos impredecibles, AV-MCPS alcanzó la segunda mejor mediana de CRPS (0.00170). En Exchange Rate, donde la heterocedasticidad condicional extrema coexiste con linealidad en media, LSPMW exhibió la mejor mediana (0.00254), superando significativamente a LSPM estándar ($p = 0.020$).
-
-Los modelos de aprendizaje profundo (DeepAR, EnCQR-LSTM) mostraron mejora monotónica al transitar de Electricity (estructura simple, rangos 5-6) a Traffic (complejidad intermedia, rangos 2-3) a Exchange Rate (memoria larga extrema, rangos 2-8). Sin embargo, incluso en el contexto más favorable, no superaron consistentemente a métodos más parsimoniosos, validando que tamaños de muestra del orden de 1800 observaciones son insuficientes para que arquitecturas recurrentes profundas exploten completamente su capacidad representacional.
-
-\subsubsection{Patrones de Efectividad Metodológica}
-
-El análisis revela tres regímenes metodológicos distintos asociados con características estructurales específicas:
-
-\paragraph{Régimen 1: Dominancia de Métodos Lineales (Electricity)}
-
-Series con transformación estabilizadora moderada ($\lambda \approx 0$), memoria larga moderada ($H \approx 0.6$), no linealidad rechazada pero no extrema, y estacionalidad estable favorecen métodos lineales simples con residuos bien caracterizados. LSPM, MCPS y Sieve Bootstrap convergieron hacia desempeño óptimo e indistinguible ($p > 0.30$), evidenciando que las transformaciones aplicadas lograron simplificar satisfactoriamente la dinámica subyacente. En este régimen, la sofisticación algorítmica no confiere ventajas sobre métodos parsimoniosos bien configurados.
-
-\paragraph{Régimen 2: Ventaja de Adaptatividad No Paramétrica (Traffic)}
-
-Series con transformación logarítmica fuerte ($\lambda \approx 0$), memoria moderada ($H \approx 0.6$), alta variabilidad temporal y eventos impredecibles favorecen métodos adaptativos no paramétricos. Sieve Bootstrap dominó mediante selección automática de complejidad, superando significativamente a varios competidores ($p < 0.03$ contra LSPM, LSPMW, AREPD). El deterioro de LSPM (rango 1 $\to$ rango 5) evidencia que simplicidad estructural se torna desventaja cuando la realidad subyacente excede capacidades representacionales lineales. AV-MCPS emergió como segundo mejor método por mediana CRPS, validando que adaptatividad a cambios distribucionales locales confiere ventajas en series con heterogeneidad temporal pronunciada.
-
-\paragraph{Régimen 3: Convergencia Multimodal (Exchange Rate)}
-
-Series con ausencia de transformación necesaria ($\lambda \approx 2$), memoria larga extrema ($H > 0.9$), linealidad en media confirmada ($p_{\text{Tsay}} > 0.95$) pero heterocedasticidad severa ($p_{\text{McLeod-Li}} < 0.00001$) generan un paisaje competitivo donde métodos con capacidades complementarias convergen hacia desempeño equivalente. La indistinguibilidad estadística entre Sieve Bootstrap, DeepAR, LSPM y LSPMW ($p > 0.09$) indica que estructura autorregresiva lineal fuerte puede explotarse eficientemente mediante múltiples paradigmas: bootstrap no paramétrico, aprendizaje profundo, regresión lineal estándar o ponderada.
-
-\subsection{Lecciones Metodológicas Fundamentales}
-\label{subsec:lecciones_metodologicas}
-
-\subsubsection{Inexistencia de un Modelo Universalmente Superior}
-
-El hallazgo central del estudio comparativo es la confirmación empírica de que \textit{no existe un modelo universalmente superior} para pronóstico probabilístico de series temporales. El reordenamiento dramático del ranking valida que efectividad es altamente dependiente de alineación entre capacidades del método y características de la serie. Esta conclusión tiene implicaciones prácticas profundas:
-
-\begin{enumerate}
-\item \textbf{Decisiones de modelado deben guiarse por análisis exploratorio exhaustivo}, no por preferencias metodológicas genéricas, popularidad algorítmica o sofisticación computacional percibida.
-
-\item \textbf{La selección de modelos debe ser diagnóstico-informada}: tests de linealidad (Tsay), heterocedasticidad (McLeod-Li, ARCH-LM), memoria larga (exponente de Hurst) y estacionariedad (ADF, KPSS) proporcionan información accionable que anticipa qué familias de modelos tendrán ventajas competitivas.
-
-\item \textbf{Benchmarking comparativo es esencial}: la evaluación de múltiples modelos con validación cruzada temporal permite identificar el método óptimo para cada contexto específico, evitando generalizaciones prematuras desde experiencias en otros dominios.
-\end{enumerate}
-
-\subsubsection{Rol Crítico del Preprocesamiento}
-
-La transformación Box-Cox, aplicada sistemáticamente según el método de Guerrero, demostró ser crucial para homogeneizar la escala de variación y facilitar el ajuste de modelos. Las diferencias dramáticas en $\lambda$ óptimo (Electricity: $-0.1181$, Traffic: $0.0512$, Exchange Rate: $1.9999$) evidencian que no existe una transformación única apropiada. La estimación data-driven mediante métodos diseñados para series temporales resulta superior a heurísticas genéricas.
-
-La eliminación de tendencia mediante LOWESS, con parámetro de ancho de banda $f = 0.05$, logró consistentemente producir series estacionarias que satisfacen simultáneamente tests ADF (rechazo de raíz unitaria, $p < 0.01$) y KPSS (no rechazo de estacionariedad, $p > 0.10$ en los tres datasets. Este resultado valida la robustez del protocolo de preprocesamiento implementado.
-
-\subsubsection{Adaptatividad Confiere Robustez pero No Garantiza Superioridad}
-
-Los métodos adaptativos (Sieve Bootstrap, AV-MCPS, LSPMW) exhibieron desempeño más estable a través de contextos diversos. Sieve Bootstrap nunca ocupó posiciones inferiores al rango 3, mientras que métodos no adaptativos mostraron mayor variabilidad (LSPM: rangos 1, 5, 3; MCPS: rangos 2, 6, 5). Sin embargo, en series con estructura simple y regular (Electricity), métodos más parsimoniosos alcanzaron efectividad comparable con menor complejidad computacional.
-
-Este patrón sugiere una estrategia pragmática: cuando existe incertidumbre sobre la estabilidad estructural de la serie o se requiere robustez ante cambios distribucionales futuros, priorizar métodos adaptativos. Cuando el análisis exploratorio confirma estructura estable y regular, métodos parsimoniosos bien configurados pueden resultar suficientes y más eficientes.
-
-\subsubsection{Aprendizaje Profundo Requiere Escala y Complejidad Adecuadas}
-
-DeepAR y EnCQR-LSTM mostraron mejora monotónica al transitar de Electricity (estructura simple) a Traffic (complejidad intermedia) a Exchange Rate (memoria larga con heterocedasticidad). Sin embargo, con aproximadamente 1800 observaciones de entrenamiento, no superaron consistentemente a métodos más parsimoniosos. Este hallazgo tiene implicaciones prácticas importantes:
-
-\begin{enumerate}
-\item \textbf{Tamaño de muestra crítico}: Arquitecturas recurrentes profundas requieren decenas de miles de observaciones para explotar plenamente su capacidad representacional. En regímenes de datos limitados ($n < 5000$), métodos más parsimoniosos frecuentemente dominan.
-
-\item \textbf{Complejidad estructural necesaria}: El desempeño relativo mejorado en Traffic y Exchange Rate sugiere que aprendizaje profundo confiere ventajas primordialmente cuando la serie exhibe patrones complejos que métodos lineales no capturan. En series con estructura simple post-transformación (Electricity), la complejidad adicional no se justifica.
-
-\item \textbf{Consideraciones computacionales}: La ventaja marginal de DeepAR en Exchange Rate ($\Delta_{\text{mediana}} = 0.00009$ vs. LSPMW) debe ponderarse contra el incremento sustancial en tiempo de entrenamiento y requisitos de hardware. Para aplicaciones en tiempo real, métodos parsimoniosos pueden resultar preferibles.
-\end{enumerate}
-
-\subsubsection{Calibración y Precisión Generalmente Correlacionan}
-
-El análisis exhaustivo de calibración mediante histogramas PIT y curvas de confiabilidad reveló un patrón consistente: modelos con mejor CRPS típicamente exhibieron mejor calibración distribucional. Sin embargo, la relación admite excepciones importantes:
-
-\begin{enumerate}
-\item \textbf{Métodos conformales mantienen calibración razonable incluso con precisión subóptima}: MCPS y AV-MCPS, con CRPS significativamente peores que los métodos superiores en Exchange Rate, mantuvieron calibración conservadora pero correcta. Este hallazgo valida que las garantías teóricas de predicción conformal se traducen en cobertura empírica adecuada.
-
-\item \textbf{Colapso de calibración indica desajuste estructural severo}: Los tres modelos que exhibieron peor desempeño en Exchange Rate (Block Bootstrapping, EnCQR-LSTM, AREPD) mostraron colapso completo de calibración con concentraciones extremas de masa PIT. Este patrón indica que distribuciones predictivas sistemáticamente no contienen el valor observado, tornándolas inútiles para gestión de riesgo o toma de decisiones bajo incertidumbre.
-
-\item \textbf{Adaptatividad mejora simultáneamente precisión y calibración}: LSPMW exhibió tanto mejor mediana de CRPS como calibración PIT mejorada comparado con LSPM en Exchange Rate, validando que ponderación temporal adaptativa confiere beneficios duales.
-\end{enumerate}
-
-\subsection{Protocolo de Análisis Exploratorio como Fundamento}
-\label{subsec:protocolo_eda_fundamento}
-
-La aplicación sistemática del protocolo de análisis exploratorio de seis etapas (transformación Box-Cox, eliminación de tendencia, análisis ACF/PACF, tests de estacionariedad y linealidad, diagnóstico de residuos, análisis espectral) demostró valor predictivo consistente. Los hallazgos exploratorios anticiparon correctamente patrones en el desempeño relativo de los modelos:
-
-\begin{itemize}
-\item \textbf{Test de Tsay anticipó efectividad de métodos lineales}: El test de Tsay no rechazó linealidad en Exchange Rate ($p = 0.966$), anticipando correctamente que LSPM y LSPMW lograrían desempeño competitivo. En Electricity y Traffic, donde Tsay rechazó linealidad ($p < 0.01$), métodos no lineales o adaptativos dominaron.
-
-\item \textbf{Exponente de Hurst indicó necesidad de adaptatividad}: El $H = 0.933$ extremo en Exchange Rate señaló correctamente que LSPMW superaría a LSPM mediante ponderación temporal. Los valores moderados en Electricity y Traffic ($H \approx 0.6$) fueron consistentes con efectividad comparable de métodos adaptativos y no adaptativos.
-
-\item \textbf{Tests de heterocedasticidad justificaron métodos adaptativos}: El rechazo consistente de McLeod-Li en los tres datasets validó la necesidad de distribuciones predictivas adaptativas. AV-MCPS mostró ventaja en Traffic (mayor variabilidad temporal) pero desempeño modesto en Electricity (dinámica estable).
-
-\item \textbf{Análisis espectral informó configuración de hiperparámetros}: Los períodos dominantes identificados (Electricity: 168h, Traffic: 24h, Exchange Rate: 51h) permitieron configurar longitudes de bloque apropiadas en Circular Block Bootstrap, alineando el método con la estructura estacional real.
-\end{itemize}
-
-Este patrón de correspondencia entre diagnósticos exploratorios y desempeño predictivo valida que el protocolo no solo cumple función descriptiva sino que fundamenta decisiones de modelado con poder predictivo real. La inversión en análisis exploratorio exhaustivo produce retornos sustanciales en calidad de pronósticos.
-
-\subsection{Implicaciones para Aplicaciones Prácticas}
-\label{subsec:implicaciones_practicas}
-
-\subsubsection{Estrategia de Selección de Modelos}
-
-Basándose en los hallazgos empíricos, se propone la siguiente estrategia decisional para selección de modelos en aplicaciones de pronóstico operacional:
-
-\begin{enumerate}
-\item \textbf{Etapa 1 - Análisis Exploratorio Exhaustivo}: Aplicar el protocolo de seis etapas para caracterizar transformación óptima ($\lambda$), estacionariedad (ADF, KPSS), linealidad (Tsay), heterocedasticidad (McLeod-Li, ARCH-LM), memoria (exponente de Hurst) y estacionalidad (análisis espectral).
-
-\item \textbf{Etapa 2 - Pre-selección Diagnóstico-Informada}: Identificar familias de modelos apropiadas según hallazgos exploratorios:
-\begin{itemize}
-\item Si Tsay no rechaza ($p > 0.10$) y $H < 0.7$: Priorizar LSPM, MCPS.
-\item Si Tsay rechaza ($p < 0.05$) o $H > 0.8$: Priorizar Sieve Bootstrap, LSPMW.
-\item Si McLeod-Li rechaza ($p < 0.01$) con evidencia de cambios distribucionales: Priorizar AV-MCPS.
-\item Si $n > 10000$ y estructura compleja confirmada: Considerar DeepAR.
-\end{itemize}
-
-\item \textbf{Etapa 3 - Validación Cruzada Temporal}: Evaluar modelos preseleccionados mediante rolling forecast en conjunto de validación, optimizando hiperparámetros vía minimización de ECRPS.
-
-\item \textbf{Etapa 4 - Selección Final con Análisis de Significancia}: Aplicar test de Diebold-Mariano modificado entre mejores modelos. Si diferencias son estadísticamente indistinguibles ($p > 0.10$), priorizar parsimonia, interpretabilidad y eficiencia computacional.
-
-\item \textbf{Etapa 5 - Validación de Calibración}: Verificar calibración mediante histogramas PIT y curvas de confiabilidad en conjunto de prueba. Descartar modelos con patrones erráticos o concentraciones extremas, incluso si CRPS es aceptable.
-\end{enumerate}
-
-\subsubsection{Configuración de Hiperparámetros}
-
-El estudio reveló configuraciones robustas aplicables a contextos diversos:
-
-\begin{itemize}
-\item \textbf{Transformación Box-Cox}: Siempre estimar $\lambda$ mediante método de Guerrero. Evitar heurísticas fijas (e.g., $\lambda = 0$ automático).
-
-\item \textbf{Eliminación de tendencia LOWESS}: $f = 0.05$ demostró robustez en los tres datasets. Valores mayores pueden introducir sesgo; valores menores pueden remover estructura estacional.
-
-\item \textbf{Partición temporal}: 70-75\% entrenamiento, 15\% validación, 10-15\% prueba proporciona balance entre capacidad de aprendizaje y evaluación robusta.
-
-\item \textbf{Parámetro de decaimiento LSPMW}: $\rho \in [0.90, 0.99]$ con selección vía validación. Valores cercanos a 0.95 equilibran adaptatividad y estabilidad en la mayoría de contextos.
-
-\item \textbf{Longitud de bloque CBB}: Igualar al período estacional dominante identificado espectralmente. Evitar heurísticas genéricas no informadas por datos.
-\end{itemize}
-
-\subsubsection{Métricas de Evaluación}
-
-El rechazo consistente de normalidad mediante test de Jarque-Bera en los tres datasets ($p < 0.001$), evidenciando leptocurtosis universal, justifica plenamente el uso de CRPS como métrica principal de evaluación. Las métricas gaussianas tradicionales (MSE, MAE) no penalizan adecuadamente errores en las colas, críticos para gestión de riesgo y toma de decisiones bajo incertidumbre.
-
-La validación de calibración mediante histogramas PIT debe complementar sistemáticamente métricas de precisión puntual. Distribuciones predictivas con CRPS aceptable pero calibración errática (patrones no uniformes en PIT) son inadecuadas para aplicaciones donde la correcta cuantificación de incertidumbre es crítica—gestión de inventarios bajo incertidumbre de demanda, pricing de derivados financieros, planificación de recursos energéticos con alta penetración renovable.
-
-\subsection{Limitaciones y Direcciones Futuras}
-\label{subsec:limitaciones_direcciones}
-
-\subsubsection{Limitaciones del Estudio}
-
-El análisis comparativo presenta limitaciones que deben reconocerse al interpretar hallazgos:
-
-\begin{enumerate}
-\item \textbf{Horizonte de predicción unitario}: El estudio se limitó a $h = 1$ paso adelante. Horizontes multi-paso ($h > 1$) introducen complejidades adicionales (propagación de errores, dependencia temporal en predicciones sucesivas) que pueden alterar el ranking relativo de modelos. Series con estructura compleja pueden favorecer métodos recursivos o directos según el horizonte.
-
-\item \textbf{Tamaño de muestra moderado}: Los tres datasets contienen aproximadamente 1800 observaciones de entrenamiento. Este régimen favorece métodos parsimoniosos sobre aprendizaje profundo. Con muestras del orden de decenas o cientos de miles de observaciones, el panorama competitivo podría reordenarse sustancialmente.
-
-\item \textbf{Contexto univariado}: La evaluación se realizó en contexto puramente univariado. Métodos diseñados para explotación de información multivariada (AREPD) no pudieron demostrar sus capacidades distintivas. En aplicaciones con múltiples series relacionadas, estos métodos podrían exhibir ventajas competitivas no evidentes aquí.
-
-\item \textbf{Ausencia de quiebres estructurales abruptos}: Los tres datasets, aunque exhibiendo variabilidad temporal, no presentan quiebres estructurales abruptos (cambios de régimen instantáneos). Métodos adaptativos podrían mostrar ventajas más pronunciadas en series con transiciones súbitas.
-\end{enumerate}
-
-\subsubsection{Direcciones de Investigación Futura}
-
-Los hallazgos sugieren múltiples direcciones prometedoras para investigación subsecuente:
-
-\begin{enumerate}
-\item \textbf{Extensión a horizontes multi-paso}: Evaluar comparativamente métodos recursivos, directos e híbridos para $h \in \{6, 12, 24\}$. Investigar si la ventaja de métodos adaptativos se amplifica con horizontes mayores donde deriva distribucional acumulada puede ser más pronunciada.
-
-\item \textbf{Escalabilidad a datasets masivos}: Replicar el estudio comparativo con datasets del orden de 50,000-100,000 observaciones para evaluar si aprendizaje profundo alcanza superioridad consistente cuando limitaciones de tamaño de muestra se relajan.
-
-\item \textbf{Contextos multivariados}: Extender la evaluación a pronóstico conjunto de múltiples series correlacionadas, permitiendo que métodos como AREPD exploten covariación temporal. Comparar con métodos univariados aplicados independientemente.
-
-\item \textbf{Modelado de cambios de régimen}: Incorporar series con quiebres estructurales identificados (crisis financieras, cambios regulatorios, eventos climáticos extremos) para evaluar la capacidad de métodos adaptativos para detectar y responder rápidamente a transiciones.
-
-\item \textbf{Optimización de hiperparámetros bayesiana}: Sustituir búsqueda en grilla por métodos bayesianos de optimización (e.g., Gaussian Process Optimization) para explorar eficientemente espacios de hiperparámetros de alta dimensión en modelos complejos.
-
-\item \textbf{Ensambles de métodos heterogéneos}: Investigar si combinaciones de métodos con capacidades complementarias (e.g., LSPMW + DeepAR) mediante ensambles ponderados pueden superar consistentemente a métodos individuales mediante explotación de diversidad metodológica.
-
-\item \textbf{Cuantificación de incertidumbre en la incertidumbre}: Extender el análisis para evaluar no solo calibración de distribuciones predictivas sino también confiabilidad de las estimaciones de calibración mismas, particularmente en regímenes de datos limitados.
-\end{enumerate}
-
-\subsection{Síntesis Final}
-\label{subsec:sintesis_final}
-
-El estudio comparativo exhaustivo de sistemas de predicción conformal y probabilística en tres series temporales reales ha validado empíricamente principios metodológicos fundamentales mientras ha revelado patrones de efectividad dependientes del contexto que desafían generalizaciones simplistas.
-
-El hallazgo central—la inexistencia de un modelo universalmente superior—no es nihilista sino constructivo: fundamenta la necesidad de análisis exploratorio riguroso, selección diagnóstico-informada, y validación comparativa exhaustiva. La aplicación disciplinada del protocolo de seis etapas de análisis exploratorio demostró valor predictivo consistente, anticipando correctamente qué familias de modelos exhibirían ventajas competitivas en cada contexto.
-
-Los métodos adaptativos (Sieve Bootstrap, LSPMW, AV-MCPS) emergieron como opciones robustas a través de contextos diversos, aunque sin dominar universalmente. Su capacidad para ajustar complejidad automáticamente o responder a cambios distribucionales confiere ventajas en series con heterogeneidad temporal, pero introduce complejidad innecesaria cuando la dinámica subyacente es estable y regular.
-
-El aprendizaje profundo (DeepAR, EnCQR-LSTM) mostró mejora monotónica con complejidad estructural creciente pero no superó consistentemente a métodos parsimoniosos en el régimen de aproximadamente 1800 observaciones. Este hallazgo enfatiza la importancia de considerar tamaño de muestra disponible al evaluar trade-offs entre capacidad representacional y eficiencia muestral.
-
-La validación exhaustiva de calibración mediante histogramas PIT y curvas de confiabilidad reveló que precisión puntual (CRPS) y calibración distribucional generalmente correlacionan pero admiten excepciones importantes. Métodos conformales mantuvieron calibración razonable incluso con precisión subóptima, mientras que ciertos métodos exhibieron colapso de calibración severo que los torna inadecuados para aplicaciones donde cuantificación correcta de incertidumbre es crítica.
-
-En conjunto, los hallazgos proporcionan guía accionable para practicantes de pronóstico probabilístico: invertir en análisis exploratorio exhaustivo, seleccionar modelos mediante correspondencia entre capacidades metodológicas y características estructurales identificadas, validar mediante comparación estadística formal con test de Diebold-Mariano, y verificar calibración distribucional sistemáticamente. Esta disciplina metodológica, más que la selección de algoritmos específicos, constituye el fundamento de pronósticos probabilísticos de alta calidad en aplicaciones operacionales.

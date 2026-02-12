@@ -2532,7 +2532,8 @@
     <bcf:citekey order="148" intorder="1">Welch1967</bcf:citekey>
     <bcf:citekey order="149" intorder="1">Salinas2020</bcf:citekey>
     <bcf:citekey order="150" intorder="1">gluonts_jmlr</bcf:citekey>
-    <bcf:citekey order="151" intorder="1">Vovk2019</bcf:citekey>
+    <bcf:citekey order="151" intorder="1">wolpert1997no</bcf:citekey>
+    <bcf:citekey order="152" intorder="1">Vovk2019</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="nyt">

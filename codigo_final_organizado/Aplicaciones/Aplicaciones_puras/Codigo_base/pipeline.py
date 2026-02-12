@@ -697,4 +697,3 @@ class PipelineExchange:
             
         df_results = pd.DataFrame(results_rows)
         return df_results, predictions_dict
-

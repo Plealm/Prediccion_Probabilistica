@@ -15,17 +15,14 @@
 \contentsline {table}{\numberline {\textbf {3-12}}{\ignorespaces Comparativa: Teoría vs. Implementación de EnCQR-LSTM}}{92}{table.caption.168}%
 \contentsline {table}{\numberline {\textbf {3-13}}{\ignorespaces Tamaños muestrales evaluados con proporción fija}}{103}{table.caption.187}%
 \contentsline {table}{\numberline {\textbf {3-14}}{\ignorespaces Proporciones de calibración evaluadas (N=240 fijo)}}{104}{table.caption.190}%
-\contentsline {table}{\numberline {\textbf {3-15}}{\ignorespaces Resumen de la carga experimental de simulaciones complementarias}}{107}{table.caption.196}%
+\contentsline {table}{\numberline {\textbf {3-15}}{\ignorespaces Resumen de la carga experimental de simulaciones complementarias}}{108}{table.caption.196}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {\textbf {4-1}}{\ignorespaces Análisis de significancia por escenarios: Sin Diferenciación vs Con Diferenciación}}{133}{table.caption.223}%
+\contentsline {table}{\numberline {\textbf {4-1}}{\ignorespaces Análisis de significancia por escenarios: Sin Diferenciación vs Con Diferenciación}}{134}{table.caption.224}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {\textbf {5-1}}{\ignorespaces Resumen de características identificadas en el análisis exploratorio del dataset Electricity y sus implicaciones metodológicas.}}{214}{table.caption.324}%
-\contentsline {table}{\numberline {\textbf {5-2}}{\ignorespaces Ranking de modelos según desempeño en dataset Electricity.}}{216}{table.caption.328}%
-\contentsline {table}{\numberline {\textbf {5-3}}{\ignorespaces Ranking de modelos según desempeño en dataset Traffic. }}{225}{table.caption.340}%
-\contentsline {table}{\numberline {\textbf {5-4}}{\ignorespaces Matriz de valores p del test de Diebold-Mariano modificado para el dataset Traffic.}}{228}{table.caption.343}%
-\contentsline {table}{\numberline {\textbf {5-5}}{\ignorespaces Ranking de modelos según desempeño en dataset Exchange Rate.}}{238}{table.caption.353}%
-\contentsline {table}{\numberline {\textbf {5-6}}{\ignorespaces Matriz de valores p del test de Diebold-Mariano modificado para el dataset Exchange Rate. }}{240}{table.caption.356}%
-\contentsline {table}{\numberline {\textbf {5-7}}{\ignorespaces Comparación sistemática de características estructurales y desempeño de modelos a través de los tres datasets evaluados.}}{248}{table.caption.361}%
+\contentsline {table}{\numberline {\textbf {5-1}}{\ignorespaces Resumen de características identificadas en el análisis exploratorio del dataset Electricity y sus implicaciones metodológicas.}}{218}{table.caption.322}%
+\contentsline {table}{\numberline {\textbf {5-2}}{\ignorespaces Ranking de modelos según desempeño en dataset Electricity.}}{221}{table.caption.326}%
+\contentsline {table}{\numberline {\textbf {5-3}}{\ignorespaces Ranking de modelos según desempeño en dataset Traffic.}}{232}{table.caption.341}%
+\contentsline {table}{\numberline {\textbf {5-4}}{\ignorespaces Ranking de modelos según desempeño en dataset Exchange Rate.}}{247}{table.caption.356}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \def \@chapapp {\appendixname }
