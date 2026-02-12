@@ -2518,22 +2518,21 @@
     <bcf:citekey order="134" intorder="1">Hyndman2021FPP3</bcf:citekey>
     <bcf:citekey order="135" intorder="1">Buhlmann1997</bcf:citekey>
     <bcf:citekey order="136" intorder="1">Box2015</bcf:citekey>
-    <bcf:citekey order="137" intorder="1">Buhlmann1997</bcf:citekey>
-    <bcf:citekey order="138" intorder="1">Vovk2005</bcf:citekey>
-    <bcf:citekey order="139" intorder="1">BoxCox1964</bcf:citekey>
-    <bcf:citekey order="140" intorder="1">Guerrero1993</bcf:citekey>
-    <bcf:citekey order="141" intorder="1">DickeyFuller1979</bcf:citekey>
-    <bcf:citekey order="142" intorder="1">KPSS1992</bcf:citekey>
-    <bcf:citekey order="143" intorder="1">BDS1996</bcf:citekey>
-    <bcf:citekey order="144" intorder="1">McLeodLi1983</bcf:citekey>
-    <bcf:citekey order="145" intorder="1">Tsay1986</bcf:citekey>
-    <bcf:citekey order="146" intorder="1">Hurst1951</bcf:citekey>
-    <bcf:citekey order="147" intorder="1">JarqueBera1987</bcf:citekey>
-    <bcf:citekey order="148" intorder="1">LjungBox1978</bcf:citekey>
-    <bcf:citekey order="149" intorder="1">Welch1967</bcf:citekey>
-    <bcf:citekey order="150" intorder="1">Salinas2020</bcf:citekey>
-    <bcf:citekey order="151" intorder="1">gluonts_jmlr</bcf:citekey>
-    <bcf:citekey order="152" intorder="1">Vovk2019</bcf:citekey>
+    <bcf:citekey order="137" intorder="1">Vovk2005</bcf:citekey>
+    <bcf:citekey order="138" intorder="1">BoxCox1964</bcf:citekey>
+    <bcf:citekey order="139" intorder="1">Guerrero1993</bcf:citekey>
+    <bcf:citekey order="140" intorder="1">DickeyFuller1979</bcf:citekey>
+    <bcf:citekey order="141" intorder="1">KPSS1992</bcf:citekey>
+    <bcf:citekey order="142" intorder="1">BDS1996</bcf:citekey>
+    <bcf:citekey order="143" intorder="1">McLeodLi1983</bcf:citekey>
+    <bcf:citekey order="144" intorder="1">Tsay1986</bcf:citekey>
+    <bcf:citekey order="145" intorder="1">Hurst1951</bcf:citekey>
+    <bcf:citekey order="146" intorder="1">JarqueBera1987</bcf:citekey>
+    <bcf:citekey order="147" intorder="1">LjungBox1978</bcf:citekey>
+    <bcf:citekey order="148" intorder="1">Welch1967</bcf:citekey>
+    <bcf:citekey order="149" intorder="1">Salinas2020</bcf:citekey>
+    <bcf:citekey order="150" intorder="1">gluonts_jmlr</bcf:citekey>
+    <bcf:citekey order="151" intorder="1">Vovk2019</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="nyt">

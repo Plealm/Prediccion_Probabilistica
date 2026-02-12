@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 24.1) (preloaded format=pdflatex 2026.1.2)  2 JAN 2026 12:56
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.1.2)  11 FEB 2026 09:14
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1277,24 +1277,16 @@ File: Inicio/EscudoUN.jpeg Graphic file (type jpg)
 <use Inicio/EscudoUN.jpeg>
 Package pdftex.def Info: Inicio/EscudoUN.jpeg  used on input line 6.
 (pdftex.def)             Requested size: 237.88815pt x 100.87662pt.
+ [1
 
 
-[1
-
-
-{C:/Users/pleal/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map} <./Inicio/EscudoUN.jpeg>]
-
-[2
+{C:/Users/pleal/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map} <./Inicio/EscudoUN.jpeg>] [2
 
 
 ]
 Underfull \vbox (badness 4518) has occurred while \output is active []
 
-
-
-[3]
-
-[4
+ [3] [4
 
 
 ]
@@ -1312,11 +1304,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 43--46
 
  []
 
-
-
-[5]
-
-[6
+[5] [6
 
 
 ]
@@ -1339,11 +1327,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 66--75
 
  []
 
-
-
-[7]
-
-[8
+[7] [8
 
 
 ]
@@ -1385,11 +1369,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 108--109
 
  []
 
-)
-
-[9]
-
-[10
+) [9] [10
 
 
 
@@ -1399,21 +1379,15 @@ No file main.lof.
 \tf@lof=\write5
 \openout5 = `main.lof'.
 
-
-
 [11
 
-]
-
-[12
+] [12
 
 
 ]
 No file main.lot.
 \tf@lot=\write6
 \openout6 = `main.lot'.
-
-
 
 [1
 
@@ -1465,9 +1439,7 @@ LaTeX Warning: Reference `cap:2' on page 2 undefined on input line 25.
 
 LaTeX Warning: Reference `cap:3' on page 2 undefined on input line 25.
 
-)
-
-[2
+) [2
 
 
 ]
@@ -1486,8 +1458,6 @@ LaTeX Warning: Citation 'phdthesis' on page 3 undefined on input line 8.
 
 LaTeX Warning: Citation 'PDG' on page 3 undefined on input line 8.
 
-
-
 [3
 
 
@@ -1497,8 +1467,6 @@ LaTeX Warning: Citation 'PDG' on page 3 undefined on input line 8.
 
 LaTeX Warning: Reference `table: notacion' on page 4 undefined on input line 74.
 
-
-
 LaTeX Info: Redefining \. on input line 106.
 LaTeX Info: Redefining \% on input line 106.
 Package babel Info: 'spanish' activates 'spanish' shorthands.
@@ -1506,8 +1474,6 @@ Package babel Info: 'spanish' activates 'spanish' shorthands.
 [4]
 
 LaTeX Warning: Citation 'hiperfina' on page 5 undefined on input line 157.
-
-
 
 LaTeX Info: Redefining \. on input line 168.
 LaTeX Info: Redefining \% on input line 168.
@@ -1529,8 +1495,6 @@ Package tikz-feynman Warning: The key you tried to use '/tikz/horizontal' requir
 
 
 LaTeX Warning: Reference `AnexoA' on page 6 undefined on input line 184.
-
-
 
 LaTeX Info: Redefining \. on input line 217.
 LaTeX Info: Redefining \% on input line 217.
@@ -1562,15 +1526,12 @@ Package tikz-feynman Warning: The key you tried to use '/tikz/vertical'' require
 
 LaTeX Warning: Reference `fig: aniquilacion' on page 7 undefined on input line 257.
 
-
-
 LaTeX Info: Redefining \. on input line 269.
 LaTeX Info: Redefining \% on input line 269.
 [7]
-
 LaTeX Info: Redefining \. on input line 330.
 LaTeX Info: Redefining \% on input line 330.
-[8]
+ [8]
 
 LaTeX Warning: Citation 'cornell' on page 9 undefined on input line 332.
 
@@ -1583,10 +1544,9 @@ File: Imagenes/potencial.pdf Graphic file (type pdf)
 Package pdftex.def Info: Imagenes/potencial.pdf  used on input line 342.
 (pdftex.def)             Requested size: 346.89513pt x 260.17136pt.
 )
-
 LaTeX Info: Redefining \. on input line 102.
 LaTeX Info: Redefining \% on input line 102.
-[9 <./Imagenes/potencial.pdf>]
+ [9 <./Imagenes/potencial.pdf>]
 \openout2 = `Capitulos/Cap2.aux'.
 
  (Capitulos/Cap2.tex
@@ -1638,8 +1598,6 @@ my insertion and my current dilemma will both disappear.
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 (hyperref)                removing `\to' on input line 36.
-
-
 
 [10
 
@@ -1705,8 +1663,6 @@ LaTeX Warning: Reference `eq: solradiinf' on page 11 undefined on input line 83.
 
 LaTeX Warning: Reference `eq: solradicero' on page 11 undefined on input line 83.
 
-
-
 LaTeX Info: Redefining \. on input line 86.
 LaTeX Info: Redefining \% on input line 86.
 [11]
@@ -1769,8 +1725,6 @@ File: Imagenes/chi2Charmonium.pdf Graphic file (type pdf)
 <use Imagenes/chi2Charmonium.pdf>
 Package pdftex.def Info: Imagenes/chi2Charmonium.pdf  used on input line 149.
 (pdftex.def)             Requested size: 416.27133pt x 312.20352pt.
-
-
 LaTeX Info: Redefining \. on input line 153.
 LaTeX Info: Redefining \% on input line 153.
 [12]
@@ -1782,8 +1736,6 @@ LaTeX Warning: Citation 'Maltoni' on page 13 undefined on input line 166.
 
 
 LaTeX Warning: Reference `eq: libertad' on page 13 undefined on input line 178.
-
-
 
 LaTeX Info: Redefining \. on input line 180.
 LaTeX Info: Redefining \% on input line 180.
@@ -1828,11 +1780,9 @@ Package pdftex.def Info: Imagenes/chi2Bottonium.pdf  used on input line 210.
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-
-
 LaTeX Info: Redefining \. on input line 215.
 LaTeX Info: Redefining \% on input line 215.
-[14]
+ [14]
 
 LaTeX Warning: Citation 'PDG' on page 15 undefined on input line 226.
 
@@ -1842,10 +1792,9 @@ Overfull \hbox (43.10313pt too wide) in paragraph at lines 226--228
  []
 
 )
-
 LaTeX Info: Redefining \. on input line 103.
 LaTeX Info: Redefining \% on input line 103.
-[15 <./Imagenes/chi2Bottonium.pdf>]
+ [15 <./Imagenes/chi2Bottonium.pdf>]
 \openout2 = `Capitulos/Cap3.aux'.
 
  (Capitulos/Cap3.tex
@@ -1860,8 +1809,6 @@ LaTeX Warning: Citation 'libro' on page 16 undefined on input line 25.
 Overfull \hbox (40.09122pt too wide) in paragraph at lines 25--26
 []\OT1/cmr/m/n/12 Las co-rrec-cio-nes de-fi-ni-das se agre-gan a la energ^^S^^Pa ba-se por me-dio de la teor^^S^^Pa de perturbaciones[[]], 
  []
-
-
 
 [16
 
@@ -1907,8 +1854,6 @@ LaTeX Warning: Citation 'lattice' on page 17 undefined on input line 104.
 
 LaTeX Warning: Citation 'data' on page 17 undefined on input line 104.
 
-
-
 LaTeX Info: Redefining \. on input line 105.
 LaTeX Info: Redefining \% on input line 105.
 [17]
@@ -1926,8 +1871,6 @@ LaTeX Warning: Citation 'data' on page 18 undefined on input line 137.
 
 
 LaTeX Warning: Reference `table: bottom_spin' on page 18 undefined on input line 140.
-
-
 
 LaTeX Info: Redefining \. on input line 149.
 LaTeX Info: Redefining \% on input line 149.
@@ -1954,8 +1897,6 @@ LaTeX Warning: Citation 'data' on page 19 undefined on input line 197.
 
 LaTeX Warning: Reference `table: 3' on page 19 undefined on input line 201.
 
-
-
 LaTeX Info: Redefining \. on input line 203.
 LaTeX Info: Redefining \% on input line 203.
 [19]
@@ -1980,15 +1921,12 @@ LaTeX Warning: Reference `table: 3' on page 20 undefined on input line 232.
 
 LaTeX Warning: Reference `table: 3' on page 20 undefined on input line 232.
 
-
-
 LaTeX Info: Redefining \. on input line 266.
 LaTeX Info: Redefining \% on input line 266.
 [20])
-
 LaTeX Info: Redefining \. on input line 104.
 LaTeX Info: Redefining \% on input line 104.
-[21]
+ [21]
 \openout2 = `Anexos/Anexos.aux'.
 
  (Anexos/Anexos.tex
@@ -2124,16 +2062,12 @@ LaTeX Warning: Citation 'dutch' on page 22 undefined on input line 51.
 
 Underfull \vbox (badness 1803) has occurred while \output is active []
 
-
-
-[22
+ [22
 
 
 
 
-]
-
-[23]
+] [23]
 chapter B.
 
 LaTeX Warning: Citation 'hiperfina' on page 24 undefined on input line 77.
@@ -2162,8 +2096,6 @@ LaTeX Warning: Citation 'hiperfina' on page 24 undefined on input line 133.
 
 LaTeX Warning: Citation 'hiperfina' on page 24 undefined on input line 133.
 
-
-
 [24
 
 ]
@@ -2171,19 +2103,14 @@ Overfull \hbox (66.68297pt too wide) detected at line 191
 []
  []
 
-
-
 LaTeX Info: Redefining \. on input line 198.
 LaTeX Info: Redefining \% on input line 198.
 [25]
-
 LaTeX Info: Redefining \. on input line 264.
 LaTeX Info: Redefining \% on input line 264.
-[26]
+ [26]
 
 LaTeX Warning: Citation 'base' on page 27 undefined on input line 300.
-
-
 
 LaTeX Info: Redefining \. on input line 306.
 LaTeX Info: Redefining \% on input line 306.
@@ -2202,8 +2129,6 @@ Overfull \hbox (10.16754pt too wide) detected at line 353
 []
  []
 
-
-
 [28
 
 ]
@@ -2212,8 +2137,6 @@ LaTeX Warning: Citation 'delta' on page 29 undefined on input line 381.
 
 
 LaTeX Warning: Reference `eq: integral1' on page 29 undefined on input line 398.
-
-
 
 LaTeX Info: Redefining \. on input line 405.
 LaTeX Info: Redefining \% on input line 405.
@@ -2232,9 +2155,7 @@ Overfull \hbox (65.01973pt too wide) detected at line 445
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-
-
-[30
+ [30
 
 ]
 Overfull \hbox (60.26521pt too wide) detected at line 462
@@ -2249,11 +2170,9 @@ Overfull \hbox (51.40852pt too wide) detected at line 479
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-
-
 LaTeX Info: Redefining \. on input line 479.
 LaTeX Info: Redefining \% on input line 479.
-[31]
+ [31]
 Overfull \hbox (44.13792pt too wide) detected at line 497
 []
  []
@@ -2266,11 +2185,9 @@ Overfull \hbox (57.28346pt too wide) detected at line 515
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-
-
 LaTeX Info: Redefining \. on input line 515.
 LaTeX Info: Redefining \% on input line 515.
-[32]
+ [32]
 Overfull \hbox (47.78334pt too wide) detected at line 534
 []
  []
@@ -2283,11 +2200,9 @@ Overfull \hbox (51.40852pt too wide) detected at line 552
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-
-
 LaTeX Info: Redefining \. on input line 552.
 LaTeX Info: Redefining \% on input line 552.
-[33]
+ [33]
 Overfull \hbox (60.9862pt too wide) detected at line 575
 []
  []
@@ -2295,11 +2210,9 @@ Overfull \hbox (60.9862pt too wide) detected at line 575
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-
-
 LaTeX Info: Redefining \. on input line 575.
 LaTeX Info: Redefining \% on input line 575.
-[34]
+ [34]
 Overfull \hbox (29.52837pt too wide) detected at line 582
 []
  []
@@ -2314,15 +2227,12 @@ Overfull \hbox (50.41704pt too wide) detected at line 592
 []
  []
 
-
-
 LaTeX Info: Redefining \. on input line 592.
 LaTeX Info: Redefining \% on input line 592.
 [35])
-
 LaTeX Info: Redefining \. on input line 105.
 LaTeX Info: Redefining \% on input line 105.
-[36]
+ [36]
 
 LaTeX Warning: Empty bibliography on input line 109.
 
@@ -2352,15 +2262,15 @@ Package logreq Info: Writing requests to 'main.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 43604 strings out of 467875
- 927210 string characters out of 5418464
- 1874262 words of memory out of 5000000
- 71684 multiletter control sequences out of 15000+600000
+ 43604 strings out of 467871
+ 927210 string characters out of 5418377
+ 1874250 words of memory out of 5000000
+ 71683 multiletter control sequences out of 15000+600000
  639851 words of font info for 81 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  108i,27n,118p,11309b,2045s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx8.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbxti10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmcsc10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi6.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr17.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmssbx10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy6.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti12.pfb>
-Output written on main.pdf (48 pages, 805605 bytes).
+Output written on main.pdf (48 pages, 804266 bytes).
 PDF statistics:
  726 PDF objects out of 1000 (max. 8388607)
  181 named destinations out of 1000 (max. 500000)
