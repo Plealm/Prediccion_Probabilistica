@@ -7,8 +7,8 @@
 \contentsline {figure}{\numberline {\textbf {4-1}}{\ignorespaces Evolución de las distribuciones predictivas para Sieve Bootstrap, DeepAR y Block Bootstrapping en la configuración ARMA(1,1) con distribución normal y $\sigma ^2=1.0$.}}{112}{figure.caption.198}%
 \contentsline {figure}{\numberline {\textbf {4-2}}{\ignorespaces ECRPS promedio por escenario.}}{113}{figure.caption.199}%
 \contentsline {figure}{\numberline {\textbf {4-3}}{\ignorespaces Z-scores de ECRPS por configuración. }}{114}{figure.caption.200}%
-\contentsline {figure}{\numberline {\textbf {4-4}}{\ignorespaces Z-scores de ECRPS por configuración según familia de procesos (parte 1).}}{115}{figure.caption.202}%
-\contentsline {figure}{\numberline {\textbf {4-4}}{\ignorespaces Z-scores de ECRPS por configuración según familia de procesos (parte 2).}}{116}{figure.caption.203}%
+\contentsline {figure}{\numberline {\textbf {4-4}}{\ignorespaces Z-scores de ECRPS por configuración según familia de procesos.}}{115}{figure.caption.202}%
+\contentsline {figure}{\numberline {\textbf {4-4}}{\ignorespaces Z-scores de ECRPS por configuración según familia de procesos (continuación).}}{116}{figure.caption.203}%
 \contentsline {figure}{\numberline {\textbf {4-5}}{\ignorespaces Z-scores de ECRPS por distribución.}}{117}{figure.caption.205}%
 \contentsline {figure}{\numberline {\textbf {4-6}}{\ignorespaces Z-scores de ECRPS por distribución del error según familia de procesos.}}{119}{figure.caption.206}%
 \contentsline {figure}{\numberline {\textbf {4-6}}{\ignorespaces Z-scores de ECRPS por distribución del error según familia de procesos (continuación).}}{120}{figure.caption.207}%
@@ -30,22 +30,22 @@
 \contentsline {figure}{\numberline {\textbf {4-18}}{\ignorespaces Porcentaje de comparaciones significativas modelo CPS por proceso ARIMA y orden de integración.}}{145}{figure.caption.233}%
 \contentsline {figure}{\numberline {\textbf {4-18}}{\ignorespaces Porcentaje de comparaciones significativas sieve bootstrap por proceso ARIMA y orden de integración.}}{146}{figure.caption.234}%
 \contentsline {figure}{\numberline {\textbf {4-19}}{\ignorespaces Z-scores de ECRPS por tamaño muestral total. }}{150}{figure.caption.239}%
-\contentsline {figure}{\numberline {\textbf {4-20}}{\ignorespaces Z-scores de ECRPS por configuración según familia de procesos (parte 1).}}{152}{figure.caption.241}%
+\contentsline {figure}{\numberline {\textbf {4-20}}{\ignorespaces Z-scores de ECRPS por configuración según familia de procesos.}}{152}{figure.caption.241}%
 \contentsline {figure}{\numberline {\textbf {4-20}}{\ignorespaces Z-scores de ECRPS por tamaño muestral según familia de procesos (continuación).}}{153}{figure.caption.242}%
 \contentsline {figure}{\numberline {\textbf {4-21}}{\ignorespaces Mejora relativa en ECRPS respecto a $N = 120$ para todos los escenarios.}}{155}{figure.caption.244}%
-\contentsline {figure}{\numberline {\textbf {4-22}}{\ignorespaces Mejora relativa en ECRPS respecto a $N = 120$ según familia de procesos (continúa).}}{157}{figure.caption.246}%
+\contentsline {figure}{\numberline {\textbf {4-22}}{\ignorespaces Mejora relativa en ECRPS respecto a $N = 120$ según familia de procesos.}}{157}{figure.caption.246}%
 \contentsline {figure}{\numberline {\textbf {4-22}}{\ignorespaces Mejora relativa en ECRPS respecto a $N = 120$ según familia de procesos (continuación).}}{158}{figure.caption.247}%
-\contentsline {figure}{\numberline {\textbf {4-23}}{\ignorespaces ECRPS medio y porcentaje de escenarios con diferencia significativa (Bonferroni) por tamaño muestral total. Valor superior: ECRPS medio. Valor entre paréntesis: \% de escenarios con diferencia significativa. Color de fondo: escala del porcentaje de significancia.}}{160}{figure.caption.249}%
-\contentsline {figure}{\numberline {\textbf {4-24}}{\ignorespaces ECRPS medio y \% de significancia según familia de procesos (parte 1).}}{162}{figure.caption.251}%
+\contentsline {figure}{\numberline {\textbf {4-23}}{\ignorespaces ECRPS medio y porcentaje de escenarios con diferencia significativa (Bonferroni) por tamaño muestral total.}}{160}{figure.caption.249}%
+\contentsline {figure}{\numberline {\textbf {4-24}}{\ignorespaces ECRPS medio y \% de significancia según familia de procesos.}}{162}{figure.caption.251}%
 \contentsline {figure}{\numberline {\textbf {4-24}}{\ignorespaces ECRPS medio y \% de significancia según familia de procesos (continuación).}}{162}{figure.caption.252}%
 \contentsline {figure}{\numberline {\textbf {4-25}}{\ignorespaces Z-scores de ECRPS por proporción de calibración (todos los escenarios).}}{166}{figure.caption.254}%
-\contentsline {figure}{\numberline {\textbf {4-26}}{\ignorespaces Z-scores de ECRPS por configuración según familia de procesos (parte 1).}}{168}{figure.caption.255}%
+\contentsline {figure}{\numberline {\textbf {4-26}}{\ignorespaces Z-scores de ECRPS por configuración según familia de procesos.}}{168}{figure.caption.255}%
 \contentsline {figure}{\numberline {\textbf {4-26}}{\ignorespaces Z-scores de ECRPS por proporción según familia de procesos.}}{169}{figure.caption.256}%
 \contentsline {figure}{\numberline {\textbf {4-27}}{\ignorespaces Evolución del ECRPS por proporción de calibración (todos los escenarios).}}{170}{figure.caption.257}%
-\contentsline {figure}{\numberline {\textbf {4-28}}{\ignorespaces Z-scores de ECRPS por configuración según familia de procesos (parte 1).}}{172}{figure.caption.259}%
+\contentsline {figure}{\numberline {\textbf {4-28}}{\ignorespaces Z-scores de ECRPS por configuración según familia de procesos.}}{172}{figure.caption.259}%
 \contentsline {figure}{\numberline {\textbf {4-28}}{\ignorespaces Evolución del ECRPS por proporción de calibración según familia de procesos.}}{173}{figure.caption.260}%
 \contentsline {figure}{\numberline {\textbf {4-29}}{\ignorespaces ECRPS medio y porcentaje de escenarios con diferencia significativa (Bonferroni) por proporción de calibración.}}{174}{figure.caption.262}%
-\contentsline {figure}{\numberline {\textbf {4-30}}{\ignorespaces ECRPS medio y \% de significancia según familia de procesos (parte 1).}}{176}{figure.caption.264}%
+\contentsline {figure}{\numberline {\textbf {4-30}}{\ignorespaces ECRPS medio y \% de significancia según familia de procesos.}}{176}{figure.caption.264}%
 \contentsline {figure}{\numberline {\textbf {4-30}}{\ignorespaces ECRPS medio y \% de significancia según familia de procesos (continuación).}}{176}{figure.caption.265}%
 \contentsline {figure}{\numberline {\textbf {4-31}}{\ignorespaces ECRPS promedio por escenario en predicción multi-paso.}}{180}{figure.caption.267}%
 \contentsline {figure}{\numberline {\textbf {4-32}}{\ignorespaces Evolución del ECRPS por horizonte de pronóstico (todos los escenarios).}}{181}{figure.caption.268}%
