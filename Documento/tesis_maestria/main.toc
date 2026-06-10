@@ -10,8 +10,8 @@
 \contentsline {chapter}{\numberline {2}Sistemas de Predicción Conformal}{6}{chapter.2}%
 \contentsline {section}{\numberline {2.1}Pronóstico Probabilístico}{6}{section.2.1}%
 \contentsline {subsection}{\numberline {2.1.1}Definición y Objetivos}{6}{subsection.2.1.1}%
-\contentsline {subsection}{\numberline {2.1.2}Ventajas del Pronóstico Probabilístico}{8}{subsection.2.1.2}%
-\contentsline {section}{\numberline {2.2}Métricas para Evaluación de Pronósticos Probabilísticos}{9}{section.2.2}%
+\contentsline {subsection}{\numberline {2.1.2}Ventajas del Pronóstico Probabilístico}{7}{subsection.2.1.2}%
+\contentsline {section}{\numberline {2.2}Métricas para Evaluación de Pronósticos Probabilísticos}{8}{section.2.2}%
 \contentsline {subsection}{\numberline {2.2.1}Reglas de Puntuación Propias}{9}{subsection.2.2.1}%
 \contentsline {subsubsection}{\nonumberline Propiedad (Propriety) y Propiedad estricta (Strict Propriety)}{9}{subsubsection*.7}%
 \contentsline {subsection}{\numberline {2.2.2}Continuous Ranked Probability Score (CRPS)}{10}{subsection.2.2.2}%
@@ -22,12 +22,12 @@
 \contentsline {subsubsection}{\nonumberline Estimación empírica}{12}{subsubsection*.11}%
 \contentsline {subsection}{\numberline {2.2.4}Z-Score Normalizado}{12}{subsection.2.2.4}%
 \contentsline {subsection}{\numberline {2.2.5}Transformación Integral de Probabilidad (PIT)}{13}{subsection.2.2.5}%
-\contentsline {subsection}{\numberline {2.2.6}Curvas de Confiabilidad (Reliability Diagrams)}{14}{subsection.2.2.6}%
+\contentsline {subsection}{\numberline {2.2.6}Curvas de Confiabilidad (Reliability Diagrams)}{13}{subsection.2.2.6}%
 \contentsline {section}{\numberline {2.3}Test de Diebold-Mariano}{14}{section.2.3}%
-\contentsline {subsection}{\numberline {2.3.1}Formulación del Test}{15}{subsection.2.3.1}%
+\contentsline {subsection}{\numberline {2.3.1}Formulación del Test}{14}{subsection.2.3.1}%
 \contentsline {subsection}{\numberline {2.3.2}Distribución Asintótica y Estimación de la Varianza}{15}{subsection.2.3.2}%
 \contentsline {subsection}{\numberline {2.3.3}Modificaciones para Muestras Pequeñas}{17}{subsection.2.3.3}%
-\contentsline {subsection}{\numberline {2.3.4}Enfoque de la Teoria Asintótica de Suavizado Fijo}{18}{subsection.2.3.4}%
+\contentsline {subsection}{\numberline {2.3.4}Enfoque de la Teoría Asintótica de Suavizado Fijo}{18}{subsection.2.3.4}%
 \contentsline {subsection}{\numberline {2.3.5}Corrección de Bonferroni}{19}{subsection.2.3.5}%
 \contentsline {section}{\numberline {2.4}Predicción Conformal por Intervalos: El Enfoque IID}{20}{section.2.4}%
 \contentsline {subsection}{\numberline {2.4.1}El Concepto de No-Conformidad}{20}{subsection.2.4.1}%
@@ -49,10 +49,9 @@
 \contentsline {subsection}{\numberline {2.8.2}Contribución y Relevancia}{30}{subsection.2.8.2}%
 \contentsline {section}{\numberline {2.9}Análisis de la Consistencia Universal de Vovk}{31}{section.2.9}%
 \contentsline {subsection}{\numberline {2.9.1}Definición de Consistencia Universal}{31}{subsection.2.9.1}%
-\contentsline {subsection}{\numberline {2.9.2}Definición de Consistencia Universal}{31}{subsection.2.9.2}%
-\contentsline {subsection}{\numberline {2.9.3}Mecanismo de la Demostración: El Enfoque de Histograma}{32}{subsection.2.9.3}%
-\contentsline {subsection}{\numberline {2.9.4}La Distancia de Lévy y la Convergencia Débil}{32}{subsection.2.9.4}%
-\contentsline {subsection}{\numberline {2.9.5}Implicaciones para el LSPM y la Eficiencia}{33}{subsection.2.9.5}%
+\contentsline {subsection}{\numberline {2.9.2}Mecanismo de la Demostración: El Enfoque de Histograma}{32}{subsection.2.9.2}%
+\contentsline {subsection}{\numberline {2.9.3}La Distancia de Lévy y la Convergencia Débil}{32}{subsection.2.9.3}%
+\contentsline {subsection}{\numberline {2.9.4}Implicaciones para el LSPM y la Eficiencia}{33}{subsection.2.9.4}%
 \contentsline {section}{\numberline {2.10}Hacia la Consistencia Universal en Series de Tiempo Ergódicas}{33}{section.2.10}%
 \contentsline {chapter}{\numberline {3}Metodología de Simulaciones}{35}{chapter.3}%
 \contentsline {section}{\numberline {3.1}Introducción}{35}{section.3.1}%
@@ -205,7 +204,7 @@
 \contentsline {subparagraph}{\nonumberline Arquitectura de Ensamble y Regresión Cuantílica}{89}{subparagraph*.161}%
 \contentsline {subparagraph}{\nonumberline Predicción Leave-One-Out y Scores de Conformidad}{89}{subparagraph*.162}%
 \contentsline {subparagraph}{\nonumberline Conformalización y Distribución Predictiva}{90}{subparagraph*.163}%
-\contentsline {subparagraph}{\nonumberline Naturaleza del Modelo}{90}{subparagraph*.164}%
+\contentsline {subparagraph}{\nonumberline Naturaleza del Modelo}{91}{subparagraph*.164}%
 \contentsline {subparagraph}{\nonumberline Propiedades Teóricas}{91}{subparagraph*.165}%
 \contentsline {paragraph}{\nonumberline De la Teoría a la Práctica}{91}{paragraph*.166}%
 \contentsline {subparagraph}{\nonumberline Adaptaciones Principales}{91}{subparagraph*.167}%

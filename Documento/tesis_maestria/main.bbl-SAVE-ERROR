@@ -132,7 +132,7 @@
            givenun=0}}%
       }
       \list{location}{1}{%
-        {Medell{'ı}n, Colombia}%
+        {Medellín, Colombia}%
       }
       \strng{namehash}{32e5ad4c46b82b0af0afc7e9b6a9cfb9}
       \strng{fullhash}{32e5ad4c46b82b0af0afc7e9b6a9cfb9}
@@ -148,7 +148,7 @@
       \field{labeldatesource}{}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{booktitle}{XXVII Simposio Internacional de Estad{'ı}stica / 5th International Workshop on Applied Statistics}
+      \field{booktitle}{XXVII Simposio Internacional de Estadística / 5th International Workshop on Applied Statistics}
       \field{note}{Poster Presentation}
       \field{title}{Evaluation of the Sieve Bootstrap's performance in comparison with the classic approach for forecasting purposes in time series analysis}
       \field{year}{2017}
@@ -2146,6 +2146,49 @@
       \range{pages}{4}
       \verb{doi}
       \verb 10.1109/TAU.1967.1161901
+      \endverb
+    \endentry
+    \entry{wolpert1997no}{article}{}{}
+      \name{author}{2}{}{%
+        {{un=0,uniquepart=base,hash=ad1e9fc8d8c048abe3c7a40671b7a044}{%
+           family={Wolpert},
+           familyi={W\bibinitperiod},
+           given={David\bibnamedelima H},
+           giveni={D\bibinitperiod\bibinitdelim H\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=b8218a164b0224b26cf36cfb4a28aed1}{%
+           family={Macready},
+           familyi={M\bibinitperiod},
+           given={William\bibnamedelima G},
+           giveni={W\bibinitperiod\bibinitdelim G\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {IEEE}%
+      }
+      \strng{namehash}{ff5577fa0e144c7d523b7e8e76755017}
+      \strng{fullhash}{ff5577fa0e144c7d523b7e8e76755017}
+      \strng{fullhashraw}{ff5577fa0e144c7d523b7e8e76755017}
+      \strng{bibnamehash}{ff5577fa0e144c7d523b7e8e76755017}
+      \strng{authorbibnamehash}{ff5577fa0e144c7d523b7e8e76755017}
+      \strng{authornamehash}{ff5577fa0e144c7d523b7e8e76755017}
+      \strng{authorfullhash}{ff5577fa0e144c7d523b7e8e76755017}
+      \strng{authorfullhashraw}{ff5577fa0e144c7d523b7e8e76755017}
+      \field{sortinit}{W}
+      \field{sortinithash}{4315d78024d0cea9b57a0c6f0e35ed0d}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{IEEE Transactions on Evolutionary Computation}
+      \field{number}{1}
+      \field{title}{No free lunch theorems for optimization}
+      \field{volume}{1}
+      \field{year}{1997}
+      \field{pages}{67\bibrangedash 82}
+      \range{pages}{16}
+      \verb{doi}
+      \verb 10.1109/4235.585893
       \endverb
     \endentry
     \entry{Ye2025}{article}{}{}

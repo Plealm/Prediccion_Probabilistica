@@ -2,7 +2,7 @@
 \chapter{Aplicaciones a Series de Tiempo Reales}
 \label{cap:aplicaciones}
 
-En este capítulo se presentan los resultados de la aplicación de los Sistemas de Predicción Conformal y métodos probabilísticos desarrollados en el Capítulo~\ref{cap:diseño_simulacion} a series de tiempo reales. El objetivo es evaluar el desempeño empírico de las metodologías propuestas en escenarios con características no estacionarias, dependencia temporal compleja y heterocedasticidad condicional, tal como se anticipa en aplicaciones prácticas de pronóstico.
+En este capítulo se presentan los resultados de la aplicación de los Sistemas de Predicción Conformal y métodos probabilísticos desarrollados en el Capítulo~\ref{cap:diseño_simulacion} a series de tiempo reales. El objetivo es evaluar el desempeño empírico de las metodologías propuestas en escenarios con características no estacionarias, dependencia temporal compleja y heterocedasticidad condicional, tal como suele observarse en aplicaciones prácticas de pronóstico.
 
 Se analizan tres conjuntos de datos representativos de distintos dominios: consumo eléctrico horario, flujo vehicular y demanda de energía residencial. Para cada aplicación, se realiza un análisis exploratorio exhaustivo que permite caracterizar las propiedades estadísticas de la serie, seguido de la estimación de distribuciones predictivas mediante los nueve métodos implementados. La evaluación se fundamenta en las métricas discutidas en la Sección~\ref{sec:metricas_evaluacion}, con énfasis en el CRPS como medida de calidad predictiva global, y en pruebas de calibración probabilística mediante los histogramas PIT (Probability Integral Transform) y las curvas de confiabilidad (Reliability Diagrams).
 
@@ -11,7 +11,7 @@ La comparación estadística entre métodos se realiza mediante el test de Diebo
 \section{Metodología de Análisis Exploratorio de Datos}
 \label{sec:metodologia_eda}
 
-Previo a la aplicación de los métodos de predicción conformal y probabilísticos desarrollados en el Capítulo~\ref{cap:diseño_simulacion}, se implementa un protocolo sistemático de análisis exploratorio de datos (EDA) para cada una de las series temporales estudiadas. Este protocolo permite caracterizar exhaustivamente las propiedades estadísticas relevantes, identificar patrones subyacentes, y validar los supuestos necesarios para la correcta aplicación de las metodologías propuestas.
+Antes de aplicar los métodos de predicción conformal y probabilísticos desarrollados en el Capítulo~\ref{cap:diseño_simulacion}, se implementa un protocolo sistemático de análisis exploratorio de datos (EDA) para cada una de las series temporales estudiadas. Este protocolo permite caracterizar exhaustivamente las propiedades estadísticas relevantes, identificar patrones subyacentes, y validar los supuestos necesarios para la correcta aplicación de las metodologías propuestas.
 
 El análisis exploratorio no solo cumple una función descriptiva, sino que fundamenta decisiones críticas de modelado: la necesidad de transformaciones estabilizadoras, la selección de arquitecturas de modelos apropiadas, la configuración de hiperparámetros, y la elección de métricas de evaluación robustas. Esta sección describe en detalle el procedimiento estándar aplicado a todas las series analizadas en este capítulo.
 
@@ -34,7 +34,7 @@ Las subsecciones siguientes detallan cada una de estas etapas, especificando los
 \subsection{Transformación Box-Cox}
 \label{subsec:eda_boxcox}
 
-La heterocedasticidad estructural (varianza que cambia sistemáticamente con el nivel de la serie) viola supuestos clave de muchos métodos estadísticos, incluyendo la predicción conformal basada en intercambiabilidad. Para abordar este problema, se aplica la transformación de Box-Cox si toda la serie toma valores positivos\parencite{BoxCox1964}:
+La heterocedasticidad estructural (varianza que cambia sistemáticamente con el nivel de la serie) viola supuestos clave de muchos métodos estadísticos, incluyendo la predicción conformal basada en intercambiabilidad. Para abordar este problema, se aplica la transformación de Box-Cox si toda la serie toma valores positivos \parencite{BoxCox1964}:
 
 \begin{equation}
 y_t^{(\lambda)} = \begin{cases}
@@ -82,7 +82,7 @@ y_t^{(d)} = y_t - \hat{T}_t
 \label{eq:detrended}
 \end{equation}
 
-\paragraph{Selección del parámetro $f$:} Un valor pequeño de $f$ (e.g., 0.05) produce un suavizado que sigue cambios graduales sin eliminar estructura estacional de alta frecuencia. Valores mayores generan tendencias más suaves pero pueden introducir sesgo.
+\paragraph{\texorpdfstring{Selección del parámetro $f$:}{Selección del parámetro f:}} Un valor pequeño de $f$ (e.g., 0.05) produce un suavizado que sigue cambios graduales sin eliminar estructura estacional de alta frecuencia. Valores mayores generan tendencias más suaves pero pueden introducir sesgo.
 
 \paragraph{Validación:} Se verifica que:
 \begin{itemize}

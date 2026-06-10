@@ -90,12 +90,14 @@ Adicionalmente, considerando que cada configuración se evalúa en un horizonte 
 Para cada una de las 420 configuraciones, se implementa el siguiente protocolo de simulación:
 
 \begin{enumerate}
-\item \textbf{Generación de la Serie:} Se simulan $n_{\text{total}} = 302$ observaciones del proceso especificado, precedidas por un período de burn-in de 50 observaciones que se descartan para eliminar el efecto de las condiciones iniciales. Esto resulta en una serie efectiva de longitud $n = 252$ lo cual emula condiciones similares a las encontradas en algunas series de distintas frecuencias (21 años de una serie mensual, o aproximadamente 5 años de una serie semanal, o 9 meses de una serie diaria) .
+\item \textbf{Generación de la Serie:} Se simulan $n_{\text{total}} = 302$ observaciones del proceso especificado, precedidas por un período de burn-in de 50 observaciones que se descartan para eliminar el efecto de las condiciones iniciales. Esto resulta en una serie efectiva de longitud $n = 252$, lo que emula condiciones 
+encontradas en series de distintas frecuencias: 21 años de datos mensuales, 
+aproximadamente 5 años de datos semanales, o 9 meses de datos diarios.
 
 \item \textbf{Partición Tripartita:} La serie se divide en tres conjuntos disjuntos:
 \begin{itemize}
 \item \textbf{Conjunto de Entrenamiento:} $n_{\text{train}} = 200$ observaciones iniciales utilizadas para la estimación inicial de parámetros.
-\item \textbf{Conjunto de Calibración:} $n_{\text{cal}} = 40$ observaciones subsecuentes utilizadas para la calibración de los hiperparametros y la construcción de distribuciones conformales.
+\item \textbf{Conjunto de Calibración:} $n_{\text{cal}} = 40$ observaciones subsecuentes utilizadas para la calibración de los hiperparámetros y la construcción de distribuciones conformales.
 \item \textbf{Conjunto de Prueba:} $n_{\text{test}} = 12$ observaciones finales utilizadas para la evaluación del desempeño predictivo.
 \end{itemize}
 
@@ -103,7 +105,7 @@ Para cada una de las 420 configuraciones, se implementa el siguiente protocolo d
 \begin{itemize}
 \item Para el primer paso de predicción, se utilizan las primeras 200 observaciones para entrenamiento y las siguientes 40 para calibración.
 \item Para cada paso $h = 1, \ldots, 12$, la ventana de entrenamiento se extiende para incluir las observaciones anteriores, manteniendo fijo el conjunto de calibración de tamaño 40 inmediatamente anterior al punto de predicción.
-\item Este esquema emula una situación operativa donde el analista actualiza periódicamente los modelos conforme nueva información se hace disponible.
+\item Este esquema emula una situación operativa donde el analista actualiza periódicamente los modelos conforme nueva información queda disponible.
 \end{itemize}
 
 \item \textbf{Generación de Distribuciones Predictivas:} Para cada método y cada paso de predicción $h$, se generan muestras de la distribución predictiva. Estas muestras se comparan con muestras de la distribución teórica verdadera del proceso (conocida por construcción del DGP) mediante el cálculo del ECRPS para ese paso específico.
@@ -132,7 +134,7 @@ Utilizando el operador de rezagos $L$ definido por $L^k Y_t = Y_{t-k}$, el proce
 \Phi(L) Y_t = c + \Theta(L) \varepsilon_t
 \label{eq:arma_lag_operator}
 \end{equation}
-donde $\Phi(L) = 1 - \sum_{i=1}^p \phi_i L^i$ es el polinomio autorregresivo y $\Theta(L) = 1 + \sum_{j=1}^q \theta_j L^j$ es el polinomio de media móvil suponiendo que no hay raíces comunes entre el polinomio $\Phi$ y $\Theta$.
+donde $\Phi(L) = 1 - \sum_{i=1}^p \phi_i L^i$ es el polinomio autorregresivo y $\Theta(L) = 1 + \sum_{j=1}^q \theta_j L^j$ es el polinomio de media móvil suponiendo que los polinomios $\Phi(L)$ y $\Theta(L)$ no tienen raíces comunes.
 
 \subsubsection{Condiciones de Estacionariedad e Invertibilidad}
 
@@ -148,7 +150,7 @@ Estas condiciones garantizan que el proceso admite representaciones de Wold (MA$
 
 \subsubsection{Distribución Predictiva Verdadera}
 
-Para un proceso ARMA estacionario e invertible, la distribución del siguiente valor $Y_{n+1}$ condicionada a la historia observada $\mathcal{F}_n = \{Y_1, \ldots, Y_n, \varepsilon_1, \ldots, \varepsilon_n\}$ tiene una forma analítica explícita. Dado que el modelo es lineal, la distribución condicional un paso adelante puede conocerse gracias a la ecuación en diferencias, por medio de la media condicional y la varianza condicional.
+Para un proceso ARMA estacionario e invertible, la distribución del siguiente valor $Y_{n+1}$ condicionada en la historia observada $\mathcal{F}_n = \{Y_1, \ldots, Y_n, \varepsilon_1, \ldots, \varepsilon_n\}$ que tiene una forma analítica explícita: dado que el modelo es lineal, la distribución condicional queda completamente caracterizada por su media condicional y su varianza condicional, calculadas directamente de la ecuación estructural.
 
 La media condicional se obtiene de la ecuación estructural del modelo:
 \begin{equation}
@@ -328,7 +330,7 @@ La notación SETAR(2; $d$, $p$) denota un modelo de dos regímenes con rezago de
 
 La estacionariedad de procesos SETAR es sustancialmente más compleja que en modelos lineales, ya que la dinámica cambia endógenamente según el estado del sistema. Las condiciones suficientes para la estacionariedad han sido objeto de extensa investigación \parencite{Chen2023}.
 
-\paragraph{Caso SETAR(2; 1, 1):} Para el caso más simple de dos regímenes con orden autorregresivo 1, \cite{petruccelli1984consistent} demostraron que el proceso es ergódico si y solo si:
+\paragraph{Caso SETAR(2; 1, 1):} Para el caso más simple de dos regímenes con orden autorregresivo 1, \textcite{petruccelli1984consistent} demostraron que el proceso es ergódico si y solo si:
 \begin{equation}
 |\phi_1^{(1)}| < 1, \quad |\phi_1^{(2)}| < 1, \quad \text{y} \quad |\phi_1^{(1)} \phi_1^{(2)}| < 1
 \label{eq:setar11_stationarity}
@@ -336,7 +338,7 @@ La estacionariedad de procesos SETAR es sustancialmente más compleja que en mod
 
 Esta condición requiere que cada régimen sea individualmente estable y que el producto de los coeficientes autorregresivos sea menor que uno en valor absoluto. Esta última condición captura el efecto de la interacción entre regímenes.
 
-\paragraph{Caso General SETAR(2; $p_1$, $p_2$):} Para órdenes autorregresivos mayores,\cite{chan1985testing} proporcionaron una condición suficiente basada en el radio espectral de las matrices compañeras:
+\paragraph{\texorpdfstring{Caso General SETAR(2; $p_1$, $p_2$):}{Caso General SETAR(2; p1, p2):}} Para órdenes autorregresivos mayores,\textcite{chan1985testing} proporcionaron una condición suficiente basada en el radio espectral de las matrices compañeras:
 \begin{equation}
 \max_j \sum_{i=1}^{p_j} |\phi_i^{(j)}| < 1
 \label{eq:setar_sufficient_condition}
@@ -483,12 +485,13 @@ La implementación desarrollada introduce tres adaptaciones principales respecto
 La teoría clásica del CBB \parencite{politis1992circular} genera bloques completos de longitud $l$ que luego se concatenan para formar series bootstrap de longitud $n$. En contraste, la implementación para pronóstico un paso adelante simplifica el proceso: dado que solo se requiere predecir $\hat{y}_{t+1}$, se muestrea directamente el valor en la posición $(i_b + r) \bmod n$ donde $r = n \bmod l$ representa la posición relativa dentro del último bloque histórico. Esta simplificación reduce la complejidad computacional de $O(Bl)$ a $O(B)$ operaciones de indexación.
 
 \subparagraph{Adaptación 2: Selección Automática de $l$}
-Mientras que la teoría requiere especificación manual del tamaño de bloque basado en análisis del proceso estocástico subyacente, la implementación incorpora la heurística automática de \textcite{politis2004automatic}: $l \approx 1.5 \times n^{1/3}$, ademas de otros valores de refencia para balancear eficiencia y captura de dependencia.
+Mientras que la teoría requiere especificación manual del tamaño de bloque basado en análisis del proceso estocástico subyacente, la implementación incorpora la heurística automática de \textcite{politis2004automatic}: $l \approx 1.5 \times n^{1/3}$, además de otros valores de referencia que equilibran eficiencia estadística y 
+captura de dependencia temporal.
 
 \subparagraph{Adaptación 3: Congelamiento Post-Optimización}
 A diferencia de implementaciones estándar que podrían recalcular $l$ en cada paso, el diseño experimental congela el hiperparámetro tras la fase de validación. Este congelamiento es crítico para prevenir \textit{data leakage}: re-optimizar en ventanas rolling introduciría información futura en la selección del modelo, violando la evaluación predictiva rigurosa.
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{Comparativa: Teoría vs. Implementación del CBB}
 \begin{tabular}{lll}
@@ -591,7 +594,7 @@ En lugar de generar series bootstrap completas de longitud $n$ (complejidad $O(B
 \end{equation}
 donde $\epsilon^*_b$ se muestrea de $\tilde{\epsilon}^*$ con reemplazo.
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{Comparativa: Teoría vs. Implementación del Sieve Bootstrap}
 \begin{tabular}{lll}
@@ -717,7 +720,7 @@ La teoría requiere que $h_{i,i} < 1$ y $h_{n,n} < 1$ para que los denominadores
 
 Estos filtros previenen divisiones por cero cuando un punto es tan influyente que el modelo lo ajusta sin residuo.
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{Comparativa: Teoría vs. Implementación del LSPM}
 \begin{tabular}{lll}
@@ -938,7 +941,7 @@ Una vez optimizada, la configuración seleccionada se congela:
     \item Estima los parámetros de normalización: $\mu_{\text{frozen}}, \sigma_{\text{frozen}}$
     \item Entrena la red LSTM hasta convergencia (early stopping)
     \item Almacena los pesos de la red: $\Theta_{\text{frozen}}$
-    \item Establece el flag 
+    \item Establece el indicador de congelamiento.
 \end{enumerate}
 
 Durante toda la evaluación rolling window posterior, el método verifica este flag: si es \texttt{True}, omite completamente el entrenamiento y procede directamente a generar predicciones con el modelo existente. Este protocolo garantiza que no haya fuga de información futura y que las métricas de desempeño reflejen la capacidad predictiva genuina del modelo.
@@ -1064,7 +1067,7 @@ El método almacena únicamente:
 
 \textit{No} se congelan los residuos conformales ni sus pesos asociados, permitiendo que la distribución predictiva refleje el estado más reciente de la serie temporal. Esta filosofía difiere del LSPM estándar, donde congelar la distribución completa es apropiado bajo intercambiabilidad, pero resulta inadecuado bajo deriva continua.
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{Comparativa: Teoría vs. Implementación del LSPMW}
 \begin{tabular}{lll}
@@ -1100,7 +1103,7 @@ n_{\text{eff}} = \frac{1}{\sum_{i=1}^{n-1} \tilde{w}_i^2} \approx \frac{1-\rho}{
 La selección de $\rho^*$ se realiza minimizando el \textbf{ECRPS} (véase \ref{subsec:ecrps}) sobre el conjunto de validación. Para cada candidato $\rho$, se genera la distribución ponderada en cada tiempo de validación mediante muestreo estratificado y se evalúa la calibración predictiva.
 
 \subparagraph{Protocolo de Congelamiento Parcial}
-El método  ejecuta:
+El método ejecuta el siguiente protocolo:
 \begin{enumerate}
     \item Congela $p^*$ (número de lags) heredado de la clase base LSPM.
     \item Identifica y almacena $\rho^*$ óptimo del proceso de validación.
@@ -1532,7 +1535,7 @@ Si el binning falla en alguna dimensión, el sistema degrada a MCPS unidimension
 
 Esta representación empírica permite cálculo eficiente de CRPS sin reconstruir CDF continua.
 
-\textbf{(4) Protocolo de Congelamiento Bidimensional:} El método  fija simultáneamente:
+\textbf{(4) Protocolo de Congelamiento Bidimensional:} El método fija simultáneamente los siguientes parámetros:
 
 \begin{itemize}
 \item Parámetros del regressor XGBoost (entrenado una sola vez)
@@ -2021,7 +2024,7 @@ Para cada escenario de simulación y en cada paso temporal $t$ de la ventana de 
 
 El conjunto completo de escenarios simulados abarca múltiples configuraciones de modelos, distribuciones de ruido y niveles de varianza. Dado que diferentes escenarios presentan escalas heterogéneas, se aplica la normalización mediante Z-score (ecuación \eqref{eq:zscore}) calculando para cada método su desviación respecto a la media y desviación estándar de todos los métodos en ese escenario particular. Esta transformación permite identificar fortalezas y debilidades específicas de cada método según las características del proceso generador.
 
-Para establecer la significancia estadística de las diferencias observadas entre pares de métodos, se emplea el test de Diebold-Mariano modificado (ecuación \eqref{eq:dm_modified}) con la corrección para muestras pequeñas propuesta por \cite{Harvey1997}. Para cada escenario, se calculan los diferenciales de pérdida $d_t = \text{ECRPS}(F_A^{(t)}, G^{(t)}) - \text{ECRPS}(F_B^{(t)}, G^{(t)})$ utilizando los $h=12$ horizontes de pronóstico, y el estadístico resultante se compara contra la distribución $t$ de Student con $(h-1)$ grados de libertad.
+Para establecer la significancia estadística de las diferencias observadas entre pares de métodos, se emplea el test de Diebold-Mariano modificado (ecuación \eqref{eq:dm_modified}) con la corrección para muestras pequeñas propuesta por \textcite{Harvey1997}. Para cada escenario, se calculan los diferenciales de pérdida $d_t = \text{ECRPS}(F_A^{(t)}, G^{(t)}) - \text{ECRPS}(F_B^{(t)}, G^{(t)})$ utilizando los $h=12$ horizontes de pronóstico, y el estadístico resultante se compara contra la distribución $t$ de Student con $(h-1)$ grados de libertad.
 
 Dado que se realizan múltiples comparaciones entre los nueve métodos evaluados, se aplica la corrección de Bonferroni al nivel de significancia: si se contrastan $K$ pares de métodos al nivel global $\alpha = 0.05$, cada test individual se realiza al nivel $\alpha/K$ para controlar la tasa de error tipo I familiar. Este procedimiento genera un $p$-valor para cada combinación de escenario y par de modelos.
 
@@ -2042,7 +2045,7 @@ El análisis se complementa con dos herramientas diagnósticas aplicadas individ
 \item \textbf{Curvas de Confiabilidad:} Se selecciona un conjunto de umbrales $\{u_1, \ldots, u_K\}$ cubriendo el rango de valores observados. Para cada método y cada umbral $u_k$, se calcula la probabilidad pronosticada promedio $\hat{p}_k = T^{-1}\sum_{t=1}^T F_t(u_k)$ y la frecuencia observada $\bar{o}_k = T^{-1}\sum_{t=1}^T \mathbbm{1}\{y_t \leq u_k\}$. La curva resultante se contrasta visualmente con la diagonal de 45 grados, cuantificando desviaciones mediante el error cuadrático medio entre $\hat{p}_k$ y $\bar{o}_k$.
 \end{enumerate}
 
-Esta metodología integrada proporciona una evaluación comprehensiva que combina precisión puntual (vía CRPS), calibración probabilística (vía PIT y curvas de confiabilidad) y comparaciones estadísticamente rigurosas (vía tests de Diebold-Mariano con corrección de Bonferroni).
+Esta metodología integrada proporciona una evaluación exhaustiva que combina precisión puntual (vía CRPS), calibración probabilística (vía PIT y curvas de confiabilidad) y comparaciones estadísticamente rigurosas (vía tests de Diebold-Mariano con corrección de Bonferroni).
 
 
 
@@ -2054,7 +2057,7 @@ Esta metodología integrada proporciona una evaluación comprehensiva que combin
 Además del diseño principal descrito en la Sección~\ref{sec:diseño_experimental}, se implementaron cinco conjuntos de simulaciones complementarias diseñadas para resolver dilemas metodológicos específicos sobre el preprocesamiento, la persistencia de los datos, la arquitectura de la muestra y la propagación de la incertidumbre en horizontes lejanos. Estas simulaciones abordan preguntas fundamentales que no pueden responderse mediante el diseño principal debido a su estructura particular de ventana rodante a un paso.
 
 % ----------------------------------------------------------------------------
-\subsection{Simulación 1: Impacto de la Diferenciación en ARIMA ($d=1$)}
+\subsection{\texorpdfstring{Simulación 1: Impacto de la Diferenciación en ARIMA ($d=1$)}{Simulación 1: Impacto de la Diferenciación en ARIMA (d=1)}}
 \label{subsec:sim1_diferenciacion}
 
 \subsubsection{Motivación}
@@ -2267,7 +2270,7 @@ N_{\text{filas}} = 2{,}100 \times 12 = 25{,}200 \text{ evaluaciones}
 % ----------------------------------------------------------------------------
 
 
-\subsection{Simulación 5: Predicción Multi-paso (Horizonte $h$)}
+\subsection{\texorpdfstring{Simulación 5: Predicción Multi-paso (Horizonte $h$)}{Simulación 5: Predicción Multi-paso (Horizonte h)}}
 \label{subsec:sim5_multi_paso}
 
 \subsubsection{Motivación}
@@ -2351,7 +2354,7 @@ Esta simulación es particularmente relevante para aplicaciones donde las decisi
 \subsection{Resumen de Evaluaciones Complementarias}
 \label{subsec:resumen_complementarias}
 
-La Tabla~\ref{tab:resumen_complementarias} consolida el alcance total de estos experimentos. El volumen combinado de estas simulaciones complementarias es comparable al del diseño principal, reflejando la importancia de estos aspectos metodológicos para una evaluación comprehensiva.
+La Tabla~\ref{tab:resumen_complementarias} consolida el alcance total de estos experimentos. El volumen combinado de estas simulaciones complementarias es comparable al del diseño principal, reflejando la importancia de estos aspectos metodológicos para una evaluación exhaustiva.
 
 \begin{table}[htbp]
 \centering

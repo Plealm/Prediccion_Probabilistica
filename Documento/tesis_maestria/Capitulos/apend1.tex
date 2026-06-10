@@ -1,7 +1,7 @@
 \chapter{Marco Teórico para Consistencia Universal en Series de Tiempo Ergódicas}
 \label{apx:consistencia_ergodica}
 
-Este apéndice presenta el desarrollo conceptual realizado durante la investigación para extender la teoría de consistencia universal de \cite{Vovk2019} del modelo IID a procesos estocásticos dependientes, específicamente series de tiempo ergódicas. Aunque no se llegó a una demostración formal completa, se identificaron los componentes fundamentales que conformarían una prueba futura.
+Este apéndice presenta el desarrollo conceptual realizado durante la investigación para extender la teoría de consistencia universal de \cite{Vovk2019} del modelo IID a procesos estocásticos dependientes, específicamente series de tiempo ergódicas. Aunque no se llegó a una demostración formal completa, se identificaron los componentes esenciales de una prueba formal futura.
 
 \section{Redefinición del Objetivo de Consistencia}
 
@@ -16,7 +16,7 @@ Para transitar de la teoría de Vovk a procesos dependientes, se han identificad
 \begin{enumerate}
     \item \textbf{Estacionariedad y Ergodicidad:} Se asume que el proceso $\{Z_t\}$ es estrictamente estacionario y ergódico. Esto garantiza que los promedios temporales observados en la ventana de datos converjan a los promedios del ensamble, permitiendo que el sistema ``aprenda'' de la historia pasada.
     
-    \item \textbf{Condición de $\alpha$-mixing (Mezcla Fuerte):} Para manejar la dependencia, se requiere que el proceso sea $\alpha$-mixing con coeficientes que decaigan algebraicamente ($\alpha(k) \leq Ck^{-\beta}, \beta > 2$). Este supuesto es crucial para aplicar teoremas límite central y asegurar que las observaciones lejanas en el tiempo sean casi independientes.
+    \item \textbf{Condición de $\alpha$-mixing (Mezcla Fuerte):} Para manejar la dependencia, se requiere que el proceso sea $\alpha$-mixing con coeficientes que decaigan algebraicamente ($\alpha(k) \leq Ck^{-\beta}, \beta > 2$). Este supuesto es crucial para aplicar teoremas del límite central y asegurar que las observaciones lejanas en el tiempo sean casi independientes.
     
     \item \textbf{Regularidad de Lipschitz:} A diferencia del enfoque de histograma de celdas discretas, aquí se asume que tanto la función de regresión $\mu(x)$ como la distribución de los residuos $G(s|x)$ son Lipschitz continuas respecto al espacio de covariables. Esto asegura que puntos cercanos en el tiempo tengan comportamientos predictivos similares.
 \end{enumerate}

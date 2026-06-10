@@ -8,7 +8,7 @@ La estructura del capítulo refleja la organización del diseño experimental. L
 \section{Resultados del Diseño Principal}
 \label{sec:resultados_principal}
 
-Esta sección presenta los resultados del diseño  completo descrito en la Sección~\ref{sec:diseño_experimental}, que evalúa 9 métodos bajo 420 configuraciones únicas distribuidas entre tres escenarios (ARMA, ARIMA, SETAR). El análisis se estructura en dos niveles: primero se examinan los patrones agregados que emergen del conjunto completo de simulaciones, y posteriormente se descomponen los resultados por escenario para identificar comportamientos específicos asociados a cada clase de proceso generador de datos. La visualización de estas predicciones para la condiguración ARMA(1,1) con distribución normal y $\sigma^2=1.0$ se presenta en la Figura~\ref{fig:dist_ecrp}, donde se observa la evolución de las distribuciones predictivas para el caso de Sieve Bootstrap, DeepAR y Block Bootstrap lo largo de seis pasos.
+Esta sección presenta los resultados del diseño  completo descrito en la Sección~\ref{sec:diseño_experimental}, que evalúa 9 métodos bajo 420 configuraciones únicas distribuidas entre tres escenarios (ARMA, ARIMA, SETAR). El análisis se estructura en dos niveles: primero se examinan los patrones agregados que emergen del conjunto completo de simulaciones, y posteriormente se descomponen los resultados por escenario para identificar comportamientos específicos asociados a cada clase de proceso generador de datos. La visualización de estas predicciones para la configuración ARMA(1,1) con distribución normal y $\sigma^2=1.0$ se presenta en la Figura~\ref{fig:dist_ecrp}, donde se observa la evolución de las distribuciones predictivas para el caso de Sieve Bootstrap, DeepAR y Block Bootstrap lo largo de seis pasos.
 
 \begin{figure}[htbp]
     \centering
@@ -23,7 +23,7 @@ Esta sección presenta los resultados del diseño  completo descrito en la Secci
 
 
 
-La Figura~\ref{fig:desempeno_escenario} cuantifica el ECRPS promedio por escenario, ordenando los modelos según su desempeño en procesos ARIMA (el escenario más exigente). La clara separación entre grupos de métodos confirma que la no estacionariedad amplifica las diferencias de rendimiento.
+La Figura~\ref{fig:desempeno_escenario} cuantifica el ECRPS promedio por escenario, ordenando los modelos según su desempeño en procesos ARIMA (el escenario más exigente). Lo cual es consistente con la hipótesis de que la no estacionariedad amplifica las diferencias de rendimiento.La clara separación entre grupos de métodos confirma que la no estacionariedad amplifica las diferencias de rendimiento.
 
 \begin{figure}[htbp]
 \centering
@@ -32,7 +32,7 @@ La Figura~\ref{fig:desempeno_escenario} cuantifica el ECRPS promedio por escenar
 \label{fig:desempeno_escenario}
 \end{figure}
 
-Los modelos están ordenados por su desempeño en ARIMA (barras grises). El ranking por escenario evidencia que Block Bootstrapping y AREPD, experimentan degradación severa en ARIMA (ECRPS $>$ 10), superando por amplio margen a métodos como Sieve Bootstrap (ECRPS $0.55 - 0.62$ en todos los escenarios) y DeepAR (ECRPS $\approx$ 0.57-4.33). En el escenario SETAR, los métodos convergen hacia un desempeño más homogéneo (ECRPS $\approx$ 0.63-0.70).
+Los modelos están ordenados por su desempeño en ARIMA (barras grises). El ranking por escenario evidencia que Block Bootstrapping y AREPD experimentan degradación severa en ARIMA (ECRPS $>$ 10), mientras que métodos como Sieve Bootstrap presentan ECRPS entre 0.55 y 0.62 en todos los escenarios y DeepAR entre 0.57 y 4.33. En el escenario SETAR, los métodos convergen hacia un desempeño más homogéneo (ECRPS $\approx$ 0.63-0.70).
 
 
 La Figura~\ref{fig:ecrps_general_config} presenta los puntajes Z por modelo (fila) del ECRPS promedio para cada modelo evaluado en las 21 configuraciones paramétricas (7 por escenario). Los puntajes Z permiten comparar el desempeño relativo estandarizado, donde valores negativos indican un rendimiento superior al promedio y valores positivos señalan un desempeño inferior.
@@ -44,7 +44,7 @@ La Figura~\ref{fig:ecrps_general_config} presenta los puntajes Z por modelo (fil
 \label{fig:ecrps_general_config}
 \end{figure}
 
-Los resultados agregados revelan tres hallazgos principales. Primero, los métodos Sieve Bootstrap, LSPM y LSPMW exhiben la mayor estabilidad, alcanzando puntajes Z maximos a 3. Segundo, se observa una marcada heterogeneidad en el desempeño según la configuración: la columna ARIMA(2,1,2) concentra los valores Z más elevados (rojo intenso) para prácticamente todos los métodos, sugiriendo que esta parametrización particular representa un desafío sistemático. Tercero, los métodos LSPM y LSPMW muestran un patrón contrastante, con excelente desempeño en configuraciones ARMA pero deterioro en configuraciones ARIMA específicas.
+Los resultados agregados revelan tres hallazgos principales. Primero, los métodos Sieve Bootstrap, LSPM y LSPMW exhiben la mayor estabilidad, alcanzando puntajes Z máximos de 3. Segundo, se observa una marcada heterogeneidad en el desempeño según la configuración: la columna ARIMA(2,1,2) concentra los valores Z más elevados (rojo intenso) para prácticamente todos los métodos, sugiriendo que esta parametrización particular representa un desafío sistemático. Tercero, los métodos LSPM y LSPMW muestran un patrón contrastante, con excelente desempeño en configuraciones ARMA pero deterioro en configuraciones ARIMA específicas.
 
 \subsubsection{Desempeño por Configuración Específica}
 Las Figuras~\ref{fig:ecrps_arma}-\ref{fig:ecrps_setar} desagregan los resultados por escenario, revelando patrones de especializaci\'on seg\'un la estructura del proceso generador. En procesos ARMA (Figura~\ref{fig:ecrps_arma}), se identifica una jerarqu\'ia clara de dificultad: el proceso ARMA(2,1) constituye el escenario m\'as desafiante para la mayor\'ia de m\'etodos (con excepci\'on de Sieve Bootstrap), mientras que MA(2) emerge como el m\'as favorable. Los modelos LSPM, LSPMW y Sieve Bootstrap demuestran robustez consistente a lo largo de todas las configuraciones ARMA, con desempe\~no particularmente destacado en AR(1), un proceso que plantea dificultades considerables para los m\'etodos restantes. En procesos ARIMA (Figura~\ref{fig:ecrps_arima}), se observa una degradaci\'on progresiva en la mayor\'ia de los modelos a medida que aumenta la complejidad de la configuraci\'on: LSPM, LSPMW, MCPS, AV-MCPS, DeepAR, EnCQR-LSTM, AREPD y Block Bootstrapping alcanzan Z-scores altos ($>$2.0, rojo intenso) en ARIMA(2,1,2), sugiriendo colapso en escenarios no estacionarios complejos. Sieve Bootstrap destaca por su estabilidad, con Z-scores consistentes y bajos (de -1.47 a 1.24, predominantemente verde y amarillo). DeepAR muestra robustez moderada en configuraciones simples (Z-scores $\approx$ -0.5, verde), pero se deteriora en las m\'as avanzadas. Los procesos SETAR (Figura~\ref{fig:ecrps_setar}) presentan un desaf\'io diferente: las configuraciones SETAR-2 y SETAR-4 (que incorporan cambios de r\'egimen m\'as abruptos) generan dificultades uniformes (Z-scores positivos) para todos los m\'etodos excepto Sieve Bootstrap. Configuraciones con transiciones suaves (SETAR-1, SETAR-3, SETAR-5) permiten un desempe\~no m\'as equilibrado.
@@ -406,7 +406,7 @@ La Figura~\ref{fig:mejora_vs_d} presenta la mejora porcentual obtenida mediante 
 \label{fig:mejora_vs_d}
 \end{figure}
 
-\subsubsection{Régimen I: Integración Moderada ($d = 1, 2$)}
+\subsubsection{\texorpdfstring{Régimen I: Integración Moderada ($d = 1, 2$)}{Régimen I: Integración Moderada (d = 1, 2)}}
 
 Para $d = 1$, los patrones replican los hallazgos de la Simulación 1 con diferenciación clara entre familias metodológicas. Los métodos conformales tradicionales (MCPS, AV-MCPS) muestran mejoras del 75-77\%, indicando degradación severa sin diferenciación. Los métodos paramétricos (LSPM, LSPMW) presentan mejoras moderadas del 41\%, mientras que Sieve Bootstrap confirma su robustez intrínseca con mejora marginal del 0.2\%, estadísticamente indistinguible de cero.
 
@@ -414,7 +414,7 @@ Este resultado demuestra que el filtrado autorregresivo adaptativo puede captura
 
 Para $d = 2$, las mejoras se intensifican uniformemente: MCPS y AV-MCPS alcanzan 95.2\% y 94.1\% respectivamente, mientras que LSPM y LSPMW suben a 50.3\%. Sieve Bootstrap mantiene invarianza perfecta (mejora del 0.0\%), confirmando su capacidad para capturar dos raíces unitarias implícitamente mediante la expansión del filtro AR.
 
-\subsubsection{Régimen II: Integración Alta ($d = 3, 4, 5$)}
+\subsubsection{\texorpdfstring{Régimen II: Integración Alta ($d = 3, 4, 5$)}{Régimen II: Integración Alta (d = 3, 4, 5)}}
 
 Para $d = 3$, se produce un quiebre estructural en todos los métodos excepto Sieve Bootstrap. Las mejoras de MCPS, AV-MCPS, LSPM y LSPMW convergen hacia el rango 98.8-99.4\%, indicando que la modalidad SIN\_DIFF se vuelve prácticamente inutilizable para cualquier método que no implemente filtrado AR adaptativo. LSPM y LSPMW, que mantenían robustez moderada para $d \leq 2$, colapsan completamente: sus mejoras saltan de 50\% en $d = 2$ a 98.8\% en $d = 3$.
 
@@ -422,7 +422,7 @@ Sieve Bootstrap mantiene invarianza perfecta ($-0.0\%$ de mejora) hasta $d = 4$,
 
 Para $d = 5$, Sieve Bootstrap experimenta un cambio cualitativo: la mejora salta a 18.3\%, indicando que la quinta raíz unitaria excede su capacidad de aproximación y comienza a requerir diferenciación, aunque de manera menos severa que otros métodos.
 
-\subsubsection{Régimen III: Integración Extrema ($d \geq 6$)}
+\subsubsection{\texorpdfstring{Régimen III: Integración Extrema ($d \geq 6$)}{Régimen III: Integración Extrema (d >= 6)}}
 
 Para $d \geq 6$, todos los métodos sin excepción requieren diferenciación de manera categórica. Las mejoras convergen uniformemente hacia 95.5-98.4\%, con Sieve Bootstrap alcanzando 98.1\% para $d = 6, 7$ y 95.5\% para $d = 10$. 
 
@@ -504,13 +504,13 @@ Las Figuras~\ref{fig:dm_mcps}-\ref{fig:dm_sieve} presentan el porcentaje de comp
 \end{figure}
 
 
-\subsubsection{MCPS y AV-MCPS: Necesidad Casi Universal para $d \geq 2$}
+\subsubsection{\texorpdfstring{MCPS y AV-MCPS: Necesidad Casi Universal para $d \geq 2$}{MCPS y AV-MCPS: Necesidad Casi Universal para d >= 2}}
 
 MCPS (Figura~\ref{fig:dm_mcps}) muestra porcentajes de significancia moderados ya para $d = 1$, con valores en el rango 15-35\% según el proceso: AR(1) y RW alcanzan 15\%, AR(2) y ARMA(1,1) suben a 20\%, MA(1) a 25\%, y ARMA(2,2) registra el valor más alto con 35\%. Esto indica que el método mondriano conformal estándar exhibe dificultades para tolerar incluso un paseo aleatorio simple, particularmente en procesos con componentes de orden elevado. Para $d = 2$, la significancia escala abruptamente al rango 85-95\% en todos los procesos, y para $d = 3$ alcanza 95-100\% de manera casi uniforme. A partir de $d = 4$, el porcentaje se estabiliza en 95-100\% en prácticamente todas las combinaciones de proceso y orden de integración, sin reducción alguna para $d \in \{7, 10\}$, lo que confirma que la diferenciación es necesaria de forma categórica y universal para este método en integración de orden moderado a extremo.
 
 AV-MCPS (Figura~\ref{fig:dm_avmcps}) presenta un perfil similar pero con menor significancia en $d = 1$, donde el rango se comprime a 5-15\%: ARMA(1,1) muestra el valor mínimo de 5\%, MA(2) y RW registran 10\%, y el resto de los procesos (AR(1), AR(2), ARMA(2,2) y MA(1)) alcanzan 15\%. Para $d = 2$, la transición es pronunciada: la significancia salta a 75-95\%, con ARMA(1,1) en 75\%, AR(1), AR(2), ARMA(2,2) y MA(2) en 80-85\%, MA(1) en 90\% y RW alcanzando el máximo de 95\%. Para $d = 3$, el patrón es mayoritariamente 100\%, con las únicas excepciones de RW (85\%) y MA(2) (95\%). A partir de $d = 4$, la significancia se estabiliza en 95-100\% de manera uniforme, sin evidencia de sesgo de selección para valores altos de $d$.
 
-\subsubsection{LSPM y LSPMW: Robustez Exacta para $d = 1$ y Quiebre en $d = 2$}
+\subsubsection{\texorpdfstring{LSPM y LSPMW: Robustez Exacta para $d = 1$ y Quiebre en $d = 2$}{LSPM y LSPMW: Robustez Exacta para d = 1 y Quiebre en d = 2}}
 
 LSPM (Figura~\ref{fig:dm_lspm}) y LSPMW (Figura~\ref{fig:dm_lspmw}) exhiben comportamiento prácticamente idéntico. Para $d = 1$, el porcentaje de significancia es 0\% en todos los procesos en LSPM, mientras que LSPMW muestra una única excepción: MA(2) registra 5\%, siendo todos los demás procesos 0\%. Esta equivalencia casi perfecta confirma que el componente AR paramétrico de ambos métodos captura paseos aleatorios simples con total efectividad, sin requerir diferenciación explícita.
 
@@ -518,7 +518,7 @@ Para $d = 2$, ambos métodos presentan el mismo patrón escalonado: RW muestra l
 
 El quiebre estructural se produce en $d = 3$: la significancia salta a 95-100\% en la mayoría de los procesos, con la única excepción de ARMA(2,2) en LSPM que registra 85\% (versus 95\% en LSPMW). Para $d = 4$ en adelante, ambos métodos alcanzan 95-100\% de forma consistente en todos los procesos, con la única reducción notable de AR(1) en $d = 10$, que desciende a 90\% en ambos métodos. Este valor, si bien ligeramente inferior a 100\%, sigue siendo muy elevado y no constituye evidencia de sesgo de selección significativo, sino una variación muestral dentro del rango de alta significancia.
 
-\subsubsection{Sieve Bootstrap: Transición Gradual con Umbral Efectivo en $d = 5$-$6$}
+\subsubsection{\texorpdfstring{Sieve Bootstrap: Transición Gradual con Umbral Efectivo en $d = 5$-$6$}{Sieve Bootstrap: Transición Gradual con Umbral Efectivo en d = 5-6}}
 
 Sieve Bootstrap (Figura~\ref{fig:dm_sieve}) presenta un perfil cualitativamente distinto al de todos los demás métodos: la transición hacia significancia alta no es abrupta sino progresiva, y el umbral efectivo se desplaza hacia $d \geq 5$-$6$ en lugar de $d \geq 2$-$3$.
 
@@ -565,7 +565,7 @@ Un hallazgo notable es la anomalía de Sieve Bootstrap en $N = 120$: su Z-score 
 
 \subsubsection{Heterogeneidad por Familia de Procesos}
 
-Las Figuras~\ref{fig:zscore_arma}-\ref{fig:zscore_setar} desagregan los patrones de convergencia por escenario, revelando que la velocidad de convergencia es altamente dependiente de la estructura del proceso generador.
+Las Figuras~\ref{fig:zscore_arma_tam}-\ref{fig:zscore_setar_tam} desagregan los patrones de convergencia por escenario, revelando que la velocidad de convergencia es altamente dependiente de la estructura del proceso generador.
 
 
 
@@ -576,17 +576,17 @@ Las Figuras~\ref{fig:zscore_arma}-\ref{fig:zscore_setar} desagregan los patrones
         \centering
         \includegraphics[width=0.8\textwidth]{Imagenes/Sim3/heatmap_zscore_Lineal_Estacionario_ARMA.png}
         \caption{Procesos ARMA}
-        \label{fig:zscore_arma}
+        \label{fig:zscore_arma_tam}
     \end{subfigure}
     \vspace{0.5cm}
     \begin{subfigure}[b]{\textwidth}
         \centering
         \includegraphics[width=0.8\textwidth]{Imagenes/Sim3/heatmap_zscore_Lineal_No_Estacionario_ARIMA.png}
         \caption{Procesos ARIMA}
-        \label{fig:zscore_arima}
+        \label{fig:zscore_arima_tam}
     \end{subfigure}
     \caption{Z-scores de ECRPS por configuración según familia de procesos.}
-    \label{fig:ecrps_config_parte1}
+    \label{fig:ecrps_config_parte1_tam}
 \end{figure}
 
 \begin{figure}[htbp]
@@ -596,18 +596,19 @@ Las Figuras~\ref{fig:zscore_arma}-\ref{fig:zscore_setar} desagregan los patrones
         \centering
         \includegraphics[width=\textwidth]{Imagenes/Sim3/heatmap_zscore_No_lineal_Estacionario_SETAR.png}
         \caption{Procesos SETAR}
-        \label{fig:zscore_setar}
+        \label{fig:zscore_setar_tam}
     \end{subfigure}
     \caption{Z-scores de ECRPS por tamaño muestral según familia de procesos (continuación).}
     \label{fig:zscore_familia} % Etiqueta principal para referenciar la figura completa
 \end{figure}
 
 
-\textbf{Procesos ARMA (Figura~\ref{fig:zscore_arma}):} La estacionariedad facilita convergencia rápida para todos los métodos excepto aquellos con deficiencias estructurales. Sieve Bootstrap alcanza su mejor desempeño relativo en $N = 120$ (Z-score = 1.65, rojo), pero este valor atípico se revierte rápidamente: para $N \geq 240$ mantiene Z-scores negativos consistentes ($\approx -0.5$ a $-1.0$). LSPM y LSPMW muestran convergencia monótona: parten de Z-scores positivos en $N = 120$ (0.51 y 0.04 respectivamente) y alcanzan sus mejores desempeños relativos en $N = 1200$ (Z-scores $< -1.2$, verde oscuro). Block Bootstrapping y AREPD presentan el patrón opuesto: desempeño superior en tamaños pequeños (Z-scores $\approx -1.0$ para $N \leq 240$) pero colapso progresivo para $N \geq 600$ (Z-scores $> 1.0$), sugiriendo que el remuestreo de bloques introduce artefactos que se magnifican con el tamaño muestral en contextos estacionarios.
+\textbf{Procesos ARMA (Figura~\ref{fig:zscore_arma_tam}):} La estacionariedad facilita convergencia rápida para todos los métodos excepto aquellos con deficiencias estructurales. Sieve Bootstrap alcanza su mejor desempeño relativo en $N = 120$ (Z-score = 1.65, rojo), pero este valor atípico se revierte rápidamente: para $N \geq 240$ mantiene Z-scores negativos consistentes ($\approx -0.5$ a $-1.0$). LSPM y LSPMW muestran convergencia monótona: parten de Z-scores positivos en $N = 120$ (0.51 y 0.04 respectivamente) y alcanzan sus mejores desempeños relativos en $N = 1200$ (Z-scores $< -1.2$, verde oscuro). Block Bootstrapping y AREPD presentan el patrón opuesto: desempeño superior en tamaños pequeños (Z-scores $\approx -1.0$ para $N \leq 240$) pero colapso progresivo para $N \geq 600$ (Z-scores $> 1.0$), sugiriendo que el remuestreo de bloques introduce artefactos que se magnifican con el tamaño muestral en contextos estacionarios.
 
-\textbf{Procesos ARIMA (Figura~\ref{fig:zscore_arima}):} La no estacionariedad amplifica dramáticamente las diferencias entre métodos. Sieve Bootstrap mantiene estabilidad excepcional a través de todos los tamaños (Z-scores de 1.65 en $N = 120$ a $-0.99$ en $N = 1200$), confirmando que su filtrado adaptativo captura raíces unitarias efectivamente. LSPM y LSPMW muestran convergencia rápida desde Z-scores de $-0.70$ y $-0.56$ en $N = 120$ hasta $-1.36$ y $-1.39$ en $N = 240$, manteniéndose estables posteriormente. Block Bootstrapping y AREPD colapsan severa y progresivamente: parten de Z-scores aceptables en $N = 120$ ($-1.05$ y $-1.03$) pero se deterioran monótonamente hasta alcanzar 1.59 y 1.61 en $N = 1200$ (rojo intenso), los peores desempeños relativos observados en toda la simulación. DeepAR presenta un patrón bimodal singular: Z-score fuertemente positivo en $N = 240$ (1.03, naranja), que se invierte a valores negativos para $N \geq 360$ ($-1.05$), sugiriendo un umbral crítico de datos requeridos para que las arquitecturas recurrentes capturen no estacionariedad.
+\textbf{Procesos ARIMA (Figura~\ref{fig:zscore_arima_tam}):} La no estacionariedad amplifica dramáticamente las diferencias entre métodos. Sieve Bootstrap mantiene estabilidad excepcional a través de todos los tamaños (Z-scores de 1.65 en $N = 120$ a $-0.99$ en $N = 1200$), confirmando que su filtrado adaptativo captura raíces unitarias efectivamente. LSPM y LSPMW muestran convergencia rápida desde Z-scores de $-0.70$ y $-0.56$ en $N = 120$ hasta $-1.36$ y $-1.39$ en $N = 240$, manteniéndose estables posteriormente. Block Bootstrapping y AREPD colapsan severa y progresivamente: parten de Z-scores aceptables en $N = 120$ ($-1.05$ y $-1.03$) pero se deterioran monótonamente hasta alcanzar 1.59 y 1.61 en $N = 1200$ (rojo intenso), los peores desempeños relativos observados en toda la simulación. DeepAR presenta un patrón bimodal singular: Z-score fuertemente positivo en $N = 240$ (1.03, naranja), que se invierte a valores negativos para $N \geq 360$ ($-1.05$), sugiriendo un umbral crítico de datos requeridos para que las arquitecturas recurrentes capturen no estacionariedad.
 
-\textbf{Procesos SETAR (Figura~\ref{fig:zscore_setar}):} La no linealidad estacionaria genera patrones de convergencia heterogéneos que no siguen la monotonía observada en ARMA o ARIMA. Sieve Bootstrap mantiene su patrón de anomalía inicial (Z-score = 1.61 en $N = 120$) seguido de convergencia estable. LSPM exhibe un comportamiento errático: Z-scores negativos en $N = 120$ y $N = 240$ ($-0.28$ y $-0.41$), seguidos de un pico positivo en $N = 360$ (1.42, rojo), para finalmente converger a valores negativos en $N \geq 600$. LSPMW muestra el patrón opuesto: Z-score positivo en $N = 240$ (1.49, rojo), que se invierte a fuertemente negativo en $N = 600$ ($-1.20$). Esta alta variabilidad sugiere que los cambios de régimen en SETAR interactúan de manera compleja con el tamaño muestral: tamaños intermedios ($N \approx 360$) pueden capturar insuficientemente la estructura de régimen, generando predicciones inestables.
+% CORRECCIÓN completa de la línea:
+\textbf{Procesos SETAR (Figura~\ref{fig:zscore_setar_tam}):} La no linealidad estacionaria genera patrones de convergencia heterogéneos que no siguen la monotonía observada en ARMA o ARIMA. Sieve Bootstrap mantiene su patrón de anomalía inicial (Z-score = 1.61 en $N = 120$) seguido de convergencia estable. LSPM exhibe un comportamiento errático: Z-scores negativos en $N = 120$ y $N = 240$ ($-0.28$ y $-0.41$), seguidos de un pico positivo en $N = 360$ (1.42, rojo), para finalmente converger a valores negativos en $N \geq 600$. LSPMW muestra el patrón opuesto: Z-score positivo en $N = 240$ (1.49, rojo), que se invierte a fuertemente negativo en $N = 600$ ($-1.20$). Esta alta variabilidad sugiere que los cambios de régimen en SETAR interactúan de manera compleja con el tamaño muestral: tamaños intermedios ($N \approx 360$) pueden capturar insuficientemente la estructura de régimen, generando predicciones inestables.
 
 \subsection{Mejora Relativa: Rentabilidad Marginal del Tamaño Muestral}
 \label{subsec:mejora_relativa_tamano}
@@ -682,13 +683,13 @@ Para evaluar la significancia estadística de las diferencias en desempeño entr
 
 \subsubsection{Patrones Agregados de Significancia}
 
-La Figura~\ref{fig:sig_general} presenta el análisis combinado de ECRPS medio y porcentaje de escenarios con diferencias significativas para todos los tipos de procesos. Cada celda muestra el ECRPS medio del método en ese tamaño muestral (valor superior) y el porcentaje de escenarios donde las diferencias son estadísticamente significativas bajo el criterio de Bonferroni (valor entre paréntesis). El código de color representa este último: verde intenso indica alta proporción de diferencias significativas, mientras que rojo indica ausencia de significancia estadística.
+La Figura~\ref{fig:sig_general_tam} presenta el análisis combinado de ECRPS medio y porcentaje de escenarios con diferencias significativas para todos los tipos de procesos. Cada celda muestra el ECRPS medio del método en ese tamaño muestral (valor superior) y el porcentaje de escenarios donde las diferencias son estadísticamente significativas bajo el criterio de Bonferroni (valor entre paréntesis). El código de color representa este último: verde intenso indica alta proporción de diferencias significativas, mientras que rojo indica ausencia de significancia estadística.
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\textwidth]{Imagenes/Sim3/heatmap_ecrps_significancia_General.png}
 \caption{ECRPS medio y porcentaje de escenarios con diferencia significativa (Bonferroni) por tamaño muestral total.}
-\label{fig:sig_general}
+\label{fig:sig_general_tam}
 \end{figure}
 
 El análisis agregado revela tres patrones de significancia claramente diferenciados:
@@ -703,7 +704,7 @@ Un hallazgo notable es la discrepancia entre magnitud absoluta de cambio en ECRP
 
 \subsubsection{Heterogeneidad por Familia de Procesos}
 
-Las Figuras~\ref{fig:sig_arma}-\ref{fig:sig_setar} desagregan los patrones de significancia por familia de procesos, revelando que la detección de diferencias significativas es altamente dependiente de la estructura del proceso generador.
+Las Figuras~\ref{fig:sig_arma_tam}-\ref{fig:sig_setar_tam} desagregan los patrones de significancia por familia de procesos, revelando que la detección de diferencias significativas es altamente dependiente de la estructura del proceso generador.
 
 \begin{figure}[htbp]
     \centering
@@ -711,14 +712,14 @@ Las Figuras~\ref{fig:sig_arma}-\ref{fig:sig_setar} desagregan los patrones de si
         \centering
         \includegraphics[width=0.9\textwidth]{Imagenes/Sim3/heatmap_ecrps_significancia_Lineal_Estacionario_ARMA.png}
         \caption{Procesos ARMA}
-        \label{fig:sig_arma}
+        \label{fig:sig_arma_tam}
     \end{subfigure}
     \vspace{0.5cm}
     \begin{subfigure}[b]{\textwidth}
         \centering
         \includegraphics[width=0.9\textwidth]{Imagenes/Sim3/heatmap_ecrps_significancia_Lineal_No_Estacionario_ARIMA.png}
         \caption{Procesos ARIMA}
-        \label{fig:sig_arima}
+        \label{fig:sig_arima_tam}
     \end{subfigure}
     \caption{ECRPS medio y \% de significancia según familia de procesos.}
     \label{fig:sig_familia_parte1}
@@ -731,17 +732,17 @@ Las Figuras~\ref{fig:sig_arma}-\ref{fig:sig_setar} desagregan los patrones de si
         \centering
         \includegraphics[width=\textwidth]{Imagenes/Sim3/heatmap_ecrps_significancia_No_lineal_Estacionario_SETAR.png}
         \caption{Procesos SETAR}
-        \label{fig:sig_setar}
+        \label{fig:sig_setar_tam}
     \end{subfigure}
     \caption{ECRPS medio y \% de significancia según familia de procesos (continuación).}
     \label{fig:sig_familia}
 \end{figure}
 
-\textbf{Procesos ARMA (Figura~\ref{fig:sig_arma}):} La estacionariedad lineal genera el patrón más homogéneo de baja significancia estadística. La mayoría de los métodos presentan porcentajes de significancia inferiores al 3\% para todos los tamaños muestrales, con la notable excepción de Block Bootstrapping, que alcanza 3\% en $N=1200$. Este patrón refleja que en contextos estacionarios, las trayectorias de convergencia son suaves y graduales: las diferencias entre tamaños consecutivos son pequeñas relativas a la variabilidad intra-método, dificultando la detección estadística. El ECRPS medio muestra mejoras modestas pero consistentes para la mayoría de métodos: Sieve Bootstrap pasa de 0.562 a 0.534, MCPS de 0.717 a 0.588, y EnCQR-LSTM de 0.907 a 0.659. Sin embargo, estas mejoras no alcanzan significancia estadística bajo el criterio conservador de Bonferroni, sugiriendo que en procesos ARMA, tamaños tan pequeños como $N = 120$ pueden ser suficientes para la mayoría de métodos.
+\textbf{Procesos ARMA (Figura~\ref{fig:sig_arma_tam}):} La estacionariedad lineal genera el patrón más homogéneo de baja significancia estadística. La mayoría de los métodos presentan porcentajes de significancia inferiores al 3\% para todos los tamaños muestrales, con la notable excepción de Block Bootstrapping, que alcanza 3\% en $N=1200$. Este patrón refleja que en contextos estacionarios, las trayectorias de convergencia son suaves y graduales: las diferencias entre tamaños consecutivos son pequeñas relativas a la variabilidad intra-método, dificultando la detección estadística. El ECRPS medio muestra mejoras modestas pero consistentes para la mayoría de métodos: Sieve Bootstrap pasa de 0.562 a 0.534, MCPS de 0.717 a 0.588, y EnCQR-LSTM de 0.907 a 0.659. Sin embargo, estas mejoras no alcanzan significancia estadística bajo el criterio conservador de Bonferroni, sugiriendo que en procesos ARMA, tamaños tan pequeños como $N = 120$ pueden ser suficientes para la mayoría de métodos.
 
-\textbf{Procesos ARIMA (Figura~\ref{fig:sig_arima}):} La no estacionariedad amplifica dramáticamente tanto las magnitudes absolutas del ECRPS como los porcentajes de significancia. Block Bootstrapping exhibe el patrón más extremo: ECRPS de 6.352 en $N=120$ escalando exponencialmente a 26.207 en $N=1200$, con porcentajes de significancia que crecen de 67\% a 70\%. Este hallazgo confirma que el deterioro progresivo observado en las secciones anteriores no es artefacto del muestreo sino un patrón estadísticamente robusto: la no estacionariedad interactúa patológicamente con el mecanismo de remuestreo de bloques, magnificando errores sistemáticos conforme aumenta $n$. AREPD sigue un patrón similar pero con menor magnitud absoluta (5.900 $\to$ 22.528) y significancia comparable (62\%-71\%). En contraste, métodos como Sieve Bootstrap, LSPM y LSPMW mantienen ECRPS estables y porcentajes de significancia nulos, confirmando su robustez ante no estacionariedad. EnCQR-LSTM presenta el patrón más heterogéneo: ECRPS de 4.537 en $N=120$ escalando a 11.560 en $N=1200$, con porcentajes de significancia que oscilan entre 38\% ($N=360$) y 56\% ($N=1200$), sugiriendo convergencia no monótona característica de arquitecturas recurrentes en contextos no estacionarios.
+\textbf{Procesos ARIMA (Figura~\ref{fig:sig_arima_tam}):} La no estacionariedad amplifica dramáticamente tanto las magnitudes absolutas del ECRPS como los porcentajes de significancia. Block Bootstrapping exhibe el patrón más extremo: ECRPS de 6.352 en $N=120$ escalando exponencialmente a 26.207 en $N=1200$, con porcentajes de significancia que crecen de 67\% a 70\%. Este hallazgo confirma que el deterioro progresivo observado en las secciones anteriores no es artefacto del muestreo sino un patrón estadísticamente robusto: la no estacionariedad interactúa patológicamente con el mecanismo de remuestreo de bloques, magnificando errores sistemáticos conforme aumenta $n$. AREPD sigue un patrón similar pero con menor magnitud absoluta (5.900 $\to$ 22.528) y significancia comparable (62\%-71\%). En contraste, métodos como Sieve Bootstrap, LSPM y LSPMW mantienen ECRPS estables y porcentajes de significancia nulos, confirmando su robustez ante no estacionariedad. EnCQR-LSTM presenta el patrón más heterogéneo: ECRPS de 4.537 en $N=120$ escalando a 11.560 en $N=1200$, con porcentajes de significancia que oscilan entre 38\% ($N=360$) y 56\% ($N=1200$), sugiriendo convergencia no monótona característica de arquitecturas recurrentes en contextos no estacionarios.
 
-\textbf{Procesos SETAR (Figura~\ref{fig:sig_setar}):} La no linealidad estacionaria genera el patrón intermedio entre ARMA y ARIMA en términos de significancia, pero con trayectorias de ECRPS más estables que en ARIMA. La mayoría de los métodos presentan porcentajes de significancia inferiores al 1\% para todos los tamaños, indicando convergencia suave similar a ARMA. Block Bootstrapping alcanza 1\% de significancia en varios tamaños ($N=120$, $N=240$, $N=600$, $N=1200$), el nivel más alto en este escenario pero sustancialmente inferior al observado en ARIMA (67\%-70\%). El ECRPS medio muestra mejoras generalizadas: EnCQR-LSTM pasa de 0.838 a 0.636, MCPS de 0.686 a 0.570, y DeepAR de 0.606 a 0.596. Este comportamiento sugiere que los cambios de régimen en SETAR, al ser determinísticos (función de umbrales fijos), son más predecibles que la no estacionariedad estocástica de ARIMA, permitiendo convergencia estable incluso para métodos con deficiencias estructurales.
+\textbf{Procesos SETAR (Figura~\ref{fig:sig_setar_tam}):} La no linealidad estacionaria genera el patrón intermedio entre ARMA y ARIMA en términos de significancia, pero con trayectorias de ECRPS más estables que en ARIMA. La mayoría de los métodos presentan porcentajes de significancia inferiores al 1\% para todos los tamaños, indicando convergencia suave similar a ARMA. Block Bootstrapping alcanza 1\% de significancia en varios tamaños ($N=120$, $N=240$, $N=600$, $N=1200$), el nivel más alto en este escenario pero sustancialmente inferior al observado en ARIMA (67\%-70\%). El ECRPS medio muestra mejoras generalizadas: EnCQR-LSTM pasa de 0.838 a 0.636, MCPS de 0.686 a 0.570, y DeepAR de 0.606 a 0.596. Este comportamiento sugiere que los cambios de régimen en SETAR, al ser determinísticos (función de umbrales fijos), son más predecibles que la no estacionariedad estocástica de ARIMA, permitiendo convergencia estable incluso para métodos con deficiencias estructurales.
 
 \subsubsection{Implicaciones para el Diseño de Estudios}
 
@@ -796,7 +797,7 @@ Los resultados revelan tres regímenes de optimalidad:
 
 \textbf{Régimen III: Óptimo volátil (EnCQR-LSTM).} Este método presenta el patrón más errático: Z-score fuertemente negativo en 20\% ($-0.94$), que se invierte a positivo en 30\% ($-1.15$) y vuelve a positivo en 50\% (1.15). Esta alta variabilidad sugiere que las arquitecturas LSTM son sensibles a interacciones complejas entre tamaño de secuencia de entrenamiento y precisión de calibración que no siguen un patrón monótono simple.
 
-Las Figuras~\ref{fig:zscore_arma}-\ref{fig:zscore_setar} desagregan los Z-scores por escenario, confirmando que la familia de procesos modera fuertemente el régimen de optimalidad.
+Las Figuras~\ref{fig:zscore_arma_prop}-\ref{fig:zscore_setar_prop} desagregan los Z-scores por escenario, confirmando que la familia de procesos modera fuertemente el régimen de optimalidad.
 
 
 
@@ -807,17 +808,17 @@ Las Figuras~\ref{fig:zscore_arma}-\ref{fig:zscore_setar} desagregan los Z-scores
         \centering
         \includegraphics[width=0.8\textwidth]{Imagenes/Sim4/zscore_arma.png}
         \caption{Procesos ARMA}
-        \label{fig:zscore_arma}
+        \label{fig:zscore_arma_prop}
     \end{subfigure}
     \vspace{0.5cm}
     \begin{subfigure}[b]{\textwidth}
         \centering
     \includegraphics[width=0.8\textwidth]{Imagenes/Sim4/zscore_arima.png}
     \caption{Procesos ARIMA}
-    \label{fig:zscore_arima}
+    \label{fig:zscore_arima_prop}
     \end{subfigure}
     \caption{Z-scores de ECRPS por configuración según familia de procesos.}
-    \label{fig:ecrps_config_parte1}
+    \label{fig:ecrps_config_parte1_prop1}
 \end{figure}
 
 \begin{figure}[htbp]
@@ -827,7 +828,7 @@ Las Figuras~\ref{fig:zscore_arma}-\ref{fig:zscore_setar} desagregan los Z-scores
         \centering
     \includegraphics[width=0.8\textwidth]{Imagenes/Sim4/zscore_setar.png}
     \caption{Procesos SETAR}
-    \label{fig:zscore_setar}
+    \label{fig:zscore_setar_prop}
     \end{subfigure}
 \caption{Z-scores de ECRPS por proporción según familia de procesos.}
 \label{fig:zscore_familia_prop}
@@ -880,7 +881,7 @@ Las Figuras~\ref{fig:ecrps_prop_arma}-\ref{fig:ecrps_prop_setar} desagregan los 
     \label{fig:ecrps_prop_arima}
     \end{subfigure}
     \caption{Z-scores de ECRPS por configuración según familia de procesos.}
-    \label{fig:ecrps_config_parte1}
+    \label{fig:ecrps_config_parte1_prop}
 \end{figure}
 
 \begin{figure}[htbp]
@@ -982,8 +983,7 @@ El análisis de significancia estadística establece tres conclusiones metodoló
 \item \textbf{El criterio de Bonferroni es apropiado pero conservador para decisiones operativas:} La tasa de comparaciones significativas sin corrección (no reportada aquí para brevedad) es sustancialmente mayor que con Bonferroni, pero la ausencia de significancia bajo el criterio conservador indica que las diferencias observadas, aunque presentes, son de magnitud marginal relativa a la variabilidad intra-proporción. Para decisiones con consecuencias económicas (e.g., asignación de presupuesto de recolección de datos), el criterio de Bonferroni es apropiado. Para análisis exploratorios, $p < 0.05$ sin corrección puede ser suficiente, pero se debe reconocer explícitamente el riesgo inflado de falsos positivos.
 \end{enumerate}
 
-Estos hallazgos complementan el análisis de Z-scores y evolución del ECRPS de las secciones anteriores, confirmando que aunque existen tendencias visuales claras (e.g., óptimo en 20\% para varios métodos), estas tendencias raramente alcanzan robustez estadística cuando se controla rigurosamente por multiplicidad de comparaciones y variabilidad inter-escenario. La recomendación operativa de 20\% como proporción por defecto (Sección~\ref{subsec:implicaciones_proporciones}) permanece válida, pero debe entenderse como una heurística conservadora más que como un imperativo estadístico universal.
-
+Estos hallazgos complementan el análisis de Z-scores y evolución del ECRPS de las secciones anteriores, confirmando que aunque existen tendencias visuales claras (e.g., óptimo en 20\% para varios métodos), estas tendencias raramente alcanzan robustez estadística cuando se controla rigurosamente por multiplicidad de comparaciones y variabilidad inter-escenario. La recomendación operativa de 20\% como proporción por defecto permanece válida, pero debe entenderse como una heurística conservadora más que como un imperativo estadístico universal.
 
 \section{Simulación 5: Degradación en Predicción Multi-paso}
 \label{sec:resultados_multi_paso}

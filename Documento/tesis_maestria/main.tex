@@ -14,8 +14,8 @@
 % --- MATEMÁTICAS ---
 \usepackage{amsmath, amssymb, amscd, mathtools, bbm}
 \usepackage{nccmath}
-\usepackage{physics}
 \usepackage{siunitx}
+\AtBeginDocument{\RenewCommandCopy\qty\SI} 
 
 % --- GRÁFICOS ---
 \usepackage{graphicx}
@@ -77,6 +77,12 @@
 \ihead{\rightmark}
 \ohead{\pagemark}
 \pagestyle{scrheadings}
+
+\raggedbottom
+\usepackage[expansion=false]{microtype}
+
+\DeclareTOCStyleEntry[numwidth=3.5em]{tocline}{figure}
+\DeclareTOCStyleEntry[numwidth=3.5em]{tocline}{table}
 
 \begin{document}
 

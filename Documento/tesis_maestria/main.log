@@ -1,10 +1,10 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.1.2)  19 FEB 2026 16:08
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.1.2)  9 JUN 2026 18:48
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
  %&-line parsing enabled.
-**c:/Users/pleal/Documents/Unal/Tesis/Codigo/Prediccion_Probabilistica/Documento/tesis_maestria/main.tex
-(c:/Users/pleal/Documents/Unal/Tesis/Codigo/Prediccion_Probabilistica/Documento/tesis_maestria/main.tex
+**c:/Users/pleal/Documents/Profesional/Unal/Tesis/Codigo/Prediccion_Probabilistica/Documento/tesis_maestria/main.tex
+(c:/Users/pleal/Documents/Profesional/Unal/Tesis/Codigo/Prediccion_Probabilistica/Documento/tesis_maestria/main.tex
 LaTeX2e <2025-11-01>
 L3 programming layer <2025-12-24>
 (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/koma-script\scrbook.cls
@@ -283,31 +283,22 @@ LaTeX Font Info:    Overwriting math alphabet `\mathbbmss' in version `bold'
 ) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/ncctools\nccmath.sty
 Package: nccmath 2006/01/20 v1.3 Additional Math Commands (NCC)
 \NCC@fracrulewidth=\dimen171
-) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/physics\physics.sty
-Package: physics 
- (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/l3packages/xparse\xparse.sty (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/l3kernel\expl3.sty
-Package: expl3 2025-12-24 L3 programming layer (loader) 
- (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-pdftex.def
-File: l3backend-pdftex.def 2025-10-09 L3 backend support: PDF output (pdfTeX)
-\l__color_backend_stack_int=\count308
-))
-Package: xparse 2025-10-09 L3 Experimental document command parser
-)) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/siunitx\siunitx.sty
+) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/siunitx\siunitx.sty
 Package: siunitx 2025-07-09 v3.4.14 A comprehensive (SI) units package
-\l__siunitx_number_uncert_offset_int=\count309
-\l__siunitx_number_exponent_fixed_int=\count310
-\l__siunitx_number_min_decimal_int=\count311
-\l__siunitx_number_min_integer_int=\count312
-\l__siunitx_number_round_precision_int=\count313
-\l__siunitx_number_lower_threshold_int=\count314
-\l__siunitx_number_upper_threshold_int=\count315
-\l__siunitx_number_group_first_int=\count316
-\l__siunitx_number_group_size_int=\count317
-\l__siunitx_number_group_minimum_int=\count318
+\l__siunitx_number_uncert_offset_int=\count308
+\l__siunitx_number_exponent_fixed_int=\count309
+\l__siunitx_number_min_decimal_int=\count310
+\l__siunitx_number_min_integer_int=\count311
+\l__siunitx_number_round_precision_int=\count312
+\l__siunitx_number_lower_threshold_int=\count313
+\l__siunitx_number_upper_threshold_int=\count314
+\l__siunitx_number_group_first_int=\count315
+\l__siunitx_number_group_size_int=\count316
+\l__siunitx_number_group_minimum_int=\count317
 \l__siunitx_angle_tmp_dim=\dimen172
 \l__siunitx_angle_marker_box=\box58
 \l__siunitx_angle_unit_box=\box59
-\l__siunitx_compound_count_int=\count319
+\l__siunitx_compound_count_int=\count318
  (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/translations\translations.sty
 Package: translations 2022/02/05 v1.12 internationalization of LaTeX2e packages (CN)
  (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pdftexcmds\pdftexcmds.sty
@@ -333,9 +324,9 @@ Package pdftexcmds Info: \pdfdraftmode found.
 \l__siunitx_table_after_box=\box65
 \l__siunitx_table_before_dim=\dimen175
 \l__siunitx_table_carry_dim=\dimen176
-\l__siunitx_unit_tmp_int=\count320
-\l__siunitx_unit_position_int=\count321
-\l__siunitx_unit_total_int=\count322
+\l__siunitx_unit_tmp_int=\count319
+\l__siunitx_unit_position_int=\count320
+\l__siunitx_unit_total_int=\count321
  (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/tools\array.sty
 Package: array 2025/09/25 v2.6n Tabular extension package (FMi)
 \col@sep=\dimen177
@@ -379,13 +370,13 @@ Package: caption3 2023/07/31 v2.4d caption3 kernel (AR)
 \caption@parindent=\dimen187
 \caption@hangindent=\dimen188
 )
-\c@caption@flags=\count323
-\c@continuedfloat=\count324
+\c@caption@flags=\count322
+\c@continuedfloat=\count323
 )
 Package caption Info: New subtype `subfigure' on input line 238.
-\c@subfigure=\count325
+\c@subfigure=\count324
 Package caption Info: New subtype `subtable' on input line 238.
-\c@subtable=\count326
+\c@subtable=\count325
 ) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/pgf/frontendlayer\tikz.sty (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/pgf/basiclayer\pgf.sty (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/pgf/utilities\pgfrcs.sty (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgfutil-common.tex
 \pgfutil@everybye=\toks28
 \pgfutil@tempdima=\dimen189
@@ -416,14 +407,14 @@ Package: pgfsys 2025-08-29 v3.1.11a (3.1.11a)
 \pgf@yd=\dimen256
 \w@pgf@writea=\write3
 \r@pgf@reada=\read2
-\c@pgf@counta=\count327
-\c@pgf@countb=\count328
-\c@pgf@countc=\count329
-\c@pgf@countd=\count330
+\c@pgf@counta=\count326
+\c@pgf@countb=\count327
+\c@pgf@countc=\count328
+\c@pgf@countd=\count329
 \t@pgf@toka=\toks32
 \t@pgf@tokb=\toks33
 \t@pgf@tokc=\toks34
-\pgf@sys@id@count=\count331
+\pgf@sys@id@count=\count330
  (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pgf/systemlayer\pgf.cfg
 File: pgf.cfg 2025-08-29 v3.1.11a (3.1.11a)
 )
@@ -434,8 +425,8 @@ File: pgfsys-pdftex.def 2025-08-29 v3.1.11a (3.1.11a)
 File: pgfsys-common-pdf.def 2025-08-29 v3.1.11a (3.1.11a)
 ))) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pgf/systemlayer\pgfsyssoftpath.code.tex
 File: pgfsyssoftpath.code.tex 2025-08-29 v3.1.11a (3.1.11a)
-\pgfsyssoftpath@smallbuffer@items=\count332
-\pgfsyssoftpath@bigbuffer@items=\count333
+\pgfsyssoftpath@smallbuffer@items=\count331
+\pgfsyssoftpath@bigbuffer@items=\count332
 ) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pgf/systemlayer\pgfsysprotocol.code.tex
 File: pgfsysprotocol.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 )) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/xcolor\xcolor.sty
@@ -458,13 +449,13 @@ Package xcolor Info: Model `wave' substituted by `hsb' on input line 1372.
 Package: pgfcore 2025-08-29 v3.1.11a (3.1.11a)
  (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmath.code.tex (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathutil.code.tex) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathparser.code.tex
 \pgfmath@dimen=\dimen257
-\pgfmath@count=\count334
+\pgfmath@count=\count333
 \pgfmath@box=\box69
 \pgfmath@toks=\toks35
 \pgfmath@stack@operand=\toks36
 \pgfmath@stack@operation=\toks37
 ) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunctions.code.tex) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunctions.basic.code.tex) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunctions.trigonometric.code.tex) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunctions.random.code.tex) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunctions.comparison.code.tex) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunctions.base.code.tex) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunctions.round.code.tex) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunctions.misc.code.tex) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunctions.integerarithmetics.code.tex) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathcalc.code.tex) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfloat.code.tex
-\c@pgfmathroundto@lastzeros=\count335
+\c@pgfmathroundto@lastzeros=\count334
 )) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfint.code.tex) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcorepoints.code.tex
 File: pgfcorepoints.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 \pgf@picminx=\dimen258
@@ -494,7 +485,7 @@ File: pgfcorescopes.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 \pgfpic=\box70
 \pgf@hbox=\box71
 \pgf@layerbox@main=\box72
-\pgf@picture@serial@count=\count336
+\pgf@picture@serial@count=\count335
 ) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcoregraphicstate.code.tex
 File: pgfcoregraphicstate.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 \pgflinewidth=\dimen276
@@ -515,8 +506,8 @@ File: pgfcorearrows.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 ) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcoreshade.code.tex
 File: pgfcoreshade.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 \pgf@max=\dimen281
-\pgf@sys@shading@range@num=\count337
-\pgf@shadingcount=\count338
+\pgf@sys@shading@range@num=\count336
+\pgf@shadingcount=\count337
 ) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcoreimage.code.tex
 File: pgfcoreimage.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 ) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcoreexternal.code.tex
@@ -551,7 +542,7 @@ Package: pgffor 2025-08-29 v3.1.11a (3.1.11a)
 Package: tikz 2025-08-29 v3.1.11a (3.1.11a)
  (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pgf/libraries\pgflibraryplothandlers.code.tex
 File: pgflibraryplothandlers.code.tex 2025-08-29 v3.1.11a (3.1.11a)
-\pgf@plot@mark@count=\count339
+\pgf@plot@mark@count=\count338
 \pgfplotmarksize=\dimen286
 )
 \tikz@lastx=\dimen287
@@ -566,17 +557,17 @@ File: pgflibraryplothandlers.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 \tikz@figbox@bg=\box76
 \tikz@tempbox=\box77
 \tikz@tempbox@bg=\box78
-\tikztreelevel=\count340
-\tikznumberofchildren=\count341
-\tikznumberofcurrentchild=\count342
-\tikz@fig@count=\count343
+\tikztreelevel=\count339
+\tikznumberofchildren=\count340
+\tikznumberofcurrentchild=\count341
+\tikz@fig@count=\count342
  (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pgf/modules\pgfmodulematrix.code.tex
 File: pgfmodulematrix.code.tex 2025-08-29 v3.1.11a (3.1.11a)
-\pgfmatrixcurrentrow=\count344
-\pgfmatrixcurrentcolumn=\count345
-\pgf@matrix@numberofcolumns=\count346
+\pgfmatrixcurrentrow=\count343
+\pgfmatrixcurrentcolumn=\count344
+\pgf@matrix@numberofcolumns=\count345
 )
-\tikz@expandcount=\count347
+\tikz@expandcount=\count346
  (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/tikz/libraries\tikzlibrarytopaths.code.tex
 File: tikzlibrarytopaths.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 ))) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/tikz/libraries\tikzlibrarypatterns.code.tex
@@ -599,10 +590,10 @@ File: tikzlibraryshapes.symbols.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 File: pgflibraryshapes.symbols.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 )) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/tikz/libraries\tikzlibraryshapes.arrows.code.tex
 File: tikzlibraryshapes.arrows.code.tex 2025-08-29 v3.1.11a (3.1.11a)
-
-(C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pgf/libraries/shapes\pgflibraryshapes.arrows.code.tex
+ (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pgf/libraries/shapes\pgflibraryshapes.arrows.code.tex
 File: pgflibraryshapes.arrows.code.tex 2025-08-29 v3.1.11a (3.1.11a)
-)) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/tikz/libraries\tikzlibraryshapes.callouts.code.tex (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pgf/libraries/shapes\pgflibraryshapes.callouts.code.tex)) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/tikz/libraries\tikzlibraryshapes.multipart.code.tex
+)) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/tikz/libraries\tikzlibraryshapes.callouts.code.tex (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pgf/libraries/shapes\pgflibraryshapes.callouts.code.tex))
+(C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/tikz/libraries\tikzlibraryshapes.multipart.code.tex
 File: tikzlibraryshapes.multipart.code.tex 2025-08-29 v3.1.11a (3.1.11a)
  (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pgf/libraries/shapes\pgflibraryshapes.multipart.code.tex
 File: pgflibraryshapes.multipart.code.tex 2025-08-29 v3.1.11a (3.1.11a)
@@ -643,34 +634,34 @@ File: tikzlibrarycalc.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 File: tikzlibrarypositioning.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 ) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/pgf/utilities\pgfcalendar.sty (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgfcalendar.code.tex
 File: pgfcalendar.code.tex 2025-08-29 v3.1.11a (3.1.11a)
-\pgfcalendarcurrentjulian=\count348
-\pgf@cal@easter@Y=\count349
-\pgf@cal@easter@G=\count350
-\pgf@cal@easter@C=\count351
-\pgf@cal@easter@X=\count352
-\pgf@cal@easter@Z=\count353
-\pgf@cal@easter@D=\count354
-\pgf@cal@easter@E=\count355
-\pgf@cal@easter@N=\count356
-\pgf@cal@easter@M=\count357
-\pgf@cal@easter@julianday=\count358
+\pgfcalendarcurrentjulian=\count347
+\pgf@cal@easter@Y=\count348
+\pgf@cal@easter@G=\count349
+\pgf@cal@easter@C=\count350
+\pgf@cal@easter@X=\count351
+\pgf@cal@easter@Z=\count352
+\pgf@cal@easter@D=\count353
+\pgf@cal@easter@E=\count354
+\pgf@cal@easter@N=\count355
+\pgf@cal@easter@M=\count356
+\pgf@cal@easter@julianday=\count357
 ))
-\gtt@currentline=\count359
-\gtt@lasttitleline=\count360
-\gtt@currgrid=\count361
-\gtt@chartwidth=\count362
-\gtt@lasttitleslot=\count363
-\gtt@elementid=\count364
-\gtt@today@slot=\count365
-\gtt@startjulian=\count366
-\gtt@endjulian=\count367
-\gtt@chartid=\count368
-\gtt@vrule@slot=\count369
-\gtt@calendar@slots=\count370
-\gtt@calendar@weeknumber=\count371
-\gtt@calendar@startofweek=\count372
-\gtt@left@slot=\count373
-\gtt@right@slot=\count374
+\gtt@currentline=\count358
+\gtt@lasttitleline=\count359
+\gtt@currgrid=\count360
+\gtt@chartwidth=\count361
+\gtt@lasttitleslot=\count362
+\gtt@elementid=\count363
+\gtt@today@slot=\count364
+\gtt@startjulian=\count365
+\gtt@endjulian=\count366
+\gtt@chartid=\count367
+\gtt@vrule@slot=\count368
+\gtt@calendar@slots=\count369
+\gtt@calendar@weeknumber=\count370
+\gtt@calendar@startofweek=\count371
+\gtt@left@slot=\count372
+\gtt@right@slot=\count373
 ) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/booktabs\booktabs.sty
 Package: booktabs 2020/01/12 v1.61803398 Publication quality tables
 \heavyrulewidth=\dimen296
@@ -683,12 +674,12 @@ Package: booktabs 2020/01/12 v1.61803398 Publication quality tables
 \cmidrulesep=\dimen303
 \cmidrulekern=\dimen304
 \defaultaddspace=\dimen305
-\@cmidla=\count375
-\@cmidlb=\count376
+\@cmidla=\count374
+\@cmidlb=\count375
 \@aboverulesep=\dimen306
 \@belowrulesep=\dimen307
-\@thisruleclass=\count377
-\@lastruleclass=\count378
+\@thisruleclass=\count376
+\@lastruleclass=\count377
 \@thisrulewidth=\dimen308
 ) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/threeparttable\threeparttable.sty
 Package: threeparttable 2003/06/13  v 3.0
@@ -696,12 +687,12 @@ Package: threeparttable 2003/06/13  v 3.0
 ) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/multirow\multirow.sty
 Package: multirow 2024/11/12 v2.9 Span multiple rows of a table
 \multirow@colwidth=\skip75
-\multirow@cntb=\count379
+\multirow@cntb=\count378
 \multirow@dima=\skip76
 \bigstrutjot=\dimen309
 ) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/floatrow\floatrow.sty
 Package: floatrow 2008/08/02 v0.3b floatrow: float package extension
-\c@float@type=\count380
+\c@float@type=\count379
 \float@exts=\toks40
 \float@box=\box102
 \@floatcapt=\box103
@@ -718,18 +709,18 @@ Package floatrow Info: Modified rotfloat package code loaded on input line 473.
 \FBo@max=\skip80
 \FBc@max=\skip81
 \FBf@max=\skip82
-\c@FBl@b=\count381
-\floatbox@depth=\count382
-\c@FRobj=\count383
-\c@FRsobj=\count384
+\c@FBl@b=\count380
+\floatbox@depth=\count381
+\c@FRobj=\count382
+\c@FRsobj=\count383
 \Xhsize=\skip83
 \sXhsize=\skip84
 \Zhsize=\skip85
 \sZhsize=\skip86
 \flrow@rowbox=\box104
 \FR@Zunitlength=\dimen313
-\c@FBcnt=\count385
-\FPOScnt=\count386
+\c@FBcnt=\count384
+\FPOScnt=\count385
 \LTleft=\skip87
 \LTright=\skip88
 \LTleft=\skip89
@@ -758,9 +749,9 @@ Package: geometry 2020/01/02 v5.9 Page Geometry
  (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/generic/iftex\ifvtex.sty
 Package: ifvtex 2019/10/25 v1.7 ifvtex legacy package. Use iftex instead.
 )
-\Gm@cnth=\count387
-\Gm@cntv=\count388
-\c@Gm@tempcnt=\count389
+\Gm@cnth=\count386
+\Gm@cntv=\count387
+\c@Gm@tempcnt=\count388
 \Gm@bindingoffset=\dimen314
 \Gm@wd@mp=\dimen315
 \Gm@odd@mp=\dimen316
@@ -786,7 +777,7 @@ Package: kvoptions 2022-06-15 v3.15 Key value format for package options (HO)
 Package: kvsetkeys 2022-10-05 v1.19 Key value parser (HO)
 )) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/logreq\logreq.sty
 Package: logreq 2010/08/04 v1.0 xml request logger
-\lrq@indent=\count390
+\lrq@indent=\count389
  (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/logreq\logreq.def
 File: logreq.def 2010/08/04 v1.0 logreq spec v1.0
 )) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/base\ifthen.sty
@@ -795,49 +786,49 @@ Package: ifthen 2024/03/16 v1.1e Standard LaTeX ifthen package (DPC)
 \Urlmuskip=\muskip18
 Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
 )
-\c@tabx@nest=\count391
-\c@listtotal=\count392
-\c@listcount=\count393
-\c@liststart=\count394
-\c@liststop=\count395
-\c@citecount=\count396
-\c@citetotal=\count397
-\c@multicitecount=\count398
-\c@multicitetotal=\count399
-\c@instcount=\count400
-\c@maxnames=\count401
-\c@minnames=\count402
-\c@maxitems=\count403
-\c@minitems=\count404
-\c@citecounter=\count405
-\c@maxcitecounter=\count406
-\c@savedcitecounter=\count407
-\c@uniquelist=\count408
-\c@uniquename=\count409
-\c@refsection=\count410
-\c@refsegment=\count411
-\c@maxextratitle=\count412
-\c@maxextratitleyear=\count413
-\c@maxextraname=\count414
-\c@maxextradate=\count415
-\c@maxextraalpha=\count416
-\c@abbrvpenalty=\count417
-\c@highnamepenalty=\count418
-\c@lownamepenalty=\count419
-\c@maxparens=\count420
-\c@parenlevel=\count421
-\blx@tempcnta=\count422
-\blx@tempcntb=\count423
-\blx@tempcntc=\count424
-\c@blx@maxsection=\count425
-\blx@maxsegment@0=\count426
-\blx@notetype=\count427
-\blx@parenlevel@text=\count428
-\blx@parenlevel@foot=\count429
-\blx@sectionciteorder@0=\count430
-\blx@sectionciteorderinternal@0=\count431
-\blx@entrysetcounter=\count432
-\blx@biblioinstance=\count433
+\c@tabx@nest=\count390
+\c@listtotal=\count391
+\c@listcount=\count392
+\c@liststart=\count393
+\c@liststop=\count394
+\c@citecount=\count395
+\c@citetotal=\count396
+\c@multicitecount=\count397
+\c@multicitetotal=\count398
+\c@instcount=\count399
+\c@maxnames=\count400
+\c@minnames=\count401
+\c@maxitems=\count402
+\c@minitems=\count403
+\c@citecounter=\count404
+\c@maxcitecounter=\count405
+\c@savedcitecounter=\count406
+\c@uniquelist=\count407
+\c@uniquename=\count408
+\c@refsection=\count409
+\c@refsegment=\count410
+\c@maxextratitle=\count411
+\c@maxextratitleyear=\count412
+\c@maxextraname=\count413
+\c@maxextradate=\count414
+\c@maxextraalpha=\count415
+\c@abbrvpenalty=\count416
+\c@highnamepenalty=\count417
+\c@lownamepenalty=\count418
+\c@maxparens=\count419
+\c@parenlevel=\count420
+\blx@tempcnta=\count421
+\blx@tempcntb=\count422
+\blx@tempcntc=\count423
+\c@blx@maxsection=\count424
+\blx@maxsegment@0=\count425
+\blx@notetype=\count426
+\blx@parenlevel@text=\count427
+\blx@parenlevel@foot=\count428
+\blx@sectionciteorder@0=\count429
+\blx@sectionciteorderinternal@0=\count430
+\blx@entrysetcounter=\count431
+\blx@biblioinstance=\count432
 \labelnumberwidth=\skip105
 \labelalphawidth=\skip106
 \biblabelsep=\skip107
@@ -849,9 +840,9 @@ Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
 \blx@bcfin=\read3
 \blx@bcfout=\write4
 \blx@langwohyphens=\language79
-\c@mincomprange=\count434
-\c@maxcomprange=\count435
-\c@mincompwidth=\count436
+\c@mincomprange=\count433
+\c@maxcomprange=\count434
+\c@mincompwidth=\count435
 Package biblatex Info: Trying to load biblatex default data model...
 Package biblatex Info: ... file 'blx-dm.def' found.
  (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/biblatex\blx-dm.def
@@ -861,74 +852,74 @@ Package biblatex Info: Trying to load biblatex style data model...
 Package biblatex Info: ... file 'authoryear.dbx' not found.
 Package biblatex Info: Trying to load biblatex custom data model...
 Package biblatex Info: ... file 'biblatex-dm.cfg' not found.
-\c@afterword=\count437
-\c@savedafterword=\count438
-\c@annotator=\count439
-\c@savedannotator=\count440
-\c@author=\count441
-\c@savedauthor=\count442
-\c@bookauthor=\count443
-\c@savedbookauthor=\count444
-\c@commentator=\count445
-\c@savedcommentator=\count446
-\c@editor=\count447
-\c@savededitor=\count448
-\c@editora=\count449
-\c@savededitora=\count450
-\c@editorb=\count451
-\c@savededitorb=\count452
-\c@editorc=\count453
-\c@savededitorc=\count454
-\c@foreword=\count455
-\c@savedforeword=\count456
-\c@holder=\count457
-\c@savedholder=\count458
-\c@introduction=\count459
-\c@savedintroduction=\count460
-\c@namea=\count461
-\c@savednamea=\count462
-\c@nameb=\count463
-\c@savednameb=\count464
-\c@namec=\count465
-\c@savednamec=\count466
-\c@translator=\count467
-\c@savedtranslator=\count468
-\c@shortauthor=\count469
-\c@savedshortauthor=\count470
-\c@shorteditor=\count471
-\c@savedshorteditor=\count472
-\c@labelname=\count473
-\c@savedlabelname=\count474
-\c@institution=\count475
-\c@savedinstitution=\count476
-\c@lista=\count477
-\c@savedlista=\count478
-\c@listb=\count479
-\c@savedlistb=\count480
-\c@listc=\count481
-\c@savedlistc=\count482
-\c@listd=\count483
-\c@savedlistd=\count484
-\c@liste=\count485
-\c@savedliste=\count486
-\c@listf=\count487
-\c@savedlistf=\count488
-\c@location=\count489
-\c@savedlocation=\count490
-\c@organization=\count491
-\c@savedorganization=\count492
-\c@origlocation=\count493
-\c@savedoriglocation=\count494
-\c@origpublisher=\count495
-\c@savedorigpublisher=\count496
-\c@publisher=\count497
-\c@savedpublisher=\count498
-\c@language=\count499
-\c@savedlanguage=\count500
-\c@origlanguage=\count501
-\c@savedoriglanguage=\count502
-\c@pageref=\count503
-\c@savedpageref=\count504
+\c@afterword=\count436
+\c@savedafterword=\count437
+\c@annotator=\count438
+\c@savedannotator=\count439
+\c@author=\count440
+\c@savedauthor=\count441
+\c@bookauthor=\count442
+\c@savedbookauthor=\count443
+\c@commentator=\count444
+\c@savedcommentator=\count445
+\c@editor=\count446
+\c@savededitor=\count447
+\c@editora=\count448
+\c@savededitora=\count449
+\c@editorb=\count450
+\c@savededitorb=\count451
+\c@editorc=\count452
+\c@savededitorc=\count453
+\c@foreword=\count454
+\c@savedforeword=\count455
+\c@holder=\count456
+\c@savedholder=\count457
+\c@introduction=\count458
+\c@savedintroduction=\count459
+\c@namea=\count460
+\c@savednamea=\count461
+\c@nameb=\count462
+\c@savednameb=\count463
+\c@namec=\count464
+\c@savednamec=\count465
+\c@translator=\count466
+\c@savedtranslator=\count467
+\c@shortauthor=\count468
+\c@savedshortauthor=\count469
+\c@shorteditor=\count470
+\c@savedshorteditor=\count471
+\c@labelname=\count472
+\c@savedlabelname=\count473
+\c@institution=\count474
+\c@savedinstitution=\count475
+\c@lista=\count476
+\c@savedlista=\count477
+\c@listb=\count478
+\c@savedlistb=\count479
+\c@listc=\count480
+\c@savedlistc=\count481
+\c@listd=\count482
+\c@savedlistd=\count483
+\c@liste=\count484
+\c@savedliste=\count485
+\c@listf=\count486
+\c@savedlistf=\count487
+\c@location=\count488
+\c@savedlocation=\count489
+\c@organization=\count490
+\c@savedorganization=\count491
+\c@origlocation=\count492
+\c@savedoriglocation=\count493
+\c@origpublisher=\count494
+\c@savedorigpublisher=\count495
+\c@publisher=\count496
+\c@savedpublisher=\count497
+\c@language=\count498
+\c@savedlanguage=\count499
+\c@origlanguage=\count500
+\c@savedoriglanguage=\count501
+\c@pageref=\count502
+\c@savedpageref=\count503
 \shorthandwidth=\skip113
 \shortjournalwidth=\skip114
 \shortserieswidth=\skip115
@@ -952,19 +943,19 @@ Package biblatex Info: Trying to load generic definitions...
 Package biblatex Info: ... file 'biblatex.def' found.
  (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/biblatex\biblatex.def
 File: biblatex.def 2025/07/10 v3.21 biblatex compatibility (PK/MW)
-\c@textcitecount=\count505
-\c@textcitetotal=\count506
-\c@textcitemaxnames=\count507
-\c@biburlbigbreakpenalty=\count508
-\c@biburlbreakpenalty=\count509
-\c@biburlnumpenalty=\count510
-\c@biburlucpenalty=\count511
-\c@biburllcpenalty=\count512
+\c@textcitecount=\count504
+\c@textcitetotal=\count505
+\c@textcitemaxnames=\count506
+\c@biburlbigbreakpenalty=\count507
+\c@biburlbreakpenalty=\count508
+\c@biburlnumpenalty=\count509
+\c@biburlucpenalty=\count510
+\c@biburllcpenalty=\count511
 \biburlbigskip=\muskip19
 \biburlnumskip=\muskip20
 \biburlucskip=\muskip21
 \biburllcskip=\muskip22
-\c@smartand=\count513
+\c@smartand=\count512
 )
 Package biblatex Info: Trying to load bibliography style 'authoryear'...
 Package biblatex Info: ... file 'authoryear.bbx' found.
@@ -974,8 +965,8 @@ Package biblatex Info: Trying to load bibliography style 'standard'...
 Package biblatex Info: ... file 'standard.bbx' found.
  (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/biblatex/bbx\standard.bbx
 File: standard.bbx 2025/07/10 v3.21 biblatex bibliography style (PK/MW)
-\c@bbx:relatedcount=\count514
-\c@bbx:relatedtotal=\count515
+\c@bbx:relatedcount=\count513
+\c@bbx:relatedtotal=\count514
 ))
 Package biblatex Info: Trying to load citation style 'authoryear'...
 Package biblatex Info: ... file 'authoryear.cbx' found.
@@ -996,11 +987,19 @@ File: biblatex.cfg
 )
 Package biblatex Info: Input encoding 'utf8' detected.
 Package biblatex Info: Document encoding is UTF8 ....
+ (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/l3kernel\expl3.sty
+Package: expl3 2025-12-24 L3 programming layer (loader) 
+ (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-pdftex.def
+File: l3backend-pdftex.def 2025-10-09 L3 backend support: PDF output (pdfTeX)
+\l__color_backend_stack_int=\count515
+))
 Package biblatex Info: ... and expl3
 (biblatex)             2025-12-24 L3 programming layer (loader) 
 (biblatex)             is new enough (at least 2020/04/06),
 (biblatex)             setting 'casechanger=expl3'.
- (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/biblatex\blx-case-expl3.sty
+ (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/biblatex\blx-case-expl3.sty (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/l3packages/xparse\xparse.sty
+Package: xparse 2025-10-09 L3 Experimental document command parser
+)
 Package: blx-case-expl3 2025/07/10 v3.21 expl3 case changing code for biblatex
 )) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hyperref.sty
 Package: hyperref 2025-07-12 v7.01o Hypertext links for LaTeX
@@ -1081,9 +1080,35 @@ Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 28
 \Hy@SectionHShift=\skip127
 )
 Package hyperref Info: Option `colorlinks' set `true' on input line 63.
+ (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/microtype\microtype.sty
+Package: microtype 2026/03/01 v3.2d Micro-typographical refinements (RS)
+\MT@toks=\toks44
+\MT@tempbox=\box105
+\MT@count=\count527
+LaTeX Info: Redefining \noprotrusionifhmode on input line 1084.
+LaTeX Info: Redefining \leftprotrusion on input line 1085.
+\MT@prot@toks=\toks45
+LaTeX Info: Redefining \rightprotrusion on input line 1104.
+LaTeX Info: Redefining \textls on input line 1449.
+\MT@outer@kern=\dimen326
+LaTeX Info: Redefining \microtypecontext on input line 2053.
+LaTeX Info: Redefining \textmicrotypecontext on input line 2070.
+\MT@listname@count=\count528
+ (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/microtype\microtype-pdftex.def
+File: microtype-pdftex.def 2026/03/01 v3.2d Definitions specific to pdftex (RS)
+LaTeX Info: Redefining \lsstyle on input line 944.
+LaTeX Info: Redefining \lslig on input line 944.
+\MT@outer@space=\skip128
+)
+Package microtype Info: Loading configuration file microtype.cfg.
+ (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/microtype\microtype.cfg
+File: microtype.cfg 2026/03/01 v3.2d microtype main configuration file (RS)
+)
+LaTeX Info: Redefining \microtypesetup on input line 3065.
+)
 Package csquotes Info: Checking for multilingual support...
 Package csquotes Info: ... none found.
-Package translations Info: No language package found. I am going to use `english' as default language. on input line 81.
+Package translations Info: No language package found. I am going to use `english' as default language. on input line 87.
 Class scrbook Info: loading recommended package `bookmark'.
 (scrbook)           Using `bookmark' together with `hyperref' is recommended,
 (scrbook)           because of handling of possible bookmark level gaps.
@@ -1091,112 +1116,60 @@ Class scrbook Info: loading recommended package `bookmark'.
 (scrbook)           `bookmarkpackage=false' before \begin{document} and
 (scrbook)           you can avoid this message adding:
 (scrbook)             \usepackage{bookmark}
-(scrbook)           before \begin{document} on input line 81.
+(scrbook)           before \begin{document} on input line 87.
  (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/bookmark\bookmark.sty
 Package: bookmark 2023-12-10 v1.31 PDF bookmarks (HO)
  (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/bookmark\bkm-pdftex.def
 File: bkm-pdftex.def 2023-12-10 v1.31 bookmark driver for pdfTeX and luaTeX (HO)
-\BKM@id=\count527
-)) (main.aux (Capitulos/Cap1.aux) (Capitulos/Cap2.aux) (Capitulos/Cap3.aux) (Capitulos/Cap4.aux
-
-LaTeX Warning: Label `fig:ecrps_config_parte1' multiply defined.
-
-
-LaTeX Warning: Label `fig:sig_general' multiply defined.
-
-
-LaTeX Warning: Label `fig:sig_arma' multiply defined.
-
-
-LaTeX Warning: Label `fig:sig_arima' multiply defined.
-
-
-LaTeX Warning: Label `fig:sig_setar' multiply defined.
-
-
-LaTeX Warning: Label `fig:zscore_arma' multiply defined.
-
-
-LaTeX Warning: Label `sub@fig:zscore_arma' multiply defined.
-
-
-LaTeX Warning: Label `fig:zscore_arima' multiply defined.
-
-
-LaTeX Warning: Label `sub@fig:zscore_arima' multiply defined.
-
-
-LaTeX Warning: Label `fig:ecrps_config_parte1' multiply defined.
-
-
-LaTeX Warning: Label `fig:zscore_setar' multiply defined.
-
-
-LaTeX Warning: Label `sub@fig:zscore_setar' multiply defined.
-
-
-LaTeX Warning: Label `fig:ecrps_config_parte1' multiply defined.
-
-) (Capitulos/Cap5.aux) (Capitulos/Cap6.aux) (Capitulos/apend1.aux))
+\BKM@id=\count529
+)) (main.aux (Capitulos/Cap1.aux) (Capitulos/Cap2.aux) (Capitulos/Cap3.aux) (Capitulos/Cap4.aux) (Capitulos/Cap5.aux) (Capitulos/Cap6.aux) (Capitulos/apend1.aux))
 \openout1 = `main.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 81.
-LaTeX Font Info:    ... okay on input line 81.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 81.
-LaTeX Font Info:    ... okay on input line 81.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 81.
-LaTeX Font Info:    ... okay on input line 81.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 81.
-LaTeX Font Info:    ... okay on input line 81.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 81.
-LaTeX Font Info:    ... okay on input line 81.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 81.
-LaTeX Font Info:    ... okay on input line 81.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 81.
-LaTeX Font Info:    ... okay on input line 81.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 81.
-LaTeX Font Info:    ... okay on input line 81.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 81.
-LaTeX Font Info:    ... okay on input line 81.
-Package scrbase Info: activating english \partname on input line 81.
-Package scrbase Info: activating english \chaptername on input line 81.
-Package scrbase Info: activating english \appendixname on input line 81.
-Package scrbase Info: activating english \figurename on input line 81.
-Package scrbase Info: activating english \tablename on input line 81.
-Package scrbase Info: activating english \contentsname on input line 81.
-Package scrbase Info: activating english \listfigurename on input line 81.
-Package scrbase Info: activating english \listtablename on input line 81.
-Package scrbase Info: activating english \bibname on input line 81.
-Package scrbase Info: activating english \indexname on input line 81.
-
-
-Package siunitx Warning: Detected the "physics" package:
-(siunitx)                omitting definition of \qty.
-(siunitx)                
-(siunitx)                If you want to use \qty with the siunitx definition,
-(siunitx)                add 
-(siunitx)                
-(siunitx)                    \AtBeginDocument{\RenewCommandCopy\qty\SI}
-(siunitx)                
-(siunitx)                to your preamble.
-
-(C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/translations/dicts\translations-basic-dictionary-english.trsl
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 87.
+LaTeX Font Info:    ... okay on input line 87.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 87.
+LaTeX Font Info:    ... okay on input line 87.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 87.
+LaTeX Font Info:    ... okay on input line 87.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 87.
+LaTeX Font Info:    ... okay on input line 87.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 87.
+LaTeX Font Info:    ... okay on input line 87.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 87.
+LaTeX Font Info:    ... okay on input line 87.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 87.
+LaTeX Font Info:    ... okay on input line 87.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 87.
+LaTeX Font Info:    ... okay on input line 87.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 87.
+LaTeX Font Info:    ... okay on input line 87.
+Package scrbase Info: activating english \partname on input line 87.
+Package scrbase Info: activating english \chaptername on input line 87.
+Package scrbase Info: activating english \appendixname on input line 87.
+Package scrbase Info: activating english \figurename on input line 87.
+Package scrbase Info: activating english \tablename on input line 87.
+Package scrbase Info: activating english \contentsname on input line 87.
+Package scrbase Info: activating english \listfigurename on input line 87.
+Package scrbase Info: activating english \listtablename on input line 87.
+Package scrbase Info: activating english \bibname on input line 87.
+Package scrbase Info: activating english \indexname on input line 87.
+ (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/translations/dicts\translations-basic-dictionary-english.trsl
 File: translations-basic-dictionary-english.trsl (english translation file `translations-basic-dictionary')
 )
-Package translations Info: loading dictionary `translations-basic-dictionary' for `english'. on input line 81.
+Package translations Info: loading dictionary `translations-basic-dictionary' for `english'. on input line 87.
  (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count528
-\scratchdimen=\dimen326
-\scratchbox=\box105
-\nofMPsegments=\count529
-\nofMParguments=\count530
-\everyMPshowfont=\toks44
-\MPscratchCnt=\count531
-\MPscratchDim=\dimen327
-\MPnumerator=\count532
-\makeMPintoPDFobject=\count533
-\everyMPtoPDFconversion=\toks45
+\scratchcounter=\count530
+\scratchdimen=\dimen327
+\scratchbox=\box106
+\nofMPsegments=\count531
+\nofMParguments=\count532
+\everyMPshowfont=\toks46
+\MPscratchCnt=\count533
+\MPscratchDim=\dimen328
+\MPnumerator=\count534
+\makeMPintoPDFobject=\count535
+\everyMPtoPDFconversion=\toks47
 ) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/epstopdf-pkg\epstopdf-base.sty
 Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
 Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 485.
@@ -1258,13 +1231,30 @@ Package biblatex Info: Automatic encoding selection.
 Package biblatex Info: Trying to load bibliographic data...
 Package biblatex Info: ... file 'main.bbl' found.
  (main.bbl)
-Package biblatex Info: Reference section=0 on input line 81.
-Package biblatex Info: Reference segment=0 on input line 81.
-Package hyperref Info: Link coloring ON on input line 81.
+Package biblatex Info: Reference section=0 on input line 87.
+Package biblatex Info: Reference segment=0 on input line 87.
+Package hyperref Info: Link coloring ON on input line 87.
+LaTeX Info: Redefining \microtypecontext on input line 87.
+Package microtype Info: Applying patch `item' on input line 87.
+Package microtype Info: Applying patch `toc' on input line 87.
+Package microtype Info: Applying patch `eqnum' on input line 87.
+Package microtype Info: Applying patch `footnote' on input line 87.
+Package microtype Info: Applying patch `verbatim' on input line 87.
+LaTeX Info: Redefining \microtypesetup on input line 87.
+Package microtype Info: Generating PDF output.
+Package microtype Info: Character protrusion enabled (level 2).
+Package microtype Info: Using default protrusion set `alltext'.
+Package microtype Info: No font expansion.
+Package microtype Info: No adjustment of tracking.
+Package microtype Info: No adjustment of interword spacing.
+Package microtype Info: No adjustment of character kerning.
+ (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/microtype\mt-cmr.cfg
+File: mt-cmr.cfg 2013/05/19 v2.2 microtype config. file: Computer Modern Roman (RS)
+)
 <Imagenes/logo_unal.png, id=6, 346.29375pt x 146.5475pt>
 File: Imagenes/logo_unal.png Graphic file (type png)
 <use Imagenes/logo_unal.png>
-Package pdftex.def Info: Imagenes/logo_unal.png  used on input line 105.
+Package pdftex.def Info: Imagenes/logo_unal.png  used on input line 111.
 (pdftex.def)             Requested size: 142.26378pt x 60.2056pt.
  [1
 
@@ -1279,49 +1269,61 @@ Package pdftex.def Info: Imagenes/logo_unal.png  used on input line 105.
 
 
 ]
-LaTeX Font Info:    Trying to load font information for U+msa on input line 184.
+Package microtype Info: Loading generic protrusion settings for font family
+(microtype)             `cmss' (encoding: OT1).
+(microtype)             For optimal results, create family-specific settings.
+(microtype)             See the microtype manual for details.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 190.
  (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
+) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/microtype\mt-msa.cfg
+File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 184.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 190.
  (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
+) (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/microtype\mt-msb.cfg
+File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 ) [4
 
-] [5
+]
+Overfull \hbox (11.3182pt too wide) in paragraph at lines 208--209
+[]\OT1/cmr/m/n/12 A mis compa~neros de la Maestr^^S^^Pa en Es-tad^^S^^Pstica, con quienes com-part^^S^^P este camino acad^^Semico,
+ []
 
-] (main.toc [6
+[5
 
 ]
-Underfull \vbox (badness 10000) has occurred while \output is active []
+Package tocbasic Info: character protrusion at toc deactivated on input line 224.
+ (main.toc [6
 
- [7]
-Overfull \hbox (1.58777pt too wide) detected at line 249
+] [7]
+Overfull \hbox (1.58777pt too wide) detected at line 248
  []\OT1/cmss/bx/n/12 110
  []
 
 [8]
-Overfull \hbox (5.08969pt too wide) in paragraph at lines 307--307
+Overfull \hbox (5.08969pt too wide) in paragraph at lines 306--306
  [][] [][][]\OT1/cmr/m/n/12 Interacci^^Son Con-fig-u-raci^^Son \TS1/cmr/m/n/12 Ö \OT1/cmr/m/n/12 Hor-i-zonte: Het-ero-genei-dad de Degradaci^^Son[][] [][]  
  []
 
 
-Overfull \hbox (1.58777pt too wide) detected at line 316
+Overfull \hbox (1.58777pt too wide) detected at line 315
  []\OT1/cmss/bx/n/12 201
  []
 
 [9]
-Overfull \hbox (1.58777pt too wide) detected at line 396
+Overfull \hbox (1.58777pt too wide) detected at line 395
  []\OT1/cmss/bx/n/12 260
  []
 
 
-Overfull \hbox (1.58777pt too wide) detected at line 400
+Overfull \hbox (1.58777pt too wide) detected at line 399
  []\OT1/cmss/bx/n/12 264
  []
 
 
-Overfull \hbox (1.58777pt too wide) detected at line 409
+Overfull \hbox (1.58777pt too wide) detected at line 408
  []\OT1/cmss/bx/n/12 268
  []
 
@@ -1329,696 +1331,27 @@ Overfull \hbox (1.58777pt too wide) detected at line 409
 \tf@toc=\write5
 \openout5 = `main.toc'.
 
- [10] (main.lof
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 19.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 19
-\OT1/cmr/bx/n/12 4-10\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 20.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 20
-\OT1/cmr/bx/n/12 4-11\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 21.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 21
-\OT1/cmr/bx/n/12 4-11\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 22.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 22
-\OT1/cmr/bx/n/12 4-11\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 23.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 23
-\OT1/cmr/bx/n/12 4-12\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 24.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 24
-\OT1/cmr/bx/n/12 4-13\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 25.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 25
-\OT1/cmr/bx/n/12 4-14\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 26.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 26
-\OT1/cmr/bx/n/12 4-15\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 27.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 27
-\OT1/cmr/bx/n/12 4-16\OT1/cmr/m/n/12 . 
+ [10]
+Package tocbasic Info: character protrusion at lof deactivated on input line 227.
+ (main.lof
+Overfull \hbox (0.62378pt too wide) in paragraph at lines 7--7
+ [][] [][][]\OT1/cmr/m/n/12 Evoluci^^Son de las dis-tribu-ciones pre-dic-ti-vas para Sieve Boot-strap, DeepAR 
  []
 
 [11
 
 ]
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 28.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 28
-\OT1/cmr/bx/n/12 4-17\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 29.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 29
-\OT1/cmr/bx/n/12 4-18\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 30.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 30
-\OT1/cmr/bx/n/12 4-18\OT1/cmr/m/n/12 . 
- []
-
-
-Overfull \hbox (0.38362pt too wide) in paragraph at lines 30--30
+Overfull \hbox (14.48344pt too wide) in paragraph at lines 30--30
  [][] [][][]\OT1/cmr/m/n/12 Porcentaje de com-para-ciones sig-ni-fica-ti-vas mod-elo CPS por pro-ceso ARIMA 
  []
 
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 31.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 31
-\OT1/cmr/bx/n/12 4-18\OT1/cmr/m/n/12 . 
- []
-
-
-Overfull \hbox (14.38893pt too wide) in paragraph at lines 31--31
- [][] [][][]\OT1/cmr/m/n/12 Porcentaje de com-para-ciones sig-ni-fica-ti-vas sieve boot-strap por pro-ceso ARIMA 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 32.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 32
-\OT1/cmr/bx/n/12 4-19\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 33.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 33
-\OT1/cmr/bx/n/12 4-20\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 34.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 34
-\OT1/cmr/bx/n/12 4-20\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 35.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 35
-\OT1/cmr/bx/n/12 4-21\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 36.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 36
-\OT1/cmr/bx/n/12 4-22\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 37.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 37
-\OT1/cmr/bx/n/12 4-22\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 38.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 38
-\OT1/cmr/bx/n/12 4-23\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 39.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 39
-\OT1/cmr/bx/n/12 4-24\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 40.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 40
-\OT1/cmr/bx/n/12 4-24\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 41.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 41
-\OT1/cmr/bx/n/12 4-25\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 42.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 42
-\OT1/cmr/bx/n/12 4-26\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 43.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 43
-\OT1/cmr/bx/n/12 4-26\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 44.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 44
-\OT1/cmr/bx/n/12 4-27\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 45.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 45
-\OT1/cmr/bx/n/12 4-28\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 46.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 46
-\OT1/cmr/bx/n/12 4-28\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 47.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 47
-\OT1/cmr/bx/n/12 4-29\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 48.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 48
-\OT1/cmr/bx/n/12 4-30\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 49.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 49
-\OT1/cmr/bx/n/12 4-30\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 50.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 50
-\OT1/cmr/bx/n/12 4-31\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 51.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 51
-\OT1/cmr/bx/n/12 4-32\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 52.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 52
-\OT1/cmr/bx/n/12 4-33\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 53.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 53
-\OT1/cmr/bx/n/12 4-33\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 54.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 54
-\OT1/cmr/bx/n/12 4-34\OT1/cmr/m/n/12 . 
- []
-
-[12]
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 55.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 55
-\OT1/cmr/bx/n/12 4-35\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 56.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 56
-\OT1/cmr/bx/n/12 4-36\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 57.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 57
-\OT1/cmr/bx/n/12 4-37\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 58.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 58
-\OT1/cmr/bx/n/12 4-38\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 59.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 59
-\OT1/cmr/bx/n/12 4-39\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 60.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 60
-\OT1/cmr/bx/n/12 4-39\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 71.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 71
-\OT1/cmr/bx/n/12 5-10\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 72.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 72
-\OT1/cmr/bx/n/12 5-11\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 73.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 73
-\OT1/cmr/bx/n/12 5-12\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 74.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 74
-\OT1/cmr/bx/n/12 5-13\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 75.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 75
-\OT1/cmr/bx/n/12 5-14\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 76.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 76
-\OT1/cmr/bx/n/12 5-15\OT1/cmr/m/n/12 . 
- []
-
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [13]
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 77.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 77
-\OT1/cmr/bx/n/12 5-16\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 78.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 78
-\OT1/cmr/bx/n/12 5-17\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 79.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 79
-\OT1/cmr/bx/n/12 5-18\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 80.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 80
-\OT1/cmr/bx/n/12 5-19\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 81.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 81
-\OT1/cmr/bx/n/12 5-20\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of figure toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 82.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 82
-\OT1/cmr/bx/n/12 5-21\OT1/cmr/m/n/12 . 
- []
-
-)
+[12] [13])
 \tf@lof=\write6
 \openout6 = `main.lof'.
 
- [14] (main.lot
-
-Package tocbasic Warning: number width of table toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 13.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 13
-\OT1/cmr/bx/n/12 3-10\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of table toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 14.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 14
-\OT1/cmr/bx/n/12 3-11\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of table toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 15.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 15
-\OT1/cmr/bx/n/12 3-12\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of table toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 16.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 16
-\OT1/cmr/bx/n/12 3-13\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of table toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 17.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 17
-\OT1/cmr/bx/n/12 3-14\OT1/cmr/m/n/12 . 
- []
-
-
-Package tocbasic Warning: number width of table toc entries should be increased!
-(tocbasic)                Currently used number width = 28.01385pt,
-(tocbasic)                Wanted number separation    = 4.69987pt,
-(tocbasic)                Reserved number width       = 27.02475pt on input line 18.
-
-
-Overfull \hbox (0.9891pt too wide) detected at line 18
-\OT1/cmr/bx/n/12 3-15\OT1/cmr/m/n/12 . 
- []
-
-
-Overfull \hbox (6.4765pt too wide) in paragraph at lines 22--22
- [][] [][][]\OT1/cmr/m/n/12 Resumen de car-ac-ter^^S^^Psticas iden-ti-fi-cadas en el an^^Salisis ex-plorato-rio del dataset 
- []
-
-)
+ [14]
+Package tocbasic Info: character protrusion at lot deactivated on input line 229.
+ (main.lot)
 \tf@lot=\write7
 \openout7 = `main.lot'.
 
@@ -2041,7 +1374,7 @@ chapter 1.
  (Capitulos/Cap2.tex
 chapter 2.
 
-Overfull \hbox (9.28336pt too wide) in paragraph at lines 10--11
+Overfull \hbox (9.28336pt too wide) in paragraph at lines 10--12
 \OT1/cmr/m/n/12 El pron^^Sostico prob-a-bil^^S^^Pstico rep-re-senta un cam-bio de paradigma fun-da-men-tal en la predicci^^Son
  []
 
@@ -2051,353 +1384,226 @@ Overfull \hbox (9.28336pt too wide) in paragraph at lines 10--11
 
 
 ]
-<./Imagenes/Cap2_prediccion.png, id=659, 785.18344pt x 467.49657pt>
+<./Imagenes/Cap2_prediccion.png, id=661, 785.18344pt x 467.49657pt>
 File: ./Imagenes/Cap2_prediccion.png Graphic file (type png)
 <use ./Imagenes/Cap2_prediccion.png>
-Package pdftex.def Info: ./Imagenes/Cap2_prediccion.png  used on input line 28.
+Package pdftex.def Info: ./Imagenes/Cap2_prediccion.png  used on input line 29.
 (pdftex.def)             Requested size: 434.91321pt x 258.95006pt.
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
  [7 <./Imagenes/Cap2_prediccion.png>]
-Overfull \hbox (9.67502pt too wide) in paragraph at lines 46--47
+Overfull \hbox (9.67502pt too wide) in paragraph at lines 47--48
 \OT1/cmr/m/n/12 La eval-u-aci^^Son rig-urosa del de-sempe~no pre-dic-tivo es fun-da-men-tal para com-parar metodolog^^S^^Pas
  []
 
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [8]
-Overfull \hbox (2.77461pt too wide) in paragraph at lines 55--56
+[8]
+Overfull \hbox (2.77461pt too wide) in paragraph at lines 56--57
 \OT1/cmr/m/n/12 La propiedad (\OT1/cmr/m/it/12 pro-pri-ety\OT1/cmr/m/n/12 ) es una car-ac-ter^^S^^Pstica fun-da-men-tal que debe sat-is-facer toda m^^Setrica
  []
 
 [9]
-LaTeX Font Info:    Trying to load font information for U+bbm on input line 81.
+LaTeX Font Info:    Trying to load font information for U+bbm on input line 82.
  (C:\Users\pleal\AppData\Local\Programs\MiKTeX\tex/latex/bbm\ubbm.fd
 File: ubbm.fd 1999/03/15 V 1.2 Font definition for bbm font - TH
 ) [10]
-Overfull \hbox (7.7886pt too wide) in paragraph at lines 102--103
+Overfull \hbox (7.7886pt too wide) in paragraph at lines 103--104
 []\OT1/cmr/bx/n/12 Reducci^^Son al er-ror ab-so-luto: \OT1/cmr/m/n/12 Cuando $\OML/cmm/m/it/12 F$ \OT1/cmr/m/n/12 es una dis-tribuci^^Son de-gen-er-ada (predicci^^Son
  []
 
 [11] [12]
-Overfull \hbox (14.66483pt too wide) in paragraph at lines 159--160
+Overfull \hbox (13.29008pt too wide) in paragraph at lines 160--161
 []\OT1/cmr/m/n/12 Si los pron^^Sosticos est^^San per-fec-ta-mente cal-i-bra-dos y $\OML/cmm/m/it/12 F[]$ \OT1/cmr/m/n/12 es con-tinua, en-tonces $\OML/cmm/m/it/12 p[] \OMS/cmsy/m/n/12 ^^X []\OT1/cmr/m/n/12 (0\OML/cmm/m/it/12 ; \OT1/cmr/m/n/12 1)$
  []
 
-
-Underfull \vbox (badness 6204) has occurred while \output is active []
-
- [13]
-Underfull \vbox (badness 1484) has occurred while \output is active []
-
- [14]
-Overfull \hbox (5.88478pt too wide) in paragraph at lines 207--208
+[13] [14]
+Overfull \hbox (5.46179pt too wide) in paragraph at lines 208--209
 []\OT1/cmr/m/n/12 Tradicionalmente, el test de Diebold-Mariano se ha apli-cado uti-lizando la p^^Serdida cuadr^^Satica
  []
 
-
-Underfull \vbox (badness 1215) has occurred while \output is active []
-
- [15]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [16] [17]
-Overfull \hbox (4.01242pt too wide) in paragraph at lines 281--282
+[15] [16]
+Overfull \hbox (4.01242pt too wide) in paragraph at lines 282--283
 \OT1/cmr/m/n/12 Mariano en mues-tras peque~nas es el en-foque de \OT1/cmr/m/it/12 asint^^Sotica de suavizado fijo \OT1/cmr/m/n/12 (fixed-smoothing
  []
 
-[18]
-Overfull \hbox (37.52359pt too wide) detected at line 315
-[][][][] \OT1/cmr/m/n/12 = \OML/cmm/m/it/12 P [] \OMS/cmsy/m/n/12 ^^T [] \OML/cmm/m/it/12 P\OT1/cmr/m/n/12 ([]\OML/cmm/m/it/12 H[]\OMS/cmsy/m/n/12 j\OML/cmm/m/it/12 H[][]\OT1/cmr/m/n/12 ) \OMS/cmsy/m/n/12 ^^T \OML/cmm/m/it/12 []
- []
-
-[19]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [20] [21]
-Overfull \hbox (5.3584pt too wide) in paragraph at lines 374--375
+[17] [18] [19] [20] [21]
+Overfull \hbox (3.98366pt too wide) in paragraph at lines 377--378
 []$\OML/cmm/m/it/12 ^^O$ \OT1/cmr/m/n/12 rep-re-senta el nivel de er-ror nom-i-nal (t^^S^^Ppicamente $\OML/cmm/m/it/12 $ \OT1/cmr/m/n/12 en predicci^^Son con-for-mal est^^Sandar) 
  []
 
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [22]
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 397.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\tau' on input line 397.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 397.
-
-[23]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [24]
-Overfull \hbox (5.68553pt too wide) in paragraph at lines 432--434
+[22] [23] [24]
+Overfull \hbox (4.83553pt too wide) in paragraph at lines 435--437
 \OT1/cmr/m/n/12 donde $[]$ es la predicci^^Son para $\OML/cmm/m/it/12 y[]$ \OT1/cmr/m/n/12 us-ando m^^S^^Pnimos cuadra-dos so-bre $\OML/cmm/m/it/12 x[]$ \OT1/cmr/m/n/12 con $\OML/cmm/m/it/12 z[]; [] ; z[]$
  []
 
-[25]
-
-LaTeX Warning: Reference `fig:analogia_mondrian' on page 26 undefined on input line 477.
-
-
-Underfull \vbox (badness 2302) has occurred while \output is active []
-
- [26]
-<Imagenes/mondrian.png, id=880, 259.97125pt x 194.7275pt>
+[25] [26]
+<Imagenes/mondrian.png, id=883, 259.97125pt x 194.7275pt>
 File: Imagenes/mondrian.png Graphic file (type png)
 <use Imagenes/mondrian.png>
-Package pdftex.def Info: Imagenes/mondrian.png  used on input line 481.
+Package pdftex.def Info: Imagenes/mondrian.png  used on input line 484.
 (pdftex.def)             Requested size: 274.6857pt x 205.75052pt.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 489.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\kappa' on input line 489.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 489.
-
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [27 <./Imagenes/mondrian.png>]
-Underfull \vbox (badness 4726) has occurred while \output is active []
-
- [28] [29] [30] [31] [32]) [33] [34]
+ [27 <./Imagenes/mondrian.png>] [28] [29] [30] [31] [32]) [33] [34]
 \openout2 = `Capitulos/Cap3.aux'.
 
  (Capitulos/Cap3.tex
 chapter 3.
-
-Overfull \hbox (0.40567pt too wide) in paragraph at lines 14--15
-[]\OT1/cmr/m/n/12 El dise~no ex-per-i-men-tal de-sar-rol-lado con-sid-era tres di-men-siones fun-da-men-tales de variaci^^Son:
- []
-
-
-Underfull \vbox (badness 3428) has occurred while \output is active []
-
- [35
+[35
 
 
 
 
 ] [36] [37]
-Overfull \hbox (8.33475pt too wide) in paragraph at lines 85--86
+Overfull \hbox (7.90001pt too wide) in paragraph at lines 85--86
 []\OT1/cmr/m/n/12 Adicionalmente, con-siderando que cada con-fig-u-raci^^Son se eval^^Sua en un hor-i-zonte de predicci^^Son
  []
 
 [38]
-Overfull \hbox (34.54555pt too wide) in paragraph at lines 106--107
+Overfull \hbox (34.54555pt too wide) in paragraph at lines 108--109
 []\OT1/cmr/m/n/12 Este es-quema em-ula una situaci^^Son op-er-a-tiva donde el anal-ista ac-tu-al-iza peri^^Sodicamente
  []
 
 [39] [40] [41]
-Overfull \hbox (35.83727pt too wide) in paragraph at lines 209--210
+Overfull \hbox (34.20403pt too wide) in paragraph at lines 211--212
 \OT1/cmr/m/n/12 Un pro-ceso au-tor-re-gre-sivo in-te-grado de me-dia m^^Sovil de ^^Sordenes $(\OML/cmm/m/it/12 p; d; q\OT1/cmr/m/n/12 )$, de-no-tado ARIMA$(\OML/cmm/m/it/12 p; d; q\OT1/cmr/m/n/12 )$,
  []
 
-[42] [43]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [44] [45]
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 339.
+[42] [43] [44] [45] [46] [47] [48] [49] [50]
+Overfull \hbox (1.10483pt too wide) in paragraph at lines 492--493
+[] \OT1/cmss/bx/n/12 Adaptaci^^Son 3: Con-ge-lamiento Post-Optimizaci^^Son[][] \OT1/cmr/m/n/12 A difer-en-cia de im-ple-menta-ciones
+ []
 
 
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `subscript' on input line 339.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 339.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 339.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `subscript' on input line 339.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 339.
-
-[46] [47] [48] [49] [50]
-Overfull \hbox (32.67107pt too wide) in paragraph at lines 494--504
+Overfull \hbox (32.67107pt too wide) in paragraph at lines 497--507
  [][] 
  []
 
 [51]
 LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <12> not available
-(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 508.
+(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 511.
  [52]
-Overfull \hbox (16.8135pt too wide) in paragraph at lines 545--546
+Overfull \hbox (14.53403pt too wide) in paragraph at lines 548--549
 \OT1/cmr/m/n/12 cuadra-dos or-di-nar-ios so-bre la se-rie hist^^Sorica, obte-niendo co-e-fi-cientes $[] = ([]\OML/cmm/m/it/12 ; []; [] ; []\OT1/cmr/m/n/12 )$. 
  []
 
-
-Underfull \vbox (badness 3460) has occurred while \output is active []
-
- [53]
-Overfull \hbox (8.72188pt too wide) in paragraph at lines 576--577
+[53]
+Overfull \hbox (8.72188pt too wide) in paragraph at lines 579--580
 [] \OT1/cmss/bx/n/12 Adaptaci^^Son 1: Se-lecci^^Son de Or-den Basada en Val-i-daci^^Son[][] \OT1/cmr/m/n/12 Mien-tras la teor^^S^^Pa asint^^Sotica
  []
 
 [54] [55]
-Overfull \hbox (32.63637pt too wide) in paragraph at lines 635--636
+Overfull \hbox (31.26163pt too wide) in paragraph at lines 638--639
 \OT1/cmr/m/n/12 menta en el prin-ci-pio de in-ter-cam-bi-a-bil-i-dad: dada una se-cuen-cia de pares $(\OML/cmm/m/it/12 x[]; y[]\OT1/cmr/m/n/12 )\OML/cmm/m/it/12 ; [] ; \OT1/cmr/m/n/12 (\OML/cmm/m/it/12 x[]; y[]\OT1/cmr/m/n/12 )$
  []
 
 [56] [57]
-Overfull \hbox (13.83414pt too wide) in paragraph at lines 701--702
+Overfull \hbox (13.83414pt too wide) in paragraph at lines 704--705
 \OT1/cmr/m/n/12 car-ac-ter^^S^^Psticas $\OML/cmm/m/it/12 X[]$ \OT1/cmr/m/n/12 in-de-pen-di-entes. En se-ries tem-po-rales, se con-struyen ob-je-tos din^^Samicamente
  []
 
 [58] [59] [60] [61] [62] [63] [64]
-Underfull \vbox (badness 2875) has occurred while \output is active []
+Overfull \hbox (9.43265pt too wide) in paragraph at lines 938--939
+[] \OT1/cmss/bx/n/12 Con-ge-lamiento de Hiper-par^^Sametros[][] \OT1/cmr/m/n/12 Una vez op-ti-mizada, la con-fig-u-raci^^Son se-lec-cionada
+ []
 
- [65] [66] [67] [68]
-Overfull \hbox (7.61426pt too wide) in paragraph at lines 1059--1060
+[65] [66] [67] [68]
+Overfull \hbox (5.98102pt too wide) in paragraph at lines 1062--1063
 [] \OT1/cmss/bx/n/12 Adaptaci^^Son 3: Pro-to-colo de Con-ge-lamiento Par-cial[][] \OT1/cmr/m/n/12 El m^^Setodo al-ma-cena ^^Sunicamente: 
  []
 
 
-Overfull \hbox (57.61661pt too wide) in paragraph at lines 1070--1082
+Overfull \hbox (57.61661pt too wide) in paragraph at lines 1073--1085
  [][] 
  []
 
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
 [69] [70] [71] [72] [73] [74] [75]
-Overfull \hbox (15.9161pt too wide) in paragraph at lines 1313--1314
+Overfull \hbox (15.9161pt too wide) in paragraph at lines 1316--1317
 [] \OT1/cmss/bx/n/12 Op-ti-mizaci^^Son de Hiper-par^^Sametros[][] \OT1/cmr/bx/n/12 Es-trate-gia de con-ge-lamiento: \OT1/cmr/m/n/12 El m^^Setodo definido
  []
 
 [76]
-Overfull \hbox (5.35019pt too wide) in paragraph at lines 1367--1368
+Overfull \hbox (5.35019pt too wide) in paragraph at lines 1370--1371
 [] \OT1/cmss/bx/n/12 Mo-ti-vaci^^Son: L^^S^^Pmites del Par-ti-cionamiento Uni-di-men-sional[][] \OT1/cmr/m/n/12 El MCPS est^^Sandar asume
  []
 
 [77]
-Overfull \hbox (8.6653pt too wide) in paragraph at lines 1377--1378
+Overfull \hbox (8.6653pt too wide) in paragraph at lines 1380--1381
 \OT1/cmr/m/n/12 braci^^Son, per-mi-tiendo que la in-cer-tidum-bre var^^S^^Pe si-mult^^Saneamente seg^^Sun el nivel de predicci^^Son
  []
 
 [78]
-Overfull \hbox (50.45358pt too wide) in paragraph at lines 1423--1424
+Overfull \hbox (50.45358pt too wide) in paragraph at lines 1426--1427
 []\OT1/cmr/m/n/12 Esta par-tici^^Son gen-era $\OML/cmm/m/it/12 B[] \OMS/cmsy/m/n/12 ^^B \OML/cmm/m/it/12 B[]$ \OT1/cmr/m/n/12 cel-das mu-tu-a-mente ex-cluyentes y ex-haus-ti-vas: $[][] [][] \OMS/cmsy/m/n/12 D[] \OT1/cmr/m/n/12 =
  []
 
 [79]
-Overfull \hbox (5.00595pt too wide) in paragraph at lines 1480--1481
+Overfull \hbox (5.00595pt too wide) in paragraph at lines 1483--1484
 \OT1/cmr/m/n/12 predicci^^Son ac-tual $[]$, pero re-stringiendo ex-clu-si-va-mente a ob-ser-va-ciones del mismo r^^Segimen
  []
 
 [80] [81] [82] [83]
-Overfull \hbox (9.40201pt too wide) in paragraph at lines 1641--1642
+Overfull \hbox (7.12253pt too wide) in paragraph at lines 1644--1645
 []\OT1/cmr/m/n/12 donde $\OML/cmm/m/it/12 ^^Z \OMS/cmsy/m/n/12 2 \OT1/cmr/m/n/12 (0\OML/cmm/m/it/12 ; \OT1/cmr/m/n/12 1)$ es el par^^Sametro de de-caimiento. Los pe-sos se nor-mal-izan: $[] = \OML/cmm/m/it/12 w[]= [][] w[]$\OT1/cmr/m/n/12 .
  []
 
 [84] [85] [86] [87]
-Overfull \hbox (15.728pt too wide) in paragraph at lines 1783--1784
+Overfull \hbox (13.76576pt too wide) in paragraph at lines 1786--1787
 [] \OT1/cmss/bx/n/12 Ex-pli-caci^^Son Te^^Sorica del Mod-elo[][] \OT1/cmr/m/n/12 El \OT1/cmr/m/it/12 En-sem-ble Con-for-mal-ized Quan-tile Re-gres-sion \OT1/cmr/m/n/12 (EnCQR-
  []
 
 
-Overfull \hbox (3.34314pt too wide) in paragraph at lines 1789--1790
+Overfull \hbox (3.34314pt too wide) in paragraph at lines 1792--1793
 []\OT1/cmr/m/n/12 Por otra parte, los m^^Setodos de predicci^^Son con-for-mal est^^Sandar garan-ti-zan cober-tura marginal
  []
 
 [88] [89]
-Overfull \hbox (9.60518pt too wide) in paragraph at lines 1848--1849
+Overfull \hbox (9.60518pt too wide) in paragraph at lines 1851--1852
 []\OT1/cmr/m/n/12 donde $\OML/cmm/m/it/12 ^^^\OT1/cmr/m/n/12 (\OMS/cmsy/m/n/12 ^^A\OT1/cmr/m/n/12 )$ y $^^H(\OMS/cmsy/m/n/12 ^^A\OT1/cmr/m/n/12 )$ son la den-si-dad y dis-tribuci^^Son acu-mu-lada Nor-mal est^^Sandar. Los par^^Sametros
  []
 
-[90] [91] [92] [93]
-Underfull \vbox (badness 6001) has occurred while \output is active []
-
- [94]
-Overfull \hbox (3.90007pt too wide) in paragraph at lines 1995--1996
+[90] [91] [92] [93] [94]
+Overfull \hbox (1.93784pt too wide) in paragraph at lines 1998--1999
 \OT1/cmr/m/n/12 metodol^^Sogica m^^Sas pro-funda al in-tro-ducir es-trat-i-fi-caci^^Son bidi-men-sional que in-cor-pora volatil-
  []
 
-[95] [96]
-Underfull \vbox (badness 10000) has occurred while \output is active []
+[95]
+Overfull \hbox (0.73206pt too wide) in paragraph at lines 2005--2006
+[]\OT1/cmr/m/n/12 La in-no-vaci^^Son fun-da-men-tal rad-ica en la filosof^^S^^Pa de "dis-tribuci^^Son hist^^Sorico-emp^^S^^Prica", donde
+ []
 
- [97]
-Underfull \vbox (badness 1122) has occurred while \output is active []
-
- [98]
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 2057.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 2057.
-
-[99]
-Underfull \vbox (badness 5403) has occurred while \output is active []
-
- [100] [101]
-Overfull \hbox (9.93613pt too wide) in paragraph at lines 2183--2184
+[96] [97] [98] [99] [100] [101]
+Overfull \hbox (9.93613pt too wide) in paragraph at lines 2186--2187
 \OT1/cmr/m/n/12 Esta sim-u-laci^^Son car-ac-ter-iza la tasa de con-ver-gen-cia de las dis-tribu-ciones pre-dic-ti-vas emp^^S^^Pricas
  []
 
+[102] [103] [104] [105]
+Overfull \hbox (6.417pt too wide) in paragraph at lines 2313--2314
+\OT1/cmr/m/n/12 Se eval^^Suan ^^Sunicamente 4 mod-e-los rep-re-sen-ta-tivos (LSPM, DeepAR, Sieve Boot-strap, MCPS)
+ []
 
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [102] [103]
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 2270.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 2270.
-
-[104] [105] [106]
-Underfull \hbox (badness 10000) in paragraph at lines 2366--2366
+[106]
+Underfull \hbox (badness 10000) in paragraph at lines 2369--2369
 []|\OT1/cmr/m/n/10.95 Modalidad (SIN[]DIFF vs
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2370--2370
+Underfull \hbox (badness 10000) in paragraph at lines 2373--2373
 []|\OT1/cmr/m/n/10.95 Orden de in-te-graci^^Son $\OML/cmm/m/it/10.95 d \OMS/cmsy/m/n/10.95 2
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2382--2382
+Underfull \hbox (badness 10000) in paragraph at lines 2385--2385
 []|\OT1/cmr/m/n/10.95 Horizonte de predicci^^Son
  []
 
 [107]
-Underfull \vbox (badness 3009) has occurred while \output is active []
+Overfull \hbox (4.38939pt too wide) in paragraph at lines 2402--2403
+\OT1/cmr/m/n/12 (Block Boot-strap-ping, Sieve Boot-strap, LSPM, LSPMW, AREPD, MCPS, AV-MCPS,
+ []
 
- [108]) [109]
+[108]) [109]
 \openout2 = `Capitulos/Cap4.aux'.
 
  (Capitulos/Cap4.tex
 chapter 4.
 
-Overfull \hbox (2.74315pt too wide) in paragraph at lines 11--12
+Overfull \hbox (1.10991pt too wide) in paragraph at lines 11--12
 \OT1/cmr/m/n/12 eval^^Sua 9 m^^Setodos bajo 420 con-fig-u-ra-ciones ^^Sunicas dis-tribuidas en-tre tres es-ce-nar-ios (ARMA,
  []
 
@@ -2407,7 +1613,7 @@ Overfull \hbox (2.74315pt too wide) in paragraph at lines 11--12
 
 
 ]
-<Imagenes/figura_tesis_ecrps.png, id=1765, 708.0051pt x 1547.5416pt>
+<Imagenes/figura_tesis_ecrps.png, id=1768, 708.0051pt x 1547.5416pt>
 File: Imagenes/figura_tesis_ecrps.png Graphic file (type png)
 <use Imagenes/figura_tesis_ecrps.png>
 Package pdftex.def Info: Imagenes/figura_tesis_ecrps.png  used on input line 15.
@@ -2416,12 +1622,12 @@ Package pdftex.def Info: Imagenes/figura_tesis_ecrps.png  used on input line 15.
 
 LaTeX Warning: Float too large for page by 40.94197pt on input line 18.
 
-<Imagenes/rendimiento_por_escenario.png, id=1767, 1004.553pt x 570.933pt>
+<Imagenes/rendimiento_por_escenario.png, id=1770, 1004.553pt x 570.933pt>
 File: Imagenes/rendimiento_por_escenario.png Graphic file (type png)
 <use Imagenes/rendimiento_por_escenario.png>
 Package pdftex.def Info: Imagenes/rendimiento_por_escenario.png  used on input line 30.
 (pdftex.def)             Requested size: 457.80486pt x 260.19307pt.
-<Imagenes/2.1_zscore_config.png, id=1769, 932.5239pt x 570.933pt>
+<Imagenes/2.1_zscore_config.png, id=1772, 932.5239pt x 570.933pt>
 File: Imagenes/2.1_zscore_config.png Graphic file (type png)
 <use Imagenes/2.1_zscore_config.png>
 Package pdftex.def Info: Imagenes/2.1_zscore_config.png  used on input line 42.
@@ -2431,13 +1637,18 @@ Overfull \hbox (91.55957pt too wide) in paragraph at lines 42--43
  [][] 
  []
 
+
+Overfull \hbox (2.01291pt too wide) in paragraph at lines 47--48
+\OT1/cmr/m/n/12 Boot-strap, LSPM y LSPMW ex-hiben la mayor es-ta-bil-i-dad, al-can-zando pun-ta-jes Z m^^Saximos
+ []
+
 [111] [112 <./Imagenes/figura_tesis_ecrps.png>]
-<Imagenes/2.1.a_zscore_config.png, id=1787, 945.0507pt x 570.933pt>
+<Imagenes/2.1.a_zscore_config.png, id=1793, 945.0507pt x 570.933pt>
 File: Imagenes/2.1.a_zscore_config.png Graphic file (type png)
 <use Imagenes/2.1.a_zscore_config.png>
 Package pdftex.def Info: Imagenes/2.1.a_zscore_config.png  used on input line 56.
 (pdftex.def)             Requested size: 457.80486pt x 276.57112pt.
-<Imagenes/2.1.b_zscore_config.png, id=1788, 945.0507pt x 570.933pt>
+<Imagenes/2.1.b_zscore_config.png, id=1794, 945.0507pt x 570.933pt>
 File: Imagenes/2.1.b_zscore_config.png Graphic file (type png)
 <use Imagenes/2.1.b_zscore_config.png>
 Package pdftex.def Info: Imagenes/2.1.b_zscore_config.png  used on input line 63.
@@ -2446,26 +1657,23 @@ Package pdftex.def Info: Imagenes/2.1.b_zscore_config.png  used on input line 63
 
 LaTeX Warning: Float too large for page by 19.11235pt on input line 69.
 
-<Imagenes/2.1.c_zscore_config.png, id=1789, 945.0507pt x 570.933pt>
+<Imagenes/2.1.c_zscore_config.png, id=1795, 945.0507pt x 570.933pt>
 File: Imagenes/2.1.c_zscore_config.png Graphic file (type png)
 <use Imagenes/2.1.c_zscore_config.png>
 Package pdftex.def Info: Imagenes/2.1.c_zscore_config.png  used on input line 76.
 (pdftex.def)             Requested size: 457.80486pt x 276.57112pt.
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [113 <./Imagenes/rendimiento_por_escenario.png>] [114 <./Imagenes/2.1_zscore_config.png>] [115 <./Imagenes/2.1.a_zscore_config.png> <./Imagenes/2.1.b_zscore_config.png>] [116 <./Imagenes/2.1.c_zscore_config.png>]
-<Imagenes/3.1_zscore_dist.png, id=1812, 945.0507pt x 570.933pt>
+[113 <./Imagenes/rendimiento_por_escenario.png>] [114 <./Imagenes/2.1_zscore_config.png>] [115 <./Imagenes/2.1.a_zscore_config.png> <./Imagenes/2.1.b_zscore_config.png>] [116 <./Imagenes/2.1.c_zscore_config.png>]
+<Imagenes/3.1_zscore_dist.png, id=1821, 945.0507pt x 570.933pt>
 File: Imagenes/3.1_zscore_dist.png Graphic file (type png)
 <use Imagenes/3.1_zscore_dist.png>
 Package pdftex.def Info: Imagenes/3.1_zscore_dist.png  used on input line 90.
 (pdftex.def)             Requested size: 457.80486pt x 276.57112pt.
-<Imagenes/3.1.a_zscore_dist.png, id=1818, 945.0507pt x 570.933pt>
+<Imagenes/3.1.a_zscore_dist.png, id=1827, 945.0507pt x 570.933pt>
 File: Imagenes/3.1.a_zscore_dist.png Graphic file (type png)
 <use Imagenes/3.1.a_zscore_dist.png>
 Package pdftex.def Info: Imagenes/3.1.a_zscore_dist.png  used on input line 100.
 (pdftex.def)             Requested size: 457.80486pt x 276.57112pt.
-<Imagenes/3.1.b_zscore_dist.png, id=1819, 945.0507pt x 570.933pt>
+<Imagenes/3.1.b_zscore_dist.png, id=1828, 945.0507pt x 570.933pt>
 File: Imagenes/3.1.b_zscore_dist.png Graphic file (type png)
 <use Imagenes/3.1.b_zscore_dist.png>
 Package pdftex.def Info: Imagenes/3.1.b_zscore_dist.png  used on input line 107.
@@ -2475,150 +1683,111 @@ Package pdftex.def Info: Imagenes/3.1.b_zscore_dist.png  used on input line 107.
 LaTeX Warning: Float too large for page by 19.11235pt on input line 113.
 
 [117 <./Imagenes/3.1_zscore_dist.png>]
-<Imagenes/3.1.c_zscore_dist.png, id=1827, 945.0507pt x 570.933pt>
+<Imagenes/3.1.c_zscore_dist.png, id=1836, 945.0507pt x 570.933pt>
 File: Imagenes/3.1.c_zscore_dist.png Graphic file (type png)
 <use Imagenes/3.1.c_zscore_dist.png>
 Package pdftex.def Info: Imagenes/3.1.c_zscore_dist.png  used on input line 120.
 (pdftex.def)             Requested size: 457.80486pt x 276.57112pt.
-<Imagenes/4.1_evolucion_var.png, id=1829, 860.013pt x 498.663pt>
+<Imagenes/4.1_evolucion_var.png, id=1838, 860.013pt x 498.663pt>
 File: Imagenes/4.1_evolucion_var.png Graphic file (type png)
 <use Imagenes/4.1_evolucion_var.png>
 Package pdftex.def Info: Imagenes/4.1_evolucion_var.png  used on input line 134.
 (pdftex.def)             Requested size: 457.80486pt x 265.44669pt.
-<Imagenes/4.1.a_evolucion_var.png, id=1835, 860.013pt x 498.663pt>
+<Imagenes/4.1.a_evolucion_var.png, id=1844, 860.013pt x 498.663pt>
 File: Imagenes/4.1.a_evolucion_var.png Graphic file (type png)
 <use Imagenes/4.1.a_evolucion_var.png>
 Package pdftex.def Info: Imagenes/4.1.a_evolucion_var.png  used on input line 145.
 (pdftex.def)             Requested size: 457.80486pt x 265.44669pt.
-<Imagenes/4.1.b_evolucion_var.png, id=1836, 860.013pt x 498.663pt>
+<Imagenes/4.1.b_evolucion_var.png, id=1845, 860.013pt x 498.663pt>
 File: Imagenes/4.1.b_evolucion_var.png Graphic file (type png)
 <use Imagenes/4.1.b_evolucion_var.png>
 Package pdftex.def Info: Imagenes/4.1.b_evolucion_var.png  used on input line 152.
 (pdftex.def)             Requested size: 457.80486pt x 265.44669pt.
-<Imagenes/4.1.c_evolucion_var.png, id=1837, 860.013pt x 498.663pt>
+<Imagenes/4.1.c_evolucion_var.png, id=1846, 860.013pt x 498.663pt>
 File: Imagenes/4.1.c_evolucion_var.png Graphic file (type png)
 <use Imagenes/4.1.c_evolucion_var.png>
 Package pdftex.def Info: Imagenes/4.1.c_evolucion_var.png  used on input line 165.
 (pdftex.def)             Requested size: 457.80486pt x 265.44669pt.
-<Imagenes/6.1_robustez_coeficiente_variacion.png, id=1839, 860.013pt x 570.933pt>
+<Imagenes/6.1_robustez_coeficiente_variacion.png, id=1848, 860.013pt x 570.933pt>
 File: Imagenes/6.1_robustez_coeficiente_variacion.png Graphic file (type png)
 <use Imagenes/6.1_robustez_coeficiente_variacion.png>
 Package pdftex.def Info: Imagenes/6.1_robustez_coeficiente_variacion.png  used on input line 181.
 (pdftex.def)             Requested size: 457.80486pt x 303.91722pt.
  [118] [119 <./Imagenes/3.1.a_zscore_dist.png> <./Imagenes/3.1.b_zscore_dist.png>] [120 <./Imagenes/3.1.c_zscore_dist.png>]
-<Imagenes/6.4_matriz_significancia_porcentual.png, id=1857, 1069.8369pt x 1004.553pt>
+<Imagenes/6.4_matriz_significancia_porcentual.png, id=1866, 1069.8369pt x 1004.553pt>
 File: Imagenes/6.4_matriz_significancia_porcentual.png Graphic file (type png)
 <use Imagenes/6.4_matriz_significancia_porcentual.png>
 Package pdftex.def Info: Imagenes/6.4_matriz_significancia_porcentual.png  used on input line 198.
 (pdftex.def)             Requested size: 457.80486pt x 429.86473pt.
  [121 <./Imagenes/4.1_evolucion_var.png>] [122 <./Imagenes/4.1.a_evolucion_var.png> <./Imagenes/4.1.b_evolucion_var.png>] [123 <./Imagenes/4.1.c_evolucion_var.png>] [124 <./Imagenes/6.1_robustez_coeficiente_variacion.png>] [125 <./Imagenes/6.4_matriz_significancia_porcentual.png>]
-<Imagenes/6.4.a_matriz_significancia_porcentual.png, id=1888, 1069.8369pt x 1004.553pt>
+<Imagenes/6.4.a_matriz_significancia_porcentual.png, id=1897, 1069.8369pt x 1004.553pt>
 File: Imagenes/6.4.a_matriz_significancia_porcentual.png Graphic file (type png)
 <use Imagenes/6.4.a_matriz_significancia_porcentual.png>
 Package pdftex.def Info: Imagenes/6.4.a_matriz_significancia_porcentual.png  used on input line 211.
 (pdftex.def)             Requested size: 457.80486pt x 429.86473pt.
-<Imagenes/6.4.b_matriz_significancia_porcentual.png, id=1889, 1069.8369pt x 1004.553pt>
+<Imagenes/6.4.b_matriz_significancia_porcentual.png, id=1898, 1069.8369pt x 1004.553pt>
 File: Imagenes/6.4.b_matriz_significancia_porcentual.png Graphic file (type png)
 <use Imagenes/6.4.b_matriz_significancia_porcentual.png>
 Package pdftex.def Info: Imagenes/6.4.b_matriz_significancia_porcentual.png  used on input line 219.
 (pdftex.def)             Requested size: 457.80486pt x 429.86473pt.
-<Imagenes/6.4.c_matriz_significancia_porcentual.png, id=1890, 1069.8369pt x 1004.553pt>
+<Imagenes/6.4.c_matriz_significancia_porcentual.png, id=1899, 1069.8369pt x 1004.553pt>
 File: Imagenes/6.4.c_matriz_significancia_porcentual.png Graphic file (type png)
 <use Imagenes/6.4.c_matriz_significancia_porcentual.png>
 Package pdftex.def Info: Imagenes/6.4.c_matriz_significancia_porcentual.png  used on input line 227.
 (pdftex.def)             Requested size: 457.80486pt x 429.86473pt.
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [126] [127 <./Imagenes/6.4.a_matriz_significancia_porcentual.png>] [128 <./Imagenes/6.4.b_matriz_significancia_porcentual.png>] [129 <./Imagenes/6.4.c_matriz_significancia_porcentual.png>]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [130]
-<Imagenes/Sim1/1.1_barras_ecrps_valores.png, id=1923, 867.24pt x 433.62pt>
+ [126] [127 <./Imagenes/6.4.a_matriz_significancia_porcentual.png>] [128 <./Imagenes/6.4.b_matriz_significancia_porcentual.png>] [129 <./Imagenes/6.4.c_matriz_significancia_porcentual.png>] [130]
+<Imagenes/Sim1/1.1_barras_ecrps_valores.png, id=1932, 867.24pt x 433.62pt>
 File: Imagenes/Sim1/1.1_barras_ecrps_valores.png Graphic file (type png)
 <use Imagenes/Sim1/1.1_barras_ecrps_valores.png>
 Package pdftex.def Info: Imagenes/Sim1/1.1_barras_ecrps_valores.png  used on input line 266.
 (pdftex.def)             Requested size: 457.80486pt x 228.90442pt.
  [131 <./Imagenes/Sim1/1.1_barras_ecrps_valores.png>]
-<Imagenes/Sim1/1.2_mejora_porcentual_valores.png, id=1931, 722.7pt x 578.16pt>
+<Imagenes/Sim1/1.2_mejora_porcentual_valores.png, id=1940, 722.7pt x 578.16pt>
 File: Imagenes/Sim1/1.2_mejora_porcentual_valores.png Graphic file (type png)
 <use Imagenes/Sim1/1.2_mejora_porcentual_valores.png>
 Package pdftex.def Info: Imagenes/Sim1/1.2_mejora_porcentual_valores.png  used on input line 286.
 (pdftex.def)             Requested size: 366.24527pt x 292.99625pt.
 
-Overfull \hbox (13.32556pt too wide) in paragraph at lines 294--296
+Overfull \hbox (11.69232pt too wide) in paragraph at lines 294--296
 \OT1/cmr/m/n/12 EnCQR-LSTM) pre-sen-tan de-pen-den-cia sus-tan-cial; m^^Setodos con-for-males de cuan-tiles (MCPS,
  []
 
 [132] [133 <./Imagenes/Sim1/1.2_mejora_porcentual_valores.png>]
-<Imagenes/Sim1/3_heatmap_modelo_config.png, id=1945, 867.24pt x 578.16pt>
+<Imagenes/Sim1/3_heatmap_modelo_config.png, id=1954, 867.24pt x 578.16pt>
 File: Imagenes/Sim1/3_heatmap_modelo_config.png Graphic file (type png)
 <use Imagenes/Sim1/3_heatmap_modelo_config.png>
 Package pdftex.def Info: Imagenes/Sim1/3_heatmap_modelo_config.png  used on input line 334.
 (pdftex.def)             Requested size: 457.80486pt x 305.2059pt.
  [134] [135 <./Imagenes/Sim1/3_heatmap_modelo_config.png>]
-<Imagenes/Sim1/4_heatmap_modelo_dist.png, id=1957, 722.7pt x 578.16pt>
+<Imagenes/Sim1/4_heatmap_modelo_dist.png, id=1966, 722.7pt x 578.16pt>
 File: Imagenes/Sim1/4_heatmap_modelo_dist.png Graphic file (type png)
 <use Imagenes/Sim1/4_heatmap_modelo_dist.png>
 Package pdftex.def Info: Imagenes/Sim1/4_heatmap_modelo_dist.png  used on input line 343.
 (pdftex.def)             Requested size: 457.80486pt x 366.24532pt.
  [136 <./Imagenes/Sim1/4_heatmap_modelo_dist.png>]
-Overfull \hbox (2.91652pt too wide) in paragraph at lines 358--359
+Overfull \hbox (0.95428pt too wide) in paragraph at lines 358--359
 []\OT1/cmr/bx/n/12 Sieve Boot-strap es intr^^S^^Pnsecamente ro-busto a no esta-cionar-iedad: \OT1/cmr/m/n/12 Su mecan-
  []
 
 [137] [138]
-<Imagenes/Sim2/1_MEJORA_PORCENTUAL_POR_D.png, id=1979, 1079.232pt x 860.013pt>
+<Imagenes/Sim2/1_MEJORA_PORCENTUAL_POR_D.png, id=1988, 1079.232pt x 860.013pt>
 File: Imagenes/Sim2/1_MEJORA_PORCENTUAL_POR_D.png Graphic file (type png)
 <use Imagenes/Sim2/1_MEJORA_PORCENTUAL_POR_D.png>
 Package pdftex.def Info: Imagenes/Sim2/1_MEJORA_PORCENTUAL_POR_D.png  used on input line 404.
 (pdftex.def)             Requested size: 457.80486pt x 364.81174pt.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 409.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 409.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 417.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 417.
-
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [139] [140 <./Imagenes/Sim2/1_MEJORA_PORCENTUAL_POR_D.png>]
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 425.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\geq' on input line 425.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 425.
-
-[141]
-<Imagenes/Sim2/2_SENSIBILIDAD_MODELOS_POR_D.png, id=1998, 1069.8369pt x 860.013pt>
+ [139] [140 <./Imagenes/Sim2/1_MEJORA_PORCENTUAL_POR_D.png>] [141]
+<Imagenes/Sim2/2_SENSIBILIDAD_MODELOS_POR_D.png, id=2007, 1069.8369pt x 860.013pt>
 File: Imagenes/Sim2/2_SENSIBILIDAD_MODELOS_POR_D.png Graphic file (type png)
 <use Imagenes/Sim2/2_SENSIBILIDAD_MODELOS_POR_D.png>
 Package pdftex.def Info: Imagenes/Sim2/2_SENSIBILIDAD_MODELOS_POR_D.png  used on input line 438.
 (pdftex.def)             Requested size: 457.80486pt x 368.01369pt.
  [142 <./Imagenes/Sim2/2_SENSIBILIDAD_MODELOS_POR_D.png>]
-<Imagenes/Sim2/3_HEATMAP_PCT_SIGNIFICANCIA_MCPS.png, id=2006, 932.0421pt x 570.933pt>
+<Imagenes/Sim2/3_HEATMAP_PCT_SIGNIFICANCIA_MCPS.png, id=2015, 932.0421pt x 570.933pt>
 File: Imagenes/Sim2/3_HEATMAP_PCT_SIGNIFICANCIA_MCPS.png Graphic file (type png)
 <use Imagenes/Sim2/3_HEATMAP_PCT_SIGNIFICANCIA_MCPS.png>
 Package pdftex.def Info: Imagenes/Sim2/3_HEATMAP_PCT_SIGNIFICANCIA_MCPS.png  used on input line 461.
 (pdftex.def)             Requested size: 457.80486pt x 280.43042pt.
-<Imagenes/Sim2/3_HEATMAP_PCT_SIGNIFICANCIA_AV_MCPS.png, id=2007, 932.0421pt x 570.933pt>
+<Imagenes/Sim2/3_HEATMAP_PCT_SIGNIFICANCIA_AV_MCPS.png, id=2016, 932.0421pt x 570.933pt>
 File: Imagenes/Sim2/3_HEATMAP_PCT_SIGNIFICANCIA_AV_MCPS.png Graphic file (type png)
 <use Imagenes/Sim2/3_HEATMAP_PCT_SIGNIFICANCIA_AV_MCPS.png>
 Package pdftex.def Info: Imagenes/Sim2/3_HEATMAP_PCT_SIGNIFICANCIA_AV_MCPS.png  used on input line 467.
@@ -2627,12 +1796,12 @@ Package pdftex.def Info: Imagenes/Sim2/3_HEATMAP_PCT_SIGNIFICANCIA_AV_MCPS.png  
 
 LaTeX Warning: Float too large for page by 27.10458pt on input line 473.
 
-<Imagenes/Sim2/3_HEATMAP_PCT_SIGNIFICANCIA_LSPM.png, id=2008, 932.0421pt x 570.933pt>
+<Imagenes/Sim2/3_HEATMAP_PCT_SIGNIFICANCIA_LSPM.png, id=2017, 932.0421pt x 570.933pt>
 File: Imagenes/Sim2/3_HEATMAP_PCT_SIGNIFICANCIA_LSPM.png Graphic file (type png)
 <use Imagenes/Sim2/3_HEATMAP_PCT_SIGNIFICANCIA_LSPM.png>
 Package pdftex.def Info: Imagenes/Sim2/3_HEATMAP_PCT_SIGNIFICANCIA_LSPM.png  used on input line 479.
 (pdftex.def)             Requested size: 457.80486pt x 280.43042pt.
-<Imagenes/Sim2/3_HEATMAP_PCT_SIGNIFICANCIA_LSPMW.png, id=2009, 932.0421pt x 570.933pt>
+<Imagenes/Sim2/3_HEATMAP_PCT_SIGNIFICANCIA_LSPMW.png, id=2018, 932.0421pt x 570.933pt>
 File: Imagenes/Sim2/3_HEATMAP_PCT_SIGNIFICANCIA_LSPMW.png Graphic file (type png)
 <use Imagenes/Sim2/3_HEATMAP_PCT_SIGNIFICANCIA_LSPMW.png>
 Package pdftex.def Info: Imagenes/Sim2/3_HEATMAP_PCT_SIGNIFICANCIA_LSPMW.png  used on input line 485.
@@ -2640,77 +1809,28 @@ Package pdftex.def Info: Imagenes/Sim2/3_HEATMAP_PCT_SIGNIFICANCIA_LSPMW.png  us
 
 LaTeX Warning: Float too large for page by 27.10458pt on input line 490.
 
-<Imagenes/Sim2/3_HEATMAP_PCT_SIGNIFICANCIA_Sieve_Bootstrap.png, id=2010, 932.0421pt x 570.933pt>
+<Imagenes/Sim2/3_HEATMAP_PCT_SIGNIFICANCIA_Sieve_Bootstrap.png, id=2019, 932.0421pt x 570.933pt>
 File: Imagenes/Sim2/3_HEATMAP_PCT_SIGNIFICANCIA_Sieve_Bootstrap.png Graphic file (type png)
 <use Imagenes/Sim2/3_HEATMAP_PCT_SIGNIFICANCIA_Sieve_Bootstrap.png>
 Package pdftex.def Info: Imagenes/Sim2/3_HEATMAP_PCT_SIGNIFICANCIA_Sieve_Bootstrap.png  used on input line 497.
 (pdftex.def)             Requested size: 457.80486pt x 280.43042pt.
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 507.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\geq' on input line 507.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 507.
-
-[143] [144 <./Imagenes/Sim2/3_HEATMAP_PCT_SIGNIFICANCIA_MCPS.png> <./Imagenes/Sim2/3_HEATMAP_PCT_SIGNIFICANCIA_AV_MCPS.png>] [145 <./Imagenes/Sim2/3_HEATMAP_PCT_SIGNIFICANCIA_LSPM.png> <./Imagenes/Sim2/3_HEATMAP_PCT_SIGNIFICANCIA_LSPMW.png>] [146 <./Imagenes/Sim2/3_HEATMAP_PCT_SIGNIFICANCIA_Sieve_Bootstrap.png>]
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 513.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 513.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 513.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 513.
-
-
-Underfull \vbox (badness 1609) has occurred while \output is active []
-
- [147]
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 521.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 521.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 521.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 521.
-
-[148]
+[143] [144 <./Imagenes/Sim2/3_HEATMAP_PCT_SIGNIFICANCIA_MCPS.png> <./Imagenes/Sim2/3_HEATMAP_PCT_SIGNIFICANCIA_AV_MCPS.png>] [145 <./Imagenes/Sim2/3_HEATMAP_PCT_SIGNIFICANCIA_LSPM.png> <./Imagenes/Sim2/3_HEATMAP_PCT_SIGNIFICANCIA_LSPMW.png>] [146 <./Imagenes/Sim2/3_HEATMAP_PCT_SIGNIFICANCIA_Sieve_Bootstrap.png>] [147] [148]
 Overfull \hbox (9.93613pt too wide) in paragraph at lines 536--537
 \OT1/cmr/m/n/12 Esta sim-u-laci^^Son car-ac-ter-iza la tasa de con-ver-gen-cia de las dis-tribu-ciones pre-dic-ti-vas emp^^S^^Pricas
  []
 
-<Imagenes/Sim3/heatmap_zscore_General.png, id=2051, 702.2235pt x 568.7649pt>
+<Imagenes/Sim3/heatmap_zscore_General.png, id=2060, 702.2235pt x 568.7649pt>
 File: Imagenes/Sim3/heatmap_zscore_General.png Graphic file (type png)
 <use Imagenes/Sim3/heatmap_zscore_General.png>
 Package pdftex.def Info: Imagenes/Sim3/heatmap_zscore_General.png  used on input line 550.
 (pdftex.def)             Requested size: 457.80486pt x 370.79498pt.
 [149] [150 <./Imagenes/Sim3/heatmap_zscore_General.png>]
-<Imagenes/Sim3/heatmap_zscore_Lineal_Estacionario_ARMA.png, id=2064, 702.2235pt x 568.7649pt>
+<Imagenes/Sim3/heatmap_zscore_Lineal_Estacionario_ARMA.png, id=2073, 702.2235pt x 568.7649pt>
 File: Imagenes/Sim3/heatmap_zscore_Lineal_Estacionario_ARMA.png Graphic file (type png)
 <use Imagenes/Sim3/heatmap_zscore_Lineal_Estacionario_ARMA.png>
 Package pdftex.def Info: Imagenes/Sim3/heatmap_zscore_Lineal_Estacionario_ARMA.png  used on input line 577.
 (pdftex.def)             Requested size: 366.24527pt x 296.63599pt.
-<Imagenes/Sim3/heatmap_zscore_Lineal_No_Estacionario_ARIMA.png, id=2065, 702.2235pt x 568.7649pt>
+<Imagenes/Sim3/heatmap_zscore_Lineal_No_Estacionario_ARIMA.png, id=2074, 702.2235pt x 568.7649pt>
 File: Imagenes/Sim3/heatmap_zscore_Lineal_No_Estacionario_ARIMA.png Graphic file (type png)
 <use Imagenes/Sim3/heatmap_zscore_Lineal_No_Estacionario_ARIMA.png>
 Package pdftex.def Info: Imagenes/Sim3/heatmap_zscore_Lineal_No_Estacionario_ARIMA.png  used on input line 584.
@@ -2719,245 +1839,209 @@ Package pdftex.def Info: Imagenes/Sim3/heatmap_zscore_Lineal_No_Estacionario_ARI
 
 LaTeX Warning: Float too large for page by 59.24208pt on input line 590.
 
-<Imagenes/Sim3/heatmap_zscore_No_lineal_Estacionario_SETAR.png, id=2066, 702.2235pt x 568.7649pt>
+<Imagenes/Sim3/heatmap_zscore_No_lineal_Estacionario_SETAR.png, id=2075, 702.2235pt x 568.7649pt>
 File: Imagenes/Sim3/heatmap_zscore_No_lineal_Estacionario_SETAR.png Graphic file (type png)
 <use Imagenes/Sim3/heatmap_zscore_No_lineal_Estacionario_SETAR.png>
 Package pdftex.def Info: Imagenes/Sim3/heatmap_zscore_No_lineal_Estacionario_SETAR.png  used on input line 597.
 (pdftex.def)             Requested size: 366.24527pt x 296.63599pt.
-[151] [152 <./Imagenes/Sim3/heatmap_zscore_Lineal_Estacionario_ARMA.png> <./Imagenes/Sim3/heatmap_zscore_Lineal_No_Estacionario_ARIMA.png>] [153 <./Imagenes/Sim3/heatmap_zscore_No_lineal_Estacionario_SETAR.png>]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [154]
-<Imagenes/Sim3/mejora_relativa_General.png, id=2092, 855.4359pt x 496.4949pt>
+[151] [152 <./Imagenes/Sim3/heatmap_zscore_Lineal_Estacionario_ARMA.png> <./Imagenes/Sim3/heatmap_zscore_Lineal_No_Estacionario_ARIMA.png>] [153 <./Imagenes/Sim3/heatmap_zscore_No_lineal_Estacionario_SETAR.png>] [154]
+<Imagenes/Sim3/mejora_relativa_General.png, id=2101, 855.4359pt x 496.4949pt>
 File: Imagenes/Sim3/mejora_relativa_General.png Graphic file (type png)
 <use Imagenes/Sim3/mejora_relativa_General.png>
-Package pdftex.def Info: Imagenes/Sim3/mejora_relativa_General.png  used on input line 623.
+Package pdftex.def Info: Imagenes/Sim3/mejora_relativa_General.png  used on input line 624.
 (pdftex.def)             Requested size: 457.80486pt x 265.71684pt.
  [155 <./Imagenes/Sim3/mejora_relativa_General.png>]
-<Imagenes/Sim3/mejora_relativa_Lineal_Estacionario_ARMA.png, id=2101, 855.6768pt x 496.4949pt>
+<Imagenes/Sim3/mejora_relativa_Lineal_Estacionario_ARMA.png, id=2110, 855.6768pt x 496.4949pt>
 File: Imagenes/Sim3/mejora_relativa_Lineal_Estacionario_ARMA.png Graphic file (type png)
 <use Imagenes/Sim3/mejora_relativa_Lineal_Estacionario_ARMA.png>
-Package pdftex.def Info: Imagenes/Sim3/mejora_relativa_Lineal_Estacionario_ARMA.png  used on input line 643.
+Package pdftex.def Info: Imagenes/Sim3/mejora_relativa_Lineal_Estacionario_ARMA.png  used on input line 644.
 (pdftex.def)             Requested size: 457.80486pt x 265.63351pt.
-<Imagenes/Sim3/mejora_relativa_Lineal_No_Estacionario_ARIMA.png, id=2102, 855.4359pt x 496.4949pt>
+<Imagenes/Sim3/mejora_relativa_Lineal_No_Estacionario_ARIMA.png, id=2111, 855.4359pt x 496.4949pt>
 File: Imagenes/Sim3/mejora_relativa_Lineal_No_Estacionario_ARIMA.png Graphic file (type png)
 <use Imagenes/Sim3/mejora_relativa_Lineal_No_Estacionario_ARIMA.png>
-Package pdftex.def Info: Imagenes/Sim3/mejora_relativa_Lineal_No_Estacionario_ARIMA.png  used on input line 650.
+Package pdftex.def Info: Imagenes/Sim3/mejora_relativa_Lineal_No_Estacionario_ARIMA.png  used on input line 651.
 (pdftex.def)             Requested size: 457.80486pt x 265.71684pt.
-<Imagenes/Sim3/mejora_relativa_No_lineal_Estacionario_SETAR.png, id=2103, 855.6768pt x 496.4949pt>
+<Imagenes/Sim3/mejora_relativa_No_lineal_Estacionario_SETAR.png, id=2112, 855.6768pt x 496.4949pt>
 File: Imagenes/Sim3/mejora_relativa_No_lineal_Estacionario_SETAR.png Graphic file (type png)
 <use Imagenes/Sim3/mejora_relativa_No_lineal_Estacionario_SETAR.png>
-Package pdftex.def Info: Imagenes/Sim3/mejora_relativa_No_lineal_Estacionario_SETAR.png  used on input line 664.
+Package pdftex.def Info: Imagenes/Sim3/mejora_relativa_No_lineal_Estacionario_SETAR.png  used on input line 665.
 (pdftex.def)             Requested size: 457.80486pt x 265.63351pt.
-
-Underfull \vbox (badness 1609) has occurred while \output is active []
-
- [156] [157 <./Imagenes/Sim3/mejora_relativa_Lineal_Estacionario_ARMA.png> <./Imagenes/Sim3/mejora_relativa_Lineal_No_Estacionario_ARIMA.png>] [158 <./Imagenes/Sim3/mejora_relativa_No_lineal_Estacionario_SETAR.png>]
-Underfull \vbox (badness 1418) has occurred while \output is active []
-
- [159]
-<Imagenes/Sim3/heatmap_ecrps_significancia_General.png, id=2129, 914.4564pt x 351.714pt>
+ [156] [157 <./Imagenes/Sim3/mejora_relativa_Lineal_Estacionario_ARMA.png> <./Imagenes/Sim3/mejora_relativa_Lineal_No_Estacionario_ARIMA.png>] [158 <./Imagenes/Sim3/mejora_relativa_No_lineal_Estacionario_SETAR.png>] [159]
+<Imagenes/Sim3/heatmap_ecrps_significancia_General.png, id=2138, 914.4564pt x 351.714pt>
 File: Imagenes/Sim3/heatmap_ecrps_significancia_General.png Graphic file (type png)
 <use Imagenes/Sim3/heatmap_ecrps_significancia_General.png>
-Package pdftex.def Info: Imagenes/Sim3/heatmap_ecrps_significancia_General.png  used on input line 689.
+Package pdftex.def Info: Imagenes/Sim3/heatmap_ecrps_significancia_General.png  used on input line 690.
 (pdftex.def)             Requested size: 457.80486pt x 176.08197pt.
  [160 <./Imagenes/Sim3/heatmap_ecrps_significancia_General.png>]
-Overfull \hbox (4.62039pt too wide) in paragraph at lines 700--701
+Overfull \hbox (4.62039pt too wide) in paragraph at lines 701--702
 []\OT1/cmr/bx/n/12 Patr^^Son 3: Sig-nif-i-can-cia Mod-er-ada Es-table (EnCQR-LSTM). \OT1/cmr/m/n/12 Este m^^Setodo mantiene
  []
 
-<Imagenes/Sim3/heatmap_ecrps_significancia_Lineal_Estacionario_ARMA.png, id=2138, 913.9746pt x 351.714pt>
+<Imagenes/Sim3/heatmap_ecrps_significancia_Lineal_Estacionario_ARMA.png, id=2147, 913.9746pt x 351.714pt>
 File: Imagenes/Sim3/heatmap_ecrps_significancia_Lineal_Estacionario_ARMA.png Graphic file (type png)
 <use Imagenes/Sim3/heatmap_ecrps_significancia_Lineal_Estacionario_ARMA.png>
-Package pdftex.def Info: Imagenes/Sim3/heatmap_ecrps_significancia_Lineal_Estacionario_ARMA.png  used on input line 712.
+Package pdftex.def Info: Imagenes/Sim3/heatmap_ecrps_significancia_Lineal_Estacionario_ARMA.png  used on input line 713.
 (pdftex.def)             Requested size: 412.02156pt x 158.5489pt.
-<Imagenes/Sim3/heatmap_ecrps_significancia_Lineal_No_Estacionario_ARIMA.png, id=2139, 913.9746pt x 351.714pt>
+<Imagenes/Sim3/heatmap_ecrps_significancia_Lineal_No_Estacionario_ARIMA.png, id=2148, 913.9746pt x 351.714pt>
 File: Imagenes/Sim3/heatmap_ecrps_significancia_Lineal_No_Estacionario_ARIMA.png Graphic file (type png)
 <use Imagenes/Sim3/heatmap_ecrps_significancia_Lineal_No_Estacionario_ARIMA.png>
-Package pdftex.def Info: Imagenes/Sim3/heatmap_ecrps_significancia_Lineal_No_Estacionario_ARIMA.png  used on input line 719.
+Package pdftex.def Info: Imagenes/Sim3/heatmap_ecrps_significancia_Lineal_No_Estacionario_ARIMA.png  used on input line 720.
 (pdftex.def)             Requested size: 412.02156pt x 158.5489pt.
-<Imagenes/Sim3/heatmap_ecrps_significancia_No_lineal_Estacionario_SETAR.png, id=2140, 913.9746pt x 351.714pt>
+<Imagenes/Sim3/heatmap_ecrps_significancia_No_lineal_Estacionario_SETAR.png, id=2149, 913.9746pt x 351.714pt>
 File: Imagenes/Sim3/heatmap_ecrps_significancia_No_lineal_Estacionario_SETAR.png Graphic file (type png)
 <use Imagenes/Sim3/heatmap_ecrps_significancia_No_lineal_Estacionario_SETAR.png>
-Package pdftex.def Info: Imagenes/Sim3/heatmap_ecrps_significancia_No_lineal_Estacionario_SETAR.png  used on input line 732.
+Package pdftex.def Info: Imagenes/Sim3/heatmap_ecrps_significancia_No_lineal_Estacionario_SETAR.png  used on input line 733.
 (pdftex.def)             Requested size: 412.02156pt x 158.5489pt.
-[161] [162 <./Imagenes/Sim3/heatmap_ecrps_significancia_Lineal_Estacionario_ARMA.png> <./Imagenes/Sim3/heatmap_ecrps_significancia_Lineal_No_Estacionario_ARIMA.png> <./Imagenes/Sim3/heatmap_ecrps_significancia_No_lineal_Estacionario_SETAR.png>]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [163]
-Underfull \vbox (badness 4660) has occurred while \output is active []
-
- [164]
-Overfull \hbox (14.67368pt too wide) in paragraph at lines 776--777
-\OT1/cmr/m/n/12 sug-ieren que pro-por-ciones bal-anceadas ($\OMS/cmsy/m/n/12 ^^Y \OT1/cmr/m/n/12 50%$) pueden ser sub^^Soptimas en mues-tras peque~nas,
- []
-
-<Imagenes/Sim4/zscore_proporciones_general.png, id=2169, 702.2235pt x 568.7649pt>
+[161] [162 <./Imagenes/Sim3/heatmap_ecrps_significancia_Lineal_Estacionario_ARMA.png> <./Imagenes/Sim3/heatmap_ecrps_significancia_Lineal_No_Estacionario_ARIMA.png> <./Imagenes/Sim3/heatmap_ecrps_significancia_No_lineal_Estacionario_SETAR.png>] [163] [164]
+<Imagenes/Sim4/zscore_proporciones_general.png, id=2178, 702.2235pt x 568.7649pt>
 File: Imagenes/Sim4/zscore_proporciones_general.png Graphic file (type png)
 <use Imagenes/Sim4/zscore_proporciones_general.png>
-Package pdftex.def Info: Imagenes/Sim4/zscore_proporciones_general.png  used on input line 786.
+Package pdftex.def Info: Imagenes/Sim4/zscore_proporciones_general.png  used on input line 787.
 (pdftex.def)             Requested size: 457.80486pt x 370.79498pt.
-[165]
-Overfull \hbox (6.69524pt too wide) in paragraph at lines 793--794
+ [165]
+Overfull \hbox (4.07623pt too wide) in paragraph at lines 794--795
 []\OT1/cmr/bx/n/12 R^^Segimen I: []Optimo en 20% (Block Boot-strap-ping, AREPD, MCPS, AV-MCPS).
  []
 
 [166 <./Imagenes/Sim4/zscore_proporciones_general.png>]
-<Imagenes/Sim4/zscore_arma.png, id=2183, 702.2235pt x 568.7649pt>
+<Imagenes/Sim4/zscore_arma.png, id=2192, 702.2235pt x 568.7649pt>
 File: Imagenes/Sim4/zscore_arma.png Graphic file (type png)
 <use Imagenes/Sim4/zscore_arma.png>
-Package pdftex.def Info: Imagenes/Sim4/zscore_arma.png  used on input line 808.
+Package pdftex.def Info: Imagenes/Sim4/zscore_arma.png  used on input line 809.
 (pdftex.def)             Requested size: 366.24527pt x 296.63599pt.
-<Imagenes/Sim4/zscore_arima.png, id=2184, 702.2235pt x 568.7649pt>
+<Imagenes/Sim4/zscore_arima.png, id=2193, 702.2235pt x 568.7649pt>
 File: Imagenes/Sim4/zscore_arima.png Graphic file (type png)
 <use Imagenes/Sim4/zscore_arima.png>
-Package pdftex.def Info: Imagenes/Sim4/zscore_arima.png  used on input line 815.
+Package pdftex.def Info: Imagenes/Sim4/zscore_arima.png  used on input line 816.
 (pdftex.def)             Requested size: 366.24527pt x 296.63599pt.
 
 
-LaTeX Warning: Float too large for page by 59.24208pt on input line 821.
+LaTeX Warning: Float too large for page by 59.24208pt on input line 822.
 
-<Imagenes/Sim4/zscore_setar.png, id=2185, 702.2235pt x 568.7649pt>
+<Imagenes/Sim4/zscore_setar.png, id=2194, 702.2235pt x 568.7649pt>
 File: Imagenes/Sim4/zscore_setar.png Graphic file (type png)
 <use Imagenes/Sim4/zscore_setar.png>
-Package pdftex.def Info: Imagenes/Sim4/zscore_setar.png  used on input line 828.
+Package pdftex.def Info: Imagenes/Sim4/zscore_setar.png  used on input line 829.
 (pdftex.def)             Requested size: 366.24527pt x 296.63599pt.
-<Imagenes/Sim4/evolucion_general.png, id=2188, 856.1586pt x 496.4949pt>
+<Imagenes/Sim4/evolucion_general.png, id=2197, 856.1586pt x 496.4949pt>
 File: Imagenes/Sim4/evolucion_general.png Graphic file (type png)
 <use Imagenes/Sim4/evolucion_general.png>
-Package pdftex.def Info: Imagenes/Sim4/evolucion_general.png  used on input line 848.
+Package pdftex.def Info: Imagenes/Sim4/evolucion_general.png  used on input line 849.
 (pdftex.def)             Requested size: 457.80486pt x 265.482pt.
 
-Overfull \hbox (7.44115pt too wide) in paragraph at lines 855--856
+Overfull \hbox (4.82214pt too wide) in paragraph at lines 856--857
 []\OT1/cmr/bx/n/12 Patr^^Son 1: M^^Setodos ro-bus-tos a la pro-porci^^Son (Sieve Boot-strap, LSPM, LSPMW).
  []
 
-[167] [168 <./Imagenes/Sim4/zscore_arma.png> <./Imagenes/Sim4/zscore_arima.png>] [169 <./Imagenes/Sim4/zscore_setar.png>]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [170 <./Imagenes/Sim4/evolucion_general.png>]
-<Imagenes/Sim4/evolucion_arma.png, id=2211, 855.6768pt x 496.4949pt>
+[167] [168 <./Imagenes/Sim4/zscore_arma.png> <./Imagenes/Sim4/zscore_arima.png>] [169 <./Imagenes/Sim4/zscore_setar.png>] [170 <./Imagenes/Sim4/evolucion_general.png>]
+<Imagenes/Sim4/evolucion_arma.png, id=2220, 855.6768pt x 496.4949pt>
 File: Imagenes/Sim4/evolucion_arma.png Graphic file (type png)
 <use Imagenes/Sim4/evolucion_arma.png>
-Package pdftex.def Info: Imagenes/Sim4/evolucion_arma.png  used on input line 871.
+Package pdftex.def Info: Imagenes/Sim4/evolucion_arma.png  used on input line 872.
 (pdftex.def)             Requested size: 457.80486pt x 265.63351pt.
-<Imagenes/Sim4/evolucion_arima.png, id=2212, 856.1586pt x 496.4949pt>
+<Imagenes/Sim4/evolucion_arima.png, id=2221, 856.1586pt x 496.4949pt>
 File: Imagenes/Sim4/evolucion_arima.png Graphic file (type png)
 <use Imagenes/Sim4/evolucion_arima.png>
-Package pdftex.def Info: Imagenes/Sim4/evolucion_arima.png  used on input line 878.
+Package pdftex.def Info: Imagenes/Sim4/evolucion_arima.png  used on input line 879.
 (pdftex.def)             Requested size: 457.80486pt x 265.482pt.
-<Imagenes/Sim4/evolucion_setar.png, id=2213, 855.6768pt x 496.4949pt>
+<Imagenes/Sim4/evolucion_setar.png, id=2222, 855.6768pt x 496.4949pt>
 File: Imagenes/Sim4/evolucion_setar.png Graphic file (type png)
 <use Imagenes/Sim4/evolucion_setar.png>
-Package pdftex.def Info: Imagenes/Sim4/evolucion_setar.png  used on input line 891.
+Package pdftex.def Info: Imagenes/Sim4/evolucion_setar.png  used on input line 892.
 (pdftex.def)             Requested size: 457.80486pt x 265.63351pt.
 
-Overfull \hbox (9.78477pt too wide) in paragraph at lines 901--902
+Overfull \hbox (7.5053pt too wide) in paragraph at lines 902--903
 \OT1/cmr/m/n/12 pro-por-ciones ba-jas (20%) para to-dos los m^^Setodos ex-cepto Sieve Boot-strap y LSPM/LSPMW.
  []
 
 
-Overfull \hbox (3.07243pt too wide) in paragraph at lines 901--902
+Overfull \hbox (3.07243pt too wide) in paragraph at lines 902--903
 \OT1/cmr/m/n/12 Block Boot-strap-ping al-canza su mejor de-sempe~no en 20% (ECRPS = 0.855), de-te-rior^^Sandose
  []
 
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [171] [172 <./Imagenes/Sim4/evolucion_arma.png> <./Imagenes/Sim4/evolucion_arima.png>] [173 <./Imagenes/Sim4/evolucion_setar.png>]
-<Imagenes/Sim4/heatmap_ecrps_significancia_General.png, id=2235, 911.3247pt x 351.714pt>
+[171] [172 <./Imagenes/Sim4/evolucion_arma.png> <./Imagenes/Sim4/evolucion_arima.png>] [173 <./Imagenes/Sim4/evolucion_setar.png>]
+<Imagenes/Sim4/heatmap_ecrps_significancia_General.png, id=2244, 911.3247pt x 351.714pt>
 File: Imagenes/Sim4/heatmap_ecrps_significancia_General.png Graphic file (type png)
 <use Imagenes/Sim4/heatmap_ecrps_significancia_General.png>
-Package pdftex.def Info: Imagenes/Sim4/heatmap_ecrps_significancia_General.png  used on input line 918.
+Package pdftex.def Info: Imagenes/Sim4/heatmap_ecrps_significancia_General.png  used on input line 919.
 (pdftex.def)             Requested size: 457.80486pt x 176.68304pt.
  [174 <./Imagenes/Sim4/heatmap_ecrps_significancia_General.png>]
-Overfull \hbox (3.31258pt too wide) in paragraph at lines 927--928
+Overfull \hbox (1.93784pt too wide) in paragraph at lines 928--929
 \OT1/cmr/m/n/12 (Secci^^Son [][]4.5.3[][]), aunque vi-sual-mente sug-er-entes, no al-can-zan sig-nif-i-can-cia es-tad^^S^^Pstica cuando
  []
 
-<Imagenes/Sim4/heatmap_ecrps_significancia_Lineal_Estacionario_ARMA.png, id=2247, 910.8429pt x 351.714pt>
+<Imagenes/Sim4/heatmap_ecrps_significancia_Lineal_Estacionario_ARMA.png, id=2256, 910.8429pt x 351.714pt>
 File: Imagenes/Sim4/heatmap_ecrps_significancia_Lineal_Estacionario_ARMA.png Graphic file (type png)
 <use Imagenes/Sim4/heatmap_ecrps_significancia_Lineal_Estacionario_ARMA.png>
-Package pdftex.def Info: Imagenes/Sim4/heatmap_ecrps_significancia_Lineal_Estacionario_ARMA.png  used on input line 939.
+Package pdftex.def Info: Imagenes/Sim4/heatmap_ecrps_significancia_Lineal_Estacionario_ARMA.png  used on input line 940.
 (pdftex.def)             Requested size: 412.02156pt x 159.10168pt.
-<Imagenes/Sim4/heatmap_ecrps_significancia_Lineal_No_Estacionario_ARIMA.png, id=2248, 910.8429pt x 351.714pt>
+<Imagenes/Sim4/heatmap_ecrps_significancia_Lineal_No_Estacionario_ARIMA.png, id=2257, 910.8429pt x 351.714pt>
 File: Imagenes/Sim4/heatmap_ecrps_significancia_Lineal_No_Estacionario_ARIMA.png Graphic file (type png)
 <use Imagenes/Sim4/heatmap_ecrps_significancia_Lineal_No_Estacionario_ARIMA.png>
-Package pdftex.def Info: Imagenes/Sim4/heatmap_ecrps_significancia_Lineal_No_Estacionario_ARIMA.png  used on input line 946.
+Package pdftex.def Info: Imagenes/Sim4/heatmap_ecrps_significancia_Lineal_No_Estacionario_ARIMA.png  used on input line 947.
 (pdftex.def)             Requested size: 412.02156pt x 159.10168pt.
-<Imagenes/Sim4/heatmap_ecrps_significancia_No_Lineal_Estacionario_SETAR.png, id=2249, 910.8429pt x 351.714pt>
+<Imagenes/Sim4/heatmap_ecrps_significancia_No_Lineal_Estacionario_SETAR.png, id=2258, 910.8429pt x 351.714pt>
 File: Imagenes/Sim4/heatmap_ecrps_significancia_No_Lineal_Estacionario_SETAR.png Graphic file (type png)
 <use Imagenes/Sim4/heatmap_ecrps_significancia_No_Lineal_Estacionario_SETAR.png>
-Package pdftex.def Info: Imagenes/Sim4/heatmap_ecrps_significancia_No_Lineal_Estacionario_SETAR.png  used on input line 959.
+Package pdftex.def Info: Imagenes/Sim4/heatmap_ecrps_significancia_No_Lineal_Estacionario_SETAR.png  used on input line 960.
 (pdftex.def)             Requested size: 412.02156pt x 159.10168pt.
-[175] [176 <./Imagenes/Sim4/heatmap_ecrps_significancia_Lineal_Estacionario_ARMA.png> <./Imagenes/Sim4/heatmap_ecrps_significancia_Lineal_No_Estacionario_ARIMA.png> <./Imagenes/Sim4/heatmap_ecrps_significancia_No_Lineal_Estacionario_SETAR.png>]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [177]
-
-LaTeX Warning: Reference `subsec:implicaciones_proporciones' on page 178 undefined on input line 985.
-
-[178]
-<Imagenes/Sim5/rendimiento_escenario.png, id=2280, 1004.553pt x 570.933pt>
+[175] [176 <./Imagenes/Sim4/heatmap_ecrps_significancia_Lineal_Estacionario_ARMA.png> <./Imagenes/Sim4/heatmap_ecrps_significancia_Lineal_No_Estacionario_ARIMA.png> <./Imagenes/Sim4/heatmap_ecrps_significancia_No_Lineal_Estacionario_SETAR.png>] [177] [178]
+<Imagenes/Sim5/rendimiento_escenario.png, id=2289, 1004.553pt x 570.933pt>
 File: Imagenes/Sim5/rendimiento_escenario.png Graphic file (type png)
 <use Imagenes/Sim5/rendimiento_escenario.png>
 Package pdftex.def Info: Imagenes/Sim5/rendimiento_escenario.png  used on input line 1000.
 (pdftex.def)             Requested size: 457.80486pt x 260.19307pt.
  [179]
-<Imagenes/Sim5/evolucion_general.png, id=2286, 860.013pt x 498.663pt>
+<Imagenes/Sim5/evolucion_general.png, id=2295, 860.013pt x 498.663pt>
 File: Imagenes/Sim5/evolucion_general.png Graphic file (type png)
 <use Imagenes/Sim5/evolucion_general.png>
 Package pdftex.def Info: Imagenes/Sim5/evolucion_general.png  used on input line 1024.
 (pdftex.def)             Requested size: 457.80486pt x 265.44669pt.
- [180 <./Imagenes/Sim5/rendimiento_escenario.png>]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [181 <./Imagenes/Sim5/evolucion_general.png>]
-<Imagenes/Sim5/evolucion_arma.png, id=2299, 860.013pt x 498.663pt>
+ [180 <./Imagenes/Sim5/rendimiento_escenario.png>] [181 <./Imagenes/Sim5/evolucion_general.png>]
+<Imagenes/Sim5/evolucion_arma.png, id=2308, 860.013pt x 498.663pt>
 File: Imagenes/Sim5/evolucion_arma.png Graphic file (type png)
 <use Imagenes/Sim5/evolucion_arma.png>
 Package pdftex.def Info: Imagenes/Sim5/evolucion_arma.png  used on input line 1048.
 (pdftex.def)             Requested size: 457.80486pt x 265.44669pt.
-<Imagenes/Sim5/evolucion_arima.png, id=2300, 860.013pt x 498.663pt>
+<Imagenes/Sim5/evolucion_arima.png, id=2309, 860.013pt x 498.663pt>
 File: Imagenes/Sim5/evolucion_arima.png Graphic file (type png)
 <use Imagenes/Sim5/evolucion_arima.png>
 Package pdftex.def Info: Imagenes/Sim5/evolucion_arima.png  used on input line 1055.
 (pdftex.def)             Requested size: 457.80486pt x 265.44669pt.
-<Imagenes/Sim5/evolucion_setar.png, id=2301, 860.013pt x 498.663pt>
+<Imagenes/Sim5/evolucion_setar.png, id=2310, 860.013pt x 498.663pt>
 File: Imagenes/Sim5/evolucion_setar.png Graphic file (type png)
 <use Imagenes/Sim5/evolucion_setar.png>
 Package pdftex.def Info: Imagenes/Sim5/evolucion_setar.png  used on input line 1067.
 (pdftex.def)             Requested size: 457.80486pt x 265.44669pt.
  [182] [183 <./Imagenes/Sim5/evolucion_arma.png> <./Imagenes/Sim5/evolucion_arima.png>] [184 <./Imagenes/Sim5/evolucion_setar.png>]
-Overfull \hbox (9.85872pt too wide) in paragraph at lines 1085--1086
+Overfull \hbox (8.22548pt too wide) in paragraph at lines 1085--1086
 \OT1/cmr/m/n/12 En pro-ce-sos ARIMA (Figura [][]\OT1/cmr/bx/n/12 4-33\OT1/cmr/m/n/12 b[][]), el patr^^Son de degradaci^^Son se in-ten-si-fica dram^^Saticamente,
  []
 
 [185]
-<Imagenes/Sim5/interaccion_config_general.png, id=2330, 1149.093pt x 866.5173pt>
+Package microtype Info: Loading generic protrusion settings for font family
+(microtype)             `cmss' (encoding: TS1).
+(microtype)             For optimal results, create family-specific settings.
+(microtype)             See the microtype manual for details.
+<Imagenes/Sim5/interaccion_config_general.png, id=2339, 1149.093pt x 866.5173pt>
 File: Imagenes/Sim5/interaccion_config_general.png Graphic file (type png)
 <use Imagenes/Sim5/interaccion_config_general.png>
 Package pdftex.def Info: Imagenes/Sim5/interaccion_config_general.png  used on input line 1109.
 (pdftex.def)             Requested size: 457.80486pt x 345.2257pt.
  [186] [187 <./Imagenes/Sim5/interaccion_config_general.png>]
-<Imagenes/Sim5/interaccion_config_arma.png, id=2344, 1148.8521pt x 866.5173pt>
+<Imagenes/Sim5/interaccion_config_arma.png, id=2353, 1148.8521pt x 866.5173pt>
 File: Imagenes/Sim5/interaccion_config_arma.png Graphic file (type png)
 <use Imagenes/Sim5/interaccion_config_arma.png>
 Package pdftex.def Info: Imagenes/Sim5/interaccion_config_arma.png  used on input line 1132.
 (pdftex.def)             Requested size: 457.80486pt x 345.29181pt.
-
-Overfull \hbox (0.47235pt too wide) in paragraph at lines 1141--1142
-[]\OT1/cmr/m/n/12 Un hal-lazgo no-table es que ARMA(2,1), la con-fig-u-raci^^Son m^^Sas com-pleja eval-u-ada en ARMA,
- []
-
-[188] [189 <./Imagenes/Sim5/interaccion_config_arma.png>]
-<Imagenes/Sim5/interaccion_config_arima.png, id=2357, 1148.8521pt x 866.5173pt>
+ [188] [189 <./Imagenes/Sim5/interaccion_config_arma.png>]
+<Imagenes/Sim5/interaccion_config_arima.png, id=2366, 1148.8521pt x 866.5173pt>
 File: Imagenes/Sim5/interaccion_config_arima.png Graphic file (type png)
 <use Imagenes/Sim5/interaccion_config_arima.png>
 Package pdftex.def Info: Imagenes/Sim5/interaccion_config_arima.png  used on input line 1149.
 (pdftex.def)             Requested size: 457.80486pt x 345.29181pt.
  [190 <./Imagenes/Sim5/interaccion_config_arima.png>]
-<Imagenes/Sim5/interaccion_config_setar.png, id=2365, 1148.8521pt x 866.5173pt>
+<Imagenes/Sim5/interaccion_config_setar.png, id=2374, 1148.8521pt x 866.5173pt>
 File: Imagenes/Sim5/interaccion_config_setar.png Graphic file (type png)
 <use Imagenes/Sim5/interaccion_config_setar.png>
 Package pdftex.def Info: Imagenes/Sim5/interaccion_config_setar.png  used on input line 1168.
@@ -2972,27 +2056,24 @@ Overfull \hbox (6.2605pt too wide) in paragraph at lines 1195--1196
 \OT1/cmr/m/n/12 hasta 3\TS1/cmr/m/n/12 Ö \OT1/cmr/m/n/12 m^^Sas r^^Sapido que ARIMA(0,1,0)) in-dica que sis-temas con m^^Sultiples par^^Sametros
  []
 
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [194]
-<Imagenes/Sim5/6.4_matriz_DM.png, id=2393, 942.8826pt x 860.013pt>
+[194]
+<Imagenes/Sim5/6.4_matriz_DM.png, id=2402, 942.8826pt x 860.013pt>
 File: Imagenes/Sim5/6.4_matriz_DM.png Graphic file (type png)
 <use Imagenes/Sim5/6.4_matriz_DM.png>
 Package pdftex.def Info: Imagenes/Sim5/6.4_matriz_DM.png  used on input line 1211.
 (pdftex.def)             Requested size: 457.80486pt x 417.5651pt.
  [195 <./Imagenes/Sim5/6.4_matriz_DM.png>]
-<Imagenes/Sim5/6.4.a_matriz_DM.png, id=2402, 942.8826pt x 860.013pt>
+<Imagenes/Sim5/6.4.a_matriz_DM.png, id=2411, 942.8826pt x 860.013pt>
 File: Imagenes/Sim5/6.4.a_matriz_DM.png Graphic file (type png)
 <use Imagenes/Sim5/6.4.a_matriz_DM.png>
 Package pdftex.def Info: Imagenes/Sim5/6.4.a_matriz_DM.png  used on input line 1228.
 (pdftex.def)             Requested size: 457.80486pt x 417.5651pt.
-<Imagenes/Sim5/6.4.b_matriz_DM.png, id=2403, 942.8826pt x 860.013pt>
+<Imagenes/Sim5/6.4.b_matriz_DM.png, id=2412, 942.8826pt x 860.013pt>
 File: Imagenes/Sim5/6.4.b_matriz_DM.png Graphic file (type png)
 <use Imagenes/Sim5/6.4.b_matriz_DM.png>
 Package pdftex.def Info: Imagenes/Sim5/6.4.b_matriz_DM.png  used on input line 1238.
 (pdftex.def)             Requested size: 457.80486pt x 417.5651pt.
-<Imagenes/Sim5/6.4.c_matriz_DM.png, id=2404, 942.8826pt x 860.013pt>
+<Imagenes/Sim5/6.4.c_matriz_DM.png, id=2413, 942.8826pt x 860.013pt>
 File: Imagenes/Sim5/6.4.c_matriz_DM.png Graphic file (type png)
 <use Imagenes/Sim5/6.4.c_matriz_DM.png>
 Package pdftex.def Info: Imagenes/Sim5/6.4.c_matriz_DM.png  used on input line 1251.
@@ -3007,43 +2088,28 @@ Overfull \hbox (2.33342pt too wide) in paragraph at lines 7--8
 []\OT1/cmr/m/n/12 Se anal-izan tres con-jun-tos de datos rep-re-sen-ta-tivos de dis-tin-tos do-min-ios: con-sumo el^^Sectrico
  []
 
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [201
+[201
 
 
 
 
-] [202] [203]
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 85.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 85.
-
-[204] [205]
+] [202] [203] [204] [205]
 Overfull \hbox (1.7506pt too wide) in paragraph at lines 150--151
 []\OT1/cmr/m/n/12 La hip^^Sotesis al-ter-na-tiva es \OT1/cmr/m/it/12 uni-lat-eral su-pe-rior\OT1/cmr/m/n/12 : la no esta-cionar-iedad se en-tiende ^^Sunicamente
  []
 
-[206] [207] [208] [209] [210]
-Underfull \vbox (badness 1215) has occurred while \output is active []
-
- [211] [212]
-<Imagenes/Cap5_elec_serie_original.png, id=2579, 859.2903pt x 484.9317pt>
+[206] [207] [208] [209] [210] [211] [212]
+<Imagenes/Cap5_elec_serie_original.png, id=2588, 859.2903pt x 484.9317pt>
 File: Imagenes/Cap5_elec_serie_original.png Graphic file (type png)
 <use Imagenes/Cap5_elec_serie_original.png>
 Package pdftex.def Info: Imagenes/Cap5_elec_serie_original.png  used on input line 382.
 (pdftex.def)             Requested size: 325.8519pt x 183.89119pt.
-<Imagenes/Cap5_elec_serie_box_cox.png, id=2580, 859.2903pt x 484.9317pt>
+<Imagenes/Cap5_elec_serie_box_cox.png, id=2589, 859.2903pt x 484.9317pt>
 File: Imagenes/Cap5_elec_serie_box_cox.png Graphic file (type png)
 <use Imagenes/Cap5_elec_serie_box_cox.png>
 Package pdftex.def Info: Imagenes/Cap5_elec_serie_box_cox.png  used on input line 390.
 (pdftex.def)             Requested size: 325.8519pt x 183.89119pt.
-<Imagenes/Cap5_elec_serie_trend.png, id=2581, 859.2903pt x 484.9317pt>
+<Imagenes/Cap5_elec_serie_trend.png, id=2590, 859.2903pt x 484.9317pt>
 File: Imagenes/Cap5_elec_serie_trend.png Graphic file (type png)
 <use Imagenes/Cap5_elec_serie_trend.png>
 Package pdftex.def Info: Imagenes/Cap5_elec_serie_trend.png  used on input line 398.
@@ -3053,7 +2119,7 @@ Package pdftex.def Info: Imagenes/Cap5_elec_serie_trend.png  used on input line 
 LaTeX Warning: Float too large for page by 24.0173pt on input line 405.
 
 [213] [214 <./Imagenes/Cap5_elec_serie_original.png> <./Imagenes/Cap5_elec_serie_box_cox.png> <./Imagenes/Cap5_elec_serie_trend.png>]
-<Imagenes/Cap5_elec_acf_pacf.png, id=2597, 1003.75pt x 501.875pt>
+<Imagenes/Cap5_elec_acf_pacf.png, id=2606, 1003.75pt x 501.875pt>
 File: Imagenes/Cap5_elec_acf_pacf.png Graphic file (type png)
 <use Imagenes/Cap5_elec_acf_pacf.png>
 Package pdftex.def Info: Imagenes/Cap5_elec_acf_pacf.png  used on input line 421.
@@ -3064,7 +2130,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 460--460
  []
 
 
-Underfull \hbox (badness 1769) in paragraph at lines 462--463
+Underfull \hbox (badness 2538) in paragraph at lines 462--463
 []|\OT1/cmr/m/n/10.95 Serie esta-cionaria tras pre-
  []
 
@@ -3084,12 +2150,12 @@ Underfull \hbox (badness 10000) in paragraph at lines 466--466
  []
 
 
-Underfull \hbox (badness 5908) in paragraph at lines 466--466
+Underfull \hbox (badness 6608) in paragraph at lines 466--466
 []|\OT1/cmr/m/n/10.95 Corte prin-ci-pal en lag 1
  []
 
 
-Underfull \hbox (badness 1803) in paragraph at lines 466--467
+Underfull \hbox (badness 2582) in paragraph at lines 466--467
 []|\OT1/cmr/m/n/10.95 Modelo AR(1) con com-po-
  []
 
@@ -3103,11 +2169,8 @@ Underfull \hbox (badness 10000) in paragraph at lines 474--475
 []|\OT1/cmr/m/n/10.95 Par^^Sametro de-caimiento
  []
 
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [217] [218]
-<Imagenes/electricity_serie_0_TypeA_Top3_Mejores.png, id=2624, 730.8906pt x 1401.5562pt>
+[217] [218]
+<Imagenes/electricity_serie_0_TypeA_Top3_Mejores.png, id=2633, 730.8906pt x 1401.5562pt>
 File: Imagenes/electricity_serie_0_TypeA_Top3_Mejores.png Graphic file (type png)
 <use Imagenes/electricity_serie_0_TypeA_Top3_Mejores.png>
 Package pdftex.def Info: Imagenes/electricity_serie_0_TypeA_Top3_Mejores.png  used on input line 526.
@@ -3117,55 +2180,44 @@ Package pdftex.def Info: Imagenes/electricity_serie_0_TypeA_Top3_Mejores.png  us
 LaTeX Warning: Float too large for page by 40.57042pt on input line 529.
 
 [219] [220 <./Imagenes/electricity_serie_0_TypeA_Top3_Mejores.png>]
-<Imagenes/Cap5_elec_boxplot_crps.png, id=2638, 867.24pt x 433.62pt>
+<Imagenes/Cap5_elec_boxplot_crps.png, id=2647, 867.24pt x 433.62pt>
 File: Imagenes/Cap5_elec_boxplot_crps.png Graphic file (type png)
 <use Imagenes/Cap5_elec_boxplot_crps.png>
 Package pdftex.def Info: Imagenes/Cap5_elec_boxplot_crps.png  used on input line 536.
 (pdftex.def)             Requested size: 457.80486pt x 228.90442pt.
-
-Overfull \hbox (0.653pt too wide) in paragraph at lines 541--542
-\OT1/cmr/m/n/12 tribu-cionales tem-po-rales, no su-per-aron a sus con-tra-partes no adap-ta-ti-vas (MCPS y LSPM).
- []
-
-[221 <./Imagenes/Cap5_elec_boxplot_crps.png>]
+ [221 <./Imagenes/Cap5_elec_boxplot_crps.png>]
 Overfull \hbox (4.45285pt too wide) in paragraph at lines 547--548
 \OT1/cmr/m/n/12 Para eval-uar si las difer-en-cias ob-ser-vadas en de-sempe~no pre-dic-tivo re-sul-tan es-tad^^S^^Psticamente
  []
 
-<Imagenes/Cap5_elec_HLN_DM_Pvalues_Matrix.png, id=2645, 887.2347pt x 783.4068pt>
+<Imagenes/Cap5_elec_HLN_DM_Pvalues_Matrix.png, id=2654, 887.2347pt x 783.4068pt>
 File: Imagenes/Cap5_elec_HLN_DM_Pvalues_Matrix.png Graphic file (type png)
 <use Imagenes/Cap5_elec_HLN_DM_Pvalues_Matrix.png>
 Package pdftex.def Info: Imagenes/Cap5_elec_HLN_DM_Pvalues_Matrix.png  used on input line 553.
 (pdftex.def)             Requested size: 434.91321pt x 384.01614pt.
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [222] [223 <./Imagenes/Cap5_elec_HLN_DM_Pvalues_Matrix.png>]
-<Imagenes/Cap5_elec_pit_histograms.png, id=2657, 1084.05pt x 867.24pt>
+[222] [223 <./Imagenes/Cap5_elec_HLN_DM_Pvalues_Matrix.png>]
+<Imagenes/Cap5_elec_pit_histograms.png, id=2666, 1084.05pt x 867.24pt>
 File: Imagenes/Cap5_elec_pit_histograms.png Graphic file (type png)
 <use Imagenes/Cap5_elec_pit_histograms.png>
 Package pdftex.def Info: Imagenes/Cap5_elec_pit_histograms.png  used on input line 572.
 (pdftex.def)             Requested size: 434.91321pt x 347.93527pt.
-<Imagenes/Cap5_elec_reliability.png, id=2659, 578.16pt x 578.16pt>
+<Imagenes/Cap5_elec_reliability.png, id=2668, 578.16pt x 578.16pt>
 File: Imagenes/Cap5_elec_reliability.png Graphic file (type png)
 <use Imagenes/Cap5_elec_reliability.png>
 Package pdftex.def Info: Imagenes/Cap5_elec_reliability.png  used on input line 581.
 (pdftex.def)             Requested size: 434.91321pt x 434.90694pt.
-
-Underfull \vbox (badness 1609) has occurred while \output is active []
-
  [224] [225 <./Imagenes/Cap5_elec_pit_histograms.png>] [226 <./Imagenes/Cap5_elec_reliability.png>] [227] [228]
-<Imagenes/Cap5_traffic_serie_original.png, id=2687, 859.2903pt x 484.9317pt>
+<Imagenes/Cap5_traffic_serie_original.png, id=2696, 859.2903pt x 484.9317pt>
 File: Imagenes/Cap5_traffic_serie_original.png Graphic file (type png)
 <use Imagenes/Cap5_traffic_serie_original.png>
 Package pdftex.def Info: Imagenes/Cap5_traffic_serie_original.png  used on input line 634.
 (pdftex.def)             Requested size: 325.8519pt x 183.89119pt.
-<Imagenes/Cap5_traffic_serie_box_cox.png, id=2688, 859.2903pt x 484.9317pt>
+<Imagenes/Cap5_traffic_serie_box_cox.png, id=2697, 859.2903pt x 484.9317pt>
 File: Imagenes/Cap5_traffic_serie_box_cox.png Graphic file (type png)
 <use Imagenes/Cap5_traffic_serie_box_cox.png>
 Package pdftex.def Info: Imagenes/Cap5_traffic_serie_box_cox.png  used on input line 642.
 (pdftex.def)             Requested size: 325.8519pt x 183.89119pt.
-<Imagenes/Cap5_traffic_serie_trend.png, id=2689, 859.2903pt x 484.9317pt>
+<Imagenes/Cap5_traffic_serie_trend.png, id=2698, 859.2903pt x 484.9317pt>
 File: Imagenes/Cap5_traffic_serie_trend.png Graphic file (type png)
 <use Imagenes/Cap5_traffic_serie_trend.png>
 Package pdftex.def Info: Imagenes/Cap5_traffic_serie_trend.png  used on input line 650.
@@ -3174,7 +2226,7 @@ Package pdftex.def Info: Imagenes/Cap5_traffic_serie_trend.png  used on input li
 
 LaTeX Warning: Float too large for page by 24.0173pt on input line 657.
 
-<Imagenes/Cap5_traffic_acf_pacf.png, id=2691, 1003.75pt x 501.875pt>
+<Imagenes/Cap5_traffic_acf_pacf.png, id=2700, 1003.75pt x 501.875pt>
 File: Imagenes/Cap5_traffic_acf_pacf.png Graphic file (type png)
 <use Imagenes/Cap5_traffic_acf_pacf.png>
 Package pdftex.def Info: Imagenes/Cap5_traffic_acf_pacf.png  used on input line 667.
@@ -3190,16 +2242,13 @@ Overfull \hbox (63.95447pt too wide) in paragraph at lines 695--710
  []
 
 [231 <./Imagenes/Cap5_traffic_acf_pacf.png>]
-<Imagenes/Cap5_traffic_boxplot_crps.png, id=2714, 867.24pt x 433.62pt>
+<Imagenes/Cap5_traffic_boxplot_crps.png, id=2723, 867.24pt x 433.62pt>
 File: Imagenes/Cap5_traffic_boxplot_crps.png Graphic file (type png)
 <use Imagenes/Cap5_traffic_boxplot_crps.png>
 Package pdftex.def Info: Imagenes/Cap5_traffic_boxplot_crps.png  used on input line 718.
 (pdftex.def)             Requested size: 434.91321pt x 217.45789pt.
- [232]
-Underfull \vbox (badness 2020) has occurred while \output is active []
-
- [233 <./Imagenes/Cap5_traffic_boxplot_crps.png>]
-<Imagenes/traffic_TypeA_Top3_Mejores.png, id=2725, 730.8906pt x 1401.5562pt>
+ [232] [233 <./Imagenes/Cap5_traffic_boxplot_crps.png>]
+<Imagenes/traffic_TypeA_Top3_Mejores.png, id=2734, 730.8906pt x 1401.5562pt>
 File: Imagenes/traffic_TypeA_Top3_Mejores.png Graphic file (type png)
 <use Imagenes/traffic_TypeA_Top3_Mejores.png>
 Package pdftex.def Info: Imagenes/traffic_TypeA_Top3_Mejores.png  used on input line 735.
@@ -3213,47 +2262,35 @@ Overfull \hbox (4.45285pt too wide) in paragraph at lines 746--747
 \OT1/cmr/m/n/12 Para eval-uar si las difer-en-cias ob-ser-vadas en de-sempe~no pre-dic-tivo re-sul-tan es-tad^^S^^Psticamente
  []
 
-<Imagenes/Cap5_traffic_HLN_DM_Pvalues_Matrix.png, id=2727, 887.2347pt x 783.4068pt>
+<Imagenes/Cap5_traffic_HLN_DM_Pvalues_Matrix.png, id=2736, 887.2347pt x 783.4068pt>
 File: Imagenes/Cap5_traffic_HLN_DM_Pvalues_Matrix.png Graphic file (type png)
 <use Imagenes/Cap5_traffic_HLN_DM_Pvalues_Matrix.png>
 Package pdftex.def Info: Imagenes/Cap5_traffic_HLN_DM_Pvalues_Matrix.png  used on input line 752.
 (pdftex.def)             Requested size: 434.91321pt x 384.01614pt.
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [234] [235 <./Imagenes/traffic_TypeA_Top3_Mejores.png>] [236 <./Imagenes/Cap5_traffic_HLN_DM_Pvalues_Matrix.png>]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [237]
-<Imagenes/Cap5_traffic_pit_histograms.png, id=2749, 1084.05pt x 867.24pt>
+[234] [235 <./Imagenes/traffic_TypeA_Top3_Mejores.png>] [236 <./Imagenes/Cap5_traffic_HLN_DM_Pvalues_Matrix.png>] [237]
+<Imagenes/Cap5_traffic_pit_histograms.png, id=2758, 1084.05pt x 867.24pt>
 File: Imagenes/Cap5_traffic_pit_histograms.png Graphic file (type png)
 <use Imagenes/Cap5_traffic_pit_histograms.png>
 Package pdftex.def Info: Imagenes/Cap5_traffic_pit_histograms.png  used on input line 775.
 (pdftex.def)             Requested size: 434.91321pt x 347.93527pt.
  [238 <./Imagenes/Cap5_traffic_pit_histograms.png>]
-<Imagenes/Cap5_traffic_reliability.png, id=2757, 578.16pt x 578.16pt>
+<Imagenes/Cap5_traffic_reliability.png, id=2766, 578.16pt x 578.16pt>
 File: Imagenes/Cap5_traffic_reliability.png Graphic file (type png)
 <use Imagenes/Cap5_traffic_reliability.png>
 Package pdftex.def Info: Imagenes/Cap5_traffic_reliability.png  used on input line 788.
 (pdftex.def)             Requested size: 434.91321pt x 434.90694pt.
- [239] [240 <./Imagenes/Cap5_traffic_reliability.png>]
-Underfull \vbox (badness 1609) has occurred while \output is active []
-
- [241]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [242]
-<Imagenes/Cap5_exchange_serie_original.png, id=2777, 859.2903pt x 484.9317pt>
+ [239] [240 <./Imagenes/Cap5_traffic_reliability.png>] [241] [242]
+<Imagenes/Cap5_exchange_serie_original.png, id=2786, 859.2903pt x 484.9317pt>
 File: Imagenes/Cap5_exchange_serie_original.png Graphic file (type png)
 <use Imagenes/Cap5_exchange_serie_original.png>
 Package pdftex.def Info: Imagenes/Cap5_exchange_serie_original.png  used on input line 843.
 (pdftex.def)             Requested size: 325.8519pt x 183.89119pt.
-<Imagenes/Cap5_exchange_serie_box_cox.png, id=2778, 859.2903pt x 484.9317pt>
+<Imagenes/Cap5_exchange_serie_box_cox.png, id=2787, 859.2903pt x 484.9317pt>
 File: Imagenes/Cap5_exchange_serie_box_cox.png Graphic file (type png)
 <use Imagenes/Cap5_exchange_serie_box_cox.png>
 Package pdftex.def Info: Imagenes/Cap5_exchange_serie_box_cox.png  used on input line 851.
 (pdftex.def)             Requested size: 325.8519pt x 183.89119pt.
-<Imagenes/Cap5_exchange_serie_trend.png, id=2779, 859.2903pt x 484.9317pt>
+<Imagenes/Cap5_exchange_serie_trend.png, id=2788, 859.2903pt x 484.9317pt>
 File: Imagenes/Cap5_exchange_serie_trend.png Graphic file (type png)
 <use Imagenes/Cap5_exchange_serie_trend.png>
 Package pdftex.def Info: Imagenes/Cap5_exchange_serie_trend.png  used on input line 859.
@@ -3263,27 +2300,24 @@ Package pdftex.def Info: Imagenes/Cap5_exchange_serie_trend.png  used on input l
 LaTeX Warning: Float too large for page by 24.0173pt on input line 866.
 
 [243] [244 <./Imagenes/Cap5_exchange_serie_original.png> <./Imagenes/Cap5_exchange_serie_box_cox.png> <./Imagenes/Cap5_exchange_serie_trend.png>]
-<Imagenes/Cap5_exchange_acf_pacf.png, id=2795, 1003.75pt x 803.0pt>
+<Imagenes/Cap5_exchange_acf_pacf.png, id=2804, 1003.75pt x 803.0pt>
 File: Imagenes/Cap5_exchange_acf_pacf.png Graphic file (type png)
 <use Imagenes/Cap5_exchange_acf_pacf.png>
 Package pdftex.def Info: Imagenes/Cap5_exchange_acf_pacf.png  used on input line 878.
 (pdftex.def)             Requested size: 434.91321pt x 347.92987pt.
- [245 <./Imagenes/Cap5_exchange_acf_pacf.png>]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [246]
+ [245 <./Imagenes/Cap5_exchange_acf_pacf.png>] [246]
 Overfull \hbox (63.95447pt too wide) in paragraph at lines 912--927
  [][] 
  []
 
 [247]
-<Imagenes/Cap5_exchange_boxplot_crps.png, id=2813, 867.24pt x 433.62pt>
+<Imagenes/Cap5_exchange_boxplot_crps.png, id=2822, 867.24pt x 433.62pt>
 File: Imagenes/Cap5_exchange_boxplot_crps.png Graphic file (type png)
 <use Imagenes/Cap5_exchange_boxplot_crps.png>
 Package pdftex.def Info: Imagenes/Cap5_exchange_boxplot_crps.png  used on input line 935.
 (pdftex.def)             Requested size: 457.80486pt x 228.90442pt.
  [248 <./Imagenes/Cap5_exchange_boxplot_crps.png>]
-<Imagenes/Exchange_Series_0_TypeA_Top3_Mejores.png, id=2820, 730.8906pt x 1401.5562pt>
+<Imagenes/Exchange_Series_0_TypeA_Top3_Mejores.png, id=2829, 730.8906pt x 1401.5562pt>
 File: Imagenes/Exchange_Series_0_TypeA_Top3_Mejores.png Graphic file (type png)
 <use Imagenes/Exchange_Series_0_TypeA_Top3_Mejores.png>
 Package pdftex.def Info: Imagenes/Exchange_Series_0_TypeA_Top3_Mejores.png  used on input line 954.
@@ -3292,40 +2326,28 @@ Package pdftex.def Info: Imagenes/Exchange_Series_0_TypeA_Top3_Mejores.png  used
 
 LaTeX Warning: Float too large for page by 40.57042pt on input line 957.
 
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [249] [250 <./Imagenes/Exchange_Series_0_TypeA_Top3_Mejores.png>]
+[249] [250 <./Imagenes/Exchange_Series_0_TypeA_Top3_Mejores.png>]
 Overfull \hbox (4.45285pt too wide) in paragraph at lines 968--969
 \OT1/cmr/m/n/12 Para eval-uar si las difer-en-cias ob-ser-vadas en de-sempe~no pre-dic-tivo re-sul-tan es-tad^^S^^Psticamente
  []
 
-<Imagenes/Cap5_exchange_HLN_DM_Pvalues_Matrix.png, id=2832, 887.2347pt x 783.4068pt>
+<Imagenes/Cap5_exchange_HLN_DM_Pvalues_Matrix.png, id=2841, 887.2347pt x 783.4068pt>
 File: Imagenes/Cap5_exchange_HLN_DM_Pvalues_Matrix.png Graphic file (type png)
 <use Imagenes/Cap5_exchange_HLN_DM_Pvalues_Matrix.png>
 Package pdftex.def Info: Imagenes/Cap5_exchange_HLN_DM_Pvalues_Matrix.png  used on input line 974.
 (pdftex.def)             Requested size: 434.91321pt x 384.01614pt.
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [251] [252 <./Imagenes/Cap5_exchange_HLN_DM_Pvalues_Matrix.png>]
-<Imagenes/Cap5_exchange_pit_histograms.png, id=2844, 1084.05pt x 867.24pt>
+[251] [252 <./Imagenes/Cap5_exchange_HLN_DM_Pvalues_Matrix.png>]
+<Imagenes/Cap5_exchange_pit_histograms.png, id=2853, 1084.05pt x 867.24pt>
 File: Imagenes/Cap5_exchange_pit_histograms.png Graphic file (type png)
 <use Imagenes/Cap5_exchange_pit_histograms.png>
 Package pdftex.def Info: Imagenes/Cap5_exchange_pit_histograms.png  used on input line 995.
 (pdftex.def)             Requested size: 434.91321pt x 347.93527pt.
-
-Underfull \vbox (badness 1609) has occurred while \output is active []
-
  [253] [254 <./Imagenes/Cap5_exchange_pit_histograms.png>]
-<Imagenes/Cap5_exchange_reliability.png, id=2856, 578.16pt x 578.16pt>
+<Imagenes/Cap5_exchange_reliability.png, id=2865, 578.16pt x 578.16pt>
 File: Imagenes/Cap5_exchange_reliability.png Graphic file (type png)
 <use Imagenes/Cap5_exchange_reliability.png>
 Package pdftex.def Info: Imagenes/Cap5_exchange_reliability.png  used on input line 1010.
 (pdftex.def)             Requested size: 434.91321pt x 434.90694pt.
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
  [255] [256 <./Imagenes/Cap5_exchange_reliability.png>] [257] [258]) [259]
 \openout2 = `Capitulos/Cap6.aux'.
 
@@ -3336,7 +2358,12 @@ chapter 6.
 
 
 
-] [261] [262]) [263]
+] [261]
+Overfull \hbox (19.47388pt too wide) in paragraph at lines 33--34
+\OT1/cmr/m/n/12 2,000 ob-ser-va-ciones, el es-tu-dio fa-voreci^^So intr^^S^^Pnsecamente a mod-e-los con pocos par^^Sametros.
+ []
+
+[262]) [263]
 \openout2 = `Capitulos/apend1.aux'.
 
  (Capitulos/apend1.tex
@@ -3354,17 +2381,17 @@ chapter without number
 
 
 ] [269]
-Overfull \hbox (7.39949pt too wide) in paragraph at lines 249--249
+Overfull \hbox (5.63701pt too wide) in paragraph at lines 255--255
 \OT1/cmr/m/n/12 heteroskedasticity-autocorrelation ro-bust tests". In: \OT1/cmr/m/it/12 Econo-met-ric The-ory \OT1/cmr/m/n/12 21.6, pp. 1130{
  []
 
 [270]
-Overfull \hbox (6.84508pt too wide) in paragraph at lines 249--249
+Overfull \hbox (4.5656pt too wide) in paragraph at lines 255--255
 [][][]\OT1/cmr/m/n/12 (2022). \OT1/cmr/m/it/12 Al-go-rith-mic Learn-ing in a Ran-dom World\OT1/cmr/m/n/12 . Sec-ond. Cham, Switzer-land: Springer.
  []
 
 [271]
-Overfull \hbox (7.06361pt too wide) in paragraph at lines 249--249
+Overfull \hbox (4.78413pt too wide) in paragraph at lines 255--255
 \OT1/cmr/m/n/12 tri-bu-tions for Or-der Ful-fill-ment Time Fore-cast-ing". In: \OT1/cmr/m/it/12 arXiv preprint arXiv:2505.17340\OT1/cmr/m/n/12 .
  []
 
@@ -3373,29 +2400,22 @@ Overfull \hbox (7.06361pt too wide) in paragraph at lines 249--249
 LaTeX2e <2025-11-01>
 L3 programming layer <2025-12-24>
  ***********
-
-
-LaTeX Warning: There were undefined references.
-
-
-LaTeX Warning: There were multiply-defined labels.
-
 Package logreq Info: Writing requests to 'main.run.xml'.
 \openout1 = `main.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 47466 strings out of 467871
- 1037358 string characters out of 5418377
- 1975472 words of memory out of 5000000
- 74521 multiletter control sequences out of 15000+600000
+ 48972 strings out of 467871
+ 1068316 string characters out of 5418377
+ 2034095 words of memory out of 5000000
+ 76014 multiletter control sequences out of 15000+600000
  648553 words of font info for 120 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 108i,21n,107p,11301b,2199s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 108i,21n,107p,11313b,2209s stack positions out of 10000i,1000n,20000p,200000b,200000s
  <C:\Users\pleal\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcsx1440.pk> <C:\Users\pleal\AppData\Local\MiKTeX\fonts/pk/ljfour/public/bbm/dpi600\bbm12.pk> <C:\Users\pleal\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm1200.pk><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx8.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbxti10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmcsc10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi6.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi7.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmib10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cmextra/cmmib8.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsl12.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmssbx10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy6.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti12.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmtt10.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmtt12.pfb><C:/Users/pleal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on main.pdf (288 pages, 31002603 bytes).
+Output written on main.pdf (288 pages, 31007195 bytes).
 PDF statistics:
- 4318 PDF objects out of 5155 (max. 8388607)
- 1176 named destinations out of 1200 (max. 500000)
- 3066 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 4324 PDF objects out of 5155 (max. 8388607)
+ 1175 named destinations out of 1200 (max. 500000)
+ 20466 words of extra memory for PDF output out of 20736 (max. 10000000)
 
